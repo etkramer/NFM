@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Engine.Content</RootNamespace>
+    <AssemblyName>Engine.Content</AssemblyName>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Shaders\CullShader.hlsl" />
+    <None Remove="Shaders\Include\Geometry.hlsl" />
+    <None Remove="Shaders\Include\Outputs.hlsl" />
+    <None Remove="Shaders\MeshShader.hlsl" />
+    <None Remove="Shaders\VisShader.hlsl" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\CullShader.hlsl" />
+    <EmbeddedResource Include="Shaders\Include\Geometry.hlsl" />
+    <EmbeddedResource Include="Shaders\Include\Outputs.hlsl" />
+    <EmbeddedResource Include="Shaders\MeshShader.hlsl" />
+    <EmbeddedResource Include="Shaders\VisShader.hlsl" />
+  </ItemGroup>
+
+</Project>

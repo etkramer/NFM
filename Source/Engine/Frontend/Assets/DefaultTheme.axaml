@@ -1,0 +1,57 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Engine.Frontend.DefaultTheme">
+  
+	<StyleInclude Source="avares://Engine/Frontend/Assets/DefaultColors.axaml"/>
+	
+	<!-- Define ToolTip first so its styles can be overriden by other controls (e.g. TextBox) -->
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ToolTip.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/DataValidationErrors.axaml"/>
+
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/FocusAdorner.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Button.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/CheckBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ComboBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ComboBoxItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ContentControl.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Label.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/GridSplitter.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ItemsControl.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ListBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ListBoxItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Menu.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ContextMenu.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/MenuItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/OverlayPopupHost.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/PathIcon.axaml" />
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/PopupRoot.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ProgressBar.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/RadioButton.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/RepeatButton.axaml" />
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Separator.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Slider.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ScrollBar.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ScrollViewer.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TabStrip.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TabStripItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TabControl.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TabItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TextBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ToggleButton.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TransitioningContentControl.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Expander.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TitleBar.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TreeView.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TreeViewItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/UserControl.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Window.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/EmbeddableControlRoot.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ButtonSpinner.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/NumericUpDown.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/AutoCompleteBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/NativeMenuBar.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/ToggleSwitch.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/SplitView.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/FlyoutPresenter.axaml"/>
+	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/MenuFlyoutPresenter.axaml"/>
+</Styles>

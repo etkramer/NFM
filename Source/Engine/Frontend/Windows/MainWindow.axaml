@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="Engine.Frontend.Controls.MainWindow"
+		xmlns:controls="using:Engine.Frontend.Controls"
+		WindowState="Maximized"
+		Icon="avares://Engine/Frontend/Assets/Icons/iconsmall.ico"
+        Title="Engine">
+	
+	<Grid RowDefinitions="auto, auto, *">
+		<!--Title bar-->
+		<Grid Grid.Row="0" ColumnDefinitions="auto, *">
+			<!--Menu bar-->
+			<StackPanel Grid.Column="0" Orientation="Horizontal">
+				<Image Source="avares://Engine/Frontend/Assets/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 5, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<Menu VerticalAlignment="Stretch">
+					<MenuItem Header="File" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
+						<MenuItem Header="New" Command="{Binding NewPressed}" InputGesture="Ctrl+N" HotKey="Ctrl+N"/>
+						<MenuItem Header="Open" Command="{Binding OpenPressed}" InputGesture="Ctrl+O" HotKey="Ctrl+O"/>
+						<Separator/>
+						<MenuItem Header="Save" Command="{Binding SavePressed}" InputGesture="Ctrl+S" HotKey="Ctrl+S"/>
+						<MenuItem Header="Save As" Command="{Binding SaveAsPressed}"/>
+						<Separator/>
+						<MenuItem Header="Quit" Command="{Binding QuitPressed}"/>
+					</MenuItem>
+					<MenuItem Header="Edit" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
+						<MenuItem Header="Undo" Command="{Binding UndoPressed}" InputGesture="Ctrl+Z" HotKey="Ctrl+Z"/>
+						<MenuItem Header="Redo" Command="{Binding RedoPressed}" InputGesture="Ctrl+Shift+Z" HotKey="Ctrl+Shift+Z"/>
+					</MenuItem>
+					<MenuItem Header="Tools" VerticalAlignment="Stretch" Padding="5, 0, 5, 0"/>
+					<MenuItem Header="Help" VerticalAlignment="Stretch" Padding="5, 0, 5, 0"/>
+				</Menu>
+			</StackPanel>
+			
+			<!--Window buttons-->
+			<controls:WindowButtons Grid.Column="1" HorizontalAlignment="Right"/>
+		</Grid>
+		
+		<!--Toolbar-->
+		<controls:Toolbar Grid.Row="1"/>
+		
+		<!--Main dockspace-->
+		<controls:Dockspace Grid.Row="2" x:Name="dockspace"/>
+	</Grid>
+</Window>

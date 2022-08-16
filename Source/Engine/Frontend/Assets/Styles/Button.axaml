@@ -1,0 +1,70 @@
+<Styles xmlns="https://github.com/avaloniaui">
+	<Style Selector="Button">
+		<Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderLowBrush}"/>
+		<Setter Property="BorderThickness" Value="{DynamicResource ThemeBorderThickness}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<Setter Property="Padding" Value="4"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<ContentPresenter Name="PART_ContentPresenter"
+					Background="{TemplateBinding Background}"
+					BorderBrush="{TemplateBinding BorderBrush}"
+					BorderThickness="{TemplateBinding BorderThickness}"
+					CornerRadius="{TemplateBinding CornerRadius}"
+					ContentTemplate="{TemplateBinding ContentTemplate}"
+					Content="{TemplateBinding Content}"
+					Padding="{TemplateBinding Padding}"
+					RecognizesAccessKey="True"
+					TextBlock.Foreground="{TemplateBinding Foreground}"
+					HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+					VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+	
+	<Style Selector="Button:pointerover /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}"/>
+	</Style>
+	
+	<Style Selector="Button:pressed  /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}"/>
+	</Style>
+	
+	<Style Selector="Button:disabled">
+		<Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}"/>
+	</Style>
+
+	<Style Selector="Button.dialog1">
+		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="Background" Value="#555555"/>
+		<Setter Property="BorderBrush" Value="#666666"/>
+	</Style>
+
+	<Style Selector="Button.dialog2">
+		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="Background" Value="{StaticResource Accent}"/>
+		<Setter Property="BorderBrush" Value="#4883F1"/>
+	</Style>
+
+	<Style Selector="Button.window">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="CornerRadius" Value="4"/>
+	</Style>
+
+	<Style Selector="Button.window:pointerover">
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+
+	<Style Selector="Button.window:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="#303030"/>
+	</Style>
+
+	<Style Selector="Button.window:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="#285C7F"/>
+	</Style>
+</Styles>

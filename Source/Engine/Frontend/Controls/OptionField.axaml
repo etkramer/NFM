@@ -1,0 +1,20 @@
+<Styles xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="using:Engine.Frontend.Controls">
+	<Design.PreviewWith>
+		<controls:OptionField/>
+	</Design.PreviewWith>
+
+	<Style Selector="controls|OptionField">
+		<!-- Set Defaults -->
+		<Setter Property="Template">
+			<ControlTemplate>
+				<StackPanel Orientation="Vertical">
+					<TextBlock Text="{TemplateBinding Label}" Name="LabelBlock" FontSize="{StaticResource FontSizeLarge}" Margin="0, 0, 0, 4"/>
+					<TextBlock Text="{TemplateBinding Description}" Name="DescriptionBlock" Foreground="{StaticResource ThemeForegroundLowColor}" Margin="0, 0, 0, 4" />
+					<TextBox Text="{TemplateBinding Subject}" Margin="0, 4, 0, 0"/>
+				</StackPanel>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+</Styles>

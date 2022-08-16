@@ -1,0 +1,32 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Engine.Frontend.Controls">
+  <Design.PreviewWith>
+    <controls:Toolbar />
+  </Design.PreviewWith>
+
+  <Style Selector="controls|Toolbar">
+    <Setter Property="Height" Value="38"/>
+	<Setter Property="Padding" Value="10, 4, 0, 4"/>
+	<Setter Property="Foreground" Value="{StaticResource ToolBackground}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+		<Panel Height="{TemplateBinding Height}">
+			<StackPanel Orientation="{TemplateBinding Orientation}" Margin="{TemplateBinding Padding}">
+				<!--Grab handle-->
+				<Border CornerRadius="3" Width="5" VerticalAlignment="Stretch" Background="{TemplateBinding Foreground}"/>
+				
+				<!--Items-->
+				<ItemsControl Items="{TemplateBinding Items}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="{TemplateBinding Orientation}"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
+		</Panel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<PlatformTarget>x64</PlatformTarget>
+		<LangVersion>latest</LangVersion>
+		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;1998</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;1998</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
+		<None Remove="Frontend\Assets\Icons\icon.ico" />
+		<None Remove="Frontend\Assets\Icons\iconsmall.ico" />
+		<AvaloniaResource Include="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
+		<AvaloniaResource Include="Frontend\Assets\Icons\icon.ico" />
+		<AvaloniaResource Include="Frontend\Assets\Icons\iconsmall.ico" />
+
+		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Modules\Engine.Content\Engine.Content.csproj" />
+		<ProjectReference Include="..\Modules\Engine.Core\Engine.Core.csproj" />
+		<ProjectReference Include="..\Modules\Engine.GPU\Engine.GPU.csproj" />
+		<ProjectReference Include="..\Modules\Engine.Roslyn\Engine.Roslyn.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="..\Libraries\MeshOptimizer.NET\MeshOptimizer.NET.vcxproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Libraries\Avalonia.Win32\Avalonia.Win32.csproj" />
+		<PackageReference Include="Avalonia" Version="0.10.17" />
+		<PackageReference Include="Avalonia.Skia" Version="0.10.17" />
+		<PackageReference Include="WinApi" Version="4.0.0" />
+		<PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+</Project>
