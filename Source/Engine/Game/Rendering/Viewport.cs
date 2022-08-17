@@ -31,7 +31,7 @@ namespace Engine.Rendering
 			Host = host;
 			All.Add(this);
 			
-			host.OnResize += Resize;
+			host.Swapchain.OnResize += Resize;
 			ColorTarget = new Texture((ulong)Size.X, (ulong)Size.Y, 1, Format.R8G8B8A8_UNorm, default(Color));
 			DepthBuffer = new Texture((ulong)Size.X, (ulong)Size.Y, 1, Format.D32_Float, new(0f));
 		}
