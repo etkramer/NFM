@@ -27,9 +27,8 @@ namespace Engine
 			// Load all plugins.
 			PluginSystem.LoadAll();
 
-			// Precache model and run the resource upload queue.
+			// Precache model.
 			Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
-			Queue.Run(0);
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -49,9 +48,6 @@ namespace Engine
 
 		public static void Update()
 		{
-			// Run the resource upload queue.
-			Queue.Run(0);
-
 			// Render the frame.
 			Renderer.Render();
 

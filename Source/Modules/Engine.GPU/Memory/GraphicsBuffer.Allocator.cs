@@ -1,8 +1,5 @@
 ﻿using System;
-using Vortice.DXGI;
 using Vortice.Direct3D12;
-using System.Runtime.InteropServices;
-using Engine.Aspects;
 
 namespace Engine.GPU
 {
@@ -26,59 +23,58 @@ namespace Engine.GPU
 
 		public BufferHandle<T> Allocate(int count)
 		{
-			int blockIndex = -1;
-
-			// Loop through all blocks.
-			for (int i = 0; i < blocks.Count; i++)
+			lock (blocks)
 			{
-				// Don't overwrite occupied blocks.
-				if (!blocks[i].Free)
-					continue;
+				int blockIndex = -1;
 
-				// Block doesn't have enough space
-				if (blocks[i].Length < count)
-					continue;
-
-				// Put the new data in this block
-				Block blockA = new()
+				// Loop through all blocks.
+				for (int i = 0; i < blocks.Count; i++)
 				{
-					Start = blocks[i].Start,
-					Length = count,
-					Free = false
+					// Don't overwrite occupied blocks.
+					if (!blocks[i].Free)
+						continue;
+
+					// Block doesn't have enough space
+					if (blocks[i].Length < count)
+						continue;
+
+					// Put the new data in this block
+					Block blockA = new()
+					{
+						Start = blocks[i].Start,
+						Length = count,
+						Free = false
+					};
+
+					// And make a new one to represent the empty space.
+					Block blockB = new()
+					{
+						Start = blockA.Start + blockA.Length,
+						Length = blocks[i].Length - blockA.Length,
+						Free = true,
+					};
+
+					blocks[i] = blockA;
+					blocks.Insert(i + 1, blockB);
+					blockIndex = i;
+					break;
+				}
+
+				// Couldn't find a large enough block.
+				if (blockIndex == -1)
+				{
+					Resize(Capacity * 2);
+					return Allocate(count);
+				}
+
+				BufferHandle<T> handle = new(this)
+				{
+					ElementStart = blocks[blockIndex].Start,
+					ElementCount = blocks[blockIndex].Length,
 				};
 
-				// And make a new one to represent the empty space.
-				Block blockB = new()
-				{
-					Start = blockA.Start + blockA.Length,
-					Length = blocks[i].Length - blockA.Length,
-					Free = true,
-				};
-
-				// Remove existing block.
-				blocks.RemoveAt(i);
-
-				// Create new blocks
-				blocks.Insert(i, blockA);
-				blocks.Insert(i + 1, blockB);
-				blockIndex = i;
-				break;
+				return handle;
 			}
-
-			// Couldn't find a large enough block.
-			if (blockIndex == -1)
-			{
-				Resize(Capacity * 2);
-				return Allocate(count);
-			}
-
-			BufferHandle<T> handle = new(this)
-			{
-				ElementStart = blocks[blockIndex].Start,
-				ElementCount = blocks[blockIndex].Length,
-			};
-
-			return handle;
 		}
 
 		public void Resize(long newCapacity)
@@ -88,38 +84,19 @@ namespace Engine.GPU
 
 		public void Free(BufferHandle<T> handle)
 		{
-			// Invalid, probably uninitialized handle.
-			if (handle == default)
+			lock (blocks)
 			{
-				return;
-			}
-
-			for (int i = 0; i < blocks.Count; i++)
-			{
-				if (blocks[i].Start == handle.ElementStart && blocks[i].Length == handle.ElementCount)
+				// Invalid, probably uninitialized handle.
+				if (handle.ElementStart == 0 && handle.ElementCount == 0)
 				{
-					if (i > 0)
+					return;
+				}
+
+				for (int i = 0; i < blocks.Count; i++)
+				{
+					// Found the block.
+					if (blocks[i].Start == handle.ElementStart && blocks[i].Length == handle.ElementCount)
 					{
-						// Previous block is free.
-						if (blocks[i - 1].Free)
-						{
-							Block extendedBlock = blocks[i - 1];
-							extendedBlock.Length += blocks[i].Length;
-						}
-					}
-					if (blocks.Count > i)
-					{
-						// Next block is free.
-						if (blocks[i + 1].Free)
-						{
-							Block extendedBlock = blocks[i + 1];
-							extendedBlock.Length += blocks[i].Length;
-							extendedBlock.Start -= blocks[i].Length;
-						}
-					}
-					else
-					{
-						// Neighbors are used, just mark this one as free.
 						Block freeBlock = blocks[i];
 						freeBlock.Free = true;
 
@@ -131,20 +108,21 @@ namespace Engine.GPU
 
 		public void FreeAll()
 		{
-			blocks.Clear();
-			blocks.Add
-			(
-				new Block() { Start = 0, Length = Capacity, Free = true }
-			);
+			lock (blocks)
+			{
+				blocks.Clear();
+				blocks.Add
+				(
+					new Block() { Start = 0, Length = Capacity, Free = true }
+				);
+			}
 		}
 	}
 
-	[AutoDispose]
 	public class BufferHandle<T> : IDisposable where T : unmanaged
 	{
-		public long ElementStart;
-		public long ElementCount;
-
+		public long ElementStart = 0;
+		public long ElementCount = 0;
 		private GraphicsBuffer<T> buffer;
 
 		public BufferHandle(GraphicsBuffer<T> source)

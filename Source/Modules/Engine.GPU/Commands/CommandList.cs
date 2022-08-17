@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
 {
-	internal class CommandList : IDisposable
+	public class CommandList : IDisposable
 	{
-		private List<Command> Commands = new();
-		private CommandAllocator allocator;
+		private readonly List<Command> commands = new();
+		private readonly CommandAllocator allocator;
 		internal ID3D12GraphicsCommandList6 list;
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
@@ -40,7 +41,10 @@ namespace Engine.GPU
 
 		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, Func<CommandInput[]> fetchInputsAction)
 		{
-			Commands.Add(new Command(buildAction, fetchInputsAction));
+			lock (commands)
+			{
+				commands.Add(new Command(buildAction, fetchInputsAction));
+			}
 		}
 
 		private struct PendingTransition
@@ -52,67 +56,78 @@ namespace Engine.GPU
 
 		public void Build()
 		{
-			List<PendingTransition> transitions = new();
-
-			// Build.
-			for (int i = 0; i < Commands.Count; i++)
+			lock (commands)
 			{
-				CommandInput[] currentInputs = Commands[i].FetchInputsAction?.Invoke();
-				transitions.Clear();
+				List<PendingTransition> transitions = new();
 
-				// Look for additional transitions to batch with.
-				for (int j = i; j < Commands.Count; j++)
+				// Build.
+				for (int i = 0; i < commands.Count; i++)
 				{
-					CommandInput[] inputs = Commands[j].FetchInputsAction?.Invoke();
+					CommandInput[] currentInputs = commands[i].FetchInputsAction?.Invoke();
+					transitions.Clear();
 
-					if (inputs == null)
+					// Look for additional transitions to batch with.
+					for (int j = i; j < commands.Count; j++)
 					{
-						continue;
-					}
+						CommandInput[] inputs = commands[j].FetchInputsAction?.Invoke();
 
-					// Look for resource transitons.
-					foreach (CommandInput input in inputs)
-					{
-						if (input.Resource == null)
+						if (inputs == null)
 						{
 							continue;
 						}
 
-						// NOTE: The "are we already transitioning this" test fails if we didn't need to insert a transition because we were already in the right state.
-						// This could cause resources to be transitioned to the wrong state, when they were already in the right one.
-						// Added solution:
-						if ((currentInputs?.Any(o => o.Resource == input.Resource) ?? false) && j != i)
+						// NOTE: Batching is completely and utterly broken. Rather than try to fix it, I'll just disable it for now.
+						if (j > i)
 						{
-							continue;
+							break;
 						}
 
-						if (input.State != input.Resource.State)
+						// Look for resource transitons.
+						foreach (CommandInput input in inputs)
 						{
-							// Already transitioning this resource.
-							if (transitions.Any((o) => o.Resource == input.Resource))
+							if (input.Resource == null)
 							{
 								continue;
 							}
 
-							// Input requires transition. Add it to the batch.
-							transitions.Add(new PendingTransition()
+							if (input.Resource.State != input.State)
 							{
-								Resource = input.Resource,
-								BeforeState = input.Resource.State,
-								AfterState = input.State,
-							});
+								// Already transitioning this resource.
+								if (transitions.Any((o) => o.Resource == input.Resource))
+								{
+									continue;
+								}
+								// Are we looking for batching candicates?
+								else if (j > i)
+								{
+									// Is this resource being used by the current command?
+									if (currentInputs?.Any(o => o.Resource == input.Resource) ?? false)
+									{
+										// Skip it, because the previous check doesn't notice resources that don't need a transition because they're already in the right state.
+										continue;
+									}
+								}
 
-							input.Resource.State = input.State;
+								// Input requires transition. Add it to the batch.
+								transitions.Add(new PendingTransition()
+								{
+									Resource = input.Resource,
+									BeforeState = input.Resource.State,
+									AfterState = input.State,
+								});
+
+								input.Resource.State = input.State;
+							}
 						}
 					}
-				}
 				
-				if (transitions.Count > 0)
-				{
-					list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.GetBaseResource(), o.BeforeState, o.AfterState))).ToArray());
-				}
+					if (transitions.Count > 0)
+					{
+						list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.GetBaseResource(), o.BeforeState, o.AfterState))).ToArray());
+					}
 
-				Commands[i].BuildAction.Invoke(list);
+					commands[i].BuildAction.Invoke(list);
+				}
 			}
 
 			// Close command list.
@@ -127,19 +142,23 @@ namespace Engine.GPU
 
 		public void Reset()
 		{
-			// Reset virtual list.
-			Commands.Clear();
-			CurrentProgram = null;
-
-			// Reset D3D list.
-			allocator.Reset();
-			list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
-
-			// Setup common state.
-			list.SetDescriptorHeaps(1, new[]
+			lock (commands)
 			{
-				ShaderResourceView.Heap.handle,
-			});
+				// Reset virtual list.
+				commands.Clear();
+
+				CurrentProgram = null;
+
+				// Reset D3D list.
+				allocator.Reset();
+				list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
+
+				// Setup common state.
+				list.SetDescriptorHeaps(1, new[]
+				{
+					ShaderResourceView.Heap.handle,
+				});
+			}
 		}
 
 		public IntPtr GetPointer()

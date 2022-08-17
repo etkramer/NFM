@@ -8,6 +8,9 @@ using Engine.GPU;
 using Engine.Rendering;
 using WinApi.User32;
 using WndProc = Avalonia.Win32.Interop.UnmanagedMethods.WndProc;
+using Avalonia.Win32;
+using Avalonia.Input;
+using Avalonia.Input.Raw;
 
 namespace Engine.Frontend
 {
@@ -56,6 +59,7 @@ namespace Engine.Frontend
 
 	public unsafe class ViewportHost : NativeControlHost
 	{
+		private static List<ViewportHost> hosts = new();
 		public event Action<Vector2i> OnResize = delegate {};
 
 		public IntPtr Hwnd { get; private set; }
@@ -69,6 +73,18 @@ namespace Engine.Frontend
 		private static WndProc overrideWndProc = WndProcOverride;
 		private static unsafe IntPtr WndProcOverride(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
 		{
+			ViewportHost host = hosts.Find(o => o.Hwnd == hwnd);
+
+			// Early out if the host can't be found.
+			if (host == null || host?.VisualRoot == null)
+			{
+				return baseWndProc(hwnd, msg, wParam, lParam);
+			}
+
+			// Grab the input callback.
+			Action<RawInputEventArgs> input = (host.VisualRoot as Window).PlatformImpl.Input;
+
+			// Override WndProc.
 			switch ((WM)msg)
 			{
 				case WM.LBUTTONDOWN:
@@ -93,6 +109,7 @@ namespace Engine.Frontend
 			baseWndProc = Marshal.GetDelegateForFunctionPointer<WndProc>(User32Methods.GetWindowLongPtr(Hwnd, (int)WindowLongFlags.GWLP_WNDPROC));
 			User32Methods.SetWindowLongPtr(Hwnd, (int)WindowLongFlags.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(overrideWndProc));
 
+			hosts.Add(this);
 			return platformHandle;
 		}
 
@@ -102,6 +119,7 @@ namespace Engine.Frontend
 			viewport.Dispose();
 			Swapchain.Dispose();
 
+			hosts.Remove(this);
 			base.DestroyNativeControlCore(control);
 		}
 		#endregion

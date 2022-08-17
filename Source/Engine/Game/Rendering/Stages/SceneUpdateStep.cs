@@ -54,9 +54,10 @@ namespace Engine.Rendering
 				return;
 			}
 
-			foreach (var instance in modelActor.Instances)
+			for (int i = modelActor.Instances.Count - 1; i >= 0; i--)
 			{
-				instance.Free();
+				modelActor.Instances[i].Free();
+				modelActor.Instances.RemoveAt(i);
 				InstanceCount--;
 			}
 

@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
-		<PackageReference Include="SafeStbImageSharp" Version="2.22.4" />
+		<PackageReference Include="StbImageSharp" Version="2.27.11" />
 	</ItemGroup>
 
 	<Import Project="$(SolutionDir)..\Runtime\Binaries\Properties\Plugin.targets" />

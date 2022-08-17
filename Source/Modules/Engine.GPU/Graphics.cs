@@ -75,8 +75,8 @@ namespace Engine.GPU
 
 			CommandInput[] inputs = new[]
 			{
-				new CommandInput(commandBuffer, ResourceStates.Common),
-				new CommandInput(countBuffer, ResourceStates.Common)
+				new CommandInput(commandBuffer, ResourceStates.IndirectArgument),
+				new CommandInput(countBuffer, ResourceStates.IndirectArgument)
 			};
 
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
@@ -303,7 +303,6 @@ namespace Engine.GPU
 			
 			// Wait for completion.
 			GPUContext.WaitFrame();
-			UploadBuffer.ResetFrame();
 
 			// Reopen command list.
 			commandList.Reset();

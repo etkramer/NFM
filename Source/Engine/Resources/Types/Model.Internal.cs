@@ -103,19 +103,16 @@ namespace Engine.Resources
 							Submesh submesh = new Submesh();  
 
 							// Upload geometry data to GPU.
-							Queue.Schedule(() =>
+							submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
+							submesh.VertHandle = Submesh.VertBuffer.Upload(vertsData);
+							submesh.MeshletHandle = Submesh.MeshletBuffer.Upload(meshlets);
+							submesh.MeshHandle = Submesh.MeshBuffer.Upload(new Mesh()
 							{
-								submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
-								submesh.VertHandle = Submesh.VertBuffer.Upload(vertsData);
-								submesh.MeshletHandle = Submesh.MeshletBuffer.Upload(meshlets);
-								submesh.MeshHandle = Submesh.MeshBuffer.Upload(new Mesh()
-								{
-									MeshletCount = (uint)submesh.MeshletHandle.ElementCount,
-									MeshletOffset = (uint)submesh.MeshletHandle.ElementStart,
-									PrimOffset = (uint)submesh.PrimHandle.ElementStart,
-									VertOffset = (uint)submesh.VertHandle.ElementStart,
-								});
-							}, 0);
+								MeshletCount = (uint)submesh.MeshletHandle.ElementCount,
+								MeshletOffset = (uint)submesh.MeshletHandle.ElementStart,
+								PrimOffset = (uint)submesh.PrimHandle.ElementStart,
+								VertOffset = (uint)submesh.VertHandle.ElementStart,
+							});
 
 							return submesh;
 						}
