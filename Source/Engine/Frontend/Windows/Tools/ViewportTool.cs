@@ -37,7 +37,7 @@ namespace Engine.Frontend
 			Content = new Grid()
 				.Rows("*, 26")
 				.Children(
-					new ViewportInputHost(),
+					new ViewportHost(),
 					new StackPanel()
 						.Row(1)
 						.Margin(10, 0)
@@ -58,29 +58,57 @@ namespace Engine.Frontend
 		}
 	}
 
-	public class ViewportInputHost : Panel
+	public class ViewportHost : Panel
 	{
-		public ViewportInputHost()
+		public event Action OnOpen = delegate{};
+		public event Action OnClose = delegate{};
+		public event Action<Vector2i> OnResize = delegate{};
+
+		public Swapchain Swapchain { get; private set; }
+		private Viewport viewport;
+
+		public ViewportHost()
 		{
+			NativeControlHostEx nativeControl = new();
+
 			IsHitTestVisible = true;
 			Focusable = true;
 			this.Background("Transparent");
-			this.Children(new ViewportHost());
+			this.Children(new NativeControlHostEx().With(o => nativeControl = o));
+
+			// Setup open/close/resize callbacks.
+			nativeControl.OnOpen += () =>
+			{
+				Swapchain = new Swapchain(nativeControl.Hwnd, new(32, 32));
+				viewport = new Viewport(this);
+
+				OnOpen.Invoke();
+			};
+			nativeControl.OnClose += () =>
+			{
+				viewport.Dispose();
+				Swapchain.Dispose();
+
+				OnClose.Invoke();
+			};
+			nativeControl.OnResize += (size) =>
+			{
+				Swapchain.Resize(size);
+
+				OnResize.Invoke(size);
+			};
 		}
 
 		protected override void OnPointerMoved(PointerEventArgs e)
 		{
+			PointerPointProperties props = e.GetCurrentPoint(this).Properties;
+
+			if (props.IsRightButtonPressed)
+			{
+				//Debug.Log("Dragged");
+			}
+
 			base.OnPointerMoved(e);
-		}
-
-		protected override void OnPointerPressed(PointerPressedEventArgs e)
-		{
-			base.OnPointerPressed(e);
-		}
-
-		protected override void OnPointerReleased(PointerReleasedEventArgs e)
-		{
-			base.OnPointerReleased(e);
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -94,15 +122,16 @@ namespace Engine.Frontend
 		}
 	}
 
-	public unsafe class ViewportHost : NativeControlHost
+	public unsafe class NativeControlHostEx : NativeControlHost
 	{
-		private static List<ViewportHost> hosts = new();
+		private static List<NativeControlHostEx> hosts = new();
 
-		public event Action<Vector2i> OnResize = delegate {};
-		public Swapchain Swapchain { get; private set; }
+		public event Action<Vector2i> OnResize = delegate{};
+		public event Action OnOpen = delegate{};
+		public event Action OnClose = delegate{};
 
-		private IntPtr hwnd;
-		private Viewport viewport;
+		public IntPtr Hwnd { get; private set; }
+		private bool hasValidMeasure = false;
 
 		#region Platform
 		// Override WndProc to handle input events.
@@ -110,7 +139,7 @@ namespace Engine.Frontend
 		private static WndProc overrideWndProc = WndProcOverride;
 		private static unsafe IntPtr WndProcOverride(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
 		{
-			ViewportHost host = hosts.Find(o => o.hwnd == hwnd);
+			NativeControlHostEx host = hosts.Find(o => o.Hwnd == hwnd);
 
 			// Early out if the host can't be found.
 			if (host == null || host?.VisualRoot == null)
@@ -440,48 +469,58 @@ namespace Engine.Frontend
 		{
 			// Create Hwnd.
 			IPlatformHandle platformHandle = base.CreateNativeControlCore(parent);
-			hwnd = platformHandle.Handle;
+			Hwnd = platformHandle.Handle;
+			
+			// Make it clear that the bounds are invalid, and request a new measurement.
+			Bounds = new(0, 0, -1, -1);
 			InvalidateArrange();
 
 			// Override WndProc.
-			baseWndProc = Marshal.GetDelegateForFunctionPointer<WndProc>(User32Methods.GetWindowLongPtr(hwnd, (int)WindowLongFlags.GWLP_WNDPROC));
-			User32Methods.SetWindowLongPtr(hwnd, (int)WindowLongFlags.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(overrideWndProc));
+			baseWndProc = Marshal.GetDelegateForFunctionPointer<WndProc>(User32Methods.GetWindowLongPtr(Hwnd, (int)WindowLongFlags.GWLP_WNDPROC));
+			User32Methods.SetWindowLongPtr(Hwnd, (int)WindowLongFlags.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(overrideWndProc));
 
 			hosts.Add(this);
+
+			if (hasValidMeasure)
+			{
+				OnOpen.Invoke();
+			}
+
 			return platformHandle;
 		}
 
 		protected override void DestroyNativeControlCore(IPlatformHandle control)
 		{
 			// Cleanup viewport and swapchain.
-			viewport.Dispose();
-			viewport = null;
-			Swapchain.Dispose();
-			Swapchain = null;
+			if (hasValidMeasure)
+			{
+				OnClose.Invoke();
+			}
 
 			hosts.Remove(this);
 			base.DestroyNativeControlCore(control);
 		}
 		#endregion
 
+		private Vector2i lastSize = Vector2i.Zero;
 		protected override Size ArrangeOverride(Size finalSize)
 		{
 			Size arrangeResult = base.ArrangeOverride(finalSize);
 			Vector2i size = new((int)arrangeResult.Width, (int)arrangeResult.Height);
 
-			if (Swapchain == null && viewport == null)
+			if (!hasValidMeasure)
 			{
-				// The correct size isn't available yet when CreateNativeControlCore is called.
-				// Because we need that size for swapchain creation, we wait until ArrangeOverride instead.
-				Swapchain = new Swapchain(hwnd, size);
-				viewport = new Viewport(this);
+				hasValidMeasure = true;
+				OnOpen.Invoke();
 			}
-			else if (size != Swapchain.Size)
+
+			if (size != lastSize)
 			{
 				// Resize the swapchain if needed.
-				Swapchain.Resize(size);
 				OnResize.Invoke(size);
 			}
+
+			lastSize = size;
 
 			return arrangeResult;
 		}

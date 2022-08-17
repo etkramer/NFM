@@ -55,6 +55,8 @@ namespace Engine.Rendering
 
 		public void Dispose()
 		{
+			ColorTarget.Dispose();
+			DepthBuffer.Dispose();
 			All.Remove(this);
 		}
 	}
