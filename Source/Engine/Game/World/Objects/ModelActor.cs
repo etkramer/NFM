@@ -15,7 +15,6 @@ namespace Engine.World
 		public ModelActor(string name = null, Actor parent = null) : base(name, parent)
 		{
 			(this as INotify).Subscribe(nameof(Model), () => IsInstanceDirty = true);
-
 			(this as INotify).Subscribe(nameof(Position), () => IsInstanceDirty = true);
 			(this as INotify).Subscribe(nameof(Rotation), () => IsInstanceDirty = true);
 			(this as INotify).Subscribe(nameof(Scale), () => IsInstanceDirty = true);

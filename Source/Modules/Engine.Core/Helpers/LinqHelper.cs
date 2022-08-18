@@ -9,7 +9,7 @@ namespace Engine.Core
 {
 	public static class LinqHelper
 	{
-		class BucketDict<TKey, TValue>
+		private class BucketDict<TKey, TValue>
 		{
 			public List<(TKey, int)> Keys = new();
 			public List<TValue> Values = new();
@@ -46,13 +46,16 @@ namespace Engine.Core
 			}
 		}
 
+		/// <summary>
+		/// Groups objects that share a certain value into buckets.
+		/// </summary>
 		public static IEnumerable<IEnumerable<T>> Bucket<T, T2>(this IEnumerable<T> source, Func<T, T2> getter)
 		{
 			BucketDict<T2, List<T>> bucketDict = new();
 
 			foreach (T subject in source)
 			{
-				T2 value = getter(subject);
+				T2 value = getter.Invoke(subject);
 
 				if (!bucketDict.TryGetValue(value, out var bucket))
 				{
@@ -64,6 +67,30 @@ namespace Engine.Core
 			}
 
 			return bucketDict.Values;
+		}
+
+		/// <summary>
+		/// Checks if there are any objects that don't share a value.
+		/// </summary>
+		public static bool HasVariation<T, T2>(this IEnumerable<T> source, Func<T, T2> getter)
+		{
+			T2 lastResult = getter(source.First());
+
+			foreach (T value in source)
+			{
+				T2 result = getter.Invoke(value);
+
+				if (!result.Equals(lastResult))
+				{
+					return true;
+				}
+				else
+				{
+					lastResult = result;
+				}
+			}
+
+			return false;
 		}
 	}
 }

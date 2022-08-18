@@ -12,14 +12,14 @@ namespace Engine.Frontend
 	public class PropertyInput : UserControl
 	{
 		[Notify] public PropertyInfo Property { get; set; }
-		[Notify] public IEnumerable<object> Owners { get; set; }
+		[Notify] public IEnumerable<object> Subjects { get; set; }
 
 		[Notify] public Control FieldContent { get; set; }
 
-		public PropertyInput(PropertyInfo property, IEnumerable<object> owners)
+		public PropertyInput(IEnumerable<object> subjects, PropertyInfo property)
 		{
+			Subjects = subjects;
 			Property = property;
-			Owners = owners;
 			DataContext = this;
 
 			Margin = new(0, 4);
@@ -50,11 +50,22 @@ namespace Engine.Frontend
 
 		private void CreateField()
 		{
-			FieldContent = new TextBox()
-					.Background(this.GetResourceBrush("ControlBackground"))
-					.With(o => o.Padding = new(4, 0))
-					.With(o => o.VerticalContentAlignment = VerticalAlignment.Center)
-					.Radius(2);
+			if (Property.PropertyType == typeof(bool))
+			{
+				FieldContent = new BoolInput(Subjects, Property);
+			}
+			else if (Property.PropertyType == typeof(int) || Property.PropertyType == typeof(uint))
+			{
+				FieldContent = new IntInput(Subjects, Property);
+			}
+			else
+			{
+				FieldContent = new TextBox()
+						.Background(this.GetResourceBrush("ControlBackground"))
+						.With(o => o.Padding = new(4, 0))
+						.With(o => o.VerticalContentAlignment = VerticalAlignment.Center)
+						.Radius(2);
+			}
 		}
 	}
 }

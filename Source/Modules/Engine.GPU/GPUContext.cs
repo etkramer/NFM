@@ -4,6 +4,7 @@ using Vortice.DXGI;
 using Vortice.Direct3D12;
 using Vortice.Direct3D12.Debug;
 using System.Runtime.InteropServices;
+using Feature = Vortice.Direct3D12.Feature;
 
 namespace Engine.GPU
 {
@@ -84,9 +85,9 @@ namespace Engine.GPU
 				}
 			}
 
-			if (DXGIFactory.PresentAllowTearing)
+			// Check feature support.
 			{
-				SupportsTearing = true;
+				SupportsTearing = DXGIFactory.PresentAllowTearing;
 			}
 
 			// Create graphics command queue.

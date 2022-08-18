@@ -13,7 +13,7 @@ namespace Engine.Rendering
 		public static List<Viewport> All { get; } = new();
 
 		// Constant buffers
-		public GraphicsBuffer<Matrix4> ViewBuffer = new(1);
+		public GraphicsBuffer<Matrix4> ViewConstantsBuffer = new(1);
 
 		// Helpers
 		public ViewportHost Host { get; }
@@ -41,7 +41,7 @@ namespace Engine.Rendering
 			float aspect = (Size.X / (float)Size.Y);
 			Matrix4 projection = Matrix4.CreatePerspectiveReversed(60f, aspect, 0.01f);
 
-			ViewBuffer.SetData(0, projection);
+			ViewConstantsBuffer.SetData(0, projection);
 		}
 
 		/// <summary>

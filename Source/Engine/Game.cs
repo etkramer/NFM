@@ -39,6 +39,10 @@ namespace Engine
 			Actor object2 = new Actor("Empty 2", object1);
 			Actor object3 = new CameraActor();
 
+			CameraActor object4 = new CameraActor();
+			object4.IsCinematic = true;
+			object4.FocalLength = 24;
+
 			// Model 1
 			ModelActor object5 = new ModelActor("Model");
 			object5.Rotation = new(0, 90, 0);

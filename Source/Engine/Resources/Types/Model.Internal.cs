@@ -100,7 +100,8 @@ namespace Engine.Resources
 							}
 
 							// Create submesh.
-							Submesh submesh = new Submesh();  
+							Submesh submesh = new Submesh();
+							submesh.Material = material;
 
 							// Upload geometry data to GPU.
 							submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
@@ -133,6 +134,7 @@ namespace Engine.Resources
 		public static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
 		public static GraphicsBuffer<Mesh> MeshBuffer = new(100000);
 
+		public Material Material;
 		public BufferHandle<uint> PrimHandle;
 		public BufferHandle<Vertex> VertHandle;
 		public BufferHandle<Meshlet> MeshletHandle;

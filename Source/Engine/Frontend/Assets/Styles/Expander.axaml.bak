@@ -31,6 +31,13 @@
       </StackPanel>
     </Border>
   </Design.PreviewWith>
+  <Style Selector="Expander">
+    <Setter Property="ContentTransition">
+      <Setter.Value>
+        <CrossFade Duration="00:00:00.25" />
+      </Setter.Value>
+    </Setter>
+  </Style>
   <Style Selector="Expander[ExpandDirection=Down]">
     <Setter Property="Template">
       <ControlTemplate>
@@ -39,15 +46,10 @@
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}">
           <Grid RowDefinitions="Auto,*">
-			<Border Grid.Row="0" BorderThickness="0, 1, 0, 1" BorderBrush="#2F2E31">
-				<ToggleButton Name="PART_toggle"
-							  Background="#3D3D3D"
-							  Height="22"
-							  Padding="0"
-							  HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
-							  VerticalAlignment="{TemplateBinding VerticalAlignment}"
-							  Content="{TemplateBinding Header}" FontSize="11" IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}" />
-			</Border>
+            <ToggleButton Name="PART_toggle" Grid.Row="0"
+                          HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                          VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                          Content="{TemplateBinding Header}" IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}" />
             <ContentPresenter Name="PART_ContentPresenter"
                               Grid.Row="1"
                               IsVisible="{TemplateBinding IsExpanded}"

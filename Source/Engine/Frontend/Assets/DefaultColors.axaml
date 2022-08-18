@@ -8,6 +8,7 @@
 		<Color x:Key="ToolBackground">#383838</Color>
 		<Color x:Key="ToolForeground">#202020</Color>
 		<Color x:Key="ControlBackground">#1F1F1F</Color>
+		<Color x:Key="ControlForeground">#C6C5C4</Color>
 		
 		<Color x:Key="Accent">#3472E6</Color>
 		<Color x:Key="Highlight">#FFFFFF</Color>
@@ -46,6 +47,7 @@
         <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="{DynamicResource ThemeControlHighlightMidColor}"/>
         <SolidColorBrush x:Key="ThemeControlHighlightHighBrush" Color="{DynamicResource ThemeControlHighlightHighColor}"/>
         <SolidColorBrush x:Key="ThemeForegroundBrush" Color="{DynamicResource ThemeForegroundColor}"/>
+		<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundMidColor}"/>
         <SolidColorBrush x:Key="ThemeForegroundLowBrush" Color="{DynamicResource ThemeForegroundLowColor}"/>
 
         <SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource Accent}"/>
