@@ -6,6 +6,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Data;
 using System.Linq;
+using System.ComponentModel;
+using Avalonia.LogicalTree;
 
 namespace Engine.Frontend
 {
@@ -48,15 +50,51 @@ namespace Engine.Frontend
 			CreateField();
 		}
 
+		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+		{
+			foreach (object subject in Subjects)
+			{
+				if (subject is INotifyPropertyChanged notifier)
+				{
+					notifier.PropertyChanged += HandlePropertyChanged;
+				}
+			}
+		}
+
+		protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+		{
+			foreach (object subject in Subjects)
+			{
+				if (subject is INotifyPropertyChanged notifier)
+				{
+					notifier.PropertyChanged -= HandlePropertyChanged;
+				}
+			}
+		}
+
+		private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Property.Name)
+			{
+				CreateField();
+			}
+		}
+
 		private void CreateField()
 		{
 			if (Property.PropertyType == typeof(bool))
 			{
 				FieldContent = new BoolInput(Subjects, Property);
 			}
-			else if (Property.PropertyType == typeof(int) || Property.PropertyType == typeof(uint))
+			else if (Property.PropertyType == typeof(sbyte) || Property.PropertyType == typeof(short) || Property.PropertyType == typeof(int) || Property.PropertyType == typeof(long)
+				|| Property.PropertyType == typeof(byte) || Property.PropertyType == typeof(ushort) || Property.PropertyType == typeof(uint) || Property.PropertyType == typeof(ulong)
+				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
-				FieldContent = new IntInput(Subjects, Property);
+				FieldContent = new NumInput(Subjects, Property);
+			}
+			else if (Property.PropertyType == typeof(string))
+			{
+				FieldContent = new StringInput(Subjects, Property);
 			}
 			else
 			{

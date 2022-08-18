@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,14 +8,14 @@ using Avalonia.Media;
 
 namespace Engine.Frontend
 {
-	public class IntInput : UserControl
+	public class NumInput : UserControl
 	{
-		public IntInput(IEnumerable<object> subjects, PropertyInfo property)
+		public NumInput(IEnumerable<object> subjects, PropertyInfo property)
 		{
 			bool hasMultipleValues = subjects.HasVariation((o) => property.GetValue(o));
 
 			Panel icon = new Panel()
-				.Background("#333328")
+				.Background("#19E6E62E")
 				.Width(16)
 				.Height(16)
 				.Children(new TextBlock()
@@ -42,14 +43,25 @@ namespace Engine.Frontend
 				// Hit enter?
 				else if (e.Key == Key.Enter)
 				{
-					if (int.TryParse(numEntry.Text, out int result))
+					// Integer values
+					if (long.TryParse(numEntry.Text, out long intResult))
 					{
 						// Apply value to subjects.
 						foreach (object subject in subjects)
 						{
-							property.SetValue(subject, Convert.ChangeType(result, property.PropertyType));
+							property.SetValue(subject, Convert.ChangeType(intResult, property.PropertyType));
 						}
 					}
+					// Floating point values
+					else if (double.TryParse(numEntry.Text, out double floatResult))
+					{
+						// Apply value to subjects.
+						foreach (object subject in subjects)
+						{
+							property.SetValue(subject, Convert.ChangeType(floatResult, property.PropertyType));
+						}
+					}
+					// Invalid value
 					else
 					{
 						// Reset input.
