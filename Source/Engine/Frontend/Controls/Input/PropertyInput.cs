@@ -8,6 +8,7 @@ using Avalonia.Data;
 using System.Linq;
 using System.ComponentModel;
 using Avalonia.LogicalTree;
+using Engine.Resources;
 
 namespace Engine.Frontend
 {
@@ -82,19 +83,29 @@ namespace Engine.Frontend
 
 		private void CreateField()
 		{
+			bool hasMultipleValues = Subjects.HasVariation((o) => Property.GetValue(o));
+
 			if (Property.PropertyType == typeof(bool))
 			{
-				FieldContent = new BoolInput(Subjects, Property);
+				// Boolean input field.
+				FieldContent = new BoolInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
+			}
+			else if (Property.PropertyType == typeof(string))
+			{
+				// String input field.
+				FieldContent = new StringInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
 			}
 			else if (Property.PropertyType == typeof(sbyte) || Property.PropertyType == typeof(short) || Property.PropertyType == typeof(int) || Property.PropertyType == typeof(long)
 				|| Property.PropertyType == typeof(byte) || Property.PropertyType == typeof(ushort) || Property.PropertyType == typeof(uint) || Property.PropertyType == typeof(ulong)
 				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
-				FieldContent = new NumInput(Subjects, Property);
+				// Numeric input field.
+				FieldContent = new NumInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, Convert.ChangeType(o, Property.PropertyType))), hasMultipleValues);
 			}
-			else if (Property.PropertyType == typeof(string))
+			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
 			{
-				FieldContent = new StringInput(Subjects, Property);
+				// Resource reference field.
+				FieldContent = new ResourceInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
 			}
 			else
 			{

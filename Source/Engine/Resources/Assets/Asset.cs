@@ -4,9 +4,11 @@ using System.Reflection;
 
 namespace Engine.Resources
 {
-	public static class Asset
+	public abstract class Asset
 	{
-		private static readonly ConcurrentDictionary<string, IAsset> assets = new(StringComparer.OrdinalIgnoreCase);
+		public string Path { get; set; }
+
+		private static readonly ConcurrentDictionary<string, Asset> assets = new(StringComparer.OrdinalIgnoreCase);
 
 		public static bool Submit<T>(Asset<T> asset) where T : Resource
 		{
@@ -15,7 +17,7 @@ namespace Engine.Resources
 
 		public static Task<T> GetAsync<T>(string path) where T : Resource
 		{
-			if (assets.TryGetValue(path, out IAsset foundAsset))
+			if (assets.TryGetValue(path, out Asset foundAsset))
 			{
 				if (foundAsset is Asset<T> asset)
 				{
@@ -27,11 +29,8 @@ namespace Engine.Resources
 		}
 	}
 
-	public interface IAsset {}
-	public sealed class Asset<T> : IAsset where T : Resource
+	public sealed class Asset<T> : Asset where T : Resource
 	{
-		public string Path { get; set; }
-
 		private Task<T> loadingTask;
 		private readonly AssetLoader<T> loader;
 		private T cache;
@@ -51,6 +50,7 @@ namespace Engine.Resources
 			if (!cache.IsLoaded)
 			{
 				cache.OnLoad();
+				cache.Source = this;
 				cache.IsLoaded = true;
 			}
 		}
@@ -68,6 +68,7 @@ namespace Engine.Resources
 						if (!cache.IsLoaded)
 						{
 							cache.OnLoad();
+							cache.Source = this;
 							cache.IsLoaded = true;
 						}
 

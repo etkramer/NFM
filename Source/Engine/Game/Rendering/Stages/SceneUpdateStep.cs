@@ -49,7 +49,7 @@ namespace Engine.Rendering
 		// Upload instance data to the GPU.
 		private void UpdateInstance(ModelActor modelActor)
 		{
-			if (modelActor.Model == null || !modelActor.IsInstanceDirty)
+			if (modelActor.Model == null || modelActor.Model?.Parts == null || !modelActor.IsInstanceDirty)
 			{
 				return;
 			}

@@ -10,10 +10,8 @@ namespace Engine.Frontend
 {
 	public class StringInput : UserControl
 	{
-		public StringInput(IEnumerable<object> subjects, PropertyInfo property)
+		public StringInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
 		{
-			bool hasMultipleValues = subjects.HasVariation((o) => property.GetValue(o));
-
 			Panel icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
@@ -30,19 +28,19 @@ namespace Engine.Frontend
 			TextBox textEntry = new TextBox();
 			textEntry.Padding = new(4, 0);
 			textEntry.VerticalContentAlignment = VerticalAlignment.Center;
-			textEntry.Text = hasMultipleValues ? "--" : property.GetValue(subjects.First()) as string;
+			textEntry.Text = hasMultipleValues ? "--" : getter.Invoke() as string;
 			textEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
 
-			// Ignore non-numeric inputs.
+			// Respond to keypresses.
 			textEntry.KeyDown += (o, e) =>
 			{
 				// Hit enter?
 				if (e.Key == Key.Enter)
 				{
 					// Apply value to subjects.
-					foreach (object subject in subjects)
+					if (textEntry.Text != "--")
 					{
-						property.SetValue(subject, Convert.ChangeType(textEntry.Text, property.PropertyType));
+						setter.Invoke(textEntry.Text);
 					}
 
 					// Switch focus to this instead.

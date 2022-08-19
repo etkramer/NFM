@@ -17,9 +17,11 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
+		<None Remove="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<None Remove="Frontend\Assets\Icons\icon.ico" />
 		<None Remove="Frontend\Assets\Icons\iconsmall.ico" />
 		<AvaloniaResource Include="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
+		<AvaloniaResource Include="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\icon.ico" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\iconsmall.ico" />
 

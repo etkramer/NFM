@@ -10,10 +10,8 @@ namespace Engine.Frontend
 {
 	public class NumInput : UserControl
 	{
-		public NumInput(IEnumerable<object> subjects, PropertyInfo property)
+		public NumInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
 		{
-			bool hasMultipleValues = subjects.HasVariation((o) => property.GetValue(o));
-
 			Panel icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
@@ -30,7 +28,7 @@ namespace Engine.Frontend
 			TextBox numEntry = new TextBox();
 			numEntry.Padding = new(4, 0);
 			numEntry.VerticalContentAlignment = VerticalAlignment.Center;
-			numEntry.Text = hasMultipleValues ? "--" : property.GetValue(subjects.First()).ToString();
+			numEntry.Text = hasMultipleValues ? "--" : getter.Invoke().ToString();
 			numEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
 
 			// Ignore non-numeric inputs.
@@ -47,25 +45,19 @@ namespace Engine.Frontend
 					if (long.TryParse(numEntry.Text, out long intResult))
 					{
 						// Apply value to subjects.
-						foreach (object subject in subjects)
-						{
-							property.SetValue(subject, Convert.ChangeType(intResult, property.PropertyType));
-						}
+						setter.Invoke(intResult);
 					}
 					// Floating point values
 					else if (double.TryParse(numEntry.Text, out double floatResult))
 					{
 						// Apply value to subjects.
-						foreach (object subject in subjects)
-						{
-							property.SetValue(subject, Convert.ChangeType(floatResult, property.PropertyType));
-						}
+						setter.Invoke(floatResult);
 					}
 					// Invalid value
 					else
 					{
 						// Reset input.
-						numEntry.Text = hasMultipleValues ? "--" : property.GetValue(subjects.First()).ToString();
+						numEntry.Text = hasMultipleValues ? "--" : getter.Invoke().ToString();
 					}
 
 					// Switch focus to this instead.

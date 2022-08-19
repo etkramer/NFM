@@ -6,26 +6,18 @@ namespace Engine.Frontend
 {
 	public class BoolInput : UserControl
 	{
-		public BoolInput(IEnumerable<object> subjects, PropertyInfo property)
+		public BoolInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
 		{
-			bool hasMultipleValues = subjects.HasVariation((o) => property.GetValue(o));
-
 			CheckBox checkBox = new CheckBox();
-			checkBox.IsChecked = hasMultipleValues ? null : (bool)property.GetValue(subjects.First());
+			checkBox.IsChecked = hasMultipleValues ? null : (bool)getter.Invoke();
 
 			checkBox.Checked += (o, e) =>
 			{
-				foreach (object subject in subjects)
-				{
-					property.SetValue(subject, true);
-				}
+				setter.Invoke(true);
 			};
 			checkBox.Unchecked += (o, e) =>
 			{
-				foreach (object subject in subjects)
-				{
-					property.SetValue(subject, false);
-				}
+				setter.Invoke(false);
 			};
 
 			Content = checkBox;

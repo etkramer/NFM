@@ -25,7 +25,7 @@ namespace Basic.Loaders
 			// Create and return shader object
 			return new Shader()
 			{
-				Source = source
+				ShaderSource = source
 			};
 		}
 	}
