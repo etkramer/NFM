@@ -12,7 +12,7 @@ namespace Engine.Frontend
 	{
 		public NumInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
 		{
-			Panel icon = new Panel()
+			Control icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
 				.Height(16)

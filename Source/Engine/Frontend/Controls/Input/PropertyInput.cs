@@ -28,7 +28,7 @@ namespace Engine.Frontend
 			Margin = new(0, 4);
 			HorizontalAlignment = HorizontalAlignment.Stretch;
 			Content = new Grid()
-				.Columns("*, *")
+				.Columns("0.8*, *")
 				.Children(
 					// Name
 					new TextBlock()
@@ -106,6 +106,11 @@ namespace Engine.Frontend
 			{
 				// Resource reference field.
 				FieldContent = new ResourceInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
+			}
+			else if (Property.PropertyType == typeof(Vector3))
+			{
+				// Vector input field.
+				FieldContent = new VectorInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues, Property);
 			}
 			else
 			{
