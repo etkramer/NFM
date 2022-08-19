@@ -10,14 +10,20 @@ namespace Engine.Frontend
 {
 	public class NumInput : UserControl
 	{
-		public NumInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
+		public NumInput(IEnumerable<object> subjects, PropertyInfo property)
+			: this(() => property.GetValue(subjects.First()), (o) => subjects.ForEach(subject => property.SetValue(subject, o)), subjects.HasVariation((o) => property.GetValue(o)))
+		{
+
+		}
+
+		public NumInput(Func<object> getter, Action<object> setter, bool hasMultipleValues, char iconOverride = '\uE3C9')
 		{
 			Control icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
 				.Height(16)
 				.Children(new TextBlock()
-					.Text("\uE3C9")
+					.Text(iconOverride.ToString())
 					.Size(12)
 					.Font(this.GetResource<FontFamily>("IconsFont"))
 					.Foreground("#E6E62E")

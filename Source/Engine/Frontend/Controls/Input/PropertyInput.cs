@@ -12,7 +12,7 @@ using Engine.Resources;
 
 namespace Engine.Frontend
 {
-	public class PropertyInput : UserControl
+	public sealed class PropertyInput : UserControl
 	{
 		[Notify] public PropertyInfo Property { get; set; }
 		[Notify] public IEnumerable<object> Subjects { get; set; }
@@ -88,7 +88,7 @@ namespace Engine.Frontend
 			if (Property.PropertyType == typeof(bool))
 			{
 				// Boolean input field.
-				FieldContent = new BoolInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
+				FieldContent = new BoolInput(Subjects, Property);
 			}
 			else if (Property.PropertyType == typeof(string))
 			{
@@ -100,17 +100,19 @@ namespace Engine.Frontend
 				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
 				// Numeric input field.
-				FieldContent = new NumInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, Convert.ChangeType(o, Property.PropertyType))), hasMultipleValues);
+				FieldContent = new NumInput(Subjects, Property);
 			}
 			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
 			{
 				// Resource reference field.
 				FieldContent = new ResourceInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
 			}
-			else if (Property.PropertyType == typeof(Vector3))
+			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
+				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
+				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i) || Property.PropertyType == typeof(Vector4d))
 			{
 				// Vector input field.
-				FieldContent = new VectorInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues, Property);
+				FieldContent = new VectorInput(Subjects, Property);
 			}
 			else
 			{
@@ -119,6 +121,23 @@ namespace Engine.Frontend
 						.With(o => o.Padding = new(4, 0))
 						.With(o => o.VerticalContentAlignment = VerticalAlignment.Center)
 						.Radius(2);
+			}
+		}
+
+		public static void SetProperty(IEnumerable<object> subjects, PropertyInfo property, object value)
+		{
+			foreach (object subject in subjects)
+			{
+				object initialValue = property.GetValue(subject);
+				property.SetValue(subject, value);
+
+				Command.AddCommand(() =>
+				{
+					property.SetValue(subject, initialValue);
+				}, () =>
+				{
+					property.SetValue(subject, value);
+				}, $"Set {property.Name} to {value}");
 			}
 		}
 	}
