@@ -11,7 +11,7 @@ namespace Engine.Frontend
 	public class NumInput : UserControl
 	{
 		public NumInput(IEnumerable<object> subjects, PropertyInfo property)
-			: this(() => property.GetValue(subjects.First()), (o) => subjects.ForEach(subject => property.SetValue(subject, o)), subjects.HasVariation((o) => property.GetValue(o)))
+			: this(() => property.GetValue(subjects.First()), (o) => subjects.ForEach(subject => property.SetValue(subject, Convert.ChangeType(o, property.PropertyType))), subjects.HasVariation((o) => property.GetValue(o)))
 		{
 
 		}
@@ -48,10 +48,10 @@ namespace Engine.Frontend
 				else if (e.Key == Key.Enter)
 				{
 					// Integer values
-					if (long.TryParse(numEntry.Text, out long longResult))
+					if (long.TryParse(numEntry.Text, out long intResult))
 					{
 						// Apply value to subjects.
-						setter.Invoke(longResult);
+						setter.Invoke(intResult);
 					}
 					// Floating point values
 					else if (double.TryParse(numEntry.Text, out double floatResult))

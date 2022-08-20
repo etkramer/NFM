@@ -9,6 +9,8 @@ using Avalonia.Markup.Xaml.Templates;
 using Engine.Editor;
 using Engine.World;
 using ISelectable = Engine.Editor.ISelectable;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Engine.Frontend
 {
@@ -43,7 +45,21 @@ namespace Engine.Frontend
 
 		private Control BuildItemContent()
 		{
-			return new TextBlock().Text(nameof(Actor.Name), BindingMode.Default);
+			Control itemContent = new TextBlock()
+				.With(o => o.Background = SolidColorBrush.Parse("Transparent"))
+				.Text(nameof(Actor.Name), BindingMode.Default)
+				.ContextMenu(
+					new MenuItem()
+						.Header("Delete")
+						.OnClick(() => {
+							Actor[] actors = Selection.Selected.OfType<Actor>().ToArray();
+							for (int i = actors.Length - 1; i >= 0; i--)
+							{
+								actors[i].Dispose();
+							}
+						}));
+
+			return itemContent;
 		}
 	}
 }

@@ -35,14 +35,14 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
-			Actor object1 = new Actor("Empty 1");
-			Actor object2 = new Actor("Empty 2", object1);
-			Actor object3 = new CameraActor();
+			Actor object1 = new Actor("Empty 1").Spawn();
+			Actor object2 = new Actor("Empty 2", object1).Spawn();
+			Actor object3 = new CameraActor().Spawn();
 
-			// Model 1
-			ModelActor object5 = new ModelActor("Model");
-			object5.Rotation = new(0, 90, 0);
-			object5.Position = new(0, -0.4f, -0.8f);
+			// Model
+			ModelActor object5 = new ModelActor("Flight Helmet").Spawn<ModelActor>();
+			object5.Rotation = new(0, 45, 0);
+			object5.Position = new(0, -0.4f, -1.2f);
 			object5.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 		}
 

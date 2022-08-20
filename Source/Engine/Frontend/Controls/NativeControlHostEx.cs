@@ -46,50 +46,64 @@ namespace Engine.Frontend
 			{
 				case WM.MOUSEMOVE:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.Move, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.LBUTTONDOWN:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.LeftButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.RBUTTONDOWN:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.RightButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.MBUTTONDOWN:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.MiddleButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.LBUTTONUP:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.LeftButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.RBUTTONUP:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.RightButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
 				case WM.MBUTTONUP:
 				{
-					int x = (short)(int)lParam + (int)host.TransformedBounds.Value.Clip.Left;
-					int y = (short)(((int)lParam) >> 16) + (int)host.TransformedBounds.Value.Clip.Top;
+					int cursorX = (short)(int)lParam;
+					int cursorY = (short)(((int)lParam) >> 16);
+					int x = cursorX + (int)host.TransformedBounds.Value.Clip.Left;
+					int y = cursorY + (int)host.TransformedBounds.Value.Clip.Top;
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.MiddleButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}

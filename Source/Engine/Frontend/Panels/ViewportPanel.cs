@@ -51,7 +51,7 @@ namespace Engine.Frontend
 		}
 	}
 
-	public class ViewportHost : Panel
+	public partial class ViewportHost : Panel
 	{
 		public Swapchain Swapchain { get; private set; }
 		private Viewport viewport;
@@ -82,22 +82,6 @@ namespace Engine.Frontend
 			{
 				Swapchain.Resize(size);
 			};
-		}
-
-		protected override void OnPointerMoved(PointerEventArgs e)
-		{
-			PointerPointProperties props = e.GetCurrentPoint(this).Properties;
-
-			if (props.IsRightButtonPressed)
-			{
-				// Capture cursor.
-			}
-			else
-			{
-				// Uncapture cursor.
-			}
-
-			base.OnPointerMoved(e);
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)

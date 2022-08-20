@@ -1,6 +1,7 @@
 ﻿using System;
 using Engine.Frontend;
 using Engine.GPU;
+using Engine.World;
 using Vortice.DXGI;
 
 namespace Engine.Rendering
@@ -18,6 +19,9 @@ namespace Engine.Rendering
 	public unsafe class Viewport : IDisposable
 	{
 		public static List<Viewport> All { get; } = new();
+
+		// Work camera settings.
+		public CameraActor WorkCamera = new CameraActor();
 
 		// Constant buffers
 		public GraphicsBuffer<ViewConstants> ViewConstantsBuffer = new(1);
@@ -45,8 +49,9 @@ namespace Engine.Rendering
 
 		public void UpdateView()
 		{
-			Matrix4 view = Matrix4.CreateTransform(Vector3.Zero, Vector3.Zero, Vector3.One).Inverted();
-			Matrix4 projection = Matrix4.CreatePerspectiveReversed(60f, Size.X / (float)Size.Y, 0.01f);
+			// Calculate view/projection matrices.
+			Matrix4 view = Matrix4.CreateTransform(WorkCamera.Position, WorkCamera.Rotation, Vector3.One).Inverted();
+			Matrix4 projection = Matrix4.CreatePerspectiveReversed(WorkCamera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
 
 			ViewConstantsBuffer.SetData(0, new ViewConstants()
 			{

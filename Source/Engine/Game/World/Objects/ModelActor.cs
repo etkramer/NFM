@@ -7,8 +7,19 @@ namespace Engine.World
 {
 	public class ModelActor : Actor
 	{
-		[Inspect] public Model Model { get; set; } = null;
+		// GPU-side instance buffer.
+		internal static GraphicsBuffer<Instance> InstanceBuffer = new(2000000);
+		internal static int InstanceCount = 0;
 
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct Instance
+		{
+			public uint Mesh;
+			public Matrix4 Transform;
+		}
+
+		[Inspect] public Model Model { get; set; } = null;
+		
 		internal List<BufferHandle<Instance>> Instances = new();
 		internal bool IsInstanceDirty = true;
 		
@@ -22,12 +33,52 @@ namespace Engine.World
 
 		public override void Dispose()
 		{
+			FreeInstances();
+			base.Dispose();
+		}
+
+		internal void UpdateInstances()
+		{
+			if (Model == null ||Model?.Parts == null || !IsInstanceDirty)
+			{
+				return;
+			}
+
+			for (int i = Instances.Count - 1; i >= 0; i--)
+			{
+				Instances[i].Free();
+				Instances.RemoveAt(i);
+				InstanceCount--;
+			}
+
+			// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
+			foreach (ModelPart part in Model.Parts)
+			{
+				foreach (Submesh submesh in part.Submeshes)
+				{
+					// Make instance data.
+					Instance instanceData = new()
+					{
+						Mesh = (uint)submesh.MeshHandle.ElementStart,
+						Transform = Matrix4.CreateTransform(Position, Rotation, Scale)
+					};
+
+					// Upload instance.
+					Instances.Add(InstanceBuffer.Upload(instanceData));
+					InstanceCount++;
+				}
+			}
+
+			IsInstanceDirty = false;
+		}
+
+		private void FreeInstances()
+		{
 			foreach (var instance in Instances)
 			{
 				instance.Free();
+				InstanceCount--;
 			}
-
-			base.Dispose();
 		}
 	}
 }

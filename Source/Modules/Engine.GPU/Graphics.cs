@@ -215,7 +215,7 @@ namespace Engine.GPU
 				new CommandInput(source, ResourceStates.CopySource),
 				new CommandInput(dest, ResourceStates.CopyDest),
 			};
-
+			
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
 		}
 

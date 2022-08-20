@@ -41,7 +41,7 @@ namespace Engine.Frontend.Controls
 
 			// Create group (viewport 2).
 			/*TabGroup group5 = new TabGroup();
-			ToolWindow.Spawn<ViewportTool>(group5);
+			ToolPanel.Spawn<ViewportPanel>(group5);
 			dockspace.Dock(group5, group4, DockPosition.Right, 0.5f);*/
 
 			// Show landing dialog.

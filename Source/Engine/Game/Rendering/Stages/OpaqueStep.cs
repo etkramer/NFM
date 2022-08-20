@@ -57,7 +57,7 @@ namespace Engine.Rendering
 			Graphics.SetProgram(cullProgram);
 
 			// Set SRV inputs.
-			Graphics.SetProgramSRV(0, SceneUpdateStep.InstanceBuffer);
+			Graphics.SetProgramSRV(0, ModelActor.InstanceBuffer);
 			Graphics.SetProgramSRV(1, Submesh.MeshBuffer);
 
 			// Set UAV outputs.
@@ -65,9 +65,9 @@ namespace Engine.Rendering
 			Graphics.SetProgramUAV(1, commandCountBuffer);
 
 			// Dispatch compute shader.
-			if (SceneUpdateStep.InstanceCount > 0)
+			if (ModelActor.InstanceCount > 0)
 			{
-				Graphics.Dispatch(SceneUpdateStep.InstanceCount);
+				Graphics.Dispatch(ModelActor.InstanceCount);
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace Engine.Rendering
 			Graphics.SetProgram(visProgram);
 
 			// Bind program inputs.
-			Graphics.SetProgramSRV(0, SceneUpdateStep.InstanceBuffer);
+			Graphics.SetProgramSRV(0, ModelActor.InstanceBuffer);
 			Graphics.SetProgramSRV(1, Submesh.MeshBuffer);
 			Graphics.SetProgramSRV(2, Submesh.MeshletBuffer);
 			Graphics.SetProgramSRV(3, Submesh.PrimBuffer);

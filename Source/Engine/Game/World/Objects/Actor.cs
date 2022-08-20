@@ -20,11 +20,11 @@ namespace Engine.World
 		public Scene Scene { get; private set; }
 		public ReadOnlyObservableCollection<Actor> Children { get; }
 
-		// Fields.
+		// Fields
 		private Actor parent;
 		private readonly ObservableCollection<Actor> children = new();
 
-		public Actor(string name = null, Actor parent = null, Scene scene = null)
+		public Actor(string name = null, Actor parent = null)
 		{
 			Children = new(children);
 
@@ -36,26 +36,43 @@ namespace Engine.World
 					name = name.Remove(name.Length - 6);
 			}
 
+			Name = name.Trim();
+			Parent = parent;
+		}
+
+		public virtual void Dispose()
+		{
+			// Remove self from scene tree.
+			Scene?.Remove(this);
+			Parent = null;
+
+			// Dispose children.
+			for (int i = Children.Count - 1; i >= 0; i--)
+				Children[i].Dispose();
+
+			// Make sure we're not still selected.
+			Selection.Deselect(this);
+		}
+
+		/// <summary>
+		/// Spawn the actor into the world
+		/// </summary>
+		public Actor Spawn(Scene scene = null) => Spawn<Actor>(scene);
+		public TThis Spawn<TThis>(Scene scene = null) where TThis : Actor
+		{
 			if (scene == null)
 			{
-				scene = Scene.Main;
+				Scene = Scene.Main;
 			}
 
 			if (parent == null)
 			{
-				scene.Add(this);
+				Scene.Add(this);
 			}
 
-			Name = name.Trim();
-			Scene = scene;
-			Parent = parent;
+			return this as TThis;
 		}
 
 		string ISelectable.GetName() => Name;
-
-		public virtual void Dispose()
-		{
-			Scene.Remove(this);
-		}
 	}
 }
