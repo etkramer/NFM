@@ -46,17 +46,23 @@ namespace Engine.GPU
 						Free = false
 					};
 
-					// And make a new one to represent the empty space.
-					Block blockB = new()
+					// Is there any empty space?
+					if (blocks[i].Length - blockA.Length > 0)
 					{
-						Start = blockA.Start + blockA.Length,
-						Length = blocks[i].Length - blockA.Length,
-						Free = true,
-					};
+						// Make a new block to represent it.
+						Block blockB = new()
+						{
+							Start = blockA.Start + blockA.Length,
+							Length = blocks[i].Length - blockA.Length,
+							Free = true,
+						};
+
+						blocks.Insert(i + 1, blockB);
+					}
 
 					blocks[i] = blockA;
-					blocks.Insert(i + 1, blockB);
 					blockIndex = i;
+					
 					break;
 				}
 
