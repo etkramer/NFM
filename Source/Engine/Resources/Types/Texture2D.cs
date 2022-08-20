@@ -23,6 +23,11 @@ namespace Engine.Resources
 			return this;
 		}
 
+		public Texture2D SetCompressed(bool value)
+		{
+			return this;
+		}
+
 		/// <summary>
 		/// Loads raw, uncompressed data (in 8-bit SDR format) into the texture.
 		/// </summary>

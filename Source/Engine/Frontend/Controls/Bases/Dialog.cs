@@ -11,7 +11,7 @@ namespace Engine.Frontend
 {
 	public abstract class Dialog : UserControl
 	{
-		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolWindow, string>(nameof(Title), "Dialog Window");
+		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Dialog Window");
 		public string Title
 		{
 			get { return GetValue(TitleProperty); }

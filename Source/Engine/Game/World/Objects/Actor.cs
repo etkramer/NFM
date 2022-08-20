@@ -7,7 +7,6 @@ using Engine.Editor;
 
 namespace Engine.World
 {
-	[AutoDispose]
 	public class Actor : ISelectable, IDisposable
 	{
 		// Properties (inspectable)
@@ -54,14 +53,9 @@ namespace Engine.World
 
 		string ISelectable.GetName() => Name;
 
-		public virtual void Destroy()
-		{
-
-		}
-
 		public virtual void Dispose()
 		{
-
+			Scene.Remove(this);
 		}
 	}
 }

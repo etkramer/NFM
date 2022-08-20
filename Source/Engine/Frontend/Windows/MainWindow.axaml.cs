@@ -21,22 +21,22 @@ namespace Engine.Frontend.Controls
 		{
 			// Create group.
 			TabGroup group1 = new TabGroup();
-			ToolWindow.Spawn<SceneTool>(group1);
+			ToolPanel.Spawn<ScenePanel>(group1);
 			dockspace.Dock(group1, null);
 
 			// Create group.
 			TabGroup group2 = new TabGroup();
-			ToolWindow.Spawn<InspectorTool>(group2);
+			ToolPanel.Spawn<InspectorPanel>(group2);
 			dockspace.Dock(group2, group1, DockPosition.Right, 0.88f);
 
 			// Create group (timeline).
 			TabGroup group3 = new TabGroup();
-			ToolWindow.Spawn<TimelineTool>(group3);
+			ToolPanel.Spawn<TimelinePanel>(group3);
 			dockspace.Dock(group3, group2, DockPosition.Left, 0.88f);
 
 			// Create group (viewport 1).
 			TabGroup group4 = new TabGroup();
-			ToolWindow.Spawn<ViewportTool>(group4);
+			ToolPanel.Spawn<ViewportPanel>(group4);
 			dockspace.Dock(group4, group3, DockPosition.Top, 0.75f);
 
 			// Create group (viewport 2).

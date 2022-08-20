@@ -16,13 +16,13 @@ using Avalonia.Interactivity;
 
 namespace Engine.Frontend
 {
-	public class ViewportTool : ToolWindow
+	public class ViewportPanel : ToolPanel
 	{
 		[Notify] string frameTime => $"Frametime: {frameTimeAverager.Result.ToString("0.00")}ms";
 		[Notify] string memory => $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
 		private Averager frameTimeAverager = new Averager(100);
 
-		public ViewportTool()
+		public ViewportPanel()
 		{
 			// Update frametime.
 			Graphics.OnFrameStart += () => frameTimeAverager.AddValue(Graphics.FrameTime * 1000);

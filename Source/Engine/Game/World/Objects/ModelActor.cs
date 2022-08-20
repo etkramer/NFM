@@ -20,14 +20,14 @@ namespace Engine.World
 			(this as INotify).Subscribe(nameof(Scale), () => IsInstanceDirty = true);
 		}
 
-		public override void Destroy()
+		public override void Dispose()
 		{
 			foreach (var instance in Instances)
 			{
 				instance.Free();
 			}
 
-			base.Destroy();
+			base.Dispose();
 		}
 	}
 }

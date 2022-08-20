@@ -13,9 +13,9 @@ using System.Text.RegularExpressions;
 
 namespace Engine.Frontend
 {
-	public class TimelineTool : ToolWindow
+	public class TimelinePanel : ToolPanel
 	{
-		public TimelineTool()
+		public TimelinePanel()
 		{
 			DataContext = this;
 

@@ -5,9 +5,9 @@ using Engine.Frontend.Controls;
 
 namespace Engine.Frontend
 {
-	public abstract class ToolWindow : UserControl
+	public abstract class ToolPanel : UserControl
 	{
-		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolWindow, string>(nameof(Title), "Tool Window");
+		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Tool Window");
 
 		public string Title
 		{
@@ -15,7 +15,7 @@ namespace Engine.Frontend
 			set { SetValue(TitleProperty, value); }
 		}
 
-		public static T Spawn<T>(TabGroup group = null) where T : ToolWindow, new()
+		public static T Spawn<T>(TabGroup group = null) where T : ToolPanel, new()
 		{
 			T tool = new();
 			tool.Focusable = true;

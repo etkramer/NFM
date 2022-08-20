@@ -12,11 +12,11 @@ using ISelectable = Engine.Editor.ISelectable;
 
 namespace Engine.Frontend
 {
-	public partial class SceneTool : ToolWindow
+	public partial class ScenePanel : ToolPanel
 	{
 		[Notify] public ReadOnlyObservableCollection<Actor> SceneActors => Scene.Main?.Actors;
 
-		public SceneTool()
+		public ScenePanel()
 		{
 			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () => (this as INotify).Raise(nameof(SceneActors)));
 

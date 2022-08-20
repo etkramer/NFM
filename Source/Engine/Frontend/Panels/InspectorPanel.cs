@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace Engine.Frontend
 {
-	public class InspectorTool : ToolWindow
+	public class InspectorPanel : ToolPanel
 	{
 		[Notify] public Control InspectorContent { get; private set; } = null;
 
@@ -23,7 +23,7 @@ namespace Engine.Frontend
 
 		[Notify] private string currentFilter { get; set; } = "";
 
-		public InspectorTool()
+		public InspectorPanel()
 		{
 			DataContext = this;
 

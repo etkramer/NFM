@@ -48,10 +48,10 @@ namespace Engine.Frontend
 				else if (e.Key == Key.Enter)
 				{
 					// Integer values
-					if (long.TryParse(numEntry.Text, out long intResult))
+					if (long.TryParse(numEntry.Text, out long longResult))
 					{
 						// Apply value to subjects.
-						setter.Invoke(intResult);
+						setter.Invoke(longResult);
 					}
 					// Floating point values
 					else if (double.TryParse(numEntry.Text, out double floatResult))

@@ -10,13 +10,13 @@ namespace Engine.Frontend.Controls
 	[PseudoClasses(":active")]
 	public class Tab : TemplatedControl
 	{
-		public static readonly StyledProperty<ToolWindow> PanelProperty = AvaloniaProperty.Register<Tab, ToolWindow>(nameof(Panel));
+		public static readonly StyledProperty<ToolPanel> PanelProperty = AvaloniaProperty.Register<Tab, ToolPanel>(nameof(Panel));
 		public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<Tab, bool>(nameof(IsSelected), false);
 
 		private TabGroup group;
 
 		[Content]
-		public ToolWindow Panel
+		public ToolPanel Panel
 		{
 			get { return GetValue(PanelProperty); }
 			set { SetValue(PanelProperty, value); }
@@ -28,7 +28,7 @@ namespace Engine.Frontend.Controls
 			set { SetValue(IsSelectedProperty, value); PseudoClasses.Set(":active", value); }
 		}
 
-		public Tab(ToolWindow panel, TabGroup group)
+		public Tab(ToolPanel panel, TabGroup group)
 		{
 			this.group = group;
 			Panel = panel;

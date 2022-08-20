@@ -48,13 +48,7 @@ namespace Engine.Plugins
 			}
 
 			// Init loaded plugins.
-			Task[] startupTasks = new Task[Plugins.Count];
-			for (int i = 0; i < Plugins.Count; i++)
-			{
-				startupTasks[i] = Task.Run(Plugins[i].OnStart);
-			}
-
-			Task.WhenAll(startupTasks).Wait();
+			Parallel.ForEachAsync(Plugins, async (o, e) => o.OnStart()).Wait();
 		}
 	}
 }
