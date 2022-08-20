@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
-using Engine.Aspects;
 using Engine.Editor;
 
 namespace Engine.World
@@ -15,12 +11,29 @@ namespace Engine.World
 		[Save, Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Save, Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 		
-		// Properties (code-only)
-		[Save, Notify] public Actor Parent { get => parent; set { parent?.children.Remove(this); value?.children.Add(this); parent = value; }}
 		public Scene Scene { get; private set; }
 		public ReadOnlyObservableCollection<Actor> Children { get; }
+		[Save, Notify] public Actor Parent
+		{
+			get => parent;
+			set
+			{
+				if (parent != value)
+				{
+					// Remove from old parent.
+					Scene?.Remove(this);
+					parent?.children.Remove(this);
 
-		// Fields
+					// Add to new parent.
+					parent = value;
+					parent?.children.Add(this);	
+					if (parent == null)
+						Scene?.Add(this);
+				}
+			}
+		}
+
+		// Backing fields
 		private Actor parent;
 		private readonly ObservableCollection<Actor> children = new();
 
@@ -48,7 +61,9 @@ namespace Engine.World
 
 			// Dispose children.
 			for (int i = Children.Count - 1; i >= 0; i--)
+			{
 				Children[i].Dispose();
+			}
 
 			// Make sure we're not still selected.
 			Selection.Deselect(this);

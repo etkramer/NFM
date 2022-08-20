@@ -35,9 +35,9 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
-			Actor object1 = new Actor("Empty 1").Spawn();
-			Actor object2 = new Actor("Empty 2", object1).Spawn();
-			Actor object3 = new CameraActor().Spawn();
+			new Actor("Empty 1").Spawn();
+			new Actor("Empty 2").Spawn();
+			new CameraActor().Spawn();
 
 			// Model
 			ModelActor object5 = new ModelActor("Flight Helmet").Spawn<ModelActor>();
