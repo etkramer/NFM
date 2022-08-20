@@ -8,6 +8,7 @@ cbuffer drawConstants : register(b0)
 
 cbuffer viewConstants : register(b1)
 {
+	float4x4 View;
 	float4x4 Projection;
 }
 
@@ -44,8 +45,9 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 
 		// Apply projection to vertex position.
 		float4 position = float4(vertex.Position, 1);
-		position = mul(instance.Transform, position);
-		position = mul(Projection, position);
+		position = mul(instance.Transform, position); // Apply instance transform.
+		position = mul(View, position); // Apply camera view.
+		position = mul(Projection, position); // Apply camera projection.
 
 		// Write output vertex.
 		verts[groupThreadID].InstanceID = InstanceID;

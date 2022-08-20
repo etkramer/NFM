@@ -5,6 +5,13 @@ using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
+	[StructLayout(LayoutKind.Sequential)]
+	public struct ViewConstants
+	{
+		public Matrix4 View;
+		public Matrix4 Projection;
+	}
+
 	/// <summary>
 	/// Contains the game logic for a UI viewport
 	/// </summary>
@@ -13,7 +20,7 @@ namespace Engine.Rendering
 		public static List<Viewport> All { get; } = new();
 
 		// Constant buffers
-		public GraphicsBuffer<Matrix4> ViewConstantsBuffer = new(1);
+		public GraphicsBuffer<ViewConstants> ViewConstantsBuffer = new(1);
 
 		// Helpers
 		public ViewportHost Host { get; }
@@ -38,10 +45,14 @@ namespace Engine.Rendering
 
 		public void UpdateView()
 		{
-			float aspect = (Size.X / (float)Size.Y);
-			Matrix4 projection = Matrix4.CreatePerspectiveReversed(60f, aspect, 0.01f);
+			Matrix4 view = Matrix4.CreateTransform(Vector3.Zero, Vector3.Zero, Vector3.One).Inverted();
+			Matrix4 projection = Matrix4.CreatePerspectiveReversed(60f, Size.X / (float)Size.Y, 0.01f);
 
-			ViewConstantsBuffer.SetData(0, projection);
+			ViewConstantsBuffer.SetData(0, new ViewConstants()
+			{
+				View = view,
+				Projection = projection,
+			});
 		}
 
 		/// <summary>

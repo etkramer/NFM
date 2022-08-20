@@ -1,18 +1,11 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Platform;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Engine.GPU;
 using Engine.Rendering;
-using WinApi.User32;
-using WndProc = Avalonia.Win32.Interop.UnmanagedMethods.WndProc;
-using Avalonia.Win32;
 using Avalonia.Input;
-using Avalonia.Input.Raw;
-using Avalonia.Threading;
-using Avalonia.Interactivity;
 
 namespace Engine.Frontend
 {
