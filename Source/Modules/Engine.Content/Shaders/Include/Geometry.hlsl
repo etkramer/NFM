@@ -29,10 +29,9 @@ struct Vertex
 	float3 Normal;
 };
 
-// Geometry data
-StructuredBuffer<Instance> Instances : register(t0);
-
-StructuredBuffer<Mesh> Meshes : register(t1);
-StructuredBuffer<Meshlet> Meshlets : register(t2);
-StructuredBuffer<uint> Primitives : register(t3);
-StructuredBuffer<Vertex> Vertices : register(t4);
+// Global geometry data - keep slot numbers out of the way. Should probably use spaces instead.
+StructuredBuffer<Instance> Instances : register(t252);
+StructuredBuffer<Mesh> Meshes : register(t253);
+StructuredBuffer<Meshlet> Meshlets : register(t254);
+StructuredBuffer<uint> Primitives : register(t255);
+StructuredBuffer<Vertex> Vertices : register(t256);

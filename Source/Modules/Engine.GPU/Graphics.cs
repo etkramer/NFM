@@ -203,11 +203,25 @@ namespace Engine.GPU
 
 		public static void CopyTexture(Texture source, Texture dest)
 		{
-			Debug.Assert(source.Size == dest.Size && source.Format == dest.Format, "Cannot copy to a texture with a mismatching size or format");
-
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.CopyResource(dest, source);
+				list.CopyTextureRegion(new TextureCopyLocation(dest.Resource), 0, 0, 0, new TextureCopyLocation(source.Resource));
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(source, ResourceStates.CopySource),
+				new CommandInput(dest, ResourceStates.CopyDest),
+			};
+			
+			GetCommandList().AddCommand(buildDelegate, () => inputs);
+		}
+
+		public static void CopyResource(Resource source, Resource dest)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.CopyResource(dest.GetBaseResource(), source.GetBaseResource());
 			};
 
 			CommandInput[] inputs = new[]

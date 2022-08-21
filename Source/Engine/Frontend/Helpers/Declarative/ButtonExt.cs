@@ -19,7 +19,7 @@ namespace Engine.Frontend
 				commandAction = command;
 			}
 
-#pragma warning disable CS0067
+			#pragma warning disable CS0067
 			public event EventHandler CanExecuteChanged;
 
 			bool ICommand.CanExecute(object parameter)

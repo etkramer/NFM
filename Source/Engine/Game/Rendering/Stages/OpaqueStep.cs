@@ -13,8 +13,9 @@ namespace Engine.Rendering
 		private static GraphicsBuffer commandCountBuffer = new GraphicsBuffer(sizeof(uint));
 
 		private CommandSignature commandSignature;
-		private ShaderProgram cullProgram;
 		private ShaderProgram visProgram;
+		private ShaderProgram cullProgram;
+		private ShaderProgram basicMaterialProgram;
 
 		public override void Init()
 		{
@@ -32,6 +33,11 @@ namespace Engine.Rendering
 				.AsConstant(0, 1)
 				.Compile().Result;
 
+			/*basicMaterialProgram = new ShaderProgram()
+				.UseIncludes(typeof(Embed).Assembly)
+				.SetComputeShader(Embed.GetString("Shaders/MaterialShader.hlsl"))
+				.Compile().Result;*/
+
 			commandSignature = new CommandSignature()
 				.WithConstantArg(0, visProgram)
 				.WithDispatchMeshArg()
@@ -45,7 +51,36 @@ namespace Engine.Rendering
 
 			// Generate indirect draw commands.
 			BuildCommands();
-			BuildVisbuffer();
+
+			// Build visibility buffer for opaque geometry.
+			DrawVisibility();
+			DrawMaterials();
+		}
+
+		private void DrawMaterials()
+		{
+			//Graphics.SetProgram(basicMaterialProgram);
+		}
+
+		private void DrawVisibility()
+		{
+			// Switch to visbuffer program (graphics).
+			Graphics.SetProgram(visProgram);
+
+			// Bind program inputs.
+			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
+			Graphics.SetProgramSRV(253, Submesh.MeshBuffer);
+			Graphics.SetProgramSRV(254, Submesh.MeshletBuffer);
+			Graphics.SetProgramSRV(255, Submesh.PrimBuffer);
+			Graphics.SetProgramSRV(256, Submesh.VertBuffer);
+
+			// Update view data.
+			Viewport.UpdateView();
+			Graphics.SetProgramConstant(1, Viewport.ViewConstantsBuffer);
+
+			// Dispatch draw commands.
+			Graphics.BarrierUAV(commandBuffer, commandCountBuffer);
+			Graphics.DrawIndirect(commandSignature, maxCommandCount, commandBuffer, commandCountBuffer);
 		}
 
 		private void BuildCommands()
@@ -57,8 +92,8 @@ namespace Engine.Rendering
 			Graphics.SetProgram(cullProgram);
 
 			// Set SRV inputs.
-			Graphics.SetProgramSRV(0, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(1, Submesh.MeshBuffer);
+			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
+			Graphics.SetProgramSRV(253, Submesh.MeshBuffer);
 
 			// Set UAV outputs.
 			Graphics.SetProgramUAV(0, commandBuffer);
@@ -69,27 +104,6 @@ namespace Engine.Rendering
 			{
 				Graphics.Dispatch(ModelActor.InstanceCount);
 			}
-		}
-
-		private void BuildVisbuffer()
-		{
-			// Switch to visbuffer program (graphics).
-			Graphics.SetProgram(visProgram);
-
-			// Bind program inputs.
-			Graphics.SetProgramSRV(0, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(1, Submesh.MeshBuffer);
-			Graphics.SetProgramSRV(2, Submesh.MeshletBuffer);
-			Graphics.SetProgramSRV(3, Submesh.PrimBuffer);
-			Graphics.SetProgramSRV(4, Submesh.VertBuffer);
-
-			// Update view data.
-			Viewport.UpdateView();
-			Graphics.SetProgramConstant(1, Viewport.ViewConstantsBuffer);
-
-			// Dispatch draw commands.
-			Graphics.BarrierUAV(commandBuffer, commandCountBuffer);
-			Graphics.DrawIndirect(commandSignature, maxCommandCount, commandBuffer, commandCountBuffer);
 		}
 	}
 }

@@ -13,6 +13,7 @@
     <None Remove="Shaders\CullShader.hlsl" />
     <None Remove="Shaders\Include\Geometry.hlsl" />
     <None Remove="Shaders\Include\Outputs.hlsl" />
+    <None Remove="Shaders\MaterialShader.hlsl" />
     <None Remove="Shaders\MeshShader.hlsl" />
     <None Remove="Shaders\VisShader.hlsl" />
   </ItemGroup>
@@ -21,6 +22,7 @@
     <EmbeddedResource Include="Shaders\CullShader.hlsl" />
     <EmbeddedResource Include="Shaders\Include\Geometry.hlsl" />
     <EmbeddedResource Include="Shaders\Include\Outputs.hlsl" />
+    <EmbeddedResource Include="Shaders\MaterialShader.hlsl" />
     <EmbeddedResource Include="Shaders\MeshShader.hlsl" />
     <EmbeddedResource Include="Shaders\VisShader.hlsl" />
   </ItemGroup>
