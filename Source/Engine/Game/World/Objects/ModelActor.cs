@@ -23,7 +23,7 @@ namespace Engine.World
 		internal List<BufferHandle<Instance>> Instances = new();
 		internal bool IsInstanceDirty = true;
 		
-		public ModelActor(string name = null, Actor parent = null) : base(name, parent)
+		public ModelActor(string name = null) : base(name)
 		{
 			(this as INotify).Subscribe(nameof(Model), () => IsInstanceDirty = true);
 			(this as INotify).Subscribe(nameof(Position), () => IsInstanceDirty = true);

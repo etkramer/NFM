@@ -29,7 +29,7 @@ namespace Engine.GPU
 			GPUContext.Device.CreateShaderResourceView(resource, desc, Handle);
 		}
 
-		public ShaderResourceView(Texture texture)
+		public ShaderResourceView(Texture target)
 		{
 			Handle = Heap.Allocate();
 
@@ -37,6 +37,7 @@ namespace Engine.GPU
 			{
 				ViewDimension = ShaderResourceViewDimension.Texture2D,
 				Shader4ComponentMapping = ShaderComponentMapping.Default,
+				Format = target.SRFormat == default ? target.Format : target.SRFormat,
 				Texture2D = new()
 				{
 					MipLevels = 1,
@@ -46,7 +47,7 @@ namespace Engine.GPU
 				},
 			};
 
-			GPUContext.Device.CreateShaderResourceView(texture.Resource, desc, Handle);
+			GPUContext.Device.CreateShaderResourceView(target.Resource, desc, Handle);
 		}
 	}
 }

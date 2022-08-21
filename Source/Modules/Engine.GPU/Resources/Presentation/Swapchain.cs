@@ -69,7 +69,7 @@ namespace Engine.GPU
             for (int i = 0; i < GPUContext.RenderLatency; i++)
             {
 				// Create backbuffer RT.
-				backbuffers[i] = new Texture(swapchain.GetBuffer<ID3D12Resource>(i), (uint)Size.X, (uint)Size.Y);
+				backbuffers[i] = new Texture(swapchain.GetBuffer<ID3D12Resource>(i), Size.X, Size.Y);
 				backbuffers[i].State = ResourceStates.Present;
             }
 		}

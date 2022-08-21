@@ -36,20 +36,22 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
-			new Actor("Empty 1").Spawn();
-			new Actor("Empty 2").Spawn();
+			new Actor("Empty").Spawn();
+			new PointLightActor().Spawn();
 			new CameraActor().Spawn();
 
-			// Model
-			ModelActor object5 = new ModelActor("Flight Helmet").Spawn<ModelActor>();
-			object5.Rotation = new(0, 45, 0);
-			object5.Position = new(0, -0.4f, -1.2f);
-			object5.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
+			// Flight Helmet
+			var flightHelmet = new ModelActor("Flight Helmet")
+				.Spawn<ModelActor>();
+			flightHelmet.Rotation = new Vector3(0, 45, 0);
+			flightHelmet.Position = new Vector3(0, -0.4f, -1.2f);
+			flightHelmet.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
-			// Model
-			/*ModelActor object6 = new ModelActor("Sponza Atrium").Spawn<ModelActor>();
-			object6.Position = new(0, -2, 1);
-			object6.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;*/
+			// Sponza Atrium
+			/*var sponzaObject = new ModelActor("Sponza Atrium")
+				.Spawn<ModelActor>();
+			sponzaObject.Position = new Vector3(0, -2, 1);
+			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;*/
 		}
 
 		public static void Update()

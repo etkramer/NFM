@@ -138,7 +138,35 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
 		}
 
-		public static void SetProgramSRV<T>(int slot, GraphicsBuffer<T> target) where T : unmanaged
+		public static void SetProgramSRV(int slot, Texture target)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				ShaderProgram program = GetCommandList().CurrentProgram;
+				if (!program.tRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				{
+					return;
+				}
+
+				if (program.IsMeshPixel)
+				{
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
+				}
+				if (program.IsCompute)
+				{
+					list.SetComputeRootDescriptorTable(parameterIndex, target.SRV.Handle);
+				}
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(target, ResourceStates.AllShaderResource)
+			};
+
+			GetCommandList().AddCommand(buildDelegate, () => inputs);
+		}
+
+		public static void SetProgramSRV(int slot, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{

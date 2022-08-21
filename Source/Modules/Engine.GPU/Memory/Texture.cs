@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.GPU
 {
-	public unsafe class Texture : Resource, IDisposable
+	public unsafe sealed class Texture : Resource, IDisposable
 	{
 		public bool IsRT => rtv != null;
 		public bool IsDS => dsv != null;
@@ -58,14 +58,14 @@ namespace Engine.GPU
 		internal ID3D12Resource Resource;
 
 		public readonly Format Format = Format.R8G8B8A8_UNorm;
-		public bool Is2D => Levels == 1;
+		public readonly Format DSFormat = default;
+		public readonly Format SRFormat = default;
 
-		public ulong Width { get; private set; }
-		public ulong Height { get; private set; }
-		public Vector2i Size => new((int)Width, (int)Height);
-		public ushort Levels;
+		public int Width { get; private set; }
+		public int Height { get; private set; }
+		public Vector2i Size => new(Width, Height);
+		public byte Levels;
 
-		public Color ClearColor { get; }
 		internal ClearValue ClearValue { get; private set; }
 
 		public string Name
@@ -77,19 +77,20 @@ namespace Engine.GPU
 		/// <summary>
 		/// Constructs a Texture object
 		/// </summary>
-		public Texture(ulong width, ulong height, ushort levels = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default(Color))
+		public Texture(int width, int height, byte levels = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default)
 		{
 			Format = format;
 			Width = width;
 			Height = height;
 			Levels = levels;
 
-			ClearColor = clearColor;
+			DSFormat = dsFormat;
+			SRFormat = srFormat;
 
 			// Calculate clear value for depth/stencil.
-			if (format.IsDepthStencil())
+			if (format.IsDepthStencil() || format.IsTypeless())
 			{
-				ClearValue = new ClearValue(format, new DepthStencilValue()
+				ClearValue = new ClearValue(dsFormat == default ? format : dsFormat, new DepthStencilValue()
 				{
 					Depth = clearColor[0],
 					Stencil = 0
@@ -102,7 +103,7 @@ namespace Engine.GPU
 			}
 
 			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, format.IsDepthStencil()), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, format), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
 
 			Resource.Name = "Standard texture";
@@ -111,7 +112,7 @@ namespace Engine.GPU
 		/// <summary>
 		/// Constructs a Texture object from a DXGI backbuffer
 		/// </summary>
-		internal Texture(ID3D12Resource resource, uint width, uint height)
+		internal Texture(ID3D12Resource resource, int width, int height)
 		{
 			Resource = resource;
 			Width = width;
@@ -126,7 +127,7 @@ namespace Engine.GPU
 		/// <summary>
 		/// Resizes and resets the texture.
 		/// </summary>
-		public void Resize(ulong width, ulong height)
+		public void Resize(int width, int height)
 		{
 			Width = width;
 			Height = height;
@@ -138,7 +139,7 @@ namespace Engine.GPU
 			dsv = null;
 
 			// Create new resource with new size.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, Format.IsDepthStencil()), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, Format), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
 		}
 
@@ -147,19 +148,19 @@ namespace Engine.GPU
 			Resource.Release();
 		}
 
-		private ResourceDescription GetDescription(ulong width, ulong height, ushort levels, bool depthOnly = false)
+		private ResourceDescription GetDescription(int width, int height, byte levels, Format format)
 		{
 			return new()
 			{
-				Dimension = Is2D ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
+				Dimension = levels == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
 				Alignment = 0,
-				Width = width,
-				Height = (int)height,
+				Width = (ulong)width,
+				Height = height,
 				DepthOrArraySize = 1,
 				MipLevels = levels,
 				Format = Format,
 				SampleDescription = new(1, 0),
-				Flags = depthOnly ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget,
+				Flags = format.IsDepthStencil() || format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget,
 			};
 		}
 

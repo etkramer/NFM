@@ -43,8 +43,10 @@ namespace Engine.Rendering
 			All.Add(this);
 			
 			host.Swapchain.OnResize += Resize;
-			ColorTarget = new Texture((ulong)Size.X, (ulong)Size.Y, 1, Format.R8G8B8A8_UNorm, default(Color));
-			DepthBuffer = new Texture((ulong)Size.X, (ulong)Size.Y, 1, Format.D32_Float, new(0f));
+			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
+			//DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.D32_Float);
+
+			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
 		}
 
 		public void UpdateView()
@@ -65,8 +67,8 @@ namespace Engine.Rendering
 		/// </summary>
 		private void Resize(Vector2i size)
 		{
-			ColorTarget.Resize((ulong)size.X, (ulong)size.Y);
-			DepthBuffer.Resize((ulong)size.X, (ulong)size.Y);
+			ColorTarget.Resize(size.X, size.Y);
+			DepthBuffer.Resize(size.X, size.Y);
 		}
 
 		public void Dispose()

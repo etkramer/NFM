@@ -110,9 +110,9 @@ namespace Engine.Frontend
 			return subject;
 		}
 
-		public static T Style<T>(this T subject, string styleClasses) where T : Control
+		public static T Style<T>(this T subject, params string[] styleClasses) where T : Control
 		{
-			subject.Classes = Classes.Parse(styleClasses);
+			subject.Classes = new Classes(styleClasses);
 			return subject;
 		}
 

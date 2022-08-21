@@ -37,7 +37,7 @@ namespace Engine.World
 		private Actor parent;
 		private readonly ObservableCollection<Actor> children = new();
 
-		public Actor(string name = null, Actor parent = null)
+		public Actor(string name = null)
 		{
 			Children = new(children);
 
@@ -46,10 +46,12 @@ namespace Engine.World
 				name = GetType().Name.PascalToDisplay();
 
 				if (name.EndsWith(" Actor"))
+				{
 					name = name.Remove(name.Length - 6);
+				}
 			}
 
-			Name = name.Trim();
+			Name = name;
 			Parent = parent;
 		}
 
@@ -70,7 +72,21 @@ namespace Engine.World
 		}
 
 		/// <summary>
-		/// Spawn the actor into the world
+		/// Spawns the actor into the scene with the given parent
+		/// </summary>
+		public Actor Spawn(Actor parent) => Spawn<Actor>(parent);
+		public TThis Spawn<TThis>(Actor parent) where TThis : Actor
+		{
+			if (parent != null)
+			{
+				Parent = parent;
+			}
+			
+			return this as TThis;
+		}
+
+		/// <summary>
+		/// Spawns the actor into the given scene
 		/// </summary>
 		public Actor Spawn(Scene scene = null) => Spawn<Actor>(scene);
 		public TThis Spawn<TThis>(Scene scene = null) where TThis : Actor

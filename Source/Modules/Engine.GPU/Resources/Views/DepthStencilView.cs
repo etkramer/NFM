@@ -23,7 +23,7 @@ namespace Engine.GPU
 		{
 			DepthStencilViewDescription desc = new()
 			{
-				Format = Target.Format,
+				Format = Target.DSFormat == default ? Target.Format : Target.DSFormat,
 				ViewDimension = DepthStencilViewDimension.Texture2D,
 				Flags = DepthStencilViewFlags.None
 			};
