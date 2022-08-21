@@ -5,7 +5,7 @@ namespace Engine.GPU
 {
 	public unsafe partial class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : unmanaged
 	{
-		public GraphicsBuffer(int capacity, int alignment = 1) : base(capacity * sizeof(T), sizeof(T), alignment)
+		public GraphicsBuffer(int elementCount, int alignment = 1) : base(elementCount * sizeof(T), sizeof(T), alignment)
 		{
 			// Create initial allocation block.
 			blocks.Add(new Block()

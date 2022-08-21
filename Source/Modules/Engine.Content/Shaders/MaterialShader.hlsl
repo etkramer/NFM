@@ -1,6 +1,6 @@
 ﻿#include "Shaders/Include/Geometry.hlsl"
 
-Texture2D<int> VisBuffer : register(t0);
+//Texture2D<int> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
 RWTexture2D<float4> RenderTarget : register(u0);
@@ -9,7 +9,7 @@ RWTexture2D<float4> RenderTarget : register(u0);
 void ComputeEntry(uint3 ID : SV_DispatchThreadID)
 {
 	// Early out if this pixel is empty.
-	bool isEmpty = DepthBuffer[pixel] == 0;
+	bool isEmpty = DepthBuffer[ID.xy] == 0;
 	if (isEmpty)
 	{
 		return;

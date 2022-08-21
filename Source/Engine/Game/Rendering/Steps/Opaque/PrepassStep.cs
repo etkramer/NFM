@@ -6,13 +6,13 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class OpaqueStep : RenderStep
+	public class PrepassStep : RenderStep
 	{
 		private const int maxCommandCount = 100;
 		private static GraphicsBuffer commandBuffer = new GraphicsBuffer(16 * maxCommandCount, 16);
 		private static GraphicsBuffer<uint> commandCountBuffer = new GraphicsBuffer<uint>(1);
 
-		private CommandSignature commandSignature;
+		private CommandSignature cullSignature;
 		private ShaderProgram visProgram;
 		private ShaderProgram cullProgram;
 
@@ -32,7 +32,7 @@ namespace Engine.Rendering
 				.AsConstant(0, 1)
 				.Compile().Result;
 
-			commandSignature = new CommandSignature()
+			cullSignature = new CommandSignature()
 				.WithConstantArg(0, visProgram)
 				.WithDispatchMeshArg()
 				.Compile();
@@ -68,7 +68,7 @@ namespace Engine.Rendering
 
 			// Dispatch draw commands.
 			Graphics.BarrierUAV(commandBuffer, commandCountBuffer);
-			Graphics.DrawIndirect(commandSignature, maxCommandCount, commandBuffer, commandCountBuffer);
+			Graphics.DrawIndirect(cullSignature, maxCommandCount, commandBuffer, commandCountBuffer);
 		}
 
 		private void BuildCommands()
