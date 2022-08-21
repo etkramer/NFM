@@ -53,16 +53,8 @@ namespace Engine.GPU
 		}
 	}
 
-	public unsafe class GraphicsBuffer : GraphicsBuffer<byte>
-	{
-		public GraphicsBuffer(int capacityBytes, int stride) : base(capacityBytes)
-		{
-			Stride = stride;
-		}
-	}
-
 	[AutoDispose]
-	public unsafe partial class GraphicsBuffer<T> : Resource, IDisposable where T : unmanaged
+	public unsafe partial class GraphicsBuffer : Resource, IDisposable
 	{
 		public const int ConstantAlignment = 256;
 		public int Capacity;
@@ -106,8 +98,8 @@ namespace Engine.GPU
 			{
 				if (cbv == null)
 				{
-					Debug.Assert(Capacity * sizeof(T) < 65536, "Buffers larger than 64kb cannot be used as program constants");
-					Debug.Assert((Capacity * sizeof(T) % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
+					Debug.Assert(Capacity * Stride < 65536, "Buffers larger than 64kb cannot be used as program constants");
+					Debug.Assert((Capacity * Stride % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
 					cbv = new ConstantBufferView(Resource, Stride, Capacity);
 				}
 
@@ -121,13 +113,13 @@ namespace Engine.GPU
 			set => Resource.Name = value;
 		}
 
-		public GraphicsBuffer(int capacity, int alignment = 1)
+		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1)
 		{
-			Capacity = capacity;
+			Capacity = sizeBytes / stride;
 			Alignment = alignment;
-			Stride = sizeof(T);
+			Stride = stride;
 
-			ulong width = (ulong)(capacity * sizeof(T));
+			ulong width = (ulong)sizeBytes;
 			width = MathHelper.Align(width, alignment); // Use user-defined alignment
 
 			// Describe buffer.
@@ -150,14 +142,6 @@ namespace Engine.GPU
 
 			// Set debug name.
 			Name = GetType().Name;
-
-			// Create initial allocation block.
-			blocks.Add(new Block()
-			{
-				Start = 0,
-				Length = Capacity,
-				Free = true,
-			});
 		}
 
 		public void Dispose()
@@ -170,53 +154,16 @@ namespace Engine.GPU
 			return Resource;
 		}
 
-		/// <summary>
-		/// Allocates space for the data, then uploads it to the GPU.
-		/// </summary>
-		public BufferHandle<T> Upload(T[] data)
-		{
-			var handle = Allocate(data.Length);
-			SetData(handle, data);
-			return handle;
-		}
-
-		/// <inheritdoc cref="Upload(T[])"/>
-		public BufferHandle<T> Upload(T data)
-		{
-			var handle = Allocate(1);
-			SetData(handle, data);
-			return handle;
-		}
-
-		/// <inheritdoc cref="Upload(T[])"/>
-		public BufferHandle<T> Upload(Span<T> data)
-		{
-			var handle = Allocate(data.Length);
-			SetData(handle, data);
-			return handle;
-		}
-
-		public void SetData(BufferHandle<T> handle, T[] data) => SetData(handle.ElementStart, data);
-		public void SetData(BufferHandle<T> handle, T data) => SetData(handle.ElementStart, data);
-		public void SetData(BufferHandle<T> handle, Span<T> data) => SetData(handle.ElementStart, data);
-
-		public void SetData(long start, T[] data) => SetData(start, data.AsSpan());
-		public void SetData(long start, T data) => SetData(start, MemoryMarshal.CreateSpan(ref data, 1));
-		public void SetData(long start, Span<T> data)
+		public void SetData(void* data, int dataSize, long offset)
 		{
 			lock (UploadBuffer.Lock)
 			{
-				int dataSize = data.Length * sizeof(T);
-
 				int uploadOffset = UploadBuffer.UploadOffset;
-				int destOffset = (int)(start * sizeof(T));
+				long destOffset = offset;
 
 				// Copy data to upload buffer.
-				fixed (void* dataPtr = data)
-				{
-					Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[UploadBuffer.Ring] + uploadOffset, dataPtr, (uint)dataSize);
-					UploadBuffer.UploadOffset += dataSize;
-				}
+				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[UploadBuffer.Ring] + uploadOffset, data, (uint)dataSize);
+				UploadBuffer.UploadOffset += dataSize;
 
 				// Copy from upload to target buffer.
 				Graphics.CustomCommand((o) => {
@@ -227,14 +174,6 @@ namespace Engine.GPU
 						State = ResourceStates.CopyDest
 					}
 				});
-			}
-		}
-
-		public T this[int i]
-		{
-			set
-			{
-				SetData(i, value);
 			}
 		}
 	}

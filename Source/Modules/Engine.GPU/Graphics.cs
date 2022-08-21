@@ -110,7 +110,7 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
 		}
 
-		public static void SetProgramUAV<T>(int slot, GraphicsBuffer<T> target) where T : unmanaged
+		public static void SetProgramUAV(int slot, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{

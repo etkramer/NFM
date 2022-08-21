@@ -10,7 +10,7 @@ namespace Engine.Rendering
 	{
 		private const int maxCommandCount = 100;
 		private static GraphicsBuffer commandBuffer = new GraphicsBuffer(16 * maxCommandCount, 16);
-		private static GraphicsBuffer commandCountBuffer = new GraphicsBuffer(sizeof(uint), 4);
+		private static GraphicsBuffer<uint> commandCountBuffer = new GraphicsBuffer<uint>(1);
 
 		private CommandSignature commandSignature;
 		private ShaderProgram visProgram;

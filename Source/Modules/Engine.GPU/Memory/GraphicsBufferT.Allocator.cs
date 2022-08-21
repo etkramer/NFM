@@ -3,7 +3,7 @@ using Vortice.Direct3D12;
 
 namespace Engine.GPU
 {
-	public unsafe partial class GraphicsBuffer<T> where T : unmanaged
+	public unsafe partial class GraphicsBuffer<T>
 	{
 		private List<Block> blocks = new();
 
