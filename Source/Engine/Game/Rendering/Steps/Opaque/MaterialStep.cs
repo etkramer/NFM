@@ -31,10 +31,10 @@ namespace Engine.Rendering
 
 			// Bind program inputs/outputs
 			Graphics.SetProgramSRV(1, Viewport.DepthBuffer);
-			//Graphics.SetProgramUAV(0, Viewport.ColorTarget);
+			Graphics.SetProgramUAV(0, Viewport.ColorTarget);
 
 			// Dispatch draw commands.
-			Graphics.Dispatch(Viewport.ColorTarget.Width / 32, Viewport.ColorTarget.Height / 32);
+			Graphics.DispatchThreads(Viewport.ColorTarget.Width, Viewport.ColorTarget.Height, 1, 32, 32, 1);
 		}
 	}
 }

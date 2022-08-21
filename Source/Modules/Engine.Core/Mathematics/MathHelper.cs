@@ -272,6 +272,12 @@ namespace Engine.Mathematics
         [Pure]
         public static double Ceiling(double n) => System.Math.Ceiling(n);
 
+		[Pure]
+		public static int IntCeiling(double n)
+		{
+			return (int)Math.Ceiling(n);
+		}
+
         /// <summary>
         /// Returns the largest integral value less than or equal to the specified number.
         /// </summary>

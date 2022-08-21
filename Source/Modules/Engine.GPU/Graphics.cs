@@ -39,6 +39,14 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, null);
 		}
 
+		public static void DispatchThreads(int threadCountX, int threadCountY = 1, int threadCountZ = 1, int groupSizeX = 1, int groupSizeY = 1, int groupSizeZ = 1)
+		{
+			int groupsX = MathHelper.IntCeiling(threadCountX / (float)groupSizeX);
+			int groupsY = MathHelper.IntCeiling(threadCountY / (float)groupSizeY);
+			int groupsZ = MathHelper.IntCeiling(threadCountZ / (float)groupSizeZ);
+			Dispatch(groupsX, groupsY, groupsZ);
+		}
+
 		public static void UAVBarrier(GraphicsBuffer buffer)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
@@ -105,6 +113,34 @@ namespace Engine.GPU
 			CommandInput[] inputs = new[]
 			{
 				new CommandInput(target, ResourceStates.VertexAndConstantBuffer)
+			};
+
+			GetCommandList().AddCommand(buildDelegate, () => inputs);
+		}
+
+		public static void SetProgramUAV(int slot, Texture target)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				ShaderProgram program = GetCommandList().CurrentProgram;
+				if (!program.uRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				{
+					return;
+				}
+
+				if (program.IsMeshPixel)
+				{
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
+				}
+				if (program.IsCompute)
+				{
+					list.SetComputeRootDescriptorTable(parameterIndex, target.UAV.Handle);
+				}
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(target, ResourceStates.UnorderedAccess)
 			};
 
 			GetCommandList().AddCommand(buildDelegate, () => inputs);

@@ -10,6 +10,20 @@ namespace Engine.GPU
 		public bool IsRT => rtv != null;
 		public bool IsDS => dsv != null;
 
+		private UnorderedAccessView uav;
+		internal UnorderedAccessView UAV
+		{
+			get
+			{
+				if (uav == null)
+				{
+					uav = new UnorderedAccessView(this);
+				}
+
+				return uav;
+			}
+		}
+
 		private ShaderResourceView srv;
 		internal ShaderResourceView SRV
 		{
@@ -160,7 +174,7 @@ namespace Engine.GPU
 				MipLevels = levels,
 				Format = Format,
 				SampleDescription = new(1, 0),
-				Flags = format.IsDepthStencil() || format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget,
+				Flags = format.IsDepthStencil() || format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget | ResourceFlags.AllowUnorderedAccess,
 			};
 		}
 

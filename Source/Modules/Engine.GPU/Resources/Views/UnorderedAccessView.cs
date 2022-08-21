@@ -28,5 +28,23 @@ namespace Engine.GPU
 
 			GPUContext.Device.CreateUnorderedAccessView(resource, null, desc, Handle);
 		}
+
+		public UnorderedAccessView(Texture target)
+		{
+			Handle = ShaderResourceView.Heap.Allocate();
+
+			UnorderedAccessViewDescription desc = new()
+			{
+				Format = target.Format,
+				ViewDimension = UnorderedAccessViewDimension.Texture2D,
+				Texture2D = new()
+				{
+					MipSlice = 0,
+					PlaneSlice = 0
+				}
+			};
+
+			GPUContext.Device.CreateUnorderedAccessView(target, null, desc, Handle);
+		}
 	}
 }
