@@ -24,7 +24,7 @@ namespace Engine.Rendering
 		public CameraActor WorkCamera = new CameraActor();
 
 		// Constant buffers
-		public GraphicsBuffer<ViewConstants> ViewConstantsBuffer = new(1);
+		public GraphicsBuffer<ViewConstants> ViewConstantsBuffer = new(1, GraphicsBuffer.ConstantAlignment);
 
 		// Helpers
 		public ViewportHost Host { get; }

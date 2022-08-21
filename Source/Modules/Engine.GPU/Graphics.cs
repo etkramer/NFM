@@ -82,7 +82,7 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
 		}
 
-		public static void SetProgramConstant<T>(int slot, GraphicsBuffer<T> target) where T : unmanaged
+		public static void SetProgramCBV<T>(int slot, GraphicsBuffer<T> target) where T : unmanaged
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
@@ -90,21 +90,21 @@ namespace Engine.GPU
 				if (!program.cRegisterMapping.TryGetValue(slot, out int parameterIndex))
 				{
 					return;
-				}		
+				}
 
 				if (program.IsMeshPixel)
 				{
-					list.SetGraphicsRootConstantBufferView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.CBV.Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootConstantBufferView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.CBV.Handle);
 				}
 			};
 
 			CommandInput[] inputs = new[]
 			{
-				new CommandInput(target, ResourceStates.Common),
+				new CommandInput(target, ResourceStates.VertexAndConstantBuffer)
 			};
 
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
@@ -150,17 +150,17 @@ namespace Engine.GPU
 
 				if (program.IsMeshPixel)
 				{
-					list.SetGraphicsRootShaderResourceView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootShaderResourceView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.SRV.Handle);
 				}
 			};
 
 			CommandInput[] inputs = new[]
 			{
-				new CommandInput(target, ResourceStates.GenericRead)
+				new CommandInput(target, ResourceStates.AllShaderResource)
 			};
 
 			GetCommandList().AddCommand(buildDelegate, () => inputs);

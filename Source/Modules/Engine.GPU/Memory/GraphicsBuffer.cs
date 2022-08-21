@@ -25,7 +25,7 @@ namespace Engine.GPU
 			{
 				Dimension = ResourceDimension.Buffer,
 				Alignment = 0,
-				Width = (ulong)UploadSize,
+				Width = UploadSize,
 				Height = 1,
 				DepthOrArraySize = 1,
 				MipLevels = 1,
@@ -61,7 +61,9 @@ namespace Engine.GPU
 	[AutoDispose]
 	public unsafe partial class GraphicsBuffer<T> : Resource, IDisposable where T : unmanaged
 	{
+		public const int ConstantAlignment = 256;
 		public int Capacity;
+		public int Alignment = 1;
 
 		internal ID3D12Resource Resource;
 
@@ -101,6 +103,7 @@ namespace Engine.GPU
 				if (cbv == null)
 				{
 					Debug.Assert(Capacity * sizeof(T) < 65536, "Buffers larger than 64kb cannot be used as program constants");
+					Debug.Assert((Capacity * sizeof(T) % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
 					cbv = new ConstantBufferView(Resource, sizeof(T), Capacity);
 				}
 
@@ -114,16 +117,17 @@ namespace Engine.GPU
 			set => Resource.Name = value;
 		}
 
-		public GraphicsBuffer(int capacity)
+		public GraphicsBuffer(int capacity, int alignment = 1)
 		{
 			Capacity = capacity;
+			Alignment = alignment;
 
 			// Describe buffer.
 			ResourceDescription bufferDescription = new()
 			{
 				Dimension = ResourceDimension.Buffer,
 				Alignment = 0,
-				Width = (ulong)capacity * (ulong)sizeof(T),
+				Width = (ulong)MathHelper.Align(capacity * sizeof(T), alignment),
 				Height = 1,
 				DepthOrArraySize = 1,
 				MipLevels = 1,

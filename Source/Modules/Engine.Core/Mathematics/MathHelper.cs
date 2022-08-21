@@ -69,6 +69,18 @@ namespace Engine.Mathematics
         public const float Log2E = 1.442695f;
 
         /// <summary>
+        /// Aligns an integer to the specified value.
+        /// </summary>
+		[Pure]
+		public static long Align(long n, int a)
+		{
+			long r = n % a;
+			long y = (r != 0) ? n + (a - r) : n;
+
+			return y;
+		}
+
+        /// <summary>
         /// Returns the absolute value of a decimal number.
         /// </summary>
         /// <param name="n">A number that is greater than or equal to MinValue, but less than or equal to MaxValue.</param>

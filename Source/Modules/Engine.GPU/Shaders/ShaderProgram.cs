@@ -196,15 +196,10 @@ namespace Engine.GPU
 
 						if (SRV)
 						{
-							// This check feels iffy. Look into why it's necessary.
-							if (!tRegisterMapping.ContainsKey(binding.BindPoint))
-							{
-								RootParameterType type = RootParameterType.ShaderResourceView;
-								rootParams.Add(new RootParameter1(type, new RootDescriptor1(binding.BindPoint, binding.Space), ShaderVisibility.All));
+							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ShaderResourceView, 1, binding.BindPoint, binding.Space);
+							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
-								tRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
-							}
-							
+							tRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
 						}
 						else if (UAV)
 						{
@@ -217,7 +212,9 @@ namespace Engine.GPU
 						{
 							if (!rootParams.Any(o => o.Constants.ShaderRegister == binding.BindPoint && o.Constants.RegisterSpace == binding.Space))
 							{
-								rootParams.Add(new RootParameter1(RootParameterType.ConstantBufferView, new RootDescriptor1(binding.BindPoint, binding.Space), ShaderVisibility.All));
+								DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ConstantBufferView, 1, binding.BindPoint, binding.Space);
+								rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+
 								cRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
 							}
 						}

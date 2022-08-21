@@ -76,7 +76,7 @@ namespace Engine.Rendering
 
 			// Update view data.
 			Viewport.UpdateView();
-			Graphics.SetProgramConstant(1, Viewport.ViewConstantsBuffer);
+			Graphics.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
 
 			// Dispatch draw commands.
 			Graphics.BarrierUAV(commandBuffer, commandCountBuffer);

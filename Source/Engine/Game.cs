@@ -28,8 +28,8 @@ namespace Engine
 			PluginSystem.LoadAll();
 
 			// Precache model.
-			//Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
-			Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
+			Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
+			//Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -41,15 +41,15 @@ namespace Engine
 			new CameraActor().Spawn();
 
 			// Model
-			/*ModelActor object5 = new ModelActor("Flight Helmet").Spawn<ModelActor>();
+			ModelActor object5 = new ModelActor("Flight Helmet").Spawn<ModelActor>();
 			object5.Rotation = new(0, 45, 0);
 			object5.Position = new(0, -0.4f, -1.2f);
-			object5.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;*/
+			object5.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
 			// Model
-			ModelActor object6 = new ModelActor("Sponza Atrium").Spawn<ModelActor>();
+			/*ModelActor object6 = new ModelActor("Sponza Atrium").Spawn<ModelActor>();
 			object6.Position = new(0, -2, 1);
-			object6.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
+			object6.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;*/
 		}
 
 		public static void Update()

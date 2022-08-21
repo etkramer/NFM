@@ -18,8 +18,8 @@ namespace Engine.GPU
 		public DescriptorHeap Heap;
 		public int Index;
 
-		public static implicit operator CpuDescriptorHandle(DescriptorHandle handle) => handle.Heap.GetCPUHandle(handle.Index);
-		public static implicit operator GpuDescriptorHandle(DescriptorHandle handle) => handle.Heap.GetGPUHandle(handle.Index);
+		public static implicit operator CpuDescriptorHandle(DescriptorHandle handle) => handle.CPUHandle;
+		public static implicit operator GpuDescriptorHandle(DescriptorHandle handle) => handle.GPUHandle;
 
 		public CpuDescriptorHandle CPUHandle => Heap.GetCPUHandle(Index);
 		public GpuDescriptorHandle GPUHandle => Heap.GetGPUHandle(Index);
@@ -31,7 +31,7 @@ namespace Engine.GPU
 		private int stride;
 		private int count;
 
-		public HeapType Type;
+		public HeapType Type { get; }
 
 		public DescriptorHeap(HeapType type, int descriptorCount, bool shaderVisible)
 		{
