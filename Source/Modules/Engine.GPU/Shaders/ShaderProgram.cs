@@ -144,7 +144,7 @@ namespace Engine.GPU
 		}
 
 		/// <summary>
-		/// Manually indicate a root constant, as opposed to the constant *buffer* that would be used otherwise.
+		/// Specifies that a parameter should be interpreted as a 32-bit root constant.
 		/// </summary>
 		public ShaderProgram Constant<T>(int slot, int space = 0) where T : unmanaged
 		{
@@ -156,7 +156,7 @@ namespace Engine.GPU
 		}
 
 		/// <summary>
-		/// Manually indicate a root constant, as opposed to the constant *buffer* that would be used otherwise.
+		/// Specifies that a parameter should be interpreted as a 32-bit root constant.
 		/// </summary>
 		public ShaderProgram AsConstant(int slot, int count, int space = 0)
 		{
@@ -203,8 +203,8 @@ namespace Engine.GPU
 						}
 						else if (UAV)
 						{
-							RootParameterType type = RootParameterType.UnorderedAccessView;
-							rootParams.Add(new RootParameter1(type, new RootDescriptor1(binding.BindPoint, binding.Space), ShaderVisibility.All));
+							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.UnorderedAccessView, 1, binding.BindPoint, binding.Space);
+							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
 							uRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
 						}

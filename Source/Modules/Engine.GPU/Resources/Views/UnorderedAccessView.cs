@@ -20,7 +20,7 @@ namespace Engine.GPU
 				{
 					FirstElement = 0,
 					StructureByteStride = stride,
-					NumElements = capacity,
+					NumElements = capacity / stride,
 					Flags = BufferUnorderedAccessViewFlags.None,
 					CounterOffsetInBytes = 0,
 				}

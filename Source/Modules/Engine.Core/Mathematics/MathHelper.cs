@@ -81,6 +81,18 @@ namespace Engine.Mathematics
 		}
 
         /// <summary>
+        /// Aligns an integer to the specified value.
+        /// </summary>
+		[Pure]
+		public static ulong Align(ulong n, int a)
+		{
+			ulong r = n % (uint)a;
+			ulong y = (r != 0) ? n + ((uint)a - r) : n;
+
+			return y;
+		}
+
+        /// <summary>
         /// Returns the absolute value of a decimal number.
         /// </summary>
         /// <param name="n">A number that is greater than or equal to MinValue, but less than or equal to MaxValue.</param>

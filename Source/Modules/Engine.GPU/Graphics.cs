@@ -118,15 +118,15 @@ namespace Engine.GPU
 				if (!program.uRegisterMapping.TryGetValue(slot, out int parameterIndex))
 				{
 					return;
-				}		
+				}
 
 				if (program.IsMeshPixel)
 				{
-					list.SetGraphicsRootUnorderedAccessView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootUnorderedAccessView(parameterIndex, target.Resource.GPUVirtualAddress);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.UAV.Handle);
 				}
 			};
 

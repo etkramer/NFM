@@ -55,7 +55,10 @@ namespace Engine.GPU
 
 	public unsafe class GraphicsBuffer : GraphicsBuffer<byte>
 	{
-		public GraphicsBuffer(int capacityBytes) : base(capacityBytes) {}
+		public GraphicsBuffer(int capacityBytes, int stride) : base(capacityBytes)
+		{
+			Stride = stride;
+		}
 	}
 
 	[AutoDispose]
@@ -63,6 +66,7 @@ namespace Engine.GPU
 	{
 		public const int ConstantAlignment = 256;
 		public int Capacity;
+		public int Stride;
 		public int Alignment = 1;
 
 		internal ID3D12Resource Resource;
@@ -74,7 +78,7 @@ namespace Engine.GPU
 			{
 				if (srv == null)
 				{
-					srv = new ShaderResourceView(Resource, sizeof(T), Capacity);
+					srv = new ShaderResourceView(Resource, Stride, Capacity);
 				}
 
 				return srv;
@@ -88,7 +92,7 @@ namespace Engine.GPU
 			{
 				if (uav == null)
 				{
-					uav = new UnorderedAccessView(Resource, sizeof(T), Capacity);
+					uav = new UnorderedAccessView(Resource, Stride, Capacity);
 				}
 
 				return uav;
@@ -104,7 +108,7 @@ namespace Engine.GPU
 				{
 					Debug.Assert(Capacity * sizeof(T) < 65536, "Buffers larger than 64kb cannot be used as program constants");
 					Debug.Assert((Capacity * sizeof(T) % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
-					cbv = new ConstantBufferView(Resource, sizeof(T), Capacity);
+					cbv = new ConstantBufferView(Resource, Stride, Capacity);
 				}
 
 				return cbv;
@@ -121,13 +125,16 @@ namespace Engine.GPU
 		{
 			Capacity = capacity;
 			Alignment = alignment;
+			Stride = sizeof(T);
+
+			ulong width = (ulong)(capacity * sizeof(T));
+			width = MathHelper.Align(width, alignment); // Use user-defined alignment
 
 			// Describe buffer.
 			ResourceDescription bufferDescription = new()
 			{
 				Dimension = ResourceDimension.Buffer,
-				Alignment = 0,
-				Width = (ulong)MathHelper.Align(capacity * sizeof(T), alignment),
+				Width = width,
 				Height = 1,
 				DepthOrArraySize = 1,
 				MipLevels = 1,

@@ -6,8 +6,9 @@ namespace Engine.GPU
 {
 	public sealed class CommandSignature
 	{
+		public int Stride { get; private set; } = 0;
+
 		private List<IndirectArgumentDescription> arguments = new();
-		private int stride = 0;
 		internal ID3D12CommandSignature Handle;
 
 		private ShaderProgram program = null;
@@ -21,7 +22,7 @@ namespace Engine.GPU
 
 			unsafe
 			{
-				stride += sizeof(DispatchMeshArguments);
+				Stride += sizeof(DispatchMeshArguments);
 			}
 
 			return this;
@@ -46,7 +47,7 @@ namespace Engine.GPU
 				}
 			});
 
-			stride += 4;
+			Stride += 4;
 			return this;
 		}
 
@@ -54,7 +55,7 @@ namespace Engine.GPU
 		{		
 			CommandSignatureDescription desc = new()
 			{
-				ByteStride = stride,
+				ByteStride = Stride,
 				IndirectArguments = arguments.ToArray(),
 			};
 

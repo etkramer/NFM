@@ -9,13 +9,12 @@ namespace Engine.Rendering
 	public class OpaqueStep : RenderStep
 	{
 		private const int maxCommandCount = 100;
-		private static GraphicsBuffer commandBuffer = new GraphicsBuffer(16 * maxCommandCount);
-		private static GraphicsBuffer commandCountBuffer = new GraphicsBuffer(sizeof(uint));
+		private static GraphicsBuffer commandBuffer = new GraphicsBuffer(16 * maxCommandCount, 16);
+		private static GraphicsBuffer commandCountBuffer = new GraphicsBuffer(sizeof(uint), 4);
 
 		private CommandSignature commandSignature;
 		private ShaderProgram visProgram;
 		private ShaderProgram cullProgram;
-		private ShaderProgram basicMaterialProgram;
 
 		public override void Init()
 		{
@@ -33,11 +32,6 @@ namespace Engine.Rendering
 				.AsConstant(0, 1)
 				.Compile().Result;
 
-			/*basicMaterialProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("Shaders/MaterialShader.hlsl"))
-				.Compile().Result;*/
-
 			commandSignature = new CommandSignature()
 				.WithConstantArg(0, visProgram)
 				.WithDispatchMeshArg()
@@ -54,12 +48,6 @@ namespace Engine.Rendering
 
 			// Build visibility buffer for opaque geometry.
 			DrawVisibility();
-			DrawMaterials();
-		}
-
-		private void DrawMaterials()
-		{
-			//Graphics.SetProgram(basicMaterialProgram);
 		}
 
 		private void DrawVisibility()
