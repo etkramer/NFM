@@ -48,10 +48,10 @@ namespace Engine
 			flightHelmet.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
 			// Sponza Atrium
-			/*var sponzaObject = new ModelActor("Sponza Atrium")
+			var sponzaObject = new ModelActor("Sponza Atrium")
 				.Spawn<ModelActor>();
 			sponzaObject.Position = new Vector3(0, -2, 1);
-			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;*/
+			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
 		}
 
 		public static void Update()

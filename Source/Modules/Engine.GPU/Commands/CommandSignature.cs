@@ -29,7 +29,7 @@ namespace Engine.GPU
 		}
 		public CommandSignature WithConstantArg(int register, ShaderProgram program)
 		{
-			if (!program.cRegisterMapping.TryGetValue(register, out var rootParam))
+			if (!program.cRegisterMapping.TryGetValue(new(register, 0), out var rootParam))
 			{
 				Debug.LogWarning($"Program does not contain cbuffer at register b{register}");
 				return this;

@@ -30,9 +30,10 @@ namespace Engine.Rendering
 		public ViewportHost Host { get; }
 		public Vector2i Size => Host.Swapchain.RT.Size;
 
-		// Render targets
+		// Render targets and buffers
 		public Texture ColorTarget;
 		public Texture DepthBuffer;
+		public Texture VisBuffer;
 
 		/// <summary>
 		/// Constructs a viewport from a given UI host
@@ -43,10 +44,11 @@ namespace Engine.Rendering
 			All.Add(this);
 			
 			host.Swapchain.OnResize += Resize;
-			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
-			//DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.D32_Float);
 
+			// Create RTs and RT-sized buffers.
+			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
 			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
+			VisBuffer = new Texture(Size.X, Size.Y, 1, Format.R32G32_UInt);
 		}
 
 		public void UpdateView()
@@ -69,12 +71,14 @@ namespace Engine.Rendering
 		{
 			ColorTarget.Resize(size.X, size.Y);
 			DepthBuffer.Resize(size.X, size.Y);
+			VisBuffer.Resize(size.X, size.Y);
 		}
 
 		public void Dispose()
 		{
 			ColorTarget.Dispose();
 			DepthBuffer.Dispose();
+			VisBuffer.Dispose();
 			All.Remove(this);
 		}
 	}

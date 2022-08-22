@@ -29,7 +29,7 @@ namespace Engine.GPU
 			return commandList;
 		}
 
-		public static void Dispatch(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
+		public static void DispatchGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
@@ -39,23 +39,12 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, null);
 		}
 
-		public static void DispatchThreads(int threadCountX, int threadCountY = 1, int threadCountZ = 1, int groupSizeX = 1, int groupSizeY = 1, int groupSizeZ = 1)
+		public static void DispatchThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
 		{
 			int groupsX = MathHelper.IntCeiling(threadCountX / (float)groupSizeX);
 			int groupsY = MathHelper.IntCeiling(threadCountY / (float)groupSizeY);
 			int groupsZ = MathHelper.IntCeiling(threadCountZ / (float)groupSizeZ);
-			Dispatch(groupsX, groupsY, groupsZ);
-		}
-
-		public static void UAVBarrier(GraphicsBuffer buffer)
-		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				ResourceBarrier barrier = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffer.Resource));
-				list.ResourceBarrier(barrier);
-			};
-
-			GetCommandList().AddCommand(buildDelegate, null);
+			DispatchGroups(groupsX, groupsY, groupsZ);
 		}
 
 		public static void BarrierUAV(params GraphicsBuffer[] buffers)
@@ -66,6 +55,22 @@ namespace Engine.GPU
 				for (int i = 0; i < buffers.Length; i++)
 				{
 					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].Resource));
+				}
+
+				list.ResourceBarrier(barriers);
+			};
+
+			GetCommandList().AddCommand(buildDelegate, null);
+		}
+
+		public static void BarrierUAV(params Texture[] textures)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				ResourceBarrier[] barriers = new ResourceBarrier[textures.Length];
+				for (int i = 0; i < textures.Length; i++)
+				{
+					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].Resource));
 				}
 
 				list.ResourceBarrier(barriers);
@@ -90,12 +95,12 @@ namespace Engine.GPU
 			GetCommandList().AddCommand(buildDelegate, () => inputs);
 		}
 
-		public static void SetProgramCBV<T>(int slot, GraphicsBuffer<T> target) where T : unmanaged
+		public static void SetProgramCBV<T>(Register binding, GraphicsBuffer<T> target) where T : unmanaged
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = GetCommandList().CurrentProgram;
-				if (!program.cRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				if (!program.cRegisterMapping.TryGetValue(binding, out int parameterIndex))
 				{
 					return;
 				}
@@ -303,7 +308,7 @@ namespace Engine.GPU
 			{
 				list.OMSetRenderTargets(color.RTV.Handle, depth?.DSV.Handle);
 				list.RSSetViewport(0, 0, color.Width, color.Height);
-				list.RSSetScissorRect((int)color.Width, (int)color.Height);
+				list.RSSetScissorRect(color.Width, color.Height);
 			};
 
 			CommandInput[] inputs = new[]
@@ -363,7 +368,27 @@ namespace Engine.GPU
 				new CommandInput(resource, state)
 			};
 
-			GetCommandList().AddCommand(delegate{}, () => inputs);
+			GetCommandList().AddCommand(null, () => inputs);
+		}
+
+		public static void PushEvent(string name)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.BeginEvent(name);
+			};
+
+			GetCommandList().AddCommand(buildDelegate, null);
+		}
+
+		public static void PopEvent()
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.EndEvent();
+			};
+
+			GetCommandList().AddCommand(buildDelegate, null);
 		}
 
 		private static Stopwatch frameTimer = new();

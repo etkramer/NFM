@@ -1,47 +1,12 @@
 ﻿#include "Shaders/Include/Geometry.hlsl"
 #include "Shaders/Include/Outputs.hlsl"
+#include "Shaders/Include/Common.hlsl"
 
-float4 PixelEntry(MeshOut input) : SV_TARGET
+uint2 PixelEntry(MeshOut input) : SV_TARGET
 {
-	Mesh mesh = Meshes[Instances[input.InstanceID].Mesh];
-	Meshlet meshlet = Meshlets[mesh.MeshletStart + input.MeshletID];
+	uint instanceID = input.InstanceID; // 32 bits allows for ~4b instances
+	uint meshletID = input.MeshletID; // (32-7) bits allows for ~33m meshlets (~4b tris)
+	uint triangleID = input.TriangleID; // Needs exactly 7 bits to represent up to 128 tris.
 
-	float4 meshletColor;
-	if (input.MeshletID % 6 == 0)
-	{
-		meshletColor = float4(0.82, 0.8, 0.57, 1);
-	}
-	else if (input.MeshletID % 6 == 1)
-	{
-		meshletColor = float4(0.58, 0.37, 0.87, 1);
-	}
-	else if (input.MeshletID % 6 == 2)
-	{
-		meshletColor = float4(0.88, 0.07, 0.6, 1);
-	}
-	else if (input.MeshletID % 6 == 3)
-	{
-		meshletColor = float4(0.89, 0.89, 0.14, 1);
-	}
-	else if (input.MeshletID % 6 == 4)
-	{		
-		meshletColor = float4(0.58, 0.86, 0.89, 1);
-	}
-	else
-	{
-		meshletColor = float4(0, 0.47, 0.84, 1);
-	}
-
-	return meshletColor;
+	return uint2(instanceID, BitPack(meshletID, triangleID, 25));
 }
-
-/*static const int NUM_TRIANGLE_BITS = 17;
-
-uint PixelEntry(MeshOut input) : SV_TARGET
-{
-	uint objectID = input.InstanceID;
-	uint triangleID = Meshlets[input.MeshletID].PrimStart + input.TriangleID;
-	uint packedResult = (objectID << NUM_TRIANGLE_BITS | triangleID);
-
-	return packedResult;
-}*/

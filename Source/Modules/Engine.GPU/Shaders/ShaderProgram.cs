@@ -50,17 +50,18 @@ namespace Engine.GPU
 		internal ID3D12RootSignature RootSignature = null;
 
 		// RootParameter <-> register mappings. TODO: Doesn't account for register spaces.
-		internal Dictionary<int, int> tRegisterMapping = new();
-		internal Dictionary<int, int> uRegisterMapping = new();
-		internal Dictionary<int, int> cRegisterMapping = new();
+		internal Dictionary<Register, int> tRegisterMapping = new();
+		internal Dictionary<Register, int> uRegisterMapping = new();
+		internal Dictionary<Register, int> cRegisterMapping = new();
 
 		// Parameters
 		List<RootParameter1> rootParams = new();
 		private ShaderBytecode compiledCompute;
 		private ShaderBytecode compiledMesh;
 		private ShaderBytecode compiledPixel;
-		private CullMode cullMode = GPU.CullMode.None;
-		private DepthMode depthMode = GPU.DepthMode.None;
+		private CullMode cullMode = CullMode.None;
+		private DepthMode depthMode = DepthMode.None;
+		private Format rtFormat = GPUContext.RTFormat;
 
 		// Custom handler for #including files from arbitrary file systems
 		private CustomIncludeHandler shaderIncludeHandler = null;
@@ -74,6 +75,12 @@ namespace Engine.GPU
 		{
 			PSO.Dispose();
 			RootSignature.Dispose();
+		}
+
+		public ShaderProgram SetRTFormat(Format format)
+		{
+			rtFormat = format;
+			return this;
 		}
 
 		public ShaderProgram SetCullMode(CullMode mode)
@@ -161,7 +168,7 @@ namespace Engine.GPU
 		public ShaderProgram AsConstant(int slot, int count, int space = 0)
 		{
 			rootParams.Add(new RootParameter1(new RootConstants(slot, space, count), ShaderVisibility.All));
-			cRegisterMapping.Add(slot, rootParams.Count - 1);
+			cRegisterMapping.Add(new(slot, space), rootParams.Count - 1);
 			return this;
 		}
 
@@ -196,26 +203,32 @@ namespace Engine.GPU
 
 						if (SRV)
 						{
-							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ShaderResourceView, 1, binding.BindPoint, binding.Space);
-							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
-
-							tRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
+							if (!tRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
+							{
+								DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ShaderResourceView, 1, binding.BindPoint, binding.Space);
+								rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+							
+								tRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
+							}
 						}
 						else if (UAV)
 						{
-							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.UnorderedAccessView, 1, binding.BindPoint, binding.Space);
-							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+							if (!uRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
+							{
+								DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.UnorderedAccessView, 1, binding.BindPoint, binding.Space);
+								rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
-							uRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
+								uRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
+							}
 						}
 						else if (CBV)
 						{
-							if (!rootParams.Any(o => o.Constants.ShaderRegister == binding.BindPoint && o.Constants.RegisterSpace == binding.Space))
+							if (!cRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
 							{
 								DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ConstantBufferView, 1, binding.BindPoint, binding.Space);
 								rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
-								cRegisterMapping.Add(binding.BindPoint, rootParams.Count - 1);
+								cRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
 							}
 						}
 					}
@@ -234,7 +247,6 @@ namespace Engine.GPU
 			public PipelineStateSubObjectTypeSampleMask SampleMask;
 			public PipelineStateSubObjectTypePrimitiveTopology PrimitiveTopology;
 			public PipelineStateSubObjectTypeRasterizer RasterizerState;
-			public PipelineStateSubObjectTypeBlend BlendState;
 			public PipelineStateSubObjectTypeDepthStencil DepthStencilState;
 			public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
 			public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
@@ -299,9 +311,8 @@ namespace Engine.GPU
 						PixelShader = compiledPixel,
 						SampleMask = uint.MaxValue,
 						PrimitiveTopology = PrimitiveTopologyType.Triangle,
-						BlendState = BlendDescription.Opaque,
 						SampleDescription = new SampleDescription(1, 0),
-						RenderTargetFormats = new[] { GPUContext.RTFormat },
+						RenderTargetFormats = new[] { rtFormat },
 						DepthStencilFormat = GPUContext.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, DepthWriteMask.All, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
@@ -392,5 +403,24 @@ namespace Engine.GPU
 		}
 
 		#endregion
+	}
+
+	public struct Register
+	{
+		public int Slot;
+		public int Space;
+
+		public Register(int slot, int space)
+		{
+			Slot = slot;
+			Space = space;
+		}
+
+		public static implicit operator Register(int slot) => new(slot, 0);
+
+		public override string ToString()
+		{
+			return $"{Slot}, space{Space}";
+		}
 	}
 }

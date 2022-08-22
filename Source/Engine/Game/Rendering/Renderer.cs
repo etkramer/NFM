@@ -36,29 +36,37 @@ namespace Engine.Rendering
 
 		public static void Render()
 		{
+			Graphics.PushEvent("Global");
 			foreach (RenderStep step in globalStage)
 			{
 				RenderStep.Scene = Scene.Main;
 
 				if (RenderStep.Scene != null)
 				{
+					Graphics.PushEvent(step.GetType().Name);
 					step.Run();
+					Graphics.PopEvent();
 				}
 			}
+			Graphics.PopEvent();
 
 			foreach (var viewport in Viewport.All)
 			{
+				Graphics.PushEvent("Viewport");
 				RenderStep.Viewport = viewport;
 
 				foreach (RenderStep step in viewportStage)
 				{
 					if (RenderStep.Scene != null)
 					{
+						Graphics.PushEvent(step.GetType().Name);
 						step.Run();
+						Graphics.PopEvent();
 					}
 				}
 
 				Graphics.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
+				Graphics.PopEvent();
 			}
 
 			// Submit graphics commands.

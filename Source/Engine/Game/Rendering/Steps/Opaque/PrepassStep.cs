@@ -3,6 +3,7 @@ using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
+using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
@@ -27,6 +28,7 @@ namespace Engine.Rendering
 				.UseIncludes(typeof(Embed).Assembly)
 				.SetMeshShader(Embed.GetString("Shaders/MeshShader.hlsl"))
 				.SetPixelShader(Embed.GetString("Shaders/VisShader.hlsl"))
+				.SetRTFormat(Format.R32G32_UInt)
 				.SetDepthMode(DepthMode.GreaterEqual)
 				.SetCullMode(CullMode.CCW)
 				.AsConstant(0, 1)
@@ -40,9 +42,6 @@ namespace Engine.Rendering
 
 		public override void Run()
 		{
-			// Set render targets.
-			Graphics.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
-
 			// Generate indirect draw commands.
 			BuildCommands();
 
@@ -54,6 +53,9 @@ namespace Engine.Rendering
 		{
 			// Switch to visbuffer program (graphics).
 			Graphics.SetProgram(visProgram);
+
+			// Set render targets.
+			Graphics.SetRenderTarget(Viewport.VisBuffer, Viewport.DepthBuffer);
 
 			// Bind program inputs.
 			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
@@ -90,7 +92,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (ModelActor.InstanceCount > 0)
 			{
-				Graphics.Dispatch(ModelActor.InstanceCount);
+				Graphics.DispatchGroups(ModelActor.InstanceCount);
 			}
 		}
 	}

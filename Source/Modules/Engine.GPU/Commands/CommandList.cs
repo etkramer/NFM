@@ -126,7 +126,7 @@ namespace Engine.GPU
 						list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.GetBaseResource(), o.BeforeState, o.AfterState))).ToArray());
 					}
 
-					commands[i].BuildAction.Invoke(list);
+					commands[i].BuildAction?.Invoke(list);
 				}
 			}
 
