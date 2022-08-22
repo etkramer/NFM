@@ -41,8 +41,11 @@ namespace Engine.Rendering
 			Graphics.SetProgramSRV(1, Viewport.DepthBuffer);
 			Graphics.SetProgramUAV(0, Viewport.ColorTarget);
 
+			// Bind view constants.
+			Graphics.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
+
 			// Dispatch the material program.
-			Graphics.DispatchThreads(Viewport.ColorTarget.Width, 32, Viewport.ColorTarget.Height, 32);
+			Graphics.DispatchThreads(Viewport.ColorTarget.Width, 8, Viewport.ColorTarget.Height, 8);
 
 			// Wait until all writes are complete before proceeding.
 			Graphics.BarrierUAV(Viewport.ColorTarget);

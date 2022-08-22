@@ -8,7 +8,7 @@ namespace MeshOptimizer
 	{
 		const float coneWeight = 0.0f;
 		const size_t maxVerts = 64;
-		const size_t maxTris = 128;
+		const size_t maxTris = 124;
 
 		// Decide how many meshlets we need to allow for
 		size_t maxMeshlets = meshopt_buildMeshletsBound(numIndices, maxVerts, maxTris);

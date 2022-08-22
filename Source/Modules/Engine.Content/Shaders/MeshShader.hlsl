@@ -25,9 +25,9 @@ Vertex GetVertex(Mesh mesh, Meshlet meshlet, uint vert)
 	return Vertices[mesh.VertStart + meshlet.VertStart + vert];
 }
 
-[NumThreads(128, 1, 1)]
+[NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
-void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out indices uint3 prims[128], out vertices MeshOut verts[64])
+void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out primitives PrimAttribute prims[124], out indices uint3 indices[124], out vertices VertAttribute verts[64])
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
@@ -50,14 +50,14 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 		position = mul(Projection, position); // Apply camera projection.
 
 		// Write output vertex.
+		verts[groupThreadID].Position = position;
 		verts[groupThreadID].InstanceID = InstanceID;
 		verts[groupThreadID].MeshletID = groupID;
-		verts[groupThreadID].TriangleID = groupThreadID;
-		verts[groupThreadID].Position = position;
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{
 		// Write output triangle.
-		prims[groupThreadID] = GetPrimitive(mesh, meshlet, groupThreadID);
+		indices[groupThreadID] = GetPrimitive(mesh, meshlet, groupThreadID);
+		prims[groupThreadID].PrimitiveID = groupThreadID;
 	}
 }
