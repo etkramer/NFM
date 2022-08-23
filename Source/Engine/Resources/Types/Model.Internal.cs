@@ -28,8 +28,7 @@ namespace Engine.Resources
 	{
 		internal unsafe void BuildSubmeshes()
 		{
-			// Build submeshes.
-			ConcurrentBag<Submesh> submeshes = new();
+			// Build submesh data.
 			Parallel.ForEach(Submeshes, (submesh, state) =>
 			{
 				fixed (uint* indicesPtr = submesh.Triangles)
@@ -61,13 +60,9 @@ namespace Engine.Resources
 							PrimOffset = (uint)submesh.PrimHandle.ElementStart,
 							VertOffset = (uint)submesh.VertHandle.ElementStart,
 						});
-
-						submeshes.Add(submesh);
 					}
 				}
 			});
-
-			Submeshes = submeshes.ToArray();
 		}
 	}
 
