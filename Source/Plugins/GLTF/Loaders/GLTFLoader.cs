@@ -27,55 +27,61 @@ namespace Basic.Loaders
 			AI.AssimpContext importContext = new AssimpContext();
 			AI.Scene importScene = importContext.ImportFile(Path, PostProcessSteps.PreTransformVertices);
 
-			int indexOffset = 0;
-			List<Vector3> Positions = new();
-			List<Vector3> Normals = new();
-			List<Face> Faces = new();
+			uint indexOffset = 0;
+			List<Vector3> positions = new();
+			List<Vector3> normals = new();
+			List<Face> faces = new();
 
+			// Create embedded materials.
+			Material[] materials = new Material[importScene.MaterialCount];
+			for (int i = 0; i < importScene.MaterialCount; i++)
+			{
+				Shader shader = await Asset.GetAsync<Shader>("Shaders/Generic");
+				Material material = new Material(shader);
+
+				materials[i] = material;
+			}
+
+			// Create meshes.
 			foreach (var importMesh in importScene.Meshes)
 			{
 				// Interpret vertices.
 				for (int j = 0; j < importMesh.VertexCount; j++)
 				{
-					Positions.Add(new(importMesh.Vertices[j].X, importMesh.Vertices[j].Y, importMesh.Vertices[j].Z));
+					positions.Add(new(importMesh.Vertices[j].X, importMesh.Vertices[j].Y, importMesh.Vertices[j].Z));
 				}
 
 				// Interpret normals.
 				for (int j = 0; j < importMesh.VertexCount; j++)
 				{
-					Normals.Add(new(importMesh.Normals[j].X, importMesh.Normals[j].Y, importMesh.Normals[j].Z));
+					normals.Add(new(importMesh.Normals[j].X, importMesh.Normals[j].Y, importMesh.Normals[j].Z));
 				}
 
-				// Interpret material. NOTE: There's no need to make separate assets for embedded content.
-				var importMaterial = importScene.Materials[importMesh.MaterialIndex];
-				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/Generic");
-				Material material = new Material(shader);
-
-				// Interpret faces (indices).
-				var indices = importMesh.GetIndices();
-				var faces = new Face[indices.Length / 3];
-				for (int j = 0; j < faces.Length; j++)
+				// Interpret faces.
+				var indices = importMesh.GetUnsignedIndices();
+				for (int i = 0; i < indices.Length; i += 3)
 				{
-					Face face = new Face();
-					face.A = (uint)indexOffset + (uint)indices[(j * 3) + 0];
-					face.B = (uint)indexOffset + (uint)indices[(j * 3) + 1];
-					face.C = (uint)indexOffset + (uint)indices[(j * 3) + 2];
-					face.Material = material;
+					Face face = new Face()
+					{
+						A = indexOffset + indices[i],
+						B = indexOffset + indices[i + 1],
+						C = indexOffset + indices[i + 2],
+						Material = materials[importMesh.MaterialIndex]
+					};
 
-					faces[j] = face;
+					faces.Add(face);
 				}
 
-				Faces.AddRange(faces);
-				indexOffset = Positions.Count;
+				indexOffset = (uint)positions.Count;
 			}
 
 			// Create model.
 			Model model = new Model();
 			model.Parts = new[] { new ModelPart()
 			{
-				Faces = Faces.ToArray(),
-				Positions = Positions.ToArray(),
-				Normals = Normals.ToArray(),
+				Faces = faces.ToArray(),
+				Positions = positions.ToArray(),
+				Normals = normals.ToArray(),
 			}};
 
 			return model;

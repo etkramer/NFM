@@ -55,13 +55,14 @@ namespace Engine.GPU
 		internal Dictionary<Register, int> cRegisterMapping = new();
 
 		// Parameters
-		List<RootParameter1> rootParams = new();
+		private List<RootParameter1> rootParams = new();
 		private ShaderBytecode compiledCompute;
 		private ShaderBytecode compiledMesh;
 		private ShaderBytecode compiledPixel;
 		private CullMode cullMode = CullMode.None;
 		private DepthMode depthMode = DepthMode.None;
 		private Format rtFormat = GPUContext.RTFormat;
+		private int rtSamples = 1;
 
 		// Custom handler for #including files from arbitrary file systems
 		private CustomIncludeHandler shaderIncludeHandler = null;
@@ -75,6 +76,12 @@ namespace Engine.GPU
 		{
 			PSO.Dispose();
 			RootSignature.Dispose();
+		}
+
+		public ShaderProgram SetRTSamples(int samples)
+		{
+			rtSamples = samples;
+			return this;
 		}
 
 		public ShaderProgram SetRTFormat(Format format)
@@ -311,7 +318,7 @@ namespace Engine.GPU
 						PixelShader = compiledPixel,
 						SampleMask = uint.MaxValue,
 						PrimitiveTopology = PrimitiveTopologyType.Triangle,
-						SampleDescription = new SampleDescription(1, 0),
+						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
 						RenderTargetFormats = new[] { rtFormat },
 						DepthStencilFormat = GPUContext.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, DepthWriteMask.All, (ComparisonFunction)depthMode) : DepthStencilDescription.None,

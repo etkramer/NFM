@@ -24,7 +24,6 @@ namespace Basic
 				{
 					string fullPath = Path.GetFullPath(path);
 					string extension = Path.GetExtension(fullPath);
-					string shortName = Path.GetFileNameWithoutExtension(fullPath);
 					string shortPath = Path.GetRelativePath(searchPath, fullPath).Split('.')[0];
 
 					if (extension == ".glb")
@@ -35,11 +34,29 @@ namespace Basic
 
 					if (extension == ".hlsl")
 					{
-						Asset<Shader> shaderAsset = new Asset<Shader>(shortPath, basicPrefix, new ShaderLoader(fullPath));
-						Asset.Submit(shaderAsset);
+						Shader shader = LoadShader(fullPath);
+						Asset.Submit(new Asset<Shader>(shortPath, basicPrefix, shader));
 					}
 				}
 			}
+		}
+
+		private Shader LoadShader(string path)
+		{
+			string source = null;
+			using (StreamReader reader = new StreamReader(path))
+			{
+				source = reader.ReadToEnd();
+			}
+
+			Shader shader = new Shader(source);
+			shader.SetBlendMode(BlendMode.Opaque);
+			shader.AddParam<Texture2D>("Color");
+			shader.AddParam<Texture2D>("Normal");
+			shader.AddParam<Texture2D>("Emission");
+			shader.AddParam<Texture2D>("ORM");
+
+			return shader;
 		}
 	}
 }

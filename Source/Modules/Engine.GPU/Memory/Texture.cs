@@ -151,6 +151,7 @@ namespace Engine.GPU
 			srv = null;
 			rtv = null;
 			dsv = null;
+			uav = null;
 
 			// Create new resource with new size.
 			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, Format), ResourceStates.CopyDest, ClearValue, out Resource);
