@@ -54,7 +54,7 @@ namespace Engine.World
 			// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
 			foreach (ModelPart part in Model.Parts)
 			{
-				foreach (Submesh submesh in part.Submeshes)
+				foreach (Mesh submesh in part.Meshes)
 				{
 					// Make instance data.
 					Instance instanceData = new()

@@ -8,6 +8,7 @@ using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Mesh = Engine.Resources.Mesh;
 
 namespace Basic.Loaders
 {
@@ -38,12 +39,11 @@ namespace Basic.Loaders
 			}
 
 			// Create submeshes.
-			ConcurrentBag<Submesh> submeshes = new();
+			ConcurrentBag<Mesh> meshes = new();
 			Parallel.ForEach(importScene.Meshes, (importMesh, state) =>
 			{
 				Vector3[] vertices = new Vector3[importMesh.VertexCount];
 				Vector3[] normals = new Vector3[importMesh.VertexCount];
-				uint[] indices = new uint[importMesh.FaceCount * 3];
 
 				// Interpret vertices/normals.
 				for (int i = 0; i < importMesh.VertexCount; i++)
@@ -52,24 +52,21 @@ namespace Basic.Loaders
 					normals[i] = new(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z);
 				}
 
-				// Interpret indices.
-				indices = importMesh.GetUnsignedIndices();
-
 				// Create submesh.
-				Submesh submesh = new Submesh();
-				submesh.Material = materials[importMesh.MaterialIndex];
-				submesh.Vertices = vertices;
-				submesh.Normals = normals;
-				submesh.Triangles = indices;
+				Mesh submesh = new Mesh();
+				submesh.SetMaterial(materials[importMesh.MaterialIndex]);
+				submesh.SetVertices(vertices);
+				submesh.SetNormals(normals);
+				submesh.SetIndices(importMesh.GetUnsignedIndices());
 
-				submeshes.Add(submesh);
+				meshes.Add(submesh);
 			});
 
 			// Create model.
 			Model model = new Model();
 			model.Parts = new[] { new ModelPart()
 			{
-				Submeshes = submeshes.ToArray()
+				Meshes = meshes.ToArray()
 			}};
 
 			return model;

@@ -59,10 +59,10 @@ namespace Engine.Rendering
 
 			// Bind program inputs.
 			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(253, Submesh.MeshBuffer);
-			Graphics.SetProgramSRV(254, Submesh.MeshletBuffer);
-			Graphics.SetProgramSRV(255, Submesh.PrimBuffer);
-			Graphics.SetProgramSRV(256, Submesh.VertBuffer);
+			Graphics.SetProgramSRV(253, Mesh.MeshBuffer);
+			Graphics.SetProgramSRV(254, Mesh.MeshletBuffer);
+			Graphics.SetProgramSRV(255, Mesh.PrimBuffer);
+			Graphics.SetProgramSRV(256, Mesh.VertBuffer);
 
 			// Update view data.
 			Viewport.UpdateView();
@@ -83,7 +83,7 @@ namespace Engine.Rendering
 
 			// Set SRV inputs.
 			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(253, Submesh.MeshBuffer);
+			Graphics.SetProgramSRV(253, Mesh.MeshBuffer);
 
 			// Set UAV outputs.
 			Graphics.SetProgramUAV(0, commandBuffer);

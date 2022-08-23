@@ -59,15 +59,20 @@ namespace Engine.Frontend.Controls
 			{
 				try
 				{
-					Game.Update();
+					Task.Run(() =>
+					{
+						Game.Update();
+					}).Wait();
+					
 					return true;
 				}
 				catch (Exception e)
 				{
-					new ExceptionDialog(ExceptionDispatchInfo.Capture(e)).Show(); return false;
+					new ExceptionDialog(ExceptionDispatchInfo.Capture(e)).Show();
+					return false;
 				}
 			},
-			TimeSpan.Zero, DispatcherPriority.Normal);
+			TimeSpan.Zero, DispatcherPriority.Render);
 		}
 
 		public void NewPressed()

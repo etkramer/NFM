@@ -31,10 +31,10 @@ namespace Engine.Rendering
 
 			// Bind common inputs.
 			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(253, Submesh.MeshBuffer);
-			Graphics.SetProgramSRV(254, Submesh.MeshletBuffer);
-			Graphics.SetProgramSRV(255, Submesh.PrimBuffer);
-			Graphics.SetProgramSRV(256, Submesh.VertBuffer);
+			Graphics.SetProgramSRV(253, Mesh.MeshBuffer);
+			Graphics.SetProgramSRV(254, Mesh.MeshletBuffer);
+			Graphics.SetProgramSRV(255, Mesh.PrimBuffer);
+			Graphics.SetProgramSRV(256, Mesh.VertBuffer);
 
 			// Bind program inputs/outputs
 			Graphics.SetProgramSRV(0, Viewport.VisBuffer);
