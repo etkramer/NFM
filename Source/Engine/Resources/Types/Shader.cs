@@ -17,19 +17,24 @@ namespace Engine.Resources
 			ShaderSource = source;
 		}
 
-		public void AddParam<T>(string name, T defaultValue = default)
+		public Shader AddBool(string param, bool defaultValue = default)
 		{
-			
+			return this;
+		}
+
+		public Shader AddInt(string param, bool defaultValue = default)
+		{
+			return this;
+		}
+
+		public Shader AddTexture(string param, Texture2D defaultValue = default)
+		{
+			return this;
 		}
 
 		public void SetBlendMode(BlendMode mode)
 		{
 
-		}
-
-		public override void OnLoad()
-		{
-			base.OnLoad();
 		}
 	}
 }

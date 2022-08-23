@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using Engine.GPU;
 using MeshOptimizer;
@@ -27,52 +28,46 @@ namespace Engine.Resources
 	{
 		internal unsafe void BuildSubmeshes()
 		{
-			// Submit submesh build tasks.
-			List<Task<Submesh>> buildTasks = new();
-
-			foreach (var submesh in Submeshes)
+			// Build submeshes.
+			ConcurrentBag<Submesh> submeshes = new();
+			Parallel.ForEach(Submeshes, (submesh, state) =>
 			{
-				buildTasks.Add(Task.Run(() =>
+				fixed (uint* indicesPtr = submesh.Triangles)
 				{
-					fixed (uint* indicesPtr = submesh.Triangles)
+					fixed (Vector3* vertsPtr = submesh.Vertices)
 					{
-						fixed (Vector3* vertsPtr = submesh.Vertices)
+						// Build meshlet data.
+						MeshOperations.BuildMeshlets(submesh.Triangles.Length, indicesPtr, submesh.Vertices.Length, vertsPtr, sizeof(Vertex), out var prims, out var verts, out var meshlets);
+
+						// Fetch final verts from meshlet output.
+						Vertex[] vertsData = new Vertex[verts.Length];
+						for (int i = 0; i < verts.Length; i++)
 						{
-							// Build meshlet data.
-							MeshOperations.BuildMeshlets(submesh.Triangles.Length, indicesPtr, submesh.Vertices.Length, vertsPtr, sizeof(Vertex), out var prims, out var verts, out var meshlets);
-
-							// Build final vertex data.
-							Vertex[] vertsData = new Vertex[verts.Length];
-							for (int i = 0; i < verts.Length; i++)
+							vertsData[i] = new Vertex()
 							{
-								vertsData[i] = new Vertex()
-								{
-									Position = submesh.Vertices[verts[i]],
-									Normal = submesh.Normals[verts[i]]
-								};
-							}
-
-							// Upload geometry data to GPU.
-							submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
-							submesh.VertHandle = Submesh.VertBuffer.Upload(vertsData);
-							submesh.MeshletHandle = Submesh.MeshletBuffer.Upload(meshlets);
-							submesh.MeshHandle = Submesh.MeshBuffer.Upload(new Mesh()
-							{
-								MeshletCount = (uint)submesh.MeshletHandle.ElementCount,
-								MeshletOffset = (uint)submesh.MeshletHandle.ElementStart,
-								PrimOffset = (uint)submesh.PrimHandle.ElementStart,
-								VertOffset = (uint)submesh.VertHandle.ElementStart,
-							});
-
-							return submesh;
+								Position = submesh.Vertices[verts[i]],
+								Normal = submesh.Normals[verts[i]]
+							};
 						}
-					}
-				}));
-			}
 
-			// Wait for submeshes to be fully built.
-			Task.WaitAll(buildTasks.ToArray());
-			Submeshes = buildTasks.Select(o => o.Result).ToArray();
+						// Upload geometry data to GPU.
+						submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
+						submesh.VertHandle = Submesh.VertBuffer.Upload(vertsData);
+						submesh.MeshletHandle = Submesh.MeshletBuffer.Upload(meshlets);
+						submesh.MeshHandle = Submesh.MeshBuffer.Upload(new Mesh()
+						{
+							MeshletCount = (uint)submesh.MeshletHandle.ElementCount,
+							MeshletOffset = (uint)submesh.MeshletHandle.ElementStart,
+							PrimOffset = (uint)submesh.PrimHandle.ElementStart,
+							VertOffset = (uint)submesh.VertHandle.ElementStart,
+						});
+
+						submeshes.Add(submesh);
+					}
+				}
+			});
+
+			Submeshes = submeshes.ToArray();
 		}
 	}
 

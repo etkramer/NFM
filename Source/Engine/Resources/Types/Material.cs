@@ -19,11 +19,6 @@ namespace Engine.Resources
 			return this;
 		}
 
-		public Material SetFloat(string param, float value)
-		{
-			return this;
-		}
-
 		public Material SetTexture(string param, Texture2D value)
 		{
 			return this;

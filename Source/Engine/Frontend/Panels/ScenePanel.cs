@@ -11,6 +11,7 @@ using Engine.World;
 using ISelectable = Engine.Editor.ISelectable;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Input;
 
 namespace Engine.Frontend
 {
@@ -34,7 +35,7 @@ namespace Engine.Frontend
 						.Margin(4)
 						.SelectionMode(SelectionMode.Multiple)
 						.Items(nameof(SceneActors), BindingMode.Default)
-						.ItemTemplate(new FuncTreeDataTemplate<Actor>((o, e) => BuildItemContent(), (o) => o.Children))
+						.ItemTemplate(new FuncTreeDataTemplate<Actor>((o, e) => BuildItemContent(o), (o) => o.Children))
 						.With(o => sceneTree = o)
 						.With(o => o.PointerPressed += (o, e) => Selection.DeselectAll())
 				);
@@ -43,7 +44,7 @@ namespace Engine.Frontend
 			sceneTree.Bind(TreeView.SelectedItemsProperty, new Binding("selected", BindingMode.Default) { Source = typeof(Selection) });
 		}
 
-		private Control BuildItemContent()
+		private Control BuildItemContent(Actor actor)
 		{
 			Control itemContent = new TextBlock()
 				.With(o => o.Background = SolidColorBrush.Parse("Transparent"))
@@ -57,7 +58,7 @@ namespace Engine.Frontend
 							{
 								actors[i].Dispose();
 							}
-						}));
+						}));		
 
 			return itemContent;
 		}

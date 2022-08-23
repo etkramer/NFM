@@ -35,6 +35,7 @@ namespace Engine.GPU
 				Flags = ResourceFlags.None,
 			};
 
+			// Create upload rings.
 			Rings = new ID3D12Resource[GPUContext.RenderLatency];
 			MappedRings = new void*[GPUContext.RenderLatency];
 			for (int i = 0; i < GPUContext.RenderLatency; i++)
@@ -46,9 +47,13 @@ namespace Engine.GPU
 				MappedRings[i] = mapPtr;
 			}
 
+			// Reset the upload offset at the beginning of every frame.
 			Graphics.OnFrameStart += () =>
 			{
-				UploadOffset = 0;
+				lock (Lock)
+				{
+					UploadOffset = 0;
+				}
 			};
 		}
 	}

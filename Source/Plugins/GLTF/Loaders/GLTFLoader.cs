@@ -6,13 +6,15 @@ using Assimp;
 using AI = Assimp;
 using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
-using Engine.Core;
-using StbImageSharp;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Basic.Loaders
 {
 	public class GLTFLoader : AssetLoader<Model>
 	{
+		static AssimpContext importContext = new AssimpContext();
+
 		public string Path;
 
 		public GLTFLoader(string path)
@@ -23,50 +25,45 @@ namespace Basic.Loaders
 		public override async Task<Model> Load()
 		{
 			// Load GLTF file.
-			AI.AssimpContext importContext = new AssimpContext();
 			AI.Scene importScene = importContext.ImportFile(Path, PostProcessSteps.PreTransformVertices);
 
 			// Create embedded materials.
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
 			{
-				Shader shader = await Asset.GetAsync<Shader>("Shaders/Generic");
+				Shader shader = await Asset.GetAsync<Shader>("Shaders/PBR");
 				Material material = new Material(shader);
 
 				materials[i] = material;
 			}
 
 			// Create submeshes.
-			List<Submesh> submeshes = new();
-			foreach (var importMesh in importScene.Meshes)
+			ConcurrentBag<Submesh> submeshes = new();
+			Parallel.ForEach(importScene.Meshes, (importMesh, state) =>
 			{
-				List<Vector3> vertices = new();
-				List<Vector3> normals = new();
-				List<uint> indices = new();
+				Vector3[] vertices = new Vector3[importMesh.VertexCount];
+				Vector3[] normals = new Vector3[importMesh.VertexCount];
+				uint[] indices = new uint[importMesh.FaceCount * 3];
 
-				// Interpret vertices.
-				for (int j = 0; j < importMesh.VertexCount; j++)
+				// Interpret vertices/normals.
+				for (int i = 0; i < importMesh.VertexCount; i++)
 				{
-					vertices.Add(new(importMesh.Vertices[j].X, importMesh.Vertices[j].Y, importMesh.Vertices[j].Z));
-				}
-
-				// Interpret normals.
-				for (int j = 0; j < importMesh.VertexCount; j++)
-				{
-					normals.Add(new(importMesh.Normals[j].X, importMesh.Normals[j].Y, importMesh.Normals[j].Z));
+					vertices[i] = new(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z);
+					normals[i] = new(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z);
 				}
 
 				// Interpret indices.
-				indices.AddRange(importMesh.GetUnsignedIndices());
+				indices = importMesh.GetUnsignedIndices();
 
 				// Create submesh.
 				Submesh submesh = new Submesh();
 				submesh.Material = materials[importMesh.MaterialIndex];
-				submesh.Vertices = vertices.ToArray();
-				submesh.Normals = normals.ToArray();
-				submesh.Triangles = indices.ToArray();
+				submesh.Vertices = vertices;
+				submesh.Normals = normals;
+				submesh.Triangles = indices;
+
 				submeshes.Add(submesh);
-			}
+			});
 
 			// Create model.
 			Model model = new Model();

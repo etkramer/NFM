@@ -29,7 +29,6 @@ namespace Engine
 
 			// Precache model.
 			Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
-			//Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -43,15 +42,8 @@ namespace Engine
 			// Sponza Atrium
 			var sponzaObject = new ModelActor("Sponza Atrium")
 				.Spawn<ModelActor>();
-			sponzaObject.Position = new Vector3(0, -2, 1);
+			sponzaObject.Position = new Vector3(0, -2, 2);
 			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
-
-			// Flight Helmet
-			/*var flightHelmet = new ModelActor("Flight Helmet")
-				.Spawn<ModelActor>();
-			flightHelmet.Rotation = new Vector3(0, 45, 0);
-			flightHelmet.Position = new Vector3(0, -0.4f, -1.2f);
-			flightHelmet.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;*/
 		}
 
 		public static void Update()

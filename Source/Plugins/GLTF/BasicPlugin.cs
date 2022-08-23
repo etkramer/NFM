@@ -34,14 +34,14 @@ namespace Basic
 
 					if (extension == ".hlsl")
 					{
-						Shader shader = LoadShader(fullPath);
+						Shader shader = LoadPBRShader(fullPath);
 						Asset.Submit(new Asset<Shader>(shortPath, basicPrefix, shader));
 					}
 				}
 			}
 		}
 
-		private Shader LoadShader(string path)
+		private Shader LoadPBRShader(string path)
 		{
 			string source = null;
 			using (StreamReader reader = new StreamReader(path))
@@ -51,10 +51,10 @@ namespace Basic
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
-			shader.AddParam<Texture2D>("Color");
-			shader.AddParam<Texture2D>("Normal");
-			shader.AddParam<Texture2D>("Emission");
-			shader.AddParam<Texture2D>("ORM");
+			shader.AddTexture("Color");
+			shader.AddTexture("Normal");
+			shader.AddTexture("Emission");
+			shader.AddTexture("ORM");
 
 			return shader;
 		}
