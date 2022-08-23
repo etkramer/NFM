@@ -16,16 +16,15 @@ namespace Engine.Resources
 	/// </summary>
 	public partial class ModelPart
 	{
-		public Face[] Faces { get; set; }
-		public Vector3[] Positions { get; set; }
-		public Vector3[] Normals { get; set; }
+		public Submesh[] Submeshes { get; set; }
 	}
 
-	public struct Face
+	public partial class Submesh
 	{
-		public uint A;
-		public uint B;
-		public uint C;
-		public Material Material;
+		public Material Material { get; set; }
+
+		public uint[] Triangles { get; set; }
+		public Vector3[] Vertices { get; set; }
+		public Vector3[] Normals { get; set; }
 	}
 }

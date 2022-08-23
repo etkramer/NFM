@@ -5,7 +5,6 @@ using Engine.Mathematics;
 using Assimp;
 using AI = Assimp;
 using ModelPart = Engine.Resources.ModelPart;
-using Face = Engine.Resources.Face;
 using Material = Engine.Resources.Material;
 using Engine.Core;
 using StbImageSharp;
@@ -27,11 +26,6 @@ namespace Basic.Loaders
 			AI.AssimpContext importContext = new AssimpContext();
 			AI.Scene importScene = importContext.ImportFile(Path, PostProcessSteps.PreTransformVertices);
 
-			uint indexOffset = 0;
-			List<Vector3> positions = new();
-			List<Vector3> normals = new();
-			List<Face> faces = new();
-
 			// Create embedded materials.
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
@@ -42,13 +36,18 @@ namespace Basic.Loaders
 				materials[i] = material;
 			}
 
-			// Create meshes.
+			// Create submeshes.
+			List<Submesh> submeshes = new();
 			foreach (var importMesh in importScene.Meshes)
 			{
+				List<Vector3> vertices = new();
+				List<Vector3> normals = new();
+				List<uint> indices = new();
+
 				// Interpret vertices.
 				for (int j = 0; j < importMesh.VertexCount; j++)
 				{
-					positions.Add(new(importMesh.Vertices[j].X, importMesh.Vertices[j].Y, importMesh.Vertices[j].Z));
+					vertices.Add(new(importMesh.Vertices[j].X, importMesh.Vertices[j].Y, importMesh.Vertices[j].Z));
 				}
 
 				// Interpret normals.
@@ -57,31 +56,23 @@ namespace Basic.Loaders
 					normals.Add(new(importMesh.Normals[j].X, importMesh.Normals[j].Y, importMesh.Normals[j].Z));
 				}
 
-				// Interpret faces.
-				var indices = importMesh.GetUnsignedIndices();
-				for (int i = 0; i < indices.Length; i += 3)
-				{
-					Face face = new Face()
-					{
-						A = indexOffset + indices[i],
-						B = indexOffset + indices[i + 1],
-						C = indexOffset + indices[i + 2],
-						Material = materials[importMesh.MaterialIndex]
-					};
+				// Interpret indices.
+				indices.AddRange(importMesh.GetUnsignedIndices());
 
-					faces.Add(face);
-				}
-
-				indexOffset = (uint)positions.Count;
+				// Create submesh.
+				Submesh submesh = new Submesh();
+				submesh.Material = materials[importMesh.MaterialIndex];
+				submesh.Vertices = vertices.ToArray();
+				submesh.Normals = normals.ToArray();
+				submesh.Triangles = indices.ToArray();
+				submeshes.Add(submesh);
 			}
 
 			// Create model.
 			Model model = new Model();
 			model.Parts = new[] { new ModelPart()
 			{
-				Faces = faces.ToArray(),
-				Positions = positions.ToArray(),
-				Normals = normals.ToArray(),
+				Submeshes = submeshes.ToArray()
 			}};
 
 			return model;

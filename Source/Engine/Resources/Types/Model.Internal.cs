@@ -25,83 +25,32 @@ namespace Engine.Resources
 
 	public partial class ModelPart
 	{
-		internal Submesh[] Submeshes;
-
 		internal unsafe void BuildSubmeshes()
 		{
 			// Submit submesh build tasks.
-			List<Task<Submesh>> submeshBuildTasks = new();
-			foreach (var bucket in Faces.Bucket((o) => o.Material))
+			List<Task<Submesh>> buildTasks = new();
+
+			foreach (var submesh in Submeshes)
 			{
-				submeshBuildTasks.Add(Task.Run(() =>
+				buildTasks.Add(Task.Run(() =>
 				{
-					Material material = bucket.First().Material;
-					Dictionary<uint, uint> indexMap = new();
-				
-					List<uint> submeshIndices = new(bucket.Count() * 3);
-					List<Vertex> submeshVertices = new();
-
-					// Build per-submesh vertex/index data.
-					foreach (Face face in bucket)
+					fixed (uint* indicesPtr = submesh.Triangles)
 					{
-						// Create new verts and indices if needed.
-						if (!indexMap.TryGetValue(face.A, out uint newIndexA))
-						{
-							submeshVertices.Add(new()
-							{
-								Position = Positions[face.A],
-								Normal = Normals[face.A],
-							});
-
-							newIndexA = (uint)submeshVertices.Count - 1;
-							indexMap.Add(face.A, newIndexA);
-						}
-						if (!indexMap.TryGetValue(face.B, out uint newIndexB))
-						{
-							submeshVertices.Add(new()
-							{
-								Position = Positions[face.B],
-								Normal = Normals[face.B],
-							});
-
-							newIndexB = (uint)submeshVertices.Count - 1;
-							indexMap.Add(face.B, newIndexB);
-						}
-						if (!indexMap.TryGetValue(face.C, out uint newIndexC))
-						{
-							submeshVertices.Add(new()
-							{
-								Position = Positions[face.C],
-								Normal = Normals[face.C],
-							});
-
-							newIndexC = (uint)submeshVertices.Count - 1;
-							indexMap.Add(face.C, newIndexC);
-						}
-
-						// Add the updated indices to the array.
-						submeshIndices.Add(newIndexA);
-						submeshIndices.Add(newIndexB);
-						submeshIndices.Add(newIndexC);
-					}
-
-					fixed (uint* indicesPtr = submeshIndices.ToArray())
-					{
-						fixed (Vertex* verticesPtr = submeshVertices.ToArray())
+						fixed (Vector3* vertsPtr = submesh.Vertices)
 						{
 							// Build meshlet data.
-							MeshOperations.BuildMeshlets(submeshIndices.Count, indicesPtr, submeshVertices.Count, verticesPtr, sizeof(Vertex), out var prims, out var verts, out var meshlets);
+							MeshOperations.BuildMeshlets(submesh.Triangles.Length, indicesPtr, submesh.Vertices.Length, vertsPtr, sizeof(Vertex), out var prims, out var verts, out var meshlets);
 
 							// Build final vertex data.
 							Vertex[] vertsData = new Vertex[verts.Length];
 							for (int i = 0; i < verts.Length; i++)
 							{
-								vertsData[i] = submeshVertices[(int)verts[i]];
+								vertsData[i] = new Vertex()
+								{
+									Position = submesh.Vertices[verts[i]],
+									Normal = submesh.Normals[verts[i]]
+								};
 							}
-
-							// Create submesh.
-							Submesh submesh = new Submesh();
-							submesh.Material = material;
 
 							// Upload geometry data to GPU.
 							submesh.PrimHandle = Submesh.PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
@@ -122,23 +71,22 @@ namespace Engine.Resources
 			}
 
 			// Wait for submeshes to be fully built.
-			Task.WaitAll(submeshBuildTasks.ToArray());
-			Submeshes = submeshBuildTasks.Select(o => o.Result).ToArray();
+			Task.WaitAll(buildTasks.ToArray());
+			Submeshes = buildTasks.Select(o => o.Result).ToArray();
 		}
 	}
 
-	internal class Submesh
+	public partial class Submesh
 	{
-		public static GraphicsBuffer<uint> PrimBuffer = new(2000000);
-		public static GraphicsBuffer<Vertex> VertBuffer = new(2000000);
-		public static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
-		public static GraphicsBuffer<Mesh> MeshBuffer = new(100000);
+		internal static GraphicsBuffer<uint> PrimBuffer = new(2000000);
+		internal static GraphicsBuffer<Vertex> VertBuffer = new(2000000);
+		internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
+		internal static GraphicsBuffer<Mesh> MeshBuffer = new(100000);
 
-		public Material Material;
-		public BufferHandle<uint> PrimHandle;
-		public BufferHandle<Vertex> VertHandle;
-		public BufferHandle<Meshlet> MeshletHandle;
-		public BufferHandle<Mesh> MeshHandle;
+		internal BufferHandle<uint> PrimHandle;
+		internal BufferHandle<Vertex> VertHandle;
+		internal BufferHandle<Meshlet> MeshletHandle;
+		internal BufferHandle<Mesh> MeshHandle;
 	}
 
 	internal struct Mesh
