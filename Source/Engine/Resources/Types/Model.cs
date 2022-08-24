@@ -79,6 +79,11 @@ namespace Engine.Resources
 						PrimHandle = PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
 						MeshletHandle = MeshletBuffer.Upload(meshlets);
 
+						// Source index/vertex count is consistent.
+						// Output index/vertex count is consistent.
+						// Output meshlets count is not only out of order (fine), but inconsistent (bad)???
+						//Debug.Log(meshlets.Length);
+
 						TryUploadMesh();
 					}
 				}
@@ -94,8 +99,9 @@ namespace Engine.Resources
 			if (vertMapping != null && normals != null)
 			{
 				VertHandle = VertBuffer.Upload(RemapVerts());
-				TryUploadMesh();
 			}
+
+			TryUploadMesh();
 		}
 
 		public void SetNormals(Vector3[] value)
@@ -107,8 +113,9 @@ namespace Engine.Resources
 			if (vertMapping != null && vertices != null)
 			{
 				VertHandle = VertBuffer.Upload(RemapVerts());
-				TryUploadMesh();
 			}
+
+			TryUploadMesh();
 		}
 
 		public void SetMaterial(Material value)

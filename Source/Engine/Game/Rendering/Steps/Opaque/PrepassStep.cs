@@ -52,25 +52,25 @@ namespace Engine.Rendering
 		private void DrawVisibility()
 		{
 			// Switch to visbuffer program (graphics).
-			Graphics.SetProgram(visProgram);
+			List.SetProgram(visProgram);
 
 			// Set render targets.
-			Graphics.SetRenderTarget(Viewport.VisBuffer, Viewport.DepthBuffer);
+			List.SetRenderTarget(Viewport.VisBuffer, Viewport.DepthBuffer);
 
 			// Bind program inputs.
-			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(253, Mesh.MeshBuffer);
-			Graphics.SetProgramSRV(254, Mesh.MeshletBuffer);
-			Graphics.SetProgramSRV(255, Mesh.PrimBuffer);
-			Graphics.SetProgramSRV(256, Mesh.VertBuffer);
+			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
+			List.SetProgramSRV(253, Mesh.MeshBuffer);
+			List.SetProgramSRV(254, Mesh.MeshletBuffer);
+			List.SetProgramSRV(255, Mesh.PrimBuffer);
+			List.SetProgramSRV(256, Mesh.VertBuffer);
 
 			// Update view data.
 			Viewport.UpdateView();
-			Graphics.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
+			List.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
 
 			// Dispatch draw commands.
-			Graphics.BarrierUAV(commandBuffer, commandCountBuffer);
-			Graphics.DrawIndirect(cullSignature, maxCommandCount, commandBuffer, commandCountBuffer);
+			List.BarrierUAV(commandBuffer, commandCountBuffer);
+			List.DrawIndirect(cullSignature, maxCommandCount, commandBuffer, commandCountBuffer);
 		}
 
 		private void BuildCommands()
@@ -79,20 +79,20 @@ namespace Engine.Rendering
 			commandCountBuffer.SetData(0, 0);
 
 			// Switch to culling program (compute).
-			Graphics.SetProgram(cullProgram);
+			List.SetProgram(cullProgram);
 
 			// Set SRV inputs.
-			Graphics.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			Graphics.SetProgramSRV(253, Mesh.MeshBuffer);
+			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
+			List.SetProgramSRV(253, Mesh.MeshBuffer);
 
 			// Set UAV outputs.
-			Graphics.SetProgramUAV(0, commandBuffer);
-			Graphics.SetProgramUAV(1, commandCountBuffer);
+			List.SetProgramUAV(0, commandBuffer);
+			List.SetProgramUAV(1, commandCountBuffer);
 
 			// Dispatch compute shader.
 			if (ModelActor.InstanceCount > 0)
 			{
-				Graphics.DispatchGroups(ModelActor.InstanceCount);
+				List.DispatchGroups(ModelActor.InstanceCount);
 			}
 		}
 	}

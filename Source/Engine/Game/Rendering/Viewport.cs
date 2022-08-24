@@ -35,6 +35,9 @@ namespace Engine.Rendering
 		public Texture DepthBuffer;
 		public Texture VisBuffer;
 
+		// Rendering command list.
+		public CommandList List = new();
+
 		/// <summary>
 		/// Constructs a viewport from a given UI host
 		/// </summary>

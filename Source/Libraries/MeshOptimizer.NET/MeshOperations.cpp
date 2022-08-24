@@ -1,5 +1,7 @@
 #include "MeshOperations.h"
 #include <vector>
+#include <iostream>
+#include <string>
 
 namespace MeshOptimizer
 {
@@ -23,19 +25,19 @@ namespace MeshOptimizer
 		
 		// Trim arrays
 		const meshopt_Meshlet& last = meshlets[meshletCount - 1];
-		meshlets.resize(meshletCount);
-		meshletVerts.resize(last.vertex_offset + last.vertex_count);
-		meshletTris.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3));
+		size_t meshletSize = meshletCount;
+		size_t meshletVertsSize = last.vertex_offset + last.vertex_count;
+		size_t meshletTrisSize = last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3);
 
 		// Write to output arrays.
-		outMeshlets = gcnew array<Meshlet>(meshlets.size());
-		outVertIndices = gcnew array<unsigned int>(meshletVerts.size());
-		outTriIndices = gcnew array<unsigned char>(meshletTris.size());
+		outMeshlets = gcnew array<Meshlet>(meshletSize);
+		outVertIndices = gcnew array<unsigned int>(meshletVertsSize);
+		outTriIndices = gcnew array<unsigned char>(meshletTrisSize);
 		pin_ptr<Meshlet> outMeshletsPin = &outMeshlets[0];
 		pin_ptr<unsigned int> outVertsPin = &outVertIndices[0];
 		pin_ptr<unsigned char> outTrisPin = &outTriIndices[0];
-		std::memcpy(outMeshletsPin, &meshlets[0], meshlets.size() * sizeof(Meshlet));
-		std::memcpy(outVertsPin, &meshletVerts[0], meshletVerts.size() * sizeof(unsigned int));
-		std::memcpy(outTrisPin, &meshletTris[0], meshletTris.size() * sizeof(unsigned char));
+		std::memcpy(outMeshletsPin, &meshlets[0], meshletSize * sizeof(Meshlet));
+		std::memcpy(outVertsPin, &meshletVerts[0], meshletVertsSize * sizeof(unsigned int));
+		std::memcpy(outTrisPin, &meshletTris[0], meshletTrisSize * sizeof(unsigned char));
 	}
 }

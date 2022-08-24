@@ -29,20 +29,20 @@ namespace Engine.Frontend.Controls
 			ToolPanel.Spawn<InspectorPanel>(group2);
 			dockspace.Dock(group2, group1, DockPosition.Right, 0.88f);
 
-			// Create group (timeline).
+			// Create group (viewport 1).
 			TabGroup group3 = new TabGroup();
-			ToolPanel.Spawn<TimelinePanel>(group3);
+			ToolPanel.Spawn<ViewportPanel>(group3);
 			dockspace.Dock(group3, group2, DockPosition.Left, 0.88f);
 
-			// Create group (viewport 1).
+			// Create group (timeline).
 			TabGroup group4 = new TabGroup();
-			ToolPanel.Spawn<ViewportPanel>(group4);
-			dockspace.Dock(group4, group3, DockPosition.Top, 0.75f);
+			ToolPanel.Spawn<TimelinePanel>(group4);
+			dockspace.Dock(group4, group3, DockPosition.Bottom, 0.25f);
 
 			// Create group (viewport 2).
 			/*TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
-			dockspace.Dock(group5, group4, DockPosition.Right, 0.5f);*/
+			dockspace.Dock(group5, group3, DockPosition.Right, 0.5f);*/
 
 			// Show landing dialog.
 			if (LandingDialog.ShowOnStartup)

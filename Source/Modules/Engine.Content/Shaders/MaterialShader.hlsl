@@ -1,4 +1,5 @@
 ﻿#include "Shaders/Include/Geometry.hlsl"
+#include "Shaders/Include/Outputs.hlsl"
 #include "Shaders/Include/Common.hlsl"
 
 cbuffer viewConstants : register(b1)

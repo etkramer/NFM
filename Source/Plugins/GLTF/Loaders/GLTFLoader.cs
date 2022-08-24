@@ -7,7 +7,7 @@ using AI = Assimp;
 using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
 using System.Collections.Concurrent;
-using System.Diagnostics;
+using Engine.Core;
 using Mesh = Engine.Resources.Mesh;
 
 namespace Basic.Loaders

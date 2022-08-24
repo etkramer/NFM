@@ -16,11 +16,11 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Copy output to backbuffer.
-			Graphics.CopyTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
+			List.CopyTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
 
 			// Clear viewport targets.
-			Graphics.ClearRenderTarget(Viewport.ColorTarget);
-			Graphics.ClearDepth(Viewport.DepthBuffer);
+			List.ClearRenderTarget(Viewport.ColorTarget);
+			List.ClearDepth(Viewport.DepthBuffer);
 		}
 	}
 }

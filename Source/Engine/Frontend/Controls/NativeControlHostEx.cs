@@ -57,8 +57,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.LeftButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
@@ -66,8 +66,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.RightButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
@@ -75,8 +75,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.MiddleButtonDown, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
@@ -84,8 +84,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.LeftButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
@@ -93,8 +93,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.RightButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}
@@ -102,8 +102,8 @@ namespace Engine.Frontend
 				{
 					int cursorX = (short)(int)lParam;
 					int cursorY = (short)(((int)lParam) >> 16);
-					int x = cursorX + (int)host.TransformedBounds?.Clip.Left;
-					int y = cursorY + (int)host.TransformedBounds?.Clip.Top;
+					int x = cursorX + (int)(host.TransformedBounds?.Clip.Left ?? 0);
+					int y = cursorY + (int)(host.TransformedBounds?.Clip.Top ?? 0);
 					input.Invoke(new RawPointerEventArgs(mouseDevice, 0, host.VisualRoot as Window, RawPointerEventType.MiddleButtonUp, new Point(x, y), GetModifiers((ulong)wParam)));
 					break;
 				}

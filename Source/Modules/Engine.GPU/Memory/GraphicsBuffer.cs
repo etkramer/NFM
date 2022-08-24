@@ -171,7 +171,7 @@ namespace Engine.GPU
 				UploadBuffer.UploadOffset += dataSize;
 
 				// Copy from upload to target buffer.
-				Graphics.CustomCommand((o) => {
+				Graphics.GetCommandList().CustomCommand((o) => {
 					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[UploadBuffer.Ring], (ulong)uploadOffset, (ulong)dataSize);
 				}, new[] {
 					new CommandInput() {
