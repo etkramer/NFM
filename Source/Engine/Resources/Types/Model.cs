@@ -66,7 +66,7 @@ namespace Engine.Resources
 					fixed (Vector3* vertsPtr = vertices)
 					{
 						// Build meshlet data.
-						MeshOperations.BuildMeshlets(indices.Length, indicesPtr, vertices.Length, vertsPtr, sizeof(VertexData), out var prims, out var verts, out var meshlets);
+						MeshOperations.BuildMeshlets(indicesPtr, indices.Length, vertsPtr, vertices.Length, sizeof(Vector3), out var prims, out var verts, out var meshlets);
 
 						vertMapping = verts;
 						if (vertices != null && normals != null)
@@ -78,11 +78,6 @@ namespace Engine.Resources
 						// Upload meshlet/index data to GPU.
 						PrimHandle = PrimBuffer.Upload(prims.Select(o => (uint)o).ToArray());
 						MeshletHandle = MeshletBuffer.Upload(meshlets);
-
-						// Source index/vertex count is consistent.
-						// Output index/vertex count is consistent.
-						// Output meshlets count is not only out of order (fine), but inconsistent (bad)???
-						//Debug.Log(meshlets.Length);
 
 						TryUploadMesh();
 					}

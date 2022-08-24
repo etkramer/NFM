@@ -18,7 +18,7 @@ namespace Engine.World
 			get => parent;
 			set
 			{
-				if (parent != value)
+				if (parent != value && value != this)
 				{
 					// Remove from old parent.
 					Scene?.Remove(this);
@@ -28,7 +28,9 @@ namespace Engine.World
 					parent = value;
 					parent?.children.Add(this);	
 					if (parent == null)
+					{
 						Scene?.Add(this);
+					}
 				}
 			}
 		}
