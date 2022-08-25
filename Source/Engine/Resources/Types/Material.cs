@@ -4,9 +4,11 @@ namespace Engine.Resources
 {
 	public sealed class Material : Resource
 	{
+		public Shader Shader { get; }
+
 		public Material(Shader shader)
 		{
-
+			Shader = shader;
 		}
 
 		public Material SetBool(string param, bool value)

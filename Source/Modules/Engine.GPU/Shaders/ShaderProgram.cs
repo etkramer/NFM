@@ -61,6 +61,8 @@ namespace Engine.GPU
 		private ShaderBytecode compiledPixel;
 		private CullMode cullMode = CullMode.None;
 		private DepthMode depthMode = DepthMode.None;
+		private bool depthRead = false;
+		private bool depthWrite = false;
 		private Format rtFormat = GPUContext.RTFormat;
 		private int rtSamples = 1;
 
@@ -96,9 +98,11 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetDepthMode(DepthMode mode)
+		public ShaderProgram SetDepthMode(DepthMode mode, bool read, bool write)
 		{
 			depthMode = mode;
+			depthRead = read;
+			depthWrite = write;
 			return this;
 		}
 
@@ -305,7 +309,7 @@ namespace Engine.GPU
 					rootParameters)
 				);
 
-				bool useDepth = depthMode != GPU.DepthMode.None;
+				bool useDepth = depthWrite || (depthRead && depthMode != DepthMode.None);
 
 				// Create PSO.
 				Result result = default;
@@ -321,7 +325,7 @@ namespace Engine.GPU
 						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
 						RenderTargetFormats = new[] { rtFormat },
 						DepthStencilFormat = GPUContext.DSFormat,
-						DepthStencilState = useDepth ? new DepthStencilDescription(true, DepthWriteMask.All, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
+						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
 					}, out PSO);
 				}

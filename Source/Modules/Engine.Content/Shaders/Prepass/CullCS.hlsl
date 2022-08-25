@@ -1,4 +1,4 @@
-﻿#include "Shaders/Include/Geometry.hlsl"
+﻿#include "Shaders/Include/Geometry.h"
 
 struct IndirectCommand
 {
@@ -12,10 +12,10 @@ RWStructuredBuffer<IndirectCommand> Commands : register(u0);
 RWStructuredBuffer<uint> CommandCount : register(u1);
 
 [numthreads(1, 1, 1)]
-void ComputeEntry(uint groupID : SV_GroupID)
+void ComputeEntry(uint3 dispatchID : SV_DispatchThreadID)
 {
 	// Grab instance/mesh data.
-	Instance instance = Instances[groupID];
+	Instance instance = Instances[dispatchID.x];
 	Mesh mesh = Meshes[instance.Mesh];
 	
 	bool visible = mesh.MeshletCount > 0;
@@ -23,14 +23,14 @@ void ComputeEntry(uint groupID : SV_GroupID)
 	{
 		// Build command.
 		IndirectCommand command;
-		command.InstanceID = groupID;
+		command.InstanceID = dispatchID.x;
 		command.ThreadGroupCountX = mesh.MeshletCount;
 		command.ThreadGroupCountY = 1;
 		command.ThreadGroupCountZ = 1;
 
 		// Store command and update count.
-		uint commandID = groupID;
+		uint commandID = dispatchID.x;
 		Commands[commandID] = command;
-		InterlockedAdd(CommandCount[0], 1);
+		InterlockedMax(CommandCount[0], commandID + 1);
 	}
 }

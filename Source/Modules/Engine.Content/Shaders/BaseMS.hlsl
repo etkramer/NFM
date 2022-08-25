@@ -1,5 +1,4 @@
-﻿#include "Shaders/Include/Outputs.hlsl"
-#include "Shaders/Include/Geometry.hlsl"
+﻿#include "Shaders/BaseMS.h"
 
 cbuffer drawConstants : register(b0)
 {
@@ -10,19 +9,6 @@ cbuffer viewConstants : register(b1)
 {
 	float4x4 View;
 	float4x4 Projection;
-}
-
-uint3 GetPrimitive(Mesh mesh, Meshlet meshlet, uint prim)
-{
-	uint prim0 = mesh.PrimStart + meshlet.PrimStart + (prim * 3);
-	uint prim1 = prim0 + 1;
-	uint prim2 = prim0 + 2;
-	return uint3(Primitives[prim0], Primitives[prim1], Primitives[prim2]);
-}
-
-Vertex GetVertex(Mesh mesh, Meshlet meshlet, uint vert)
-{
-	return Vertices[mesh.VertStart + meshlet.VertStart + vert];
 }
 
 [NumThreads(124, 1, 1)]
@@ -51,13 +37,14 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 
 		// Write output vertex.
 		verts[groupThreadID].Position = position;
-		verts[groupThreadID].InstanceID = InstanceID;
-		verts[groupThreadID].MeshletID = groupID;
+		verts[groupThreadID].Normal = float4(vertex.Normal, 1);
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{
 		// Write output triangle.
 		indices[groupThreadID] = GetPrimitive(mesh, meshlet, groupThreadID);
 		prims[groupThreadID].PrimitiveID = groupThreadID;
+		prims[groupThreadID].InstanceID = InstanceID;
+		prims[groupThreadID].MeshletID = groupID;
 	}
 }

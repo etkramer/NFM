@@ -36,9 +36,10 @@ namespace Engine
 		public static void OnProjectCreated()
 		{
 			new Actor("Empty").Spawn();
-			new PointLightActor().Spawn();
 			new CameraActor().Spawn();
-
+			new PointLightActor().Spawn();
+			
+			// Flight helmet.
 			var helmObject = new ModelActor("Flight Helmet")
 				.Spawn<ModelActor>();
 			helmObject.Position = new Vector3(0, -0.4f, -1);
@@ -53,18 +54,12 @@ namespace Engine
 		{
 			// Render the frame.
 			Renderer.Render();
-
-			// Run the dispose queue.
-			Queue.Run(-1);
 		}
 
 		public static void Cleanup()
 		{
 			// Cleanup the renderer.
 			Renderer.Cleanup();
-
-			// Run the dispose queue.
-			Queue.Run(-1);
 		}
 	}
 }

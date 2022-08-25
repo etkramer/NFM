@@ -10,23 +10,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Shaders\BaseMaterialPS.hlsl" />
+    <None Remove="Shaders\BaseMS.h" />
+    <None Remove="Shaders\BaseMS.hlsl" />
     <None Remove="Shaders\CullShader.hlsl" />
-    <None Remove="Shaders\Include\Common.hlsl" />
-    <None Remove="Shaders\Include\Geometry.hlsl" />
-    <None Remove="Shaders\Include\Outputs.hlsl" />
-    <None Remove="Shaders\MaterialShader.hlsl" />
-    <None Remove="Shaders\MeshShader.hlsl" />
-    <None Remove="Shaders\VisShader.hlsl" />
+    <None Remove="Shaders\Include\Common.h" />
+    <None Remove="Shaders\Include\Geometry.h" />
+    <None Remove="Shaders\Prepass\DepthPS.hlsl" />
+    <None Remove="Shaders\TempMaterialPS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Shaders\CullShader.hlsl" />
-    <EmbeddedResource Include="Shaders\Include\Common.hlsl" />
-    <EmbeddedResource Include="Shaders\Include\Geometry.hlsl" />
-    <EmbeddedResource Include="Shaders\Include\Outputs.hlsl" />
-    <EmbeddedResource Include="Shaders\MaterialShader.hlsl" />
-    <EmbeddedResource Include="Shaders\MeshShader.hlsl" />
-    <EmbeddedResource Include="Shaders\VisShader.hlsl" />
+    <EmbeddedResource Include="Shaders\BaseMS.h" />
+    <EmbeddedResource Include="Shaders\Prepass\CullCS.hlsl" />
+    <EmbeddedResource Include="Shaders\Include\Common.h" />
+    <EmbeddedResource Include="Shaders\Include\Geometry.h" />
+    <EmbeddedResource Include="Shaders\BaseMS.hlsl" />
+    <EmbeddedResource Include="Shaders\Material\BaseMaterialPS.hlsl" />
+    <EmbeddedResource Include="Shaders\Material\TempMaterialPS.hlsl" />
+    <EmbeddedResource Include="Shaders\Prepass\DepthPS.hlsl" />
   </ItemGroup>
 
 </Project>

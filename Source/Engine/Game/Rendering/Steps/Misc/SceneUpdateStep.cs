@@ -1,7 +1,4 @@
 ﻿using System;
-using Engine.Content;
-using Engine.GPU;
-using Engine.Resources;
 using Engine.World;
 
 namespace Engine.Rendering
@@ -14,6 +11,12 @@ namespace Engine.Rendering
 			foreach (Actor actor in Scene.Main.Actors)
 			{
 				RecurseInstances(actor);
+			}
+
+			// Update view data.
+			foreach (Viewport viewport in Viewport.All)
+			{
+				viewport.UpdateView();
 			}
 		}
 

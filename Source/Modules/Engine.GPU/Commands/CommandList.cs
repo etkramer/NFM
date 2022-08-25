@@ -104,11 +104,13 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		public void DrawIndirect(CommandSignature signature, int maxCommandCount, GraphicsBuffer commandBuffer, GraphicsBuffer countBuffer)
+		public void DrawIndirect(CommandSignature signature, int maxCommandCount, GraphicsBuffer commandBuffer, GraphicsBuffer countBuffer, int commandStart = 0, int countStart = 0)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, 0, countBuffer?.Resource, 0);
+				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+				ulong countOffset = (ulong)countStart * sizeof(int);
+				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, countBuffer?.Resource, countOffset);
 			};
 
 			CommandInput[] inputs = new[]
@@ -331,9 +333,18 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.OMSetRenderTargets(color.RTV.Handle, depth?.DSV.Handle);
-				list.RSSetViewport(0, 0, color.Width, color.Height);
-				list.RSSetScissorRect(color.Width, color.Height);
+				if (color == null)
+				{
+					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depth.DSV.Handle);
+					list.RSSetViewport(0, 0, depth.Width, depth.Height);
+					list.RSSetScissorRect(depth.Width, depth.Height);
+				}
+				else
+				{
+					list.OMSetRenderTargets(color.RTV.Handle, depth?.DSV.Handle);
+					list.RSSetViewport(0, 0, color.Width, color.Height);
+					list.RSSetScissorRect(color.Width, color.Height);
+				}
 			};
 
 			CommandInput[] inputs = new[]
