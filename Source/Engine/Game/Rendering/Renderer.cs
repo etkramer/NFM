@@ -36,39 +36,41 @@ namespace Engine.Rendering
 
 		public static void Render()
 		{
-			// Grab the default command list.
-			CommandList defaultList = Graphics.GetCommandList();
-			RenderStep.List = defaultList;
-
 			// Build and execute global commands on default command list.
+			RenderStep.List.PushEvent("Global");
 			foreach (RenderStep step in globalStage)
 			{
+				RenderStep.Viewport = null;
 				RenderStep.Scene = Scene.Main;
 
 				if (RenderStep.Scene != null)
 				{
-					defaultList.PushEvent(step.GetType().Name);
+					RenderStep.List.PushEvent(step.GetType().Name);
 					step.Run();
-					defaultList.PopEvent();
+					RenderStep.List.PopEvent();
 				}
 			}
+			RenderStep.List.PopEvent();
 
 			// Build and execute viewport-level commands on viewport command lists.
 			foreach (var viewport in Viewport.All)
 			{
 				RenderStep.Viewport = viewport;
-				RenderStep.List = viewport.List;
-				CommandList viewportList = viewport.List;
+				CommandList viewportList = viewport.CommandList;
 
+				RenderStep.List.PushEvent("Viewport");
 				foreach (RenderStep step in viewportStage)
 				{
 					RenderStep.Scene = Scene.Main;
 
 					if (RenderStep.Scene != null)
 					{
+						RenderStep.List.PushEvent(step.GetType().Name);
 						step.Run();
+						RenderStep.List.PopEvent();
 					}
 				}
+				RenderStep.List.PopEvent();
 
 				// Make sure the viewport's backbuffer is in the right state for presentation.
 				viewportList.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
@@ -86,7 +88,7 @@ namespace Engine.Rendering
 				viewport.Host.Swapchain.Present();
 
 				// Reopen viewport command list.
-				viewport.List.Reset();
+				viewport.CommandList.Reset();
 			}
 		}
 

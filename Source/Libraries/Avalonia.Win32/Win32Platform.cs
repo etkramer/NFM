@@ -81,7 +81,7 @@ namespace Avalonia.Win32
 {
     public class Win32Platform : IPlatformThreadingInterface, IPlatformSettings, IWindowingPlatform, IPlatformIconLoader, IPlatformLifetimeEventsImpl
     {
-        private static Thread uiThread;
+        //private static Thread uiThread;
         private UnmanagedMethods.WndProc wndProcDelegate;
         private readonly List<Delegate> delegateReferences = new List<Delegate>();
 
@@ -141,7 +141,7 @@ namespace Avalonia.Win32
 
             Win32GlManager.Initialize();
 
-            uiThread = Thread.CurrentThread;
+            //uiThread = Thread.CurrentThread;
 
             if (OleContext.Current != null)
                 AvaloniaLocator.CurrentMutable.Bind<IPlatformDragSource>().ToSingleton<DragSource>();
@@ -196,7 +196,8 @@ namespace Avalonia.Win32
                 new IntPtr(SignalL));
         }
 
-        public bool CurrentThreadIsLoopThread => uiThread == Thread.CurrentThread;
+       // public bool CurrentThreadIsLoopThread => uiThread == Thread.CurrentThread;
+	    public bool CurrentThreadIsLoopThread => true;
 
         public event Action<DispatcherPriority?> Signaled;
 

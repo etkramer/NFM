@@ -51,33 +51,33 @@ namespace Engine.Frontend
 			CreateField();
 		}
 
+		private List<(INotifyPropertyChanged, PropertyChangedEventHandler)> handlers = new();
+
 		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
 			foreach (object subject in Subjects)
 			{
 				if (subject is INotifyPropertyChanged notifier)
 				{
-					notifier.PropertyChanged += HandlePropertyChanged;
+					PropertyChangedEventHandler handler = (o, e) =>
+					{
+						if (e.PropertyName == Property.Name)
+						{
+							CreateField();
+						}
+					};
+
+					handlers.Add(new(notifier, handler));
+					notifier.PropertyChanged += handler;
 				}
 			}
 		}
 
 		protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
-			foreach (object subject in Subjects)
+			foreach (var handler in handlers)
 			{
-				if (subject is INotifyPropertyChanged notifier)
-				{
-					notifier.PropertyChanged -= HandlePropertyChanged;
-				}
-			}
-		}
-
-		private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == Property.Name)
-			{
-				CreateField();
+				handler.Item1.PropertyChanged -= handler.Item2;
 			}
 		}
 

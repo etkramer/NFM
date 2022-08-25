@@ -18,7 +18,8 @@ namespace Engine.Rendering
 	{
 		public static Viewport Viewport;
 		public static Scene Scene;
-		public static CommandList List;
+
+		public static CommandList List => Viewport?.CommandList ?? Graphics.GetCommandList();
 
 		public virtual void Init() {}
 		public abstract void Run();

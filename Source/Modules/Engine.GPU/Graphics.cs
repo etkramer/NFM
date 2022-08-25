@@ -38,6 +38,7 @@ namespace Engine.GPU
 			
 			// Wait for completion.
 			GPUContext.WaitFrame();
+			OnFrameStart.Invoke();
 
 			// Reopen default command list.
 			GetCommandList().Reset();
@@ -46,9 +47,6 @@ namespace Engine.GPU
 			frameTimer.Stop();
 			FrameTime = frameTimer.Elapsed.TotalSeconds;
 			frameTimer.Restart();
-
-			// Raise new frame event.
-			OnFrameStart.Invoke();
 		}
 
 		public static void Flush()

@@ -36,7 +36,7 @@ namespace Engine.Rendering
 		public Texture VisBuffer;
 
 		// Rendering command list.
-		public CommandList List = new();
+		public CommandList CommandList = new();
 
 		/// <summary>
 		/// Constructs a viewport from a given UI host

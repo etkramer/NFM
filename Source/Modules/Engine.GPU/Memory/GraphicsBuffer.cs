@@ -163,16 +163,19 @@ namespace Engine.GPU
 		{
 			lock (UploadBuffer.Lock)
 			{
+				int uploadRing = UploadBuffer.Ring;
 				int uploadOffset = UploadBuffer.UploadOffset;
 				long destOffset = offset;
 
 				// Copy data to upload buffer.
-				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[UploadBuffer.Ring] + uploadOffset, data, (uint)dataSize);
+				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
 				UploadBuffer.UploadOffset += dataSize;
+
+				// Second copy (GPU-GPU) isn't occuring for later uploads?
 
 				// Copy from upload to target buffer.
 				Graphics.GetCommandList().CustomCommand((o) => {
-					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[UploadBuffer.Ring], (ulong)uploadOffset, (ulong)dataSize);
+					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
 				}, new[] {
 					new CommandInput() {
 						Resource = this,

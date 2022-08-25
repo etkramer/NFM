@@ -28,8 +28,7 @@ namespace Engine
 			PluginSystem.LoadAll();
 
 			// Precache model.
-			Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
-			//Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
+			Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -40,18 +39,14 @@ namespace Engine
 			new PointLightActor().Spawn();
 			new CameraActor().Spawn();
 
-			// Sponza Atrium
-			var sponzaObject = new ModelActor("Sponza Atrium")
+			var helmObject = new ModelActor("Flight Helmet")
 				.Spawn<ModelActor>();
-			sponzaObject.Position = new Vector3(0, -2, 2);
-			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
+			helmObject.Position = new Vector3(0, -0.4f, -1);
+			helmObject.Rotation = new Vector3(0, 25, 0);
+			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
-			// Flight Helmet
-			/*var flightHelmet = new ModelActor("Flight Helmet")
-				.Spawn<ModelActor>();
-			flightHelmet.Position = new Vector3(0, -0.4f, -1);
-			flightHelmet.Rotation = new Vector3(0, 20, 0);
-			flightHelmet.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;*/
+			// Try to make sure the big GC happens *before* we start presenting.
+			GC.Collect(2, GCCollectionMode.Forced, true);
 		}
 
 		public static void Update()
