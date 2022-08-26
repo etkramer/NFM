@@ -8,8 +8,7 @@ struct IndirectCommand
 	uint ThreadGroupCountZ;
 };
 
-RWStructuredBuffer<IndirectCommand> Commands : register(u0);
-RWStructuredBuffer<uint> CommandCount : register(u1);
+AppendStructuredBuffer<IndirectCommand> Commands : register(u0);
 
 [numthreads(1, 1, 1)]
 void CullCS(uint3 dispatchID : SV_DispatchThreadID)
@@ -31,12 +30,6 @@ void CullCS(uint3 dispatchID : SV_DispatchThreadID)
 		command.ThreadGroupCountZ = 1;
 
 		// Store command and update count.
-		InterlockedMax(CommandCount[0], dispatchID.x + 1);
-		Commands[dispatchID.x] = command;
-	}
-	else
-	{
-		// For now, let's just zero it out because we don't have any compaction yet.
-		Commands[dispatchID.x] = (IndirectCommand)0;
+		Commands.Append(command);
 	}
 }

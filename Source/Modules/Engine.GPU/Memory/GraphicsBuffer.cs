@@ -7,57 +7,6 @@ using System.Runtime.CompilerServices;
 
 namespace Engine.GPU
 {
-	internal unsafe static class UploadBuffer
-	{
-		// 250MB upload heap. TODO: Use a proper allocator, current method means we can't upload to an offset of >250MB.
-		const int UploadSize = 250 * 1024 * 1024;
-
-		public static int UploadOffset = 0;
-		public static int Ring => GPUContext.FrameIndex;
-		public static ID3D12Resource[] Rings;
-		public static void*[] MappedRings;
-
-		public static object Lock = new();
-
-		static UploadBuffer()
-		{
-			ResourceDescription copyBufferDescription = new()
-			{
-				Dimension = ResourceDimension.Buffer,
-				Alignment = 0,
-				Width = UploadSize,
-				Height = 1,
-				DepthOrArraySize = 1,
-				MipLevels = 1,
-				Format = Format.Unknown,
-				SampleDescription = new(1, 0),
-				Layout = TextureLayout.RowMajor,
-				Flags = ResourceFlags.None,
-			};
-
-			// Create upload rings.
-			Rings = new ID3D12Resource[GPUContext.RenderLatency];
-			MappedRings = new void*[GPUContext.RenderLatency];
-			for (int i = 0; i < GPUContext.RenderLatency; i++)
-			{
-				GPUContext.Device.CreateCommittedResource(HeapProperties.UploadHeapProperties, HeapFlags.None, copyBufferDescription, ResourceStates.GenericRead, out Rings[i]);
-
-				void* mapPtr = null;
-				Rings[i].Map(0, &mapPtr);
-				MappedRings[i] = mapPtr;
-			}
-
-			// Reset the upload offset at the beginning of every frame.
-			Graphics.OnFrameStart += () =>
-			{
-				lock (Lock)
-				{
-					UploadOffset = 0;
-				}
-			};
-		}
-	}
-
 	[AutoDispose]
 	public unsafe partial class GraphicsBuffer : Resource, IDisposable
 	{
@@ -65,6 +14,9 @@ namespace Engine.GPU
 		public int Capacity;
 		public int Stride;
 		public int Alignment = 1;
+
+		public bool HasCounter { get; private set; }
+		public long CounterOffset { get; private set; } = 0;
 
 		internal ID3D12Resource Resource;
 
@@ -89,7 +41,7 @@ namespace Engine.GPU
 			{
 				if (uav == null)
 				{
-					uav = new UnorderedAccessView(Resource, Stride, Capacity);
+					uav = new UnorderedAccessView(Resource, Stride, Capacity, HasCounter, CounterOffset);
 				}
 
 				return uav;
@@ -118,14 +70,26 @@ namespace Engine.GPU
 			set => Resource.Name = value;
 		}
 
-		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1)
+		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1, bool hasCounter = false)
 		{
 			Capacity = sizeBytes / stride;
 			Alignment = alignment;
 			Stride = stride;
+			HasCounter = hasCounter;
 
 			ulong width = (ulong)sizeBytes;
-			width = MathHelper.Align(width, alignment); // Use user-defined alignment
+
+			// Ensure enough space for UAV counter.
+			if (hasCounter)
+			{
+				const int UAV_COUNTER_PLACEMENT_ALIGNMENT = 4096;
+				width = MathHelper.Align(width, UAV_COUNTER_PLACEMENT_ALIGNMENT) + 4;
+
+				CounterOffset = (long)(width - 4);
+			}
+
+			// Ensure user-defined alignment.
+			width = MathHelper.Align(width, alignment);
 
 			// Describe buffer.
 			ResourceDescription bufferDescription = new()
@@ -171,8 +135,6 @@ namespace Engine.GPU
 				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
 				UploadBuffer.UploadOffset += dataSize;
 
-				// Second copy (GPU-GPU) isn't occuring for later uploads?
-
 				// Copy from upload to target buffer.
 				Graphics.GetCommandList().CustomCommand((o) => {
 					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
@@ -182,6 +144,15 @@ namespace Engine.GPU
 						State = ResourceStates.CopyDest
 					}
 				});
+			}
+		}
+
+		public void ResetCounter()
+		{
+			if (HasCounter)
+			{
+				int zeroInt = 0;
+				SetData(&zeroInt, 4, CounterOffset);
 			}
 		}
 	}

@@ -15,12 +15,12 @@ namespace Engine.GPU
 		struct Command
 		{
 			public Action<ID3D12GraphicsCommandList6> BuildAction;
-			public Func<CommandInput[]> FetchInputsAction;
+			public CommandInput[] Inputs;
 
-			public Command(Action<ID3D12GraphicsCommandList6> buildAction, Func<CommandInput[]> fetchInputsAction)
+			public Command(Action<ID3D12GraphicsCommandList6> buildAction, CommandInput[] inputs)
 			{
 				BuildAction = buildAction;
-				FetchInputsAction = fetchInputsAction;
+				Inputs = inputs;
 			}
 		}
 
@@ -39,11 +39,11 @@ namespace Engine.GPU
 			allocator.Dispose();
 		}
 
-		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, Func<CommandInput[]> fetchInputsAction)
+		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, CommandInput[] inputs)
 		{
 			lock (commands)
 			{
-				commands.Add(new Command(buildAction, fetchInputsAction));
+				commands.Add(new Command(buildAction, inputs));
 			}
 		}
 
@@ -104,22 +104,20 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		public void DrawIndirect(CommandSignature signature, int maxCommandCount, GraphicsBuffer commandBuffer, GraphicsBuffer countBuffer, int commandStart = 0, int countStart = 0)
+		public void DrawIndirect(CommandSignature signature, int maxCommandCount, GraphicsBuffer commandBuffer, int commandStart = 0)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-				ulong countOffset = (ulong)countStart * sizeof(int);
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, countBuffer?.Resource, countOffset);
+				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
 			};
 
 			CommandInput[] inputs = new[]
 			{
-				new CommandInput(commandBuffer, ResourceStates.IndirectArgument),
-				new CommandInput(countBuffer, ResourceStates.IndirectArgument)
+				new CommandInput(commandBuffer, ResourceStates.IndirectArgument)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgramCBV<T>(Register binding, GraphicsBuffer<T> target) where T : unmanaged
@@ -147,7 +145,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.VertexAndConstantBuffer)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgramUAV(int slot, Texture target)
@@ -175,7 +173,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.UnorderedAccess)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgramUAV(int slot, GraphicsBuffer target)
@@ -203,7 +201,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.UnorderedAccess)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgramSRV(int slot, Texture target)
@@ -231,7 +229,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.AllShaderResource)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgramSRV(int slot, GraphicsBuffer target)
@@ -259,7 +257,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.AllShaderResource)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetProgram(ShaderProgram program)
@@ -294,7 +292,7 @@ namespace Engine.GPU
 
 		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate, CommandInput[] inputs)
 		{
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void CopyTexture(Texture source, Texture dest)
@@ -310,7 +308,7 @@ namespace Engine.GPU
 				new CommandInput(dest, ResourceStates.CopyDest),
 			};
 			
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void CopyResource(Resource source, Resource dest)
@@ -326,7 +324,7 @@ namespace Engine.GPU
 				new CommandInput(dest, ResourceStates.CopyDest),
 			};
 			
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
@@ -353,7 +351,7 @@ namespace Engine.GPU
 				new CommandInput(depthStencil, ResourceStates.DepthWrite),
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
@@ -376,7 +374,7 @@ namespace Engine.GPU
 				inputs.Add(new CommandInput(target, ResourceStates.RenderTarget));
 			}
 
-			AddCommand(buildDelegate, () => inputs.ToArray());
+			AddCommand(buildDelegate, inputs.ToArray());
 		}
 
 		public void ClearRenderTarget(Texture target, Color color = default(Color))
@@ -402,7 +400,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.RenderTarget)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void ClearDepth(Texture target)
@@ -417,7 +415,7 @@ namespace Engine.GPU
 				new CommandInput(target, ResourceStates.DepthWrite)
 			};
 
-			AddCommand(buildDelegate, () => inputs);
+			AddCommand(buildDelegate, inputs);
 		}
 
 		public void RequestState(Resource resource, ResourceStates state)
@@ -427,7 +425,7 @@ namespace Engine.GPU
 				new CommandInput(resource, state)
 			};
 
-			AddCommand(null, () => inputs);
+			AddCommand(null, inputs);
 		}
 
 		public void PushEvent(string name)
@@ -459,13 +457,13 @@ namespace Engine.GPU
 				// Build.
 				for (int i = 0; i < commands.Count; i++)
 				{
-					CommandInput[] currentInputs = commands[i].FetchInputsAction?.Invoke();
+					CommandInput[] currentInputs = commands[i].Inputs;
 					transitions.Clear();
 
 					// Look for additional transitions to batch with.
 					for (int j = i; j < commands.Count; j++)
 					{
-						CommandInput[] inputs = commands[j].FetchInputsAction?.Invoke();
+						CommandInput[] inputs = commands[j].Inputs;
 
 						if (inputs == null)
 						{

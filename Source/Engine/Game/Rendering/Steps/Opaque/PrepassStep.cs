@@ -9,7 +9,6 @@ namespace Engine.Rendering
 	public class PrepassStep : RenderStep
 	{
 		public GraphicsBuffer CommandBuffer;
-		public GraphicsBuffer<uint> CommandCountBuffer;
 		public CommandSignature DepthCommandSignature;
 
 		private ShaderProgram cullProgram;
@@ -37,23 +36,28 @@ namespace Engine.Rendering
 				.AddDispatchMeshArg()
 				.Compile();
 
-			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * ModelActor.MaxInstanceCount, DepthCommandSignature.Stride);
-			CommandCountBuffer = new GraphicsBuffer<uint>(1);
+			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * ModelActor.MaxInstanceCount, DepthCommandSignature.Stride, hasCounter: true);
 		}
 
 		public override void Run()
 		{
-			// Generate indirect draw commands.
+			// Generate indirect draw commands and sort front-back.
 			Cull();
+			SortCommands();
 
 			// Build depth buffer for opaque geometry.
 			DrawDepth();
 		}
 
+		private void SortCommands()
+		{
+
+		}
+
 		private void Cull()
 		{
 			// Reset command count.
-			CommandCountBuffer.SetData(0, 0);
+			CommandBuffer.ResetCounter();
 
 			// Switch to culling program (compute).
 			List.SetProgram(cullProgram);
@@ -64,7 +68,6 @@ namespace Engine.Rendering
 
 			// Set UAV outputs.
 			List.SetProgramUAV(0, CommandBuffer);
-			List.SetProgramUAV(1, CommandCountBuffer);
 
 			// Dispatch compute shader.
 			if (ModelActor.InstanceBufferCount > 0)
@@ -91,8 +94,7 @@ namespace Engine.Rendering
 			List.SetProgramCBV(1, Viewport.ViewCB);
 
 			// Dispatch draw commands.
-			List.BarrierUAV(CommandBuffer, CommandCountBuffer);
-			List.DrawIndirect(DepthCommandSignature, ModelActor.MaxInstanceCount, CommandBuffer, CommandCountBuffer);
+			List.DrawIndirect(DepthCommandSignature, ModelActor.MaxInstanceCount, CommandBuffer);
 		}
 	}
 }

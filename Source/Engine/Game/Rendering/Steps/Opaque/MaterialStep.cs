@@ -49,8 +49,7 @@ namespace Engine.Rendering
 
 			// Dispatch draw commands.
 			var prepass = Renderer.GetStep<PrepassStep>();
-			List.BarrierUAV(prepass.CommandBuffer, prepass.CommandCountBuffer);
-			List.DrawIndirect(prepass.DepthCommandSignature, ModelActor.MaxInstanceCount, prepass.CommandBuffer, prepass.CommandCountBuffer);
+			List.DrawIndirect(prepass.DepthCommandSignature, ModelActor.MaxInstanceCount, prepass.CommandBuffer);
 		}
 	}
 }

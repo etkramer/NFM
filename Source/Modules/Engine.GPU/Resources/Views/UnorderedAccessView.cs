@@ -8,7 +8,7 @@ namespace Engine.GPU
 	{
 		public DescriptorHandle Handle;
 
-		public UnorderedAccessView(ID3D12Resource resource, int stride, int capacity)
+		public UnorderedAccessView(ID3D12Resource resource, int stride, int capacity, bool hasCounter, long counterOffset)
 		{
 			Handle = ShaderResourceView.Heap.Allocate();
 
@@ -22,20 +22,20 @@ namespace Engine.GPU
 					StructureByteStride = stride,
 					NumElements = capacity,
 					Flags = BufferUnorderedAccessViewFlags.None,
-					CounterOffsetInBytes = 0,
+					CounterOffsetInBytes = (ulong)counterOffset,
 				}
 			};
 
-			GPUContext.Device.CreateUnorderedAccessView(resource, null, desc, Handle);
+			GPUContext.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
 		}
 
-		public UnorderedAccessView(Texture target)
+		public UnorderedAccessView(Texture texture)
 		{
 			Handle = ShaderResourceView.Heap.Allocate();
 
 			UnorderedAccessViewDescription desc = new()
 			{
-				Format = target.Format,
+				Format = texture.Format,
 				ViewDimension = UnorderedAccessViewDimension.Texture2D,
 				Texture2D = new()
 				{
@@ -44,7 +44,7 @@ namespace Engine.GPU
 				}
 			};
 
-			GPUContext.Device.CreateUnorderedAccessView(target, null, desc, Handle);
+			GPUContext.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
 		}
 	}
 }
