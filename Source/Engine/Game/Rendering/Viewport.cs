@@ -20,22 +20,24 @@ namespace Engine.Rendering
 	{
 		public static List<Viewport> All { get; } = new();
 
-		// Work camera settings.
-		public CameraActor WorkCamera = new CameraActor();
-
-		// Constant buffers
-		public GraphicsBuffer<ViewConstants> ViewConstantsBuffer = new(1, GraphicsBuffer.ConstantAlignment);
-
-		// Helpers
+		// Basic properties
 		public ViewportHost Host { get; }
 		public Vector2i Size => Host.Swapchain.RT.Size;
 
-		// Render targets and buffers
-		public Texture ColorTarget;
-		public Texture DepthBuffer;
+		// Work camera settings
+		public CameraActor WorkCamera = new CameraActor();
 
-		// Rendering command list.
+		#region Rendering
+
+		// Command list and constants
 		public CommandList CommandList = new();
+		public GraphicsBuffer<ViewConstants> ViewCB = new(1, GraphicsBuffer.ConstantAlignment);
+
+		// Render targets
+		public Texture ColorTarget;
+		public Texture DepthBuffer;	
+
+		#endregion
 
 		/// <summary>
 		/// Constructs a viewport from a given UI host
@@ -58,7 +60,7 @@ namespace Engine.Rendering
 			Matrix4 view = Matrix4.CreateTransform(WorkCamera.Position, WorkCamera.Rotation, Vector3.One).Inverted();
 			Matrix4 projection = Matrix4.CreatePerspectiveReversed(WorkCamera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
 
-			ViewConstantsBuffer.SetData(0, new ViewConstants()
+			ViewCB.SetData(0, new ViewConstants()
 			{
 				View = view,
 				Projection = projection,
@@ -78,6 +80,7 @@ namespace Engine.Rendering
 		{
 			ColorTarget.Dispose();
 			DepthBuffer.Dispose();
+
 			All.Remove(this);
 		}
 	}

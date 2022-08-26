@@ -1,4 +1,4 @@
-﻿#include "Shaders/Include/Geometry.h"
+﻿#include "HLSL/Include/Geometry.h"
 
 struct IndirectCommand
 {
@@ -12,25 +12,31 @@ RWStructuredBuffer<IndirectCommand> Commands : register(u0);
 RWStructuredBuffer<uint> CommandCount : register(u1);
 
 [numthreads(1, 1, 1)]
-void ComputeEntry(uint3 dispatchID : SV_DispatchThreadID)
+void CullCS(uint3 dispatchID : SV_DispatchThreadID)
 {
 	// Grab instance/mesh data.
-	Instance instance = Instances[dispatchID.x];
-	Mesh mesh = Meshes[instance.Mesh];
-	
+	uint instanceID = dispatchID.x;
+	Instance instance = Instances[instanceID];
+	Mesh mesh = Meshes[instance.MeshID];
+
+	// Check visibility.
 	bool visible = mesh.MeshletCount > 0;
 	if (visible)
 	{
 		// Build command.
 		IndirectCommand command;
-		command.InstanceID = dispatchID.x;
+		command.InstanceID = instanceID;
 		command.ThreadGroupCountX = mesh.MeshletCount;
 		command.ThreadGroupCountY = 1;
 		command.ThreadGroupCountZ = 1;
 
 		// Store command and update count.
-		uint commandID = dispatchID.x;
-		Commands[commandID] = command;
-		InterlockedMax(CommandCount[0], commandID + 1);
+		InterlockedMax(CommandCount[0], dispatchID.x + 1);
+		Commands[dispatchID.x] = command;
+	}
+	else
+	{
+		// For now, let's just zero it out because we don't have any compaction yet.
+		Commands[dispatchID.x] = (IndirectCommand)0;
 	}
 }

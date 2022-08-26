@@ -6,23 +6,21 @@ namespace Engine.Resources
 	{
 		public Shader Shader { get; }
 
+		public List<ShaderParameter> OverrideParameters { get; } = new();
+
 		public Material(Shader shader)
 		{
 			Shader = shader;
 		}
 
-		public Material SetBool(string param, bool value)
-		{
-			return this;
-		}
-
 		public Material SetInt(string param, int value)
 		{
-			return this;
-		}
+			OverrideParameters.Add(new ShaderParameter()
+			{
+				Name = param,
+				Value = value
+			});
 
-		public Material SetTexture(string param, Texture2D value)
-		{
 			return this;
 		}
 	}

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -10,25 +10,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Shaders\BaseMaterialPS.hlsl" />
-    <None Remove="Shaders\BaseMS.h" />
-    <None Remove="Shaders\BaseMS.hlsl" />
-    <None Remove="Shaders\CullShader.hlsl" />
-    <None Remove="Shaders\Include\Common.h" />
-    <None Remove="Shaders\Include\Geometry.h" />
-    <None Remove="Shaders\Prepass\DepthPS.hlsl" />
-    <None Remove="Shaders\TempMaterialPS.hlsl" />
+    <None Remove="HLSL\Include\Common.h" />
+    <None Remove="HLSL\Material\BaseMaterialPS.h" />
+    <None Remove="HLSL\Prepass\DepthPS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Shaders\BaseMS.h" />
-    <EmbeddedResource Include="Shaders\Prepass\CullCS.hlsl" />
-    <EmbeddedResource Include="Shaders\Include\Common.h" />
-    <EmbeddedResource Include="Shaders\Include\Geometry.h" />
-    <EmbeddedResource Include="Shaders\BaseMS.hlsl" />
-    <EmbeddedResource Include="Shaders\Material\BaseMaterialPS.hlsl" />
-    <EmbeddedResource Include="Shaders\Material\TempMaterialPS.hlsl" />
-    <EmbeddedResource Include="Shaders\Prepass\DepthPS.hlsl" />
+    <EmbeddedResource Include="HLSL\BaseMS.h" />
+    <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.h" />
+    <EmbeddedResource Include="HLSL\Prepass\CullCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Include\Common.h" />
+    <EmbeddedResource Include="HLSL\Include\Geometry.h" />
+    <EmbeddedResource Include="HLSL\BaseMS.hlsl" />
+    <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.hlsl" />
+    <EmbeddedResource Include="HLSL\Prepass\DepthPS.hlsl" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using Engine.Editor;
+using Engine.GPU;
 
 namespace Engine.World
 {
@@ -34,10 +35,15 @@ namespace Engine.World
 				}
 			}
 		}
-
+		
 		// Backing fields
 		private Actor parent;
 		private readonly ObservableCollection<Actor> children = new();
+
+		// Transform buffer
+		public bool IsTransformDirty = true;
+		public static GraphicsBuffer<Matrix4> TransformBuffer = new(ModelActor.MaxInstanceCount);
+		public BufferHandle<Matrix4> TransformHandle;
 
 		public Actor(string name = null)
 		{
@@ -55,6 +61,12 @@ namespace Engine.World
 
 			Name = name;
 			Parent = parent;
+
+			// Transform buffer
+			TransformHandle = TransformBuffer.Allocate(1);
+			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
+			(this as INotify).Subscribe(nameof(Rotation), () => IsTransformDirty = true);
+			(this as INotify).Subscribe(nameof(Scale), () => IsTransformDirty = true);
 		}
 
 		public virtual void Dispose()
@@ -62,6 +74,7 @@ namespace Engine.World
 			// Remove self from scene tree.
 			Scene?.Remove(this);
 			Parent = null;
+			TransformHandle.Free();
 
 			// Dispose children.
 			for (int i = Children.Count - 1; i >= 0; i--)
@@ -104,6 +117,11 @@ namespace Engine.World
 			}
 
 			return this as TThis;
+		}
+
+		public void UpdateTransform()
+		{
+			TransformBuffer.SetData(TransformHandle, Matrix4.CreateTransform(Position, Rotation, Scale));
 		}
 
 		string ISelectable.GetName() => Name;

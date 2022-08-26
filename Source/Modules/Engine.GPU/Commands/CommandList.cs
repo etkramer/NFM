@@ -329,31 +329,54 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, () => inputs);
 		}
 
-		public void SetRenderTarget(Texture color, Texture depth = null)
+		public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				if (color == null)
+				if (renderTarget == null)
 				{
-					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depth.DSV.Handle);
-					list.RSSetViewport(0, 0, depth.Width, depth.Height);
-					list.RSSetScissorRect(depth.Width, depth.Height);
+					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.DSV.Handle);
+					list.RSSetViewport(0, 0, depthStencil.Width, depthStencil.Height);
+					list.RSSetScissorRect(depthStencil.Width, depthStencil.Height);
 				}
 				else
 				{
-					list.OMSetRenderTargets(color.RTV.Handle, depth?.DSV.Handle);
-					list.RSSetViewport(0, 0, color.Width, color.Height);
-					list.RSSetScissorRect(color.Width, color.Height);
+					list.OMSetRenderTargets(renderTarget.RTV.Handle, depthStencil?.DSV.Handle);
+					list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
+					list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
 				}
 			};
 
 			CommandInput[] inputs = new[]
 			{
-				new CommandInput(color, ResourceStates.RenderTarget),
-				new CommandInput(depth, ResourceStates.DepthWrite),
+				new CommandInput(renderTarget, ResourceStates.RenderTarget),
+				new CommandInput(depthStencil, ResourceStates.DepthWrite),
 			};
 
 			AddCommand(buildDelegate, () => inputs);
+		}
+
+		public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.RTV.Handle.CPUHandle).ToArray(), depthStencil?.DSV.Handle);
+				list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
+				list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
+			};
+
+			List<CommandInput> inputs = new();
+			if (depthStencil != null)
+			{
+				inputs.Add(new CommandInput(depthStencil, ResourceStates.DepthWrite));
+			}
+			
+			foreach (var target in renderTargets)
+			{
+				inputs.Add(new CommandInput(target, ResourceStates.RenderTarget));
+			}
+
+			AddCommand(buildDelegate, () => inputs.ToArray());
 		}
 
 		public void ClearRenderTarget(Texture target, Color color = default(Color))

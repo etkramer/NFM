@@ -8,33 +8,39 @@ namespace Engine.Resources
 		Transparent
 	}
 
+	public struct ShaderParameter
+	{
+		public string Name;
+		public object Value;
+	}
+
 	public class Shader : Resource
 	{
 		public string ShaderSource { get; set; }
+
+		public int ParameterCount => Parameters.Count;
+		public List<ShaderParameter> Parameters { get; } = new();
+		public BlendMode BlendMode = BlendMode.Opaque;
 
 		public Shader(string source)
 		{
 			ShaderSource = source;
 		}
 
-		public Shader AddBool(string param, bool defaultValue = default)
+		public Shader AddInt(string param, int defaultValue = default)
 		{
-			return this;
-		}
+			Parameters.Add(new ShaderParameter()
+			{
+				Name = param,
+				Value = defaultValue
+			});
 
-		public Shader AddInt(string param, bool defaultValue = default)
-		{
-			return this;
-		}
-
-		public Shader AddTexture(string param, Texture2D defaultValue = default)
-		{
 			return this;
 		}
 
 		public void SetBlendMode(BlendMode mode)
 		{
-
+			BlendMode = mode;
 		}
 	}
 }

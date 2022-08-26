@@ -63,7 +63,7 @@ namespace Engine.GPU
 		private DepthMode depthMode = DepthMode.None;
 		private bool depthRead = false;
 		private bool depthWrite = false;
-		private Format rtFormat = GPUContext.RTFormat;
+		private Format[] rtFormats = { GPUContext.RTFormat };
 		private int rtSamples = 1;
 
 		// Custom handler for #including files from arbitrary file systems
@@ -86,9 +86,20 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetRTFormat(Format format)
+		public ShaderProgram SetRTFormat(int rt, Format format)
 		{
-			rtFormat = format;
+			rtFormats[rt] = format;
+			return this;
+		}
+
+		public ShaderProgram SetRTCount(int count)
+		{
+			rtFormats = new Format[count];
+			for (int i = 0; i < count; i++)
+			{
+				rtFormats[i] = Format.R8G8B8A8_UNorm;
+			}
+
 			return this;
 		}
 
@@ -169,14 +180,14 @@ namespace Engine.GPU
 			unsafe
 			{
 				int count = sizeof(T) / 32;
-				return AsConstant(slot, count, space);
+				return AsRootConstant(slot, count, space);
 			}
 		}
 
 		/// <summary>
 		/// Specifies that a parameter should be interpreted as a 32-bit root constant.
 		/// </summary>
-		public ShaderProgram AsConstant(int slot, int count, int space = 0)
+		public ShaderProgram AsRootConstant(int slot, int count, int space = 0)
 		{
 			rootParams.Add(new RootParameter1(new RootConstants(slot, space, count), ShaderVisibility.All));
 			cRegisterMapping.Add(new(slot, space), rootParams.Count - 1);
@@ -300,7 +311,7 @@ namespace Engine.GPU
 				}
 
 				// Build root parameters.
-				RootParameter1[] rootParameters = BuildRootParameters(compiledPixel, compiledMesh, compiledCompute);
+				RootParameter1[] rootParameters = BuildRootParameters(compiledMesh, compiledPixel, compiledCompute);
 
 				// Create root signature.
 				RootSignature = GPUContext.Device.CreateRootSignature(new RootSignatureDescription1(
@@ -323,7 +334,7 @@ namespace Engine.GPU
 						SampleMask = uint.MaxValue,
 						PrimitiveTopology = PrimitiveTopologyType.Triangle,
 						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
-						RenderTargetFormats = new[] { rtFormat },
+						RenderTargetFormats = rtFormats,
 						DepthStencilFormat = GPUContext.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)

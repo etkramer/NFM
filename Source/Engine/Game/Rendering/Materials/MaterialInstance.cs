@@ -1,30 +1,34 @@
 ﻿using System;
+using System.Linq;
 using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 
 namespace Engine.Rendering
 {
-	public class MaterialInstance
+	public class MaterialInstance : IDisposable
 	{
-		private Material baseMaterial;
+		[Inspect] public Material BaseMaterial { get; set; }
+		public Shader BaseShader => BaseMaterial.Shader;
 
 		public MaterialInstance(Material baseMaterial)
 		{
-			this.baseMaterial = baseMaterial;
+			BaseMaterial = baseMaterial;
+
+			// NOTE: Should start by sorting commands front-to-back before the depth prepass, just to prove sorting is working. Also, less overdraw is good.
 
 			// Basic outline:
-			// 1. Loop through all shader stacks "used" in the scene (doesn't matter if culled)
-			// 2. Generate draw commands for all meshes using that shader stack, then dispatch the shader.
-			// 3. Shaders use instance ID to look themselves up in the material buffer, which contains all material parameters (descriptor indexes and constants).
+			// 1. Build and cull draw commands as per usual.
+			// 2. Sort draw commands into buckets by shader. Do this by first storing the number of commands with a given shader in a "Shader Count" buffer
+			//		basically "InterlockedAdd(ShaderCount[ShaderID], 1)", then use a full prefix sum (*not* WavePrefixSum) to get the value for the "Shader Start" buffer.
+			// 3. Send one DrawIndirect call per shader, offsetting and clamping the dispatchThreadID by the start/length.
+			// 4. Shaders can use their instance IDs to look themselves up in the material buffer, which contains all material
+			// parameters (descriptor indexes and constants). Material buffer can be accessed at arbitrary offsets with ByteAddressBuffer.
+		}
 
-			// 1. Cull shader counts the number of objects using this shader, then uses it in a prefix sum to figure out the shader's range in the command buffer. Can also
-			// consult http://filmicworlds.com/blog/visibility-buffer-rendering-with-material-graphs/ for a (non-exact) reference.
-			// 2. May need a "Material Start/Count" buffer to feed to DrawIndirect().
+		public void Dispose()
+		{
 
-			// To do this, we first need to:
-			// 1. Maintain a collection of all used shader combinations.
-			// 2. Generate an entry into the material buffer for each material instance.
 		}
 	}
 }

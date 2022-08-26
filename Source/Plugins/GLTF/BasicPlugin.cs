@@ -51,10 +51,7 @@ namespace Basic
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
-			shader.AddTexture("Color");
-			shader.AddTexture("Normal");
-			shader.AddTexture("Emission");
-			shader.AddTexture("ORM");
+			shader.AddInt("TempyIndex");
 
 			return shader;
 		}

@@ -13,7 +13,7 @@ namespace Engine.GPU
 
 		private ShaderProgram program = null;
 
-		public CommandSignature WithDispatchMeshArg()
+		public CommandSignature AddDispatchMeshArg()
 		{
 			arguments.Add(new IndirectArgumentDescription
 			{
@@ -27,7 +27,7 @@ namespace Engine.GPU
 
 			return this;
 		}
-		public CommandSignature WithConstantArg(int register, ShaderProgram program)
+		public CommandSignature AddConstantArg(int register, ShaderProgram program)
 		{
 			if (!program.cRegisterMapping.TryGetValue(new(register, 0), out var rootParam))
 			{

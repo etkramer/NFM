@@ -1,4 +1,4 @@
-﻿#include "Shaders/BaseMS.h"
+﻿#include "HLSL/BaseMS.h"
 
 cbuffer drawConstants : register(b0)
 {
@@ -17,7 +17,7 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
-	Mesh mesh = Meshes[instance.Mesh];
+	Mesh mesh = Meshes[instance.MeshID];
 	Meshlet meshlet = Meshlets[mesh.MeshletStart + groupID];
 
 	// Set the meshlet output counts.
@@ -31,7 +31,7 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 
 		// Apply projection to vertex position.
 		float4 position = float4(vertex.Position, 1);
-		position = mul(instance.Transform, position); // Apply instance transform.
+		position = mul(Transforms[instance.TransformID], position); // Apply instance transform.
 		position = mul(View, position); // Apply camera view.
 		position = mul(Projection, position); // Apply camera projection.
 

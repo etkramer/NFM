@@ -32,8 +32,10 @@ namespace Basic.Loaders
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
 			{
-				Shader shader = await Asset.GetAsync<Shader>("Shaders/PBR");
+				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR");
+
 				Material material = new Material(shader);
+				material.SetInt("TempyIndex", i);
 
 				materials[i] = material;
 			}

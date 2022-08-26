@@ -5,80 +5,105 @@ using Engine.Resources;
 
 namespace Engine.World
 {
-	public class ModelActor : Actor
+	[StructLayout(LayoutKind.Sequential)]
+	public struct InstanceData
 	{
-		// GPU-side instance buffer.
-		internal static GraphicsBuffer<Instance> InstanceBuffer = new(2000000);
-		internal static int InstanceCount = 0;
+		public uint MeshID;
+		public uint MaterialID;
+		public uint TransformID;
+	}
 
-		[StructLayout(LayoutKind.Sequential)]
-		internal struct Instance
-		{
-			public uint Mesh;
-			public Matrix4 Transform;
-		}
+	public partial class ModelActor : Actor
+	{
+		public const int MaxInstanceCount = 100;
+		public static int InstanceBufferCount = 0;	
+		public static GraphicsBuffer<InstanceData> InstanceBuffer = new(MaxInstanceCount);
 
 		[Inspect] public Model Model { get; set; } = null;
-		
-		internal List<BufferHandle<Instance>> Instances = new();
-		internal bool IsInstanceDirty = true;
+	
+		// Mesh instances
+		public bool IsInstanceDirty = true;
+		public BufferHandle<InstanceData>[] InstanceHandles;
+
+		// Material instances
+		public MaterialInstance[] MaterialInstances;
 		
 		public ModelActor(string name = null) : base(name)
 		{
 			(this as INotify).Subscribe(nameof(Model), () => IsInstanceDirty = true);
-			(this as INotify).Subscribe(nameof(Position), () => IsInstanceDirty = true);
-			(this as INotify).Subscribe(nameof(Rotation), () => IsInstanceDirty = true);
-			(this as INotify).Subscribe(nameof(Scale), () => IsInstanceDirty = true);
 		}
 
 		public override void Dispose()
 		{
-			FreeInstances();
+			for (int i = 0; i < InstanceHandles?.Length; i++)
+			{
+				MaterialInstances[i].Dispose();
+				InstanceHandles[i].Free();
+				InstanceBufferCount--;
+			}
+
 			base.Dispose();
 		}
 
-		internal void UpdateInstances()
+		public void UpdateInstances()
 		{
-			if (Model == null ||Model?.Parts == null || !IsInstanceDirty)
+			if (Model == null ||Model?.Parts == null)
 			{
+				InstanceHandles = null;
+				MaterialInstances = null;
 				return;
 			}
 
-			for (int i = Instances.Count - 1; i >= 0; i--)
+			// Count instances.
+			uint instanceCount = 0;
+			foreach (ModelPart part in Model.Parts)
 			{
-				Instances[i].Free();
-				Instances.RemoveAt(i);
-				InstanceCount--;
+				foreach (Mesh mesh in part.Meshes)
+				{
+					instanceCount++;
+				}
+			}
+
+			// (Re)build the array of instance handles.
+			if (InstanceHandles == null || InstanceHandles.Length != instanceCount)
+			{
+				MaterialInstances?.ForEach(o => o.Dispose());
+				InstanceHandles?.ForEach(o => o.Free());
+
+				// Allocate a handful of new ones.
+				MaterialInstances = new MaterialInstance[instanceCount];
+				InstanceHandles = new BufferHandle<InstanceData>[instanceCount];
+				for (int i = 0; i < instanceCount; i++)
+				{
+					InstanceHandles[i] = InstanceBuffer.Allocate(1);
+					InstanceBufferCount++;
+				}
 			}
 
 			// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
+			int instanceID = 0;
 			foreach (ModelPart part in Model.Parts)
 			{
-				foreach (Mesh submesh in part.Meshes)
+				foreach (Mesh mesh in part.Meshes)
 				{
+					// Create material instance.
+					MaterialInstances[instanceID] = new MaterialInstance(mesh.Material);
+
 					// Make instance data.
-					Instance instanceData = new()
+					InstanceData instanceData = new()
 					{
-						Mesh = (uint)submesh.MeshHandle.ElementStart,
-						Transform = Matrix4.CreateTransform(Position, Rotation, Scale)
+						MeshID = (uint)mesh.MeshHandle.ElementStart,
+						TransformID = (uint)TransformHandle.ElementStart,
+						//MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.ElementStart,
 					};
 
-					// Upload instance.
-					Instances.Add(InstanceBuffer.Upload(instanceData));
-					InstanceCount++;
+					// Upload instance to buffer.
+					InstanceBuffer.SetData(InstanceHandles[instanceID], instanceData);
+					instanceID++;
 				}
 			}
 
 			IsInstanceDirty = false;
-		}
-
-		private void FreeInstances()
-		{
-			foreach (var instance in Instances)
-			{
-				instance.Free();
-				InstanceCount--;
-			}
 		}
 	}
 }

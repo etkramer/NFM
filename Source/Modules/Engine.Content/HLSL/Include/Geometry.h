@@ -1,8 +1,9 @@
 ﻿// One per object in scene (unordered, compact).
 struct Instance
 {
-	uint Mesh;
-	float4x4 Transform;
+	uint MeshID;
+	uint MaterialID;
+	uint TransformID;
 };
 
 // One per loaded mesh.
@@ -30,6 +31,7 @@ struct Vertex
 };
 
 // Global geometry data - keep slot numbers out of the way. Should probably use spaces instead.
+StructuredBuffer<float4x4> Transforms : register(t251);
 StructuredBuffer<Instance> Instances : register(t252);
 StructuredBuffer<Mesh> Meshes : register(t253);
 StructuredBuffer<Meshlet> Meshlets : register(t254);

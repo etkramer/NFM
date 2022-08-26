@@ -13,7 +13,7 @@ namespace Engine.Resources
 
 	public sealed class Texture2D : Resource
 	{
-		public Texture2D(long width, long height, TextureFormat format = TextureFormat.RGB)
+		public Texture2D(int width, int height, TextureFormat format = TextureFormat.RGB)
 		{
 
 		}

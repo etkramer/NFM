@@ -23,6 +23,11 @@ namespace Engine.Rendering
 		// Loops through actors and (re)uploads instance data where requested.
 		private void RecurseInstances(Actor root)
 		{
+			if (root.IsTransformDirty)
+			{
+				root.UpdateTransform();
+			}
+
 			if (root is ModelActor modelActor)
 			{
 				if (modelActor.IsInstanceDirty)

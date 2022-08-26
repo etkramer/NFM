@@ -9,40 +9,48 @@ namespace Engine.Rendering
 {
 	public class MaterialStep : RenderStep
 	{
-		private ShaderProgram materialProgram;
+		public ShaderProgram MaterialProgram;
+		public CommandSignature MaterialCommandSignature;
 
 		public override void Init()
 		{
-			materialProgram = new ShaderProgram()
+			MaterialProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
-				.SetMeshShader(Embed.GetString("Shaders/BaseMS.hlsl"))
-				.SetPixelShader(Embed.GetString("Shaders/Material/TempMaterialPS.hlsl"))
-				.SetDepthMode(DepthMode.GreaterEqual, true, false)
+				.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
+				.SetPixelShader(Embed.GetString("HLSL/Material/BaseMaterialPS.hlsl"), "MaterialPS")
+				.SetDepthMode(DepthMode.Equal, true, false)
 				.SetCullMode(CullMode.CCW)
-				.AsConstant(0, 1)
+				.SetRTCount(2)
+				.AsRootConstant(0, 1)
 				.Compile().Result;
+
+			MaterialCommandSignature = new CommandSignature()
+				.AddConstantArg(0, MaterialProgram)
+				.AddDispatchMeshArg()
+				.Compile();
 		}
 
 		public override void Run()
 		{
 			// Switch to material program.
-			List.SetProgram(materialProgram);
+			List.SetProgram(MaterialProgram);
 
 			// Set render targets.
 			List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
 
 			// Bind program inputs.
+			List.SetProgramSRV(251, Actor.TransformBuffer);
 			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
 			List.SetProgramSRV(253, Mesh.MeshBuffer);
 			List.SetProgramSRV(254, Mesh.MeshletBuffer);
 			List.SetProgramSRV(255, Mesh.PrimBuffer);
 			List.SetProgramSRV(256, Mesh.VertBuffer);
-			List.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
+			List.SetProgramCBV(1, Viewport.ViewCB);
 
 			// Dispatch draw commands.
 			var prepass = Renderer.GetStep<PrepassStep>();
 			List.BarrierUAV(prepass.CommandBuffer, prepass.CommandCountBuffer);
-			List.DrawIndirect(prepass.CommandSignature, PrepassStep.MaxCommandCount, prepass.CommandBuffer, prepass.CommandCountBuffer);
+			List.DrawIndirect(prepass.DepthCommandSignature, ModelActor.MaxInstanceCount, prepass.CommandBuffer, prepass.CommandCountBuffer);
 		}
 	}
 }

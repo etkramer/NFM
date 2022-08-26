@@ -3,56 +3,54 @@ using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
-using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
 	public class PrepassStep : RenderStep
 	{
-		public const int MaxCommandCount = 100;
-
 		public GraphicsBuffer CommandBuffer;
 		public GraphicsBuffer<uint> CommandCountBuffer;
-		public CommandSignature CommandSignature;
+		public CommandSignature DepthCommandSignature;
 
 		private ShaderProgram cullProgram;
-		private ShaderProgram prepassProgram;
+		private ShaderProgram depthProgram;
 
 		public override void Init()
 		{
 			cullProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("Shaders/Prepass/CullCS.hlsl"))
+				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
 				.Compile().Result;
 
-			prepassProgram = new ShaderProgram()
+			depthProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
-				.SetMeshShader(Embed.GetString("Shaders/BaseMS.hlsl"))
-				.SetPixelShader(Embed.GetString("Shaders/Prepass/DepthPS.hlsl"))
+				.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
+				.SetPixelShader(Embed.GetString("HLSL/Prepass/DepthPS.hlsl"))
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetCullMode(CullMode.CCW)
-				.AsConstant(0, 1)
+				.AsRootConstant(0, 1)
 				.Compile().Result;
 
-			CommandSignature = new CommandSignature()
-				.WithConstantArg(0, prepassProgram)
-				.WithDispatchMeshArg()
+			// Indirect command signature for depth pass.
+			DepthCommandSignature = new CommandSignature()
+				.AddConstantArg(0, depthProgram)
+				.AddDispatchMeshArg()
 				.Compile();
 
-			CommandBuffer = new GraphicsBuffer(CommandSignature.Stride * MaxCommandCount, CommandSignature.Stride);
+			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * ModelActor.MaxInstanceCount, DepthCommandSignature.Stride);
 			CommandCountBuffer = new GraphicsBuffer<uint>(1);
 		}
 
 		public override void Run()
 		{
 			// Generate indirect draw commands.
-			BuildCommands();
+			Cull();
 
 			// Build depth buffer for opaque geometry.
 			DrawDepth();
 		}
 
-		private void BuildCommands()
+		private void Cull()
 		{
 			// Reset command count.
 			CommandCountBuffer.SetData(0, 0);
@@ -69,31 +67,32 @@ namespace Engine.Rendering
 			List.SetProgramUAV(1, CommandCountBuffer);
 
 			// Dispatch compute shader.
-			if (ModelActor.InstanceCount > 0)
+			if (ModelActor.InstanceBufferCount > 0)
 			{
-				List.DispatchGroups(ModelActor.InstanceCount);
+				List.DispatchGroups(ModelActor.InstanceBufferCount);
 			}
 		}
 
 		private void DrawDepth()
 		{
 			// Switch to material program.
-			List.SetProgram(prepassProgram);
+			List.SetProgram(depthProgram);
 
 			// Set render targets.
 			List.SetRenderTarget(null, Viewport.DepthBuffer);
 
 			// Bind program inputs.
+			List.SetProgramSRV(251, Actor.TransformBuffer);
 			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
 			List.SetProgramSRV(253, Mesh.MeshBuffer);
 			List.SetProgramSRV(254, Mesh.MeshletBuffer);
 			List.SetProgramSRV(255, Mesh.PrimBuffer);
 			List.SetProgramSRV(256, Mesh.VertBuffer);
-			List.SetProgramCBV(1, Viewport.ViewConstantsBuffer);
+			List.SetProgramCBV(1, Viewport.ViewCB);
 
 			// Dispatch draw commands.
 			List.BarrierUAV(CommandBuffer, CommandCountBuffer);
-			List.DrawIndirect(CommandSignature, MaxCommandCount, CommandBuffer, CommandCountBuffer);
+			List.DrawIndirect(DepthCommandSignature, ModelActor.MaxInstanceCount, CommandBuffer, CommandCountBuffer);
 		}
 	}
 }
