@@ -129,6 +129,10 @@ namespace Engine.Frontend
 
 		protected override void OnPointerPressed(PointerPressedEventArgs e)
 		{
+			// Make sure to focus this control.
+			// It wouldn't happen automatically with right click, which would mean no keyboard input.
+			Focus();
+
 			UpdatePointer(e);
 			base.OnPointerPressed(e);
 		}
