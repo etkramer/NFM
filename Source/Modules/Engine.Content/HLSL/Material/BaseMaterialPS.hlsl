@@ -20,7 +20,7 @@ struct PSTargets
 	float4 NRM : SV_TARGET1;
 };
 
-float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET
+PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 {
 	// G-buffer layout:
 	//	Color map (32-bit):
@@ -38,10 +38,13 @@ float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET
 	// Get params from surface shader.
 	SurfaceInfo surfaceInfo = SurfaceMain();
 
+	// Calculate normal vector from combined vert/surface normals.
+	float2 normal = vert.Normal.xy * 0.5 + 0.5;
+
 	// Copy to G-buffer targets.
 	PSTargets targets;
 	targets.Color = float4(surfaceInfo.Color, surfaceInfo.Emission);
-	targets.NRM = float4(surfaceInfo.Normal.xy, surfaceInfo.Roughness, surfaceInfo.Metallic);
+	targets.NRM = float4(normal.xy, surfaceInfo.Roughness, surfaceInfo.Metallic);
 
-	return float4(vert.Normal);
+	return targets;
 }

@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Numerics;
 
 namespace Engine.Mathematics
 {
@@ -69,7 +70,7 @@ namespace Engine.Mathematics
         public const float Log2E = 1.442695f;
 
         /// <summary>
-        /// Aligns an integer to the specified value.
+        /// Aligns an integer to the nearest multiple of a.
         /// </summary>
 		[Pure]
 		public static long Align(long n, int a)
@@ -78,6 +79,16 @@ namespace Engine.Mathematics
 			long y = (r != 0) ? n + (a - r) : n;
 
 			return y;
+		}
+
+        /// <summary>
+        /// Aligns an integer to the next power of two.
+        /// </summary>
+		[Pure]
+		public static long AlignPowerOfTwo(long nn)
+		{
+			return 1L << (BitOperations.Log2((ulong)nn - 1) + 1); // or
+			//return 1L << (63 - BitOperations.LeadingZeroCount((ulong)nn));
 		}
 
         /// <summary>

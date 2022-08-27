@@ -8,6 +8,12 @@ struct IndirectCommand
 	uint ThreadGroupCountZ;
 };
 
+cbuffer viewConstants : register(b1)
+{
+	float4x4 View;
+	float4x4 Projection;
+}
+
 AppendStructuredBuffer<IndirectCommand> Commands : register(u0);
 
 [numthreads(1, 1, 1)]

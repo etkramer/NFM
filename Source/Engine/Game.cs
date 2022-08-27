@@ -18,6 +18,8 @@ namespace Engine
 {
 	public static class Game
 	{
+		public static event Action<double> OnTick = delegate {};
+
 		public static void Init()
 		{
 			// Init basic systems.
@@ -52,6 +54,8 @@ namespace Engine
 
 		public static void Update()
 		{
+			OnTick.Invoke(Graphics.FrameTime);
+
 			// Render the frame.
 			Renderer.Render();
 		}

@@ -27,6 +27,22 @@ namespace Engine.GPU
 
 			return this;
 		}
+
+		public CommandSignature AddDispatchArg()
+		{
+			arguments.Add(new IndirectArgumentDescription
+			{
+				Type = IndirectArgumentType.Dispatch,
+			});
+
+			unsafe
+			{
+				Stride += sizeof(DispatchArguments);
+			}
+
+			return this;
+		}
+
 		public CommandSignature AddConstantArg(int register, ShaderProgram program)
 		{
 			if (!program.cRegisterMapping.TryGetValue(new(register, 0), out var rootParam))

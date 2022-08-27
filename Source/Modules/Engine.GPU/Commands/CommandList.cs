@@ -104,7 +104,7 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		public void DrawIndirect(CommandSignature signature, int maxCommandCount, GraphicsBuffer commandBuffer, int commandStart = 0)
+		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, int commandStart = 0)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
@@ -120,7 +120,42 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramCBV<T>(Register binding, GraphicsBuffer<T> target) where T : unmanaged
+		public void SetProgramConstants(Register binding, params uint[] constants)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				ShaderProgram program = CurrentProgram;
+				if (!program.cRegisterMapping.TryGetValue(binding, out int parameterIndex))
+				{
+					return;
+				}
+
+				if (program.IsMeshPixel)
+				{
+					unsafe
+					{
+						fixed (uint* constantsPtr = constants)
+						{
+							list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, 0);
+						}
+					}
+				}
+				if (program.IsCompute)
+				{
+					unsafe
+					{
+						fixed (uint* constantsPtr = constants)
+						{
+							list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, 0);
+						}
+					}
+				}
+			};
+
+			AddCommand(buildDelegate, null);
+		}
+
+		public void SetProgramCBV(Register binding, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{

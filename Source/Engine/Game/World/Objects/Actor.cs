@@ -4,6 +4,12 @@ using Engine.GPU;
 
 namespace Engine.World
 {
+	public struct GPUTransform
+	{
+		public Matrix4 ObjectToWorld;
+		public Matrix4 WorldToObject;
+	}
+
 	public class Actor : ISelectable, IDisposable
 	{
 		// Properties (inspectable)
@@ -42,8 +48,8 @@ namespace Engine.World
 
 		// Transform buffer
 		public bool IsTransformDirty = true;
-		public static GraphicsBuffer<Matrix4> TransformBuffer = new(ModelActor.MaxInstanceCount);
-		public BufferHandle<Matrix4> TransformHandle;
+		public static GraphicsBuffer<GPUTransform> TransformBuffer = new(ModelActor.MaxInstanceCount);
+		public BufferHandle<GPUTransform> TransformHandle;
 
 		public Actor(string name = null)
 		{
@@ -121,7 +127,13 @@ namespace Engine.World
 
 		public void UpdateTransform()
 		{
-			TransformBuffer.SetData(TransformHandle, Matrix4.CreateTransform(Position, Rotation, Scale));
+			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
+
+			TransformBuffer.SetData(TransformHandle, new GPUTransform()
+			{
+				ObjectToWorld = transform,
+				WorldToObject = transform.Inverse()
+			});
 		}
 
 		string ISelectable.GetName() => Name;

@@ -10,12 +10,10 @@ namespace Avalonia.Win32
 {
     class Win32NativeControlHost : INativeControlHostImpl
     {
-        private readonly bool _useLayeredWindow;
         public WindowImpl Window { get; }
 
-        public Win32NativeControlHost(WindowImpl window, bool useLayeredWindow)
+        public Win32NativeControlHost(WindowImpl window)
         {
-            _useLayeredWindow = useLayeredWindow;
             Window = window;
         }
 
@@ -28,18 +26,16 @@ namespace Avalonia.Win32
         public INativeControlHostDestroyableControlHandle CreateDefaultChild(IPlatformHandle parent)
         {
             AssertCompatible(parent);
-            return new DumbWindow(false, parent.Handle);
+            return new DumbWindow(parent.Handle);
         }
 
         public INativeControlHostControlTopLevelAttachment CreateNewAttachment(Func<IPlatformHandle, IPlatformHandle> create)
         {
-            var holder = new DumbWindow(_useLayeredWindow, Window.Handle.Handle);
+            var holder = new DumbWindow(Window.Handle.Handle);
             Win32NativeControlAttachment attachment = null;
             try
             {
                 var child = create(holder);
-                // ReSharper disable once UseObjectOrCollectionInitializer
-                // It has to be assigned to the variable before property setter is called so we dispose it on exception
                 attachment = new Win32NativeControlAttachment(holder, child);
                 attachment.AttachedTo = this;
                 return attachment;
@@ -55,8 +51,7 @@ namespace Avalonia.Win32
         public INativeControlHostControlTopLevelAttachment CreateNewAttachment(IPlatformHandle handle)
         {
             AssertCompatible(handle);
-            return new Win32NativeControlAttachment(new DumbWindow(_useLayeredWindow, Window.Handle.Handle),
-                handle) { AttachedTo = this };
+            return new Win32NativeControlAttachment(new DumbWindow(Window.Handle.Handle), handle) { AttachedTo = this };
         }
 
         public bool IsCompatibleWith(IPlatformHandle handle) => handle.HandleDescriptor == "HWND";
@@ -67,27 +62,29 @@ namespace Avalonia.Win32
             public string HandleDescriptor => "HWND";
             public void Destroy() => Dispose();
 
-            UnmanagedMethods.WndProc _wndProcDelegate;
-            private readonly string _className;
+            UnmanagedMethods.WndProc wndProcDelegate;
+            private readonly string className;
 
-            public DumbWindow(bool layered = false, IntPtr? parent = null)
+            public DumbWindow(IntPtr? parent = null)
             {
-                _wndProcDelegate = WndProc;
+                wndProcDelegate = WndProc;
                 var wndClassEx = new UnmanagedMethods.WNDCLASSEX
                 {
                     cbSize = Marshal.SizeOf<UnmanagedMethods.WNDCLASSEX>(),
                     hInstance = UnmanagedMethods.GetModuleHandle(null),
-                    lpfnWndProc = _wndProcDelegate,
-                    lpszClassName = _className = "AvaloniaDumbWindow-" + Guid.NewGuid(),
+                    lpfnWndProc = wndProcDelegate,
+                    lpszClassName = className = "AvaloniaDumbWindow-" + Guid.NewGuid(),
 					hCursor = User32Methods.LoadCursor(IntPtr.Zero, (IntPtr)32512)
                 };
 
-                var atom = UnmanagedMethods.RegisterClassEx(ref wndClassEx);
+                ushort windowClass = UnmanagedMethods.RegisterClassEx(ref wndClassEx);
                 Handle = UnmanagedMethods.CreateWindowEx(
-                    layered ? (int)UnmanagedMethods.WindowStyles.WS_EX_LAYERED : 0,
-                    atom,
+                    0,
+                    windowClass,
                     null,
-                    (int)UnmanagedMethods.WindowStyles.WS_CHILD,
+					(int)(UnmanagedMethods.WindowStyles.WS_CHILD
+					 | UnmanagedMethods.WindowStyles.WS_EX_NOACTIVATE
+					 & ~UnmanagedMethods.WindowStyles.WS_TABSTOP),
                     0,
                     0,
                     640,
@@ -99,23 +96,24 @@ namespace Avalonia.Win32
 
                 if (Handle == IntPtr.Zero)
                     throw new InvalidOperationException("Unable to create child window for native control host. Application manifest with supported OS list might be required.");
-
-                if (layered)
-                    UnmanagedMethods.SetLayeredWindowAttributes(Handle, 0, 255,
-                        UnmanagedMethods.LayeredWindowFlags.LWA_ALPHA);
             }
-
-
 
             protected virtual unsafe IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
             {
+				// Passthrough mouse input to parent window
+				switch ((WM)msg)
+				{
+					case WM.NCHITTEST:
+						return (IntPtr)HitTestResult.HTTRANSPARENT;
+				}
+
                 return UnmanagedMethods.DefWindowProc(hWnd, msg, wParam, lParam);
             }
 
             private void ReleaseUnmanagedResources()
             {
                 UnmanagedMethods.DestroyWindow(Handle);
-                UnmanagedMethods.UnregisterClass(_className, UnmanagedMethods.GetModuleHandle(null));
+                UnmanagedMethods.UnregisterClass(className, UnmanagedMethods.GetModuleHandle(null));
             }
 
             public void Dispose()
@@ -141,7 +139,7 @@ namespace Avalonia.Win32
                 _holder = holder;
                 _child = child;
                 UnmanagedMethods.SetParent(child.Handle, _holder.Handle);
-                UnmanagedMethods.ShowWindow(child.Handle, UnmanagedMethods.ShowWindowCommand.Show);
+                UnmanagedMethods.ShowWindow(child.Handle, UnmanagedMethods.ShowWindowCommand.ShowNoActivate);
             }
 
             void CheckDisposed()

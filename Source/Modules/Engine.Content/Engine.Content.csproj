@@ -10,13 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="HLSL\Utils\**" />
+    <EmbeddedResource Remove="HLSL\Utils\**" />
+    <None Remove="HLSL\Utils\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="HLSL\Include\Common.h" />
+    <None Remove="HLSL\Lighting\LightingCS.hlsl" />
     <None Remove="HLSL\Material\BaseMaterialPS.h" />
     <None Remove="HLSL\Prepass\DepthPS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="HLSL\BaseMS.h" />
+    <EmbeddedResource Include="HLSL\Lighting\LightingCS.hlsl" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.h" />
     <EmbeddedResource Include="HLSL\Prepass\CullCS.hlsl" />
     <EmbeddedResource Include="HLSL\Include\Common.h" />

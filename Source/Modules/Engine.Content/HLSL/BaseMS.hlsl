@@ -5,12 +5,6 @@ cbuffer drawConstants : register(b0)
 	int InstanceID;
 }
 
-cbuffer viewConstants : register(b1)
-{
-	float4x4 View;
-	float4x4 Projection;
-}
-
 [NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
 void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out primitives PrimAttribute prims[124], out indices uint3 indices[124], out vertices VertAttribute verts[64])
@@ -29,15 +23,22 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 		// Fetch vertex data.
 		Vertex vertex = GetVertex(mesh, meshlet, groupThreadID);
 
+		// Grab the transform matrix.
+		Transform transform = Transforms[instance.TransformID];
+
 		// Apply projection to vertex position.
 		float4 position = float4(vertex.Position, 1);
-		position = mul(Transforms[instance.TransformID], position); // Apply instance transform.
-		position = mul(View, position); // Apply camera view.
-		position = mul(Projection, position); // Apply camera projection.
+		position = mul(transform.ObjectToWorld, position); // Apply instance transform.
+		position = mul(ViewConstants.WorldToView, position); // Apply camera view.
+		position = mul(ViewConstants.ViewToClip, position); // Apply camera projection.
+
+		// Apply transformation to vertex normal.
+		float3 normal = vertex.Normal;
+		normal = mul(normal.xyz, (float3x3)transform.WorldToObject);
 
 		// Write output vertex.
 		verts[groupThreadID].Position = position;
-		verts[groupThreadID].Normal = float4(vertex.Normal, 1);
+		verts[groupThreadID].Normal = float4(normal, 1);
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{

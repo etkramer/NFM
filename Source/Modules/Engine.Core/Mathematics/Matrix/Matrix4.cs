@@ -511,7 +511,7 @@ namespace  Engine.Mathematics
 		/// Returns an inverted copy of this instance.
 		/// </summary>
 		/// <returns>The inverted copy.</returns>
-		public Matrix4 Inverted()
+		public Matrix4 Inverse()
 		{
 			var m = this;
 			if (m.Determinant != 0)

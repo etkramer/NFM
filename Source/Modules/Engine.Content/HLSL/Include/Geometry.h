@@ -1,9 +1,26 @@
-﻿// One per object in scene (unordered, compact).
+﻿// Shared view constants
+struct _ViewConstants
+{
+	float4x4 WorldToView;
+	float4x4 ViewToWorld;
+
+	float4x4 ViewToClip;
+	float4x4 ClipToView;
+};
+ConstantBuffer<_ViewConstants> ViewConstants : register(b256);
+
+// One per object in scene (unordered, compact).
 struct Instance
 {
 	uint MeshID;
 	uint MaterialID;
 	uint TransformID;
+};
+
+struct Transform
+{
+	float4x4 ObjectToWorld;
+	float4x4 WorldToObject;
 };
 
 // One per loaded mesh.
@@ -31,7 +48,7 @@ struct Vertex
 };
 
 // Global geometry data - keep slot numbers out of the way. Should probably use spaces instead.
-StructuredBuffer<float4x4> Transforms : register(t251);
+StructuredBuffer<Transform> Transforms : register(t251);
 StructuredBuffer<Instance> Instances : register(t252);
 StructuredBuffer<Mesh> Meshes : register(t253);
 StructuredBuffer<Meshlet> Meshlets : register(t254);

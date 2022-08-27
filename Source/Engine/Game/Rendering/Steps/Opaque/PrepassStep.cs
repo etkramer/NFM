@@ -16,11 +16,13 @@ namespace Engine.Rendering
 
 		public override void Init()
 		{
+			// Compile indirect compute program.
 			cullProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
 				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
 				.Compile().Result;
 
+			// Compile depth prepass program.
 			depthProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
 				.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
@@ -43,15 +45,9 @@ namespace Engine.Rendering
 		{
 			// Generate indirect draw commands and sort front-back.
 			Cull();
-			SortCommands();
 
 			// Build depth buffer for opaque geometry.
 			DrawDepth();
-		}
-
-		private void SortCommands()
-		{
-
 		}
 
 		private void Cull()
@@ -70,9 +66,9 @@ namespace Engine.Rendering
 			List.SetProgramUAV(0, CommandBuffer);
 
 			// Dispatch compute shader.
-			if (ModelActor.InstanceBufferCount > 0)
+			if (ModelActor.InstanceCount > 0)
 			{
-				List.DispatchGroups(ModelActor.InstanceBufferCount);
+				List.DispatchGroups(ModelActor.InstanceCount);
 			}
 		}
 
@@ -91,10 +87,10 @@ namespace Engine.Rendering
 			List.SetProgramSRV(254, Mesh.MeshletBuffer);
 			List.SetProgramSRV(255, Mesh.PrimBuffer);
 			List.SetProgramSRV(256, Mesh.VertBuffer);
-			List.SetProgramCBV(1, Viewport.ViewCB);
+			List.SetProgramCBV(256, Viewport.ViewCB);
 
 			// Dispatch draw commands.
-			List.DrawIndirect(DepthCommandSignature, ModelActor.MaxInstanceCount, CommandBuffer);
+			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, ModelActor.MaxInstanceCount);
 		}
 	}
 }

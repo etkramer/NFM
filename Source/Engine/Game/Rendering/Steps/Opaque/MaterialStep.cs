@@ -35,8 +35,10 @@ namespace Engine.Rendering
 			// Switch to material program.
 			List.SetProgram(MaterialProgram);
 
-			// Set render targets.
-			List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
+			// Set and reset render targets.
+			List.ClearRenderTarget(Viewport.MatBuffer0);
+			List.ClearRenderTarget(Viewport.MatBuffer1);
+			List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
 
 			// Bind program inputs.
 			List.SetProgramSRV(251, Actor.TransformBuffer);
@@ -49,7 +51,7 @@ namespace Engine.Rendering
 
 			// Dispatch draw commands.
 			var prepass = Renderer.GetStep<PrepassStep>();
-			List.DrawIndirect(prepass.DepthCommandSignature, ModelActor.MaxInstanceCount, prepass.CommandBuffer);
+			List.ExecuteIndirect(prepass.DepthCommandSignature, prepass.CommandBuffer, ModelActor.MaxInstanceCount);
 		}
 	}
 }

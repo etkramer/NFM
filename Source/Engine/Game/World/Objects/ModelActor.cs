@@ -16,7 +16,7 @@ namespace Engine.World
 	public partial class ModelActor : Actor
 	{
 		public const int MaxInstanceCount = 100;
-		public static int InstanceBufferCount = 0;	
+		public static int InstanceCount = 0;	
 		public static GraphicsBuffer<InstanceData> InstanceBuffer = new(MaxInstanceCount);
 
 		[Inspect] public Model Model { get; set; } = null;
@@ -39,7 +39,7 @@ namespace Engine.World
 			{
 				MaterialInstances[i].Dispose();
 				InstanceHandles[i].Free();
-				InstanceBufferCount--;
+				InstanceCount--;
 			}
 
 			base.Dispose();
@@ -76,7 +76,7 @@ namespace Engine.World
 				for (int i = 0; i < instanceCount; i++)
 				{
 					InstanceHandles[i] = InstanceBuffer.Allocate(1);
-					InstanceBufferCount++;
+					InstanceCount++;
 				}
 			}
 

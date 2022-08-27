@@ -49,6 +49,25 @@ namespace Engine.Frontend
 						)
 				);
 		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			// NOTE: Input only seems to work if the viewport is first selected with a left click, not a right click.
+
+			Debug.Log("Key down");
+			InputHelper.UpdateKey(e.Key, true);
+
+			e.Handled = true;
+			base.OnKeyDown(e);
+		}
+
+		protected override void OnKeyUp(KeyEventArgs e)
+		{
+			InputHelper.UpdateKey(e.Key, false);
+
+			e.Handled = true;
+			base.OnKeyDown(e);
+		}
 	}
 
 	public partial class ViewportHost : Panel
@@ -84,14 +103,40 @@ namespace Engine.Frontend
 			};
 		}
 
-		protected override void OnKeyDown(KeyEventArgs e)
+		private void UpdatePointer(PointerEventArgs e)
 		{
-			base.OnKeyDown(e);
+			// Update input.
+			PointerPointProperties props = e.GetCurrentPoint(this).Properties;
+			PointerPoint point = e.GetCurrentPoint(null);
+			InputHelper.UpdateMouse(point);
+
+			// Capture when held.
+			if (props.IsLeftButtonPressed || props.IsRightButtonPressed)
+			{
+				e.Pointer.Capture(this);
+			}
+			else
+			{
+				e.Pointer.Capture(null);
+			}
 		}
 
-		protected override void OnKeyUp(KeyEventArgs e)
+		protected override void OnPointerMoved(PointerEventArgs e)
 		{
-			base.OnKeyUp(e);
+			UpdatePointer(e);
+			base.OnPointerMoved(e);
+		}
+
+		protected override void OnPointerPressed(PointerPressedEventArgs e)
+		{
+			UpdatePointer(e);
+			base.OnPointerPressed(e);
+		}
+
+		protected override void OnPointerReleased(PointerReleasedEventArgs e)
+		{
+			UpdatePointer(e);
+			base.OnPointerReleased(e);
 		}
 	}
 }

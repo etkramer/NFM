@@ -49,6 +49,7 @@ namespace Engine.Rendering
 			AddStep(new SceneUpdateStep(), RenderStage.Global);
 			AddStep(new PrepassStep(), RenderStage.Viewport);
 			AddStep(new MaterialStep(), RenderStage.Viewport);
+			AddStep(new LightingStep(), RenderStage.Viewport);
 			AddStep(new ResolveStep(), RenderStage.Viewport);
 		}
 
