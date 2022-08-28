@@ -9,20 +9,21 @@ namespace Engine.GPU
 		internal static DescriptorHeap Heap = new DescriptorHeap(HeapType.SRV, 4096, true);
 		internal DescriptorHandle Handle;
 
-		public ShaderResourceView(ID3D12Resource resource, int stride, int capacity)
+		public ShaderResourceView(ID3D12Resource resource, int stride, int capacity, bool isRaw)
 		{
 			Handle = Heap.Allocate();
 
 			ShaderResourceViewDescription desc = new()
 			{
+				Format = isRaw ? Format.R32_Typeless : Format.Unknown,
 				ViewDimension = ShaderResourceViewDimension.Buffer,
 				Shader4ComponentMapping = ShaderComponentMapping.Default,
 				Buffer = new()
 				{
 					FirstElement = 0,
-					StructureByteStride = stride,
-					NumElements = capacity,
-					Flags = BufferShaderResourceViewFlags.None,
+					StructureByteStride = isRaw ? 0 : stride,
+					NumElements = isRaw ? capacity / 4 : capacity,
+					Flags = isRaw ? BufferShaderResourceViewFlags.Raw : BufferShaderResourceViewFlags.None,
 				}
 			};
 

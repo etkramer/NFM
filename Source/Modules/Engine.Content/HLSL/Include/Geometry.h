@@ -48,6 +48,7 @@ struct Vertex
 };
 
 // Global geometry data - keep slot numbers out of the way. Should probably use spaces instead.
+ByteAddressBuffer Materials : register(t250);
 StructuredBuffer<Transform> Transforms : register(t251);
 StructuredBuffer<Instance> Instances : register(t252);
 StructuredBuffer<Mesh> Meshes : register(t253);

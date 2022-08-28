@@ -25,13 +25,13 @@ namespace  Engine.Mathematics
         public float A;
 
 		#region Constructors
-		public static Color FromHex(int Value)
+		public static Color FromHex(int value)
 		{
-			byte[] Bytes = BitConverter.GetBytes(Value);
+			byte[] Bytes = BitConverter.GetBytes(value);
 
 			Color Col = new();
 
-			string Hex = Value.ToString("X6");
+			string Hex = value.ToString("X6");
 			string SR = Hex[0].ToString() + Hex[1].ToString();
 			string SG = Hex[2].ToString() + Hex[3].ToString();
 			string SB = Hex[4].ToString() + Hex[5].ToString();
@@ -48,28 +48,28 @@ namespace  Engine.Mathematics
 			return Col;
 		}
 
-		public Color(float Value)
+		public Color(float rgb)
 		{
-			R = Value;
-			G = Value;
-			B = Value;
+			R = rgb;
+			G = rgb;
+			B = rgb;
 			A = 1;
 		}
 
-		public Color(float R, float G, float B)
+		public Color(float r, float g, float b)
 		{
-			this.R = R;
-			this.G = G;
-			this.B = B;
-			this.A = 1f;
+			R = r;
+			G = g;
+			B = b;
+			A = 1f;
 		}
 
-		public Color(float R, float G, float B, float A)
+		public Color(float r, float g, float b, float a)
         {
-            this.R = R;
-			this.G = G;
-			this.B = B;
-			this.A = A;
+			R = r;
+			G = g;
+			B = b;
+			A = a;
         }
 
 		#endregion
@@ -89,7 +89,7 @@ namespace  Engine.Mathematics
 		}
 
 		#endregion
-		#region Common Utilities
+		#region Helpers
 		/// <summary>
 		/// Gets or sets the value at the index of the Vector.
 		/// </summary>
@@ -199,8 +199,8 @@ namespace  Engine.Mathematics
 
 		#endregion
 
-		public static Color Invisible = new Color(0, 0, 0, 0);
-		public static Color Black = new Color(0, 0, 0, 1);
-		public static Color White = new Color(1, 1, 1, 1);
+		public static readonly Color Invisible = new Color(0, 0, 0, 0);
+		public static readonly Color Black = new Color(0, 0, 0, 1);
+		public static readonly Color White = new Color(1, 1, 1, 1);
 	}
 }

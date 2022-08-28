@@ -12,6 +12,7 @@ namespace Engine.Resources
 	{
 		public string Name;
 		public object Value;
+		public Type Type;
 	}
 
 	public class Shader : Resource
@@ -27,12 +28,13 @@ namespace Engine.Resources
 			ShaderSource = source;
 		}
 
-		public Shader AddInt(string param, int defaultValue = default)
+		public Shader AddColor(string param, Color defaultValue = default)
 		{
 			Parameters.Add(new ShaderParameter()
 			{
 				Name = param,
-				Value = defaultValue
+				Value = defaultValue,
+				Type = typeof(Color)
 			});
 
 			return this;

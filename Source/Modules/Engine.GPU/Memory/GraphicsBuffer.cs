@@ -16,6 +16,7 @@ namespace Engine.GPU
 		public int Alignment = 1;
 
 		public bool HasCounter { get; private set; }
+		public bool IsRaw { get; private set; }
 		public long CounterOffset { get; private set; } = 0;
 
 		internal ID3D12Resource Resource;
@@ -27,7 +28,7 @@ namespace Engine.GPU
 			{
 				if (srv == null)
 				{
-					srv = new ShaderResourceView(Resource, Stride, Capacity);
+					srv = new ShaderResourceView(Resource, Stride, Capacity, IsRaw && Stride == 1);
 				}
 
 				return srv;
@@ -70,12 +71,13 @@ namespace Engine.GPU
 			set => Resource.Name = value;
 		}
 
-		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1, bool hasCounter = false)
+		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1, bool hasCounter = false, bool isRaw = false)
 		{
 			Capacity = sizeBytes / stride;
 			Alignment = alignment;
 			Stride = stride;
 			HasCounter = hasCounter;
+			IsRaw = isRaw;
 
 			ulong width = (ulong)sizeBytes;
 

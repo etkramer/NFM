@@ -100,5 +100,20 @@ namespace Engine.Core
 				action.Invoke(value);
 			}
 		}
+
+		public static bool TryFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource value)
+		{
+			foreach (var item in source)
+			{
+				if (predicate.Invoke(item))
+				{
+					value = item;
+					return true;
+				}
+			}
+
+			value = default(TSource);
+			return false;
+		}
 	}
 }

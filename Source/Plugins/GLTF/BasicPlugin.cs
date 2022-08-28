@@ -51,7 +51,7 @@ namespace Basic
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
-			shader.AddInt("TempyIndex");
+			shader.AddColor("DebugColor", new Color(1, 0, 1));
 
 			return shader;
 		}

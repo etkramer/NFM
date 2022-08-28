@@ -94,7 +94,7 @@ namespace Engine.World
 					{
 						MeshID = (uint)mesh.MeshHandle.ElementStart,
 						TransformID = (uint)TransformHandle.ElementStart,
-						//MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.ElementStart,
+						MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.ElementStart,
 					};
 
 					// Upload instance to buffer.

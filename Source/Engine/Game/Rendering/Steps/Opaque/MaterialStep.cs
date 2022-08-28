@@ -41,6 +41,7 @@ namespace Engine.Rendering
 			List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
 
 			// Bind program inputs.
+			List.SetProgramSRV(250, MaterialInstance.MaterialBuffer);
 			List.SetProgramSRV(251, Actor.TransformBuffer);
 			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
 			List.SetProgramSRV(253, Mesh.MeshBuffer);
@@ -51,7 +52,7 @@ namespace Engine.Rendering
 
 			// Dispatch draw commands.
 			var prepass = Renderer.GetStep<PrepassStep>();
-			List.ExecuteIndirect(prepass.DepthCommandSignature, prepass.CommandBuffer, ModelActor.MaxInstanceCount);
+			List.ExecuteIndirect(MaterialCommandSignature, prepass.CommandBuffer, ModelActor.MaxInstanceCount);
 		}
 	}
 }

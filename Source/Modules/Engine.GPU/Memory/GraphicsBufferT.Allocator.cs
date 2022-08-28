@@ -21,6 +21,9 @@ namespace Engine.GPU
 			}
 		}
 
+		/// <summary>
+		/// Allocates space in the buffer and returns a handle.
+		/// </summary>
 		public BufferHandle<T> Allocate(int count)
 		{
 			lock (blocks)

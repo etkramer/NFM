@@ -13,7 +13,7 @@ namespace Engine.Resources
 			Shader = shader;
 		}
 
-		public Material SetInt(string param, int value)
+		public Material SetColor(string param, Color value)
 		{
 			OverrideParameters.Add(new ShaderParameter()
 			{

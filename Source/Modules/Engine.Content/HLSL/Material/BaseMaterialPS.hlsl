@@ -35,6 +35,8 @@ PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 	uint instanceID = prim.InstanceID;
 	uint materialID = Instances[instanceID].MaterialID;
 
+	uint shaderID = Materials.Load(materialID + 0);
+
 	// Get params from surface shader.
 	SurfaceInfo surfaceInfo = SurfaceMain();
 
@@ -45,6 +47,8 @@ PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 	PSTargets targets;
 	targets.Color = float4(surfaceInfo.Color, surfaceInfo.Emission);
 	targets.NRM = float4(normal.xy, surfaceInfo.Roughness, surfaceInfo.Metallic);
+
+	targets.Color = float4(IndexToColor(shaderID), 1);
 
 	return targets;
 }

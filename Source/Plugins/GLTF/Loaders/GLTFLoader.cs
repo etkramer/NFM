@@ -35,7 +35,7 @@ namespace Basic.Loaders
 				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR");
 
 				Material material = new Material(shader);
-				material.SetInt("TempyIndex", i);
+				material.SetColor("DebugColor", i % 2 == 0 ? new Color(0, 0, 1) : new Color(1, 0, 0));
 
 				materials[i] = material;
 			}
