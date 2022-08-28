@@ -28,8 +28,8 @@ namespace Engine.Rendering
 			List.SetProgramSRV(0, 0, Viewport.DepthBuffer);
 			List.SetProgramSRV(1, 0, Viewport.MatBuffer0);
 			List.SetProgramSRV(2, 0, Viewport.MatBuffer1);
+			List.SetProgramCBV(0, 1, Viewport.ViewCB);
 			List.SetProgramUAV(0, 0, Viewport.ColorTarget);
-			List.SetProgramCBV(256, 0, Viewport.ViewCB);
 
 			// Dispatch lighting shader.
 			List.DispatchThreads(Viewport.ColorTarget.Width, 32, Viewport.ColorTarget.Height, 32);
