@@ -59,11 +59,11 @@ namespace Engine.Rendering
 			List.SetProgram(cullProgram);
 
 			// Set SRV inputs.
-			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			List.SetProgramSRV(253, Mesh.MeshBuffer);
+			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
+			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
 
 			// Set UAV outputs.
-			List.SetProgramUAV(0, CommandBuffer);
+			List.SetProgramUAV(0, 0, CommandBuffer);
 
 			// Dispatch compute shader.
 			if (ModelActor.InstanceCount > 0)
@@ -80,14 +80,16 @@ namespace Engine.Rendering
 			// Set render targets.
 			List.SetRenderTarget(null, Viewport.DepthBuffer);
 
-			// Bind program inputs.
-			List.SetProgramSRV(251, Actor.TransformBuffer);
-			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			List.SetProgramSRV(253, Mesh.MeshBuffer);
-			List.SetProgramSRV(254, Mesh.MeshletBuffer);
-			List.SetProgramSRV(255, Mesh.PrimBuffer);
-			List.SetProgramSRV(256, Mesh.VertBuffer);
-			List.SetProgramCBV(256, Viewport.ViewCB);
+			// Bind program SRVs.
+			List.SetProgramSRV(0, 1, Mesh.VertBuffer);
+			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
+			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
+			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
+			List.SetProgramSRV(4, 1, Actor.TransformBuffer);
+			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
+
+			// Bind program CBVs.
+			List.SetProgramCBV(0, 1, Viewport.ViewCB);
 
 			// Dispatch draw commands.
 			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, ModelActor.MaxInstanceCount);

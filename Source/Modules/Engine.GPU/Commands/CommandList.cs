@@ -155,12 +155,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		public void SetProgramCBV(Register binding, GraphicsBuffer target)
+		public void SetProgramCBV(int slot, int space, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.cRegisterMapping.TryGetValue(binding, out int parameterIndex))
+				if (!program.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 				{
 					return;
 				}
@@ -183,12 +183,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramUAV(int slot, Texture target)
+		public void SetProgramUAV(int slot, int space, Texture target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.uRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				if (!program.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 				{
 					return;
 				}
@@ -211,12 +211,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramUAV(int slot, GraphicsBuffer target)
+		public void SetProgramUAV(int slot, int space, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.uRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				if (!program.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 				{
 					return;
 				}
@@ -239,12 +239,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramSRV(int slot, Texture target)
+		public void SetProgramSRV(int slot, int space, Texture target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.tRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				if (!program.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 				{
 					return;
 				}
@@ -267,12 +267,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramSRV(int slot, GraphicsBuffer target)
+		public void SetProgramSRV(int slot, int space, GraphicsBuffer target)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.tRegisterMapping.TryGetValue(slot, out int parameterIndex))
+				if (!program.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 				{
 					return;
 				}

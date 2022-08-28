@@ -7,7 +7,7 @@ struct _ViewConstants
 	float4x4 ViewToClip;
 	float4x4 ClipToView;
 };
-ConstantBuffer<_ViewConstants> ViewConstants : register(b256);
+ConstantBuffer<_ViewConstants> ViewConstants : register(b0, space1);
 
 // One per object in scene (unordered, compact).
 struct Instance
@@ -47,11 +47,10 @@ struct Vertex
 	float3 Normal;
 };
 
-// Global geometry data - keep slot numbers out of the way. Should probably use spaces instead.
-ByteAddressBuffer Materials : register(t250);
-StructuredBuffer<Transform> Transforms : register(t251);
-StructuredBuffer<Instance> Instances : register(t252);
-StructuredBuffer<Mesh> Meshes : register(t253);
-StructuredBuffer<Meshlet> Meshlets : register(t254);
-StructuredBuffer<uint> Primitives : register(t255);
-StructuredBuffer<Vertex> Vertices : register(t256);
+// Global geometry data.
+StructuredBuffer<Vertex> Vertices : register(t0, space1);
+StructuredBuffer<uint> Primitives : register(t1, space1);
+StructuredBuffer<Meshlet> Meshlets : register(t2, space1);
+StructuredBuffer<Mesh> Meshes : register(t3, space1);
+StructuredBuffer<Transform> Transforms : register(t4, space1);
+StructuredBuffer<Instance> Instances : register(t5, space1);

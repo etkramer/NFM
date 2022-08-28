@@ -2,6 +2,8 @@
 #include "HLSL/Material/BaseMaterialPS.h"
 #include "HLSL/BaseMS.h"
 
+ByteAddressBuffer MaterialParams : register(t0);
+
 //#insert MATERIAL
 SurfaceInfo SurfaceMain()
 {
@@ -35,7 +37,8 @@ PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 	uint instanceID = prim.InstanceID;
 	uint materialID = Instances[instanceID].MaterialID;
 
-	uint shaderID = Materials.Load(materialID + 0);
+	// Read material params from buffer.
+	uint shaderID = MaterialParams.Load(materialID + 0);
 
 	// Get params from surface shader.
 	SurfaceInfo surfaceInfo = SurfaceMain();

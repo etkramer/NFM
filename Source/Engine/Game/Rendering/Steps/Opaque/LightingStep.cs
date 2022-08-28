@@ -25,11 +25,11 @@ namespace Engine.Rendering
 			List.SetProgram(lightingProgram);
 
 			// Set program inputs and outputs.
-			List.SetProgramSRV(0, Viewport.DepthBuffer);
-			List.SetProgramSRV(1, Viewport.MatBuffer0);
-			List.SetProgramSRV(2, Viewport.MatBuffer1);
-			List.SetProgramUAV(0, Viewport.ColorTarget);
-			List.SetProgramCBV(256, Viewport.ViewCB);
+			List.SetProgramSRV(0, 0, Viewport.DepthBuffer);
+			List.SetProgramSRV(1, 0, Viewport.MatBuffer0);
+			List.SetProgramSRV(2, 0, Viewport.MatBuffer1);
+			List.SetProgramUAV(0, 0, Viewport.ColorTarget);
+			List.SetProgramCBV(256, 0, Viewport.ViewCB);
 
 			// Dispatch lighting shader.
 			List.DispatchThreads(Viewport.ColorTarget.Width, 32, Viewport.ColorTarget.Height, 32);

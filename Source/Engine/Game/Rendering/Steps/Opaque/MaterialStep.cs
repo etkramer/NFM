@@ -40,15 +40,19 @@ namespace Engine.Rendering
 			List.ClearRenderTarget(Viewport.MatBuffer1);
 			List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
 
-			// Bind program inputs.
-			List.SetProgramSRV(250, MaterialInstance.MaterialBuffer);
-			List.SetProgramSRV(251, Actor.TransformBuffer);
-			List.SetProgramSRV(252, ModelActor.InstanceBuffer);
-			List.SetProgramSRV(253, Mesh.MeshBuffer);
-			List.SetProgramSRV(254, Mesh.MeshletBuffer);
-			List.SetProgramSRV(255, Mesh.PrimBuffer);
-			List.SetProgramSRV(256, Mesh.VertBuffer);
-			List.SetProgramCBV(1, Viewport.ViewCB);
+			// Bind program SRVs.
+			List.SetProgramSRV(0, 1, Mesh.VertBuffer);
+			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
+			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
+			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
+			List.SetProgramSRV(4, 1, Actor.TransformBuffer);
+			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
+
+			// Bind program CBVs.
+			List.SetProgramCBV(0, 1, Viewport.ViewCB);
+
+			// Bind material params buffer.
+			List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 			// Dispatch draw commands.
 			var prepass = Renderer.GetStep<PrepassStep>();
