@@ -47,13 +47,10 @@ namespace Basic.Loaders
 				Vector3[] vertices = new Vector3[importMesh.VertexCount];
 				Vector3[] normals = new Vector3[importMesh.VertexCount];
 
-				// Create matrix for translating Y-up GLTF coords to Z-up engine coords.
-				Matrix4 zUp = Matrix4.CreateRotation(new Vector3(-90, 180, 180));
-
 				// Interpret vertices/normals.
 				for (int i = 0; i < importMesh.VertexCount; i++)
 				{
-					vertices[i] = (new Vector4(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z, 1) * zUp).Xyz;
+					vertices[i] = new(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z);
 					normals[i] = new(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z);
 				}
 

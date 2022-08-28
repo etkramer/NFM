@@ -42,9 +42,9 @@ namespace Engine
 			new PointLightActor().Spawn();
 			
 			// Flight helmet.
-			var helmObject = new ModelActor("Flight Helmet")
-				.Spawn<ModelActor>();
-			helmObject.Position = new Vector3(0, 1, -0.4f);
+			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();
+			helmObject.Position = new Vector3(0, -0.4f, 1);
+			helmObject.Rotation = new Vector3(0, 180, 0);
 			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
 			// If we need a GC, now's a good time.

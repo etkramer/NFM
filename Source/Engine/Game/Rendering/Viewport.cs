@@ -79,8 +79,8 @@ namespace Engine.Rendering
 			{
 				// Mouse look
 				Vector3 cameraRotation = WorkCamera.Rotation;
-				cameraRotation.Z += InputHelper.MouseDelta.X * lookSens;
-				cameraRotation.X -= InputHelper.MouseDelta.Y * lookSens;
+				cameraRotation.Y += InputHelper.MouseDelta.X * lookSens;
+				cameraRotation.X += InputHelper.MouseDelta.Y * lookSens;
 				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
 				WorkCamera.Rotation = cameraRotation;
 
@@ -88,19 +88,19 @@ namespace Engine.Rendering
 				Vector3 accelVector = Vector3.Zero;
 				if (InputHelper.W == KeyState.Down)
 				{
-					accelVector.Y -= 1;
+					accelVector.Z -= 1;
 				}
 				if (InputHelper.A == KeyState.Down)
 				{
-					accelVector.X += 1;
+					accelVector.X -= 1;
 				}
 				if (InputHelper.S == KeyState.Down)
 				{
-					accelVector.Y += 1;
+					accelVector.Z += 1;
 				}
 				if (InputHelper.D == KeyState.Down)
 				{
-					accelVector.X -= 1;
+					accelVector.X += 1;
 				}
 
 				// Transform WASD accelerations by camera direction.
@@ -108,11 +108,11 @@ namespace Engine.Rendering
 
 				if (InputHelper.Space == KeyState.Down)
 				{
-					accelVector.Z += 1;
+					accelVector.Y += 1;
 				}
 				if (InputHelper.C == KeyState.Down)
 				{
-					accelVector.Z -= 1;
+					accelVector.Y -= 1;
 				}
 
 				// Apply acceleration to velocity.
@@ -130,11 +130,8 @@ namespace Engine.Rendering
 			Matrix4 view = Matrix4.CreateTransform(WorkCamera.Position, WorkCamera.Rotation, Vector3.One).Inverse();
 			Matrix4 projection = Matrix4.CreatePerspectiveReversed(WorkCamera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
 
-			// Orient the camera in the opposite direction (facing +Y).
-			view = Matrix4.CreateRotation(new Vector3(0, 0, 180)) * view;
-
-			// World is in Z-up space (Blender coords). Translate it to Y-up (render coords).
-			view = view * Matrix4.CreateRotation(new Vector3(-90, 180, 0)).Inverse();
+			// Orient the camera in the opposite direction (facing +Z).
+			view = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * view;
 
 			ViewCB.SetData(0, new ViewConstants()
 			{
