@@ -44,12 +44,11 @@ namespace Engine
 			// Flight helmet.
 			var helmObject = new ModelActor("Flight Helmet")
 				.Spawn<ModelActor>();
-			helmObject.Position = new Vector3(0, -0.4f, -1);
-			helmObject.Rotation = new Vector3(0, 25, 0);
+			helmObject.Position = new Vector3(0, 1, -0.4f);
 			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
-			// Try to make sure the big GC happens *before* we start presenting.
-			GC.Collect(2, GCCollectionMode.Forced, true);
+			// If we need a GC, now's a good time.
+			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
 		}
 
 		public static void Update()

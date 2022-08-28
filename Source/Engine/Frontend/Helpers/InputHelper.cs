@@ -25,8 +25,10 @@ namespace Engine.Frontend
 		public static KeyState A;
 		public static KeyState S;
 		public static KeyState D;
+		public static KeyState Q;
+		public static KeyState E;
+		public static KeyState C;
 		public static KeyState Space;
-		public static KeyState Ctrl;
 		public static KeyState Shift;
 
 		private static bool wasMouseMoved = false;
@@ -93,13 +95,21 @@ namespace Engine.Frontend
 			{
 				D = down ? KeyState.Down : KeyState.Up;
 			}
+			if (key == Key.Q)
+			{
+				Q = down ? KeyState.Down : KeyState.Up;
+			}
+			if (key == Key.E)
+			{
+				E = down ? KeyState.Down : KeyState.Up;
+			}
+			if (key == Key.C)
+			{
+				C = down ? KeyState.Down : KeyState.Up;
+			}
 			if (key == Key.Space)
 			{
 				Space = down ? KeyState.Down : KeyState.Up;
-			}
-			if (key == Key.LeftCtrl)
-			{
-				Ctrl = down ? KeyState.Down : KeyState.Up;
 			}
 			if (key == Key.LeftShift)
 			{

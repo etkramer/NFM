@@ -52,9 +52,6 @@ namespace Engine.Frontend
 
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
-			// NOTE: Input only seems to work if the viewport is first selected with a left click, not a right click.
-
-			Debug.Log("Key down");
 			InputHelper.UpdateKey(e.Key, true);
 
 			e.Handled = true;
