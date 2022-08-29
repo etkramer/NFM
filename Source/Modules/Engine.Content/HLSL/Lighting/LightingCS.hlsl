@@ -39,5 +39,5 @@ void LightingCS(uint3 pixel : SV_DispatchThreadID)
 	norm.z = sqrt(1 - dot(norm.xy, norm.xy));
 
 	Output[pixel.xy] = float4(norm, 1);
-	Output[pixel.xy] = float4(mat0.xyz, 1);
+	//Output[pixel.xy] = float4(mat0.xyz, 1);
 }

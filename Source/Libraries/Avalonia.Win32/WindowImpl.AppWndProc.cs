@@ -16,7 +16,7 @@ namespace Avalonia.Win32
     public partial class WindowImpl
     {
 		private const long resizeTimerID = 0xDEADBEEF;
-		private bool isResizing = false;
+		private bool isMovingResizing = false;
 
         [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
             Justification = "Using Win32 naming for consistency.")]
@@ -131,7 +131,7 @@ namespace Avalonia.Win32
 
 				case WindowsMessage.WM_ENTERSIZEMOVE:
 					{
-						isResizing = true;
+						isMovingResizing = true;
 						User32Methods.SetTimer(hWnd, (IntPtr)resizeTimerID, 0x0000000A, null);
 
 						_resizeReason = PlatformResizeReason.User;
@@ -140,7 +140,7 @@ namespace Avalonia.Win32
 
 				case WindowsMessage.WM_EXITSIZEMOVE:
 					{
-						isResizing = false;
+						isMovingResizing = false;
 						User32Methods.KillTimer(hWnd, (IntPtr)resizeTimerID);
 
 						_resizeReason = PlatformResizeReason.Unspecified;
@@ -387,7 +387,7 @@ namespace Avalonia.Win32
                 case WindowsMessage.WM_PAINT:
                 {
 					// Update timers.
-					if (!isResizing)
+					if (!isMovingResizing)
 					{
 						Win32Platform.Instance.TimerTick();
 					}
@@ -397,11 +397,10 @@ namespace Avalonia.Win32
 
                 case WindowsMessage.WM_SIZE:
                     {
-                        using(NonPumpingSyncContext.Use())
-                        using (_rendererLock.Lock())
-                        {
-                            // Do nothing here, just block until the pending frame render is completed on the render thread
-                        }
+						if (isMovingResizing)
+						{
+							Win32Platform.Instance.TimerTick();
+						}
 
                         var size = (SizeCommand)wParam;
 
