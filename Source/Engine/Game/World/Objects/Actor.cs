@@ -129,7 +129,7 @@ namespace Engine.World
 		{
 			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
 
-			TransformBuffer.SetData(TransformHandle, new GPUTransform()
+			Graphics.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
 			{
 				ObjectToWorld = transform,
 				WorldToObject = transform.Inverse()

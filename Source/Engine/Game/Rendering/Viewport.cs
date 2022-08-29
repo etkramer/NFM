@@ -133,7 +133,7 @@ namespace Engine.Rendering
 			// Orient the camera in the opposite direction (facing +Z).
 			view = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * view;
 
-			ViewCB.SetData(0, new ViewConstants()
+			Graphics.DefaultCommandList.UploadBuffer(ViewCB, new ViewConstants()
 			{
 				WorldToView = view,
 				ViewToWorld = view.Inverse(),

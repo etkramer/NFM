@@ -56,7 +56,7 @@ namespace Engine.Rendering
 		public static void Render()
 		{
 			// Switch to the default command list.
-			RenderStep.List = Graphics.GetCommandList();
+			RenderStep.List = Graphics.DefaultCommandList;
 
 			// Build and execute global commands on default command list.
 			RenderStep.List.PushEvent("Global");

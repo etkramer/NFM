@@ -132,16 +132,16 @@ namespace Engine.GPU
 	{
 		public long ElementStart = 0;
 		public long ElementCount = 0;
-		private GraphicsBuffer<T> buffer;
+		public GraphicsBuffer<T> Buffer;
 
 		public BufferHandle(GraphicsBuffer<T> source)
 		{
-			buffer = source;
+			Buffer = source;
 		}
 
 		public void Dispose()
 		{
-			buffer.Free(this);
+			Buffer.Free(this);
 		}
 	}
 }

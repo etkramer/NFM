@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Engine.GPU
 {
-	internal unsafe static class UploadBuffer
+	internal unsafe static class UploadHelper
 	{
 		// 250MB upload heap. TODO: Use a proper allocator, current method means we can't upload to an offset of >250MB.
 		const int UploadSize = 250 * 1024 * 1024;
@@ -19,7 +19,7 @@ namespace Engine.GPU
 
 		public static object Lock = new();
 
-		static UploadBuffer()
+		static UploadHelper()
 		{
 			ResourceDescription copyBufferDescription = new()
 			{

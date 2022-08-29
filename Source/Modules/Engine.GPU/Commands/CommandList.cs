@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
@@ -373,8 +374,52 @@ namespace Engine.GPU
 				unsafe
 				{
 					int zeroInt = 0;
-					buffer.SetData(&zeroInt, 4, buffer.CounterOffset, this);
+					UploadBuffer(buffer, &zeroInt, 4, buffer.CounterOffset);
 				}
+			}
+		}
+
+		public unsafe void UploadBuffer<T>(BufferHandle<T> handle, T data) where T : unmanaged
+		{
+			UploadBuffer(handle.Buffer, data, handle.ElementStart);
+		}
+
+		public unsafe void UploadBuffer<T>(BufferHandle<T> handle, Span<T> data) where T : unmanaged
+		{
+			UploadBuffer(handle.Buffer, data, handle.ElementStart);
+		}
+
+		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, long start = 0) where T : unmanaged
+		{
+			UploadBuffer(buffer, &data, sizeof(T), start * sizeof(T));
+		}
+
+		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, Span<T> data, long start = 0) where T : unmanaged
+		{
+			fixed (T* dataPtr = data)
+			{
+				UploadBuffer(buffer, dataPtr, data.Length * sizeof(T), start * sizeof(T));
+			}
+		}
+
+		public unsafe void UploadBuffer(GraphicsBuffer buffer, void* data, int dataSize, long offset = 0)
+		{
+			lock (UploadHelper.Lock)
+			{
+				int uploadRing = UploadHelper.Ring;
+				int uploadOffset = UploadHelper.UploadOffset;
+				long destOffset = offset;
+
+				// Copy data to upload buffer.
+				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
+				UploadHelper.UploadOffset += dataSize;
+
+				// Copy from upload to dest buffer.
+				CustomCommand((o) =>
+				{
+					o.CopyBufferRegion(buffer.Resource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
+				},
+				new[] { new CommandInput(buffer, ResourceStates.CopyDest) });
 			}
 		}
 

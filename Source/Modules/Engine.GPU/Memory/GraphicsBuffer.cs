@@ -123,32 +123,5 @@ namespace Engine.GPU
 		{
 			return Resource;
 		}
-
-		public void SetData(void* data, int dataSize, long offset, CommandList listOverride = null)
-		{
-			lock (UploadBuffer.Lock)
-			{
-				int uploadRing = UploadBuffer.Ring;
-				int uploadOffset = UploadBuffer.UploadOffset;
-				long destOffset = offset;
-
-				if (listOverride == null)
-					listOverride = Graphics.GetCommandList();
-
-				// Copy data to upload buffer.
-				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
-				UploadBuffer.UploadOffset += dataSize;
-
-				// Copy from upload to target buffer.
-				listOverride.CustomCommand((o) => {
-					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
-				}, new[] {
-					new CommandInput() {
-						Resource = this,
-						State = ResourceStates.CopyDest
-					}
-				});
-			}
-		}
 	}
 }
