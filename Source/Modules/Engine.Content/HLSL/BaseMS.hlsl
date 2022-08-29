@@ -1,6 +1,6 @@
 ﻿#include "HLSL/BaseMS.h"
 
-cbuffer drawConstants : register(b0)
+cbuffer CommandConstants : register(b0)
 {
 	int InstanceID;
 }

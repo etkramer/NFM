@@ -9,54 +9,87 @@ namespace Engine.Rendering
 {
 	public class MaterialStep : RenderStep
 	{
-		public ShaderProgram MaterialProgram;
-		public CommandSignature MaterialCommandSignature;
+		private GraphicsBuffer commandBuffer;
+		private ShaderProgram cullProgram;
 
 		public override void Init()
 		{
-			MaterialProgram = new ShaderProgram()
+			// Compile indirect compute program.
+			cullProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
-				.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
-				.SetPixelShader(Embed.GetString("HLSL/Material/BaseMaterialPS.hlsl"), "MaterialPS")
-				.SetDepthMode(DepthMode.Equal, true, false)
-				.SetCullMode(CullMode.CCW)
-				.SetRTCount(2)
+				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
-			MaterialCommandSignature = new CommandSignature()
-				.AddConstantArg(0, MaterialProgram)
-				.AddDispatchMeshArg()
-				.Compile();
+			const int commandStride = 16;
+			commandBuffer = new GraphicsBuffer(commandStride * ModelActor.MaxInstanceCount, commandStride, hasCounter: true);
 		}
 
 		public override void Run()
 		{
-			// Switch to material program.
-			List.SetProgram(MaterialProgram);
-
-			// Set and reset render targets.
+			// Reset render targets.
 			List.ClearRenderTarget(Viewport.MatBuffer0);
 			List.ClearRenderTarget(Viewport.MatBuffer1);
-			List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
 
-			// Bind program SRVs.
-			List.SetProgramSRV(0, 1, Mesh.VertBuffer);
-			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
-			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
+			// Loop through materials to shade.
+			foreach (var shaderPair in ShaderStack.Programs)
+			{
+				CommandSignature commandSignature = shaderPair.Item2.Item2;
+				ShaderProgram program = shaderPair.Item2.Item1;
+				int shaderID = shaderPair.Item1.ProgramID;
+
+				// Build indirect draw commands for this shader ID.
+				BuildDraws(shaderID);
+
+				List.PushEvent($"Draw shader {shaderID}");
+
+				// Switch to material program.
+				List.SetProgram(program);
+
+				// Set and reset render targets.
+				List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
+
+				// Bind program SRVs.
+				List.SetProgramSRV(0, 1, Mesh.VertBuffer);
+				List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
+				List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
+				List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
+				List.SetProgramSRV(4, 1, Actor.TransformBuffer);
+				List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
+				List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
+
+				// Bind program CBVs.
+				List.SetProgramCBV(0, 1, Viewport.ViewCB);
+
+				List.ExecuteIndirect(commandSignature, commandBuffer, ModelActor.InstanceCount);
+				List.PopEvent();
+			}
+		}
+
+		private void BuildDraws(int shaderID)
+		{
+			// Reset command count.
+			commandBuffer.ResetCounter(List);
+
+			// Switch to culling program (compute).
+			List.SetProgram(cullProgram);
+
+			// Set SRV inputs.
+			List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(4, 1, Actor.TransformBuffer);
 			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
 
-			// Bind program CBVs.
-			List.SetProgramCBV(0, 1, Viewport.ViewCB);
+			// Set UAV outputs.
+			List.SetProgramUAV(0, 0, commandBuffer);
 
-			// Bind material params buffer.
-			List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
+			// Build for chosen shader.
+			List.SetProgramConstants(0, shaderID);
 
-			// Dispatch draw commands.
-			var prepass = Renderer.GetStep<PrepassStep>();
-			List.ExecuteIndirect(MaterialCommandSignature, prepass.CommandBuffer, ModelActor.MaxInstanceCount);
+			// Dispatch compute shader.
+			if (ModelActor.InstanceCount > 0)
+			{
+				List.DispatchGroups(ModelActor.InstanceCount);
+			}
 		}
 	}
 }

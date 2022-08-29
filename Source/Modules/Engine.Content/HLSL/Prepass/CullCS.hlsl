@@ -8,12 +8,12 @@ struct IndirectCommand
 	uint ThreadGroupCountZ;
 };
 
-cbuffer viewConstants : register(b1)
+cbuffer Constants : register(b0)
 {
-	float4x4 View;
-	float4x4 Projection;
+	int TargetShaderID;
 }
 
+ByteAddressBuffer MaterialParams : register(t0);
 AppendStructuredBuffer<IndirectCommand> Commands : register(u0);
 
 [numthreads(1, 1, 1)]
@@ -23,6 +23,18 @@ void CullCS(uint3 dispatchID : SV_DispatchThreadID)
 	uint instanceID = dispatchID.x;
 	Instance instance = Instances[instanceID];
 	Mesh mesh = Meshes[instance.MeshID];
+
+	// Only build draws for chosen shader.
+	if (TargetShaderID != -1)
+	{
+		uint materialID = instance.MaterialID;
+		uint shaderID = MaterialParams.Load(materialID + 0);
+
+		if (shaderID != TargetShaderID)
+		{
+			return;
+		}
+	}
 
 	// Check visibility.
 	bool visible = mesh.MeshletCount > 0;

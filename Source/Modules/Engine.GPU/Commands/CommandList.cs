@@ -120,7 +120,43 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramConstants(Register binding, params uint[] constants)
+		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, GraphicsBuffer countBuffer, long countOffset, int maxCommandCount, int commandStart = 0)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, countBuffer, (ulong)countOffset);
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(commandBuffer, ResourceStates.IndirectArgument),
+				new CommandInput(countBuffer, ResourceStates.IndirectArgument)
+			};
+
+			AddCommand(buildDelegate, inputs);
+		}
+
+		private static CommandSignature dispatchSignature = new CommandSignature()
+			.AddDispatchArg()
+			.Compile();
+
+		public void DispatchIndirect(GraphicsBuffer commandBuffer, int commandOffset = 0)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.ExecuteIndirect(dispatchSignature.Handle, 1, commandBuffer, (ulong)commandOffset, null, 0);
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(commandBuffer, ResourceStates.IndirectArgument)
+			};
+
+			AddCommand(buildDelegate, inputs);
+		}
+
+		public void SetProgramConstants(Register binding, params int[] constants)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
@@ -134,7 +170,7 @@ namespace Engine.GPU
 				{
 					unsafe
 					{
-						fixed (uint* constantsPtr = constants)
+						fixed (int* constantsPtr = constants)
 						{
 							list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, 0);
 						}
@@ -144,7 +180,7 @@ namespace Engine.GPU
 				{
 					unsafe
 					{
-						fixed (uint* constantsPtr = constants)
+						fixed (int* constantsPtr = constants)
 						{
 							list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, 0);
 						}
@@ -327,6 +363,27 @@ namespace Engine.GPU
 
 		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate, CommandInput[] inputs)
 		{
+			AddCommand(buildDelegate, inputs);
+		}
+
+		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, long startOffset = 0, long destOffset = 0, long numBytes = -1)
+		{
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				if (numBytes == -1)
+				{
+					numBytes = Math.Min(source.Capacity * source.Stride, dest.Capacity * dest.Stride);
+				}
+
+				list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(source, ResourceStates.CopySource),
+				new CommandInput(dest, ResourceStates.CopyDest),
+			};
+			
 			AddCommand(buildDelegate, inputs);
 		}
 

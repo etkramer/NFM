@@ -10,28 +10,33 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="HLSL\Utils\**" />
-    <EmbeddedResource Remove="HLSL\Utils\**" />
-    <None Remove="HLSL\Utils\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="HLSL\Include\Common.h" />
     <None Remove="HLSL\Lighting\LightingCS.hlsl" />
     <None Remove="HLSL\Material\BaseMaterialPS.h" />
+    <None Remove="HLSL\Material\BaseMaterialPS.hlsl" />
     <None Remove="HLSL\Prepass\DepthPS.hlsl" />
+    <None Remove="HLSL\Utils\BitonicCommon.h" />
+    <None Remove="HLSL\Utils\BitonicIndirectCS.hlsl" />
+    <None Remove="HLSL\Utils\BitonicInnerSortCS.hlsl" />
+    <None Remove="HLSL\Utils\BitonicOuterSortCS.hlsl" />
+    <None Remove="HLSL\Utils\BitonicPreSortCS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="HLSL\BaseMS.h" />
     <EmbeddedResource Include="HLSL\Lighting\LightingCS.hlsl" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.h" />
+    <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.hlsl" />
     <EmbeddedResource Include="HLSL\Prepass\CullCS.hlsl" />
     <EmbeddedResource Include="HLSL\Include\Common.h" />
     <EmbeddedResource Include="HLSL\Include\Geometry.h" />
     <EmbeddedResource Include="HLSL\BaseMS.hlsl" />
-    <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.hlsl" />
     <EmbeddedResource Include="HLSL\Prepass\DepthPS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\BitonicCommon.h" />
+    <EmbeddedResource Include="HLSL\Utils\BitonicIndirectCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\BitonicInnerSortCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\BitonicOuterSortCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\BitonicPreSortCS.hlsl" />
   </ItemGroup>
 
 </Project>

@@ -32,10 +32,10 @@ namespace Basic.Loaders
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
 			{
-				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR");
+				Shader shader = (i % 2 == 0) ? await Asset.GetAsync<Shader>("USER:Shaders/PBR") : await Asset.GetAsync<Shader>("USER:Shaders/PBR2");
 
 				Material material = new Material(shader);
-				material.SetColor("DebugColor", i % 2 == 0 ? new Color(0, 0, 1) : new Color(1, 0, 0));
+				//material.SetColor("DebugColor", i % 2 == 0 ? new Color(0, 0, 1) : new Color(1, 0, 0));
 
 				materials[i] = material;
 			}

@@ -40,8 +40,7 @@ namespace Engine.Rendering
 			List<byte> materialData = new();
 
 			// Add shader ID to material data.
-			int shaderID = 1;
-			materialData.AddRange(GetBytes(shaderID));
+			materialData.AddRange(StructureToByteArray(typeof(int), ShaderStack.ProgramID));
 
 			// Loop through all shader parameters
 			foreach (var param in ShaderStack.Parameters)
@@ -55,9 +54,14 @@ namespace Engine.Rendering
 					value = overrideParam.Value;
 				}
 
-				if (param.Type == typeof(Color))
+				if (param.Type == typeof(bool))
 				{
-					materialData.AddRange(GetBytes((Color)param.Value));
+					// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
+					materialData.AddRange(StructureToByteArray(param.Type, (bool)value ? 1 : 0));
+				}
+				else
+				{
+					materialData.AddRange(StructureToByteArray(param.Type, value));
 				}
 			}
 
@@ -68,10 +72,16 @@ namespace Engine.Rendering
 			MaterialBuffer.SetData(MaterialHandle, materialData.ToArray());
 		}
 
-		private unsafe byte[] GetBytes<T>(T data) where T : unmanaged
+		private byte[] StructureToByteArray(Type type, object data)
 		{
-			byte[] buffer = new byte[sizeof(T)];
-			Marshal.Copy((IntPtr)(&data), buffer, 0, sizeof(T));
+			int dataSize = Marshal.SizeOf(type);
+
+			IntPtr bufferptr = Marshal.AllocHGlobal(dataSize);
+			Marshal.StructureToPtr(data, bufferptr, false);
+			byte[] buffer = new byte[dataSize];
+			Marshal.Copy(bufferptr, buffer, 0, dataSize);
+			Marshal.FreeHGlobal(bufferptr);
+
 			return buffer;
 		}
 

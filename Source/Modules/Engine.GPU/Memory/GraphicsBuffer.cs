@@ -11,6 +11,7 @@ namespace Engine.GPU
 	public unsafe partial class GraphicsBuffer : Resource, IDisposable
 	{
 		public const int ConstantAlignment = 256;
+		public const int CounterAlignment = 4096;
 		public int Capacity;
 		public int Stride;
 		public int Alignment = 1;
@@ -84,9 +85,7 @@ namespace Engine.GPU
 			// Ensure enough space for UAV counter.
 			if (hasCounter)
 			{
-				const int UAV_COUNTER_PLACEMENT_ALIGNMENT = 4096;
-				width = MathHelper.Align(width, UAV_COUNTER_PLACEMENT_ALIGNMENT) + 4;
-
+				width = MathHelper.Align(width, CounterAlignment) + 4;
 				CounterOffset = (long)(width - 4);
 			}
 
@@ -125,7 +124,7 @@ namespace Engine.GPU
 			return Resource;
 		}
 
-		public void SetData(void* data, int dataSize, long offset)
+		public void SetData(void* data, int dataSize, long offset, CommandList listOverride = null)
 		{
 			lock (UploadBuffer.Lock)
 			{
@@ -133,12 +132,15 @@ namespace Engine.GPU
 				int uploadOffset = UploadBuffer.UploadOffset;
 				long destOffset = offset;
 
+				if (listOverride == null)
+					listOverride = Graphics.GetCommandList();
+
 				// Copy data to upload buffer.
 				Unsafe.CopyBlockUnaligned((byte*)UploadBuffer.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
 				UploadBuffer.UploadOffset += dataSize;
 
 				// Copy from upload to target buffer.
-				Graphics.GetCommandList().CustomCommand((o) => {
+				listOverride.CustomCommand((o) => {
 					o.CopyBufferRegion(Resource, (ulong)destOffset, UploadBuffer.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
 				}, new[] {
 					new CommandInput() {
@@ -149,12 +151,12 @@ namespace Engine.GPU
 			}
 		}
 
-		public void ResetCounter()
+		public void ResetCounter(CommandList list = null)
 		{
 			if (HasCounter)
 			{
 				int zeroInt = 0;
-				SetData(&zeroInt, 4, CounterOffset);
+				SetData(&zeroInt, 4, CounterOffset, list);
 			}
 		}
 	}

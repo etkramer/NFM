@@ -21,7 +21,7 @@ void LightingCS(uint3 pixel : SV_DispatchThreadID)
 	}
 
 	// Sample depth.
-	float2 texCoord = float2(pixel.x / (float)width, pixel.y / (float)height);
+	float2 texCoords = pixel / (float)width;
 	float depth = DepthBuffer.Load(pixel);
 
 	// Return if this pixel does not contain any geometry.
@@ -38,6 +38,6 @@ void LightingCS(uint3 pixel : SV_DispatchThreadID)
 	float3 norm = float3(mat1.xy * 2 - 1, 0);
 	norm.z = sqrt(1 - dot(norm.xy, norm.xy));
 
-	//Output[pixel.xy] = float4(mat0.xyz, 1);
 	Output[pixel.xy] = float4(norm, 1);
+	//Output[pixel.xy] = float4(mat0.xyz, 1);
 }

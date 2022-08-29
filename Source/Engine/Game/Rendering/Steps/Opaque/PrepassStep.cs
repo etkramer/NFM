@@ -20,6 +20,7 @@ namespace Engine.Rendering
 			cullProgram = new ShaderProgram()
 				.UseIncludes(typeof(Embed).Assembly)
 				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
+				.AsRootConstant(0, 1)
 				.Compile().Result;
 
 			// Compile depth prepass program.
@@ -64,6 +65,9 @@ namespace Engine.Rendering
 
 			// Set UAV outputs.
 			List.SetProgramUAV(0, 0, CommandBuffer);
+
+			// Build for all shaders
+			List.SetProgramConstants(0, -1);
 
 			// Dispatch compute shader.
 			if (ModelActor.InstanceCount > 0)

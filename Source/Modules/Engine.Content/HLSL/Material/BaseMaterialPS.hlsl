@@ -4,17 +4,7 @@
 
 ByteAddressBuffer MaterialParams : register(t0);
 
-//#insert MATERIAL
-SurfaceInfo SurfaceMain()
-{
-	SurfaceInfo surface;
-	surface.Color = float3(1, 0, 1);
-	surface.Normal = float3(0.5, 0.5, 1);
-	surface.Metallic = 0;
-	surface.Roughness = 0.5;
-
-	return surface;
-}
+#insert MATERIAL
 
 struct PSTargets
 {
@@ -50,8 +40,6 @@ PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 	PSTargets targets;
 	targets.Color = float4(surfaceInfo.Color, surfaceInfo.Emission);
 	targets.NRM = float4(normal.xy, surfaceInfo.Roughness, surfaceInfo.Metallic);
-
-	targets.Color = float4(IndexToColor(shaderID), 1);
 
 	return targets;
 }
