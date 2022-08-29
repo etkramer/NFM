@@ -69,7 +69,7 @@ namespace Engine.Rendering
 		private void BuildDraws(int shaderID)
 		{
 			// Reset command count.
-			commandBuffer.ResetCounter(List);
+			List.ResetCounter(commandBuffer);
 
 			// Switch to culling program (compute).
 			List.SetProgram(cullProgram);

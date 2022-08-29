@@ -41,10 +41,10 @@ namespace Engine.Resources
 			vertices = null;
 			normals = null;
 
-			PrimHandle?.Free();
-			VertHandle?.Free();
-			MeshletHandle?.Free();
-			MeshHandle?.Free();
+			PrimHandle?.Dispose();
+			VertHandle?.Dispose();
+			MeshletHandle?.Dispose();
+			MeshHandle?.Dispose();
 		}
 
 		private uint[] vertMapping = null;

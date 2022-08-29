@@ -80,7 +80,7 @@ namespace Engine.World
 			// Remove self from scene tree.
 			Scene?.Remove(this);
 			Parent = null;
-			TransformHandle.Free();
+			TransformHandle.Dispose();
 
 			// Dispose children.
 			for (int i = Children.Count - 1; i >= 0; i--)

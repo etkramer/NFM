@@ -150,14 +150,5 @@ namespace Engine.GPU
 				});
 			}
 		}
-
-		public void ResetCounter(CommandList list = null)
-		{
-			if (HasCounter)
-			{
-				int zeroInt = 0;
-				SetData(&zeroInt, 4, CounterOffset, list);
-			}
-		}
 	}
 }

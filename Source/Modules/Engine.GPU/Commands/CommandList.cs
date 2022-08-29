@@ -366,6 +366,18 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
+		public void ResetCounter(GraphicsBuffer buffer)
+		{
+			if (buffer.HasCounter)
+			{
+				unsafe
+				{
+					int zeroInt = 0;
+					buffer.SetData(&zeroInt, 4, buffer.CounterOffset, this);
+				}
+			}
+		}
+
 		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, long startOffset = 0, long destOffset = 0, long numBytes = -1)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>

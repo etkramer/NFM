@@ -139,11 +139,9 @@ namespace Engine.GPU
 			buffer = source;
 		}
 
-		public void Free()
+		public void Dispose()
 		{
 			buffer.Free(this);
 		}
-
-		public void Dispose() => Free();
 	}
 }

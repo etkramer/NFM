@@ -54,7 +54,7 @@ namespace Engine.Rendering
 		private void Cull()
 		{
 			// Reset command count.
-			CommandBuffer.ResetCounter();
+			List.ResetCounter(CommandBuffer);
 
 			// Switch to culling program (compute).
 			List.SetProgram(cullProgram);

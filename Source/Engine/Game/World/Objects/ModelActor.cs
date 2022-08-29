@@ -38,7 +38,7 @@ namespace Engine.World
 			for (int i = 0; i < InstanceHandles?.Length; i++)
 			{
 				MaterialInstances[i].Dispose();
-				InstanceHandles[i].Free();
+				InstanceHandles[i].Dispose();
 				InstanceCount--;
 			}
 
@@ -68,7 +68,7 @@ namespace Engine.World
 			if (InstanceHandles == null || InstanceHandles.Length != instanceCount)
 			{
 				MaterialInstances?.ForEach(o => o.Dispose());
-				InstanceHandles?.ForEach(o => o.Free());
+				InstanceHandles?.ForEach(o => o.Dispose());
 
 				// Allocate a handful of new ones.
 				MaterialInstances = new MaterialInstance[instanceCount];

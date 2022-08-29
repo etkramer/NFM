@@ -26,7 +26,7 @@ namespace Engine.Rendering
 
 		private void UpdateMaterialData()
 		{
-			MaterialHandle?.Free();
+			MaterialHandle?.Dispose();
 			List<byte> materialData = new();
 
 			// Add shader ID to material data.
@@ -77,7 +77,7 @@ namespace Engine.Rendering
 
 		public void Dispose()
 		{
-			MaterialHandle?.Free();
+			MaterialHandle?.Dispose();
 		}
 	}
 }
