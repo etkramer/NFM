@@ -30,6 +30,8 @@ PSTargets MaterialPS(VertAttribute vert, PrimAttribute prim)
 	// Read material params from buffer.
 	uint shaderID = MaterialParams.Load(materialID + 0);
 
+	#insert SETUP
+
 	// Get params from surface shader.
 	SurfaceInfo surfaceInfo = SurfaceMain();
 
