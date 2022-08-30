@@ -98,9 +98,9 @@ namespace Engine.World
 					// Make instance data.
 					InstanceData instanceData = new()
 					{
-						MeshID = (uint)mesh.MeshHandle.ElementStart,
-						TransformID = (uint)TransformHandle.ElementStart,
-						MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.ElementStart,
+						MeshID = (uint)mesh.MeshHandle.Start,
+						TransformID = (uint)TransformHandle.Start,
+						MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.Start,
 					};
 
 					// Upload instance to buffer.

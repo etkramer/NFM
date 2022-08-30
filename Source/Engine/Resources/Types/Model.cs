@@ -138,10 +138,10 @@ namespace Engine.Resources
 			MeshHandle = MeshBuffer.Allocate(1);
 			Graphics.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
 			{
-				MeshletCount = (uint)MeshletHandle.ElementCount,
-				MeshletOffset = (uint)MeshletHandle.ElementStart,
-				PrimOffset = (uint)PrimHandle.ElementStart,
-				VertOffset = (uint)VertHandle.ElementStart,
+				MeshletCount = (uint)MeshletHandle.Count,
+				MeshletOffset = (uint)MeshletHandle.Start,
+				PrimOffset = (uint)PrimHandle.Start,
+				VertOffset = (uint)VertHandle.Start,
 			});
 		}
 

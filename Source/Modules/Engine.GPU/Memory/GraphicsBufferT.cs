@@ -6,19 +6,7 @@ namespace Engine.GPU
 {
 	public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : unmanaged
 	{
-		private List<Block> blocks = new();
-
-		public struct Block
-		{
-			public long Start;
-			public long Length;
-
-			public Block(long start, long length)
-			{
-				Start = start;
-				Length = length;
-			}
-		}
+		private List<BufferAllocation<T>> allocations = new();
 
 		public GraphicsBuffer(int elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
 		{
@@ -30,19 +18,20 @@ namespace Engine.GPU
 		/// </summary>
 		public BufferAllocation<T> Allocate(int count)
 		{
-			lock (blocks)
+			lock (allocations)
 			{
-				Block block = default;
+				BufferAllocation<T> alloc = null;
+
 				for (long i = 0; i < Capacity; i++)
 				{
 					long goalStart = i;
 					long goalEnd = i + count;
 
 					bool blocked = false;
-					for (int j = 0; j < blocks.Count; j++) // Loop through blocks that might obstruct this area.
+					for (int j = 0; j < allocations.Count; j++) // Loop through blocks that might obstruct this area.
 					{
-						long blockStart = blocks[j].Start - 1;
-						long blockEnd = blockStart + blocks[j].Length;
+						long blockStart = allocations[j].Start;
+						long blockEnd = blockStart + allocations[j].Count - 1;
 
 						// Can already tell this block isn't in the way.
 						if (blockStart > goalEnd || blockEnd < goalStart)
@@ -66,31 +55,25 @@ namespace Engine.GPU
 
 					if (!blocked)
 					{
-						block = new Block()
+						alloc = new BufferAllocation<T>(this)
 						{
 							Start = goalStart,
-							Length = count
+							Count = count
 						};
 
-						blocks.Add(block);
+						allocations.Add(alloc);
 						break;
 					}
 				}
 
 				// Couldn't find a large enough block.
-				if (block.Length == 0)
+				if (alloc == null)
 				{
 					Resize(Capacity * 2);
 					return Allocate(count);
 				}
-				
-				BufferAllocation<T> handle = new(this)
-				{
-					ElementStart = block.Start,
-					ElementCount = block.Length,
-				};
 
-				return handle;
+				return alloc;
 			}
 		}
 
@@ -101,25 +84,25 @@ namespace Engine.GPU
 
 		public void Free(BufferAllocation<T> handle)
 		{
-			lock (blocks)
+			lock (allocations)
 			{
-				blocks.RemoveAt(blocks.FindIndex(o => o.Start == handle.ElementStart && o.Length == handle.ElementCount));
+				allocations.Remove(handle);
 			}
 		}
 
 		public void Clear()
 		{
-			lock (blocks)
+			lock (allocations)
 			{
-				blocks.Clear();
+				allocations.Clear();
 			}
 		}
 	}
 
 	public class BufferAllocation<T> : IDisposable where T : unmanaged
 	{
-		public long ElementStart = 0;
-		public long ElementCount = 0;
+		public long Start = 0;
+		public long Count = 0;
 		public GraphicsBuffer<T> Buffer { get; private set; }
 
 		public BufferAllocation(GraphicsBuffer<T> source)
