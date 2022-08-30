@@ -40,10 +40,6 @@ namespace Engine.Rendering
 		public Texture ColorTarget;
 		public Texture DepthBuffer;	
 
-		// Material (G-) buffers
-		public Texture MatBuffer0;
-		public Texture MatBuffer1;	
-
 		#endregion
 
 		/// <summary>
@@ -57,8 +53,6 @@ namespace Engine.Rendering
 			// Create RTs and RT-sized buffers.
 			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
 			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
-			MatBuffer0 = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
-			MatBuffer1 = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
 			
 			// Register callbacks
 			Game.OnTick += OnTick;
@@ -149,16 +143,12 @@ namespace Engine.Rendering
 		{
 			ColorTarget.Resize(size.X, size.Y);
 			DepthBuffer.Resize(size.X, size.Y);
-			MatBuffer0.Resize(size.X, size.Y);
-			MatBuffer1.Resize(size.X, size.Y);
 		}
 
 		public void Dispose()
 		{
 			ColorTarget.Dispose();
 			DepthBuffer.Dispose();
-			MatBuffer0.Dispose();
-			MatBuffer1.Dispose();
 
 			Game.OnTick -= OnTick;
 			All.Remove(this);

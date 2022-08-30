@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <None Remove="HLSL\Include\Common.h" />
-    <None Remove="HLSL\Lighting\LightingCS.hlsl" />
     <None Remove="HLSL\Material\BaseMaterialPS.h" />
     <None Remove="HLSL\Material\BaseMaterialPS.hlsl" />
     <None Remove="HLSL\Prepass\DepthPS.hlsl" />
@@ -24,7 +23,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="HLSL\BaseMS.h" />
-    <EmbeddedResource Include="HLSL\Lighting\LightingCS.hlsl" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.h" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.hlsl" />
     <EmbeddedResource Include="HLSL\Prepass\CullCS.hlsl" />

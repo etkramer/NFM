@@ -110,7 +110,6 @@ namespace Engine.Rendering
 					.SetPixelShader(source, "MaterialPS")
 					.SetDepthMode(DepthMode.Equal, true, false)
 					.SetCullMode(CullMode.CCW)
-					.SetRTCount(2)
 					.AsRootConstant(0, 1)
 					.Compile().Result;
 

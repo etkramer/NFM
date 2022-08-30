@@ -54,7 +54,6 @@ namespace Engine.Rendering
 			AddStep(new SceneUpdateStep(), RenderStage.Global);
 			AddStep(new PrepassStep(), RenderStage.Viewport);
 			AddStep(new MaterialStep(), RenderStage.Viewport);
-			AddStep(new LightingStep(), RenderStage.Viewport);
 			AddStep(new ResolveStep(), RenderStage.Viewport);
 		}
 
@@ -77,6 +76,7 @@ namespace Engine.Rendering
 					RenderStep.List.PopEvent();
 				}
 			}
+
 			RenderStep.List.PopEvent();
 
 			// Execute default command list and wait for it on the GPU.

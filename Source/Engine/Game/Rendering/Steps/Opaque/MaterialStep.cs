@@ -27,10 +27,6 @@ namespace Engine.Rendering
 
 		public override void Run()
 		{
-			// Reset render targets.
-			List.ClearRenderTarget(Viewport.MatBuffer0);
-			List.ClearRenderTarget(Viewport.MatBuffer1);
-
 			// Loop through materials to shade.
 			foreach (var shaderPair in ShaderStack.Programs)
 			{
@@ -47,7 +43,7 @@ namespace Engine.Rendering
 				List.SetProgram(program);
 
 				// Set and reset render targets.
-				List.SetRenderTargets(Viewport.DepthBuffer, Viewport.MatBuffer0, Viewport.MatBuffer1);
+				List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
 
 				// Bind program SRVs.
 				List.SetProgramSRV(0, 1, Mesh.VertBuffer);
