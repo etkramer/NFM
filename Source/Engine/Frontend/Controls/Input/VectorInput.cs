@@ -24,9 +24,9 @@ namespace Engine.Frontend
 			set
 			{
 				object vec = GetFirstValue<object>();
-				if (float.TryParse(value, out float floatValue))
+				if (TryParseNum(value, typeof(float), out object num))
 				{
-					vecIndexer.SetValue(vec, floatValue, new object[] { 0 });
+					vecIndexer.SetValue(vec, num, new object[] { 0 });
 					SetValue(vec);
 				}
 			}
@@ -42,9 +42,9 @@ namespace Engine.Frontend
 			set
 			{
 				object vec = GetFirstValue<object>();
-				if (float.TryParse(value, out float floatValue))
+				if (TryParseNum(value, typeof(float), out object num))
 				{
-					vecIndexer.SetValue(vec, floatValue, new object[] { 1 });
+					vecIndexer.SetValue(vec, num, new object[] { 1 });
 					SetValue(vec);
 				}
 			}
@@ -60,9 +60,9 @@ namespace Engine.Frontend
 			set
 			{
 				object vec = GetFirstValue<object>();
-				if (float.TryParse(value, out float floatValue))
+				if (TryParseNum(value, typeof(float), out object num))
 				{
-					vecIndexer.SetValue(vec, floatValue, new object[] { 2 });
+					vecIndexer.SetValue(vec, num, new object[] { 2 });
 					SetValue(vec);
 				}
 			}
@@ -78,9 +78,9 @@ namespace Engine.Frontend
 			set
 			{
 				object vec = GetFirstValue<object>();
-				if (float.TryParse(value, out float floatValue))
+				if (TryParseNum(value, typeof(float), out object num))
 				{
-					vecIndexer.SetValue(vec, floatValue, new object[] { 3 });
+					vecIndexer.SetValue(vec, num, new object[] { 3 });
 					SetValue(vec);
 				}
 			}

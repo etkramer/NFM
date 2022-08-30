@@ -104,6 +104,34 @@ namespace Engine.Frontend
 			}
 		}
 
+		protected bool TryParseNum(string value, Type numType, out object num)
+		{
+			if (IsFloat(numType))
+			{
+				if (double.TryParse(value, out double floatValue) && !value.EndsWith('.'))
+				{
+					num = Convert.ChangeType(floatValue, numType);
+					return true;
+				}
+			}
+			else
+			{
+				if (ulong.TryParse(value, out ulong uintValue))
+				{
+					num = Convert.ChangeType(uintValue, numType);
+					return true;
+				}
+				else if (long.TryParse(value, out long intValue))
+				{
+					num = Convert.ChangeType(intValue, numType);
+					return true;
+				}
+			}
+
+			num = null;
+			return false;
+		}
+
 		protected T GetFirstValue<T>()
 		{
 			return (T)Property.GetValue(Subjects.First());

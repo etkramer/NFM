@@ -21,19 +21,9 @@ namespace Engine.Frontend
 			}
 			set
 			{
-				// Integer values
-				if (!IsFloat(Property.PropertyType) && long.TryParse(value, out long intResult))
+				if (TryParseNum(value, Property.PropertyType, out object num))
 				{
-					if (!IsUnsigned(Property.PropertyType) || intResult >= 0)
-					{
-						SetValue(intResult);
-					}
-				}
-				// Floating point values
-				else if (IsFloat(Property.PropertyType) && double.TryParse(value, out double floatResult))
-				{
-					// Apply value to subjects.
-					SetValue(floatResult);
+					SetValue(num);
 				}
 			}
 		}
