@@ -428,6 +428,11 @@ namespace Engine.GPU
 			}
 		}
 
+		public void CompactBuffer<T>(GraphicsBuffer<T> buffer) where T : unmanaged
+		{
+			buffer.Compact(this);
+		}
+
 		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, long startOffset = 0, long destOffset = 0, long numBytes = -1)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
@@ -467,6 +472,33 @@ namespace Engine.GPU
 			{
 				new CommandInput(source, ResourceStates.CopySource),
 				new CommandInput(dest, ResourceStates.CopyDest),
+			};
+			
+			AddCommand(buildDelegate, inputs);
+		}
+
+		public void ResolveTexture(Texture source, Texture dest)
+		{
+			// If neither texture is multisampled, perform a regular copy instead.
+			if (source.Samples <= 1 && dest.Samples <= 1)
+			{
+				CopyTexture(source, dest);
+				return;
+			}
+
+			Debug.Log($"{source.Samples}, {dest.Samples}");
+
+			Debug.Assert(source.Samples > 1 && dest.Samples <= 1, "Cannot resolve a non-multisampled texture or to a multisampled texture");
+
+			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			{
+				list.ResolveSubresource(dest, 0, source, 0, dest.Format);
+			};
+
+			CommandInput[] inputs = new[]
+			{
+				new CommandInput(source, ResourceStates.ResolveSource),
+				new CommandInput(dest, ResourceStates.ResolveDest),
 			};
 			
 			AddCommand(buildDelegate, inputs);

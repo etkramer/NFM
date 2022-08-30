@@ -51,8 +51,8 @@ namespace Engine.Rendering
 			All.Add(this);
 
 			// Create RTs and RT-sized buffers.
-			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm);
-			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
+			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);
+			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float, samples: 1);
 			
 			// Register callbacks
 			Game.OnTick += OnTick;

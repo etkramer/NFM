@@ -16,7 +16,7 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Copy output to backbuffer.
-			List.CopyTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
+			List.ResolveTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
 
 			// Clear viewport targets.
 			List.ClearRenderTarget(Viewport.ColorTarget);

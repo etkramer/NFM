@@ -104,6 +104,35 @@ namespace Engine.GPU
 			}
 		}
 
+		internal void Compact(CommandList list)
+		{
+			// If there's nothing allocated, there's nothing to compact.
+			if (allocations.Count < 1)
+			{
+				return;
+			}
+
+			// Compact first element first
+			if (allocations[0].Start != 0)
+			{
+				list.CopyBuffer(this, allocations[0].Start * sizeof(T), 0, allocations[0].Count * sizeof(T));
+				allocations[0].Start = 0;
+			}
+
+			for (int i = 1; i < allocations.Count; i++)
+			{
+				var alloc = allocations[i];
+				var prevAlloc = allocations[i - 1];
+				
+				// Free space between these allocations.
+				if (alloc.Start != prevAlloc.End)
+				{
+					list.CopyBuffer(this, alloc.Start * sizeof(T), prevAlloc.End * sizeof(T), alloc.Count * sizeof(T));
+					alloc.Start = prevAlloc.End;
+				}
+			}
+		}
+
 		public void Clear()
 		{
 			lock (allocations)
@@ -117,6 +146,7 @@ namespace Engine.GPU
 	{
 		public long Start = 0;
 		public long Count = 0;
+		public long End => Start + Count;
 		public GraphicsBuffer<T> Buffer { get; private set; }
 
 		public BufferAllocation(GraphicsBuffer<T> source)

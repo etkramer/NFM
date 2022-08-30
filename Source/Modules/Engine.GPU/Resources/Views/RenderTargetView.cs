@@ -23,7 +23,8 @@ namespace Engine.GPU
 		{
 			RenderTargetViewDescription desc = new()
 			{
-				Format = Target.Format, ViewDimension = RenderTargetViewDimension.Texture2D,
+				Format = Target.Format,
+				ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
 			};
 
 			GPUContext.Device.CreateRenderTargetView(Target.GetBaseResource(), desc, Handle);

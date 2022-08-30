@@ -13,6 +13,9 @@ namespace Engine.Rendering
 				RecurseInstances(actor);
 			}
 
+			// Make sure the instance buffer is fully compacted.
+			List.CompactBuffer(ModelActor.InstanceBuffer);
+
 			// Update view data.
 			foreach (Viewport viewport in Viewport.All)
 			{

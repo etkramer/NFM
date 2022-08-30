@@ -38,18 +38,16 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
-			new Actor("Empty").Spawn();
 			new CameraActor().Spawn();
 			new PointLightActor().Spawn();
-			new PointLightActor().Spawn();
 			
-			// Flight helmet.
+			// Helmet
 			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();
 			helmObject.Position = new Vector3(0, -0.4f, 1);
 			helmObject.Rotation = new Vector3(0, 180, 0);
 			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
 
-			// Sponza.
+			// Sponza
 			var sponzaObject = new ModelActor("Sponza").Spawn<ModelActor>();
 			sponzaObject.Position = new Vector3(0, -0.4f, 0);
 			sponzaObject.Rotation = new Vector3(0, 0, 0);

@@ -79,6 +79,7 @@ namespace Engine.GPU
 		public int Height { get; private set; }
 		public Vector2i Size => new(Width, Height);
 		public byte Levels;
+		public byte Samples;
 
 		internal ClearValue ClearValue { get; private set; }
 
@@ -91,12 +92,13 @@ namespace Engine.GPU
 		/// <summary>
 		/// Constructs a Texture object
 		/// </summary>
-		public Texture(int width, int height, byte levels = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default)
+		public Texture(int width, int height, byte levels = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default, byte samples = 1)
 		{
 			Format = format;
 			Width = width;
 			Height = height;
 			Levels = levels;
+			Samples = samples;
 
 			DSFormat = dsFormat;
 			SRFormat = srFormat;
@@ -117,7 +119,7 @@ namespace Engine.GPU
 			}
 
 			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, format), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
 
 			Resource.Name = "Standard texture";
@@ -154,7 +156,7 @@ namespace Engine.GPU
 			uav = null;
 
 			// Create new resource with new size.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(Width, Height, Levels, Format), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
 		}
 
@@ -163,19 +165,20 @@ namespace Engine.GPU
 			Resource.Release();
 		}
 
-		private ResourceDescription GetDescription(int width, int height, byte levels, Format format)
+		private ResourceDescription GetDescription()
 		{
 			return new()
 			{
-				Dimension = levels == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
+				Dimension = Levels == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
 				Alignment = 0,
-				Width = (ulong)width,
-				Height = height,
+				Width = (ulong)Width,
+				Height = Height,
 				DepthOrArraySize = 1,
-				MipLevels = levels,
+				MipLevels = Levels,
 				Format = Format,
-				SampleDescription = new(1, 0),
-				Flags = format.IsDepthStencil() || format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget | ResourceFlags.AllowUnorderedAccess,
+				SampleDescription = new SampleDescription(Samples, 0),
+				Flags = Format.IsDepthStencil() || Format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget
+					| (Samples == 1 ? ResourceFlags.AllowUnorderedAccess : ResourceFlags.None),
 			};
 		}
 

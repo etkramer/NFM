@@ -24,7 +24,7 @@ namespace Engine.GPU
 			DepthStencilViewDescription desc = new()
 			{
 				Format = Target.DSFormat == default ? Target.Format : Target.DSFormat,
-				ViewDimension = DepthStencilViewDimension.Texture2D,
+				ViewDimension = Target.Samples == 1 ? DepthStencilViewDimension.Texture2D : DepthStencilViewDimension.Texture2DMultisampled,
 				Flags = DepthStencilViewFlags.None
 			};
 
