@@ -18,26 +18,20 @@ namespace Engine.GPU
 
 		public static event Action OnFrameStart = delegate {};
 
-		public static CommandList DefaultCommandList { get; } = new();
-
 		private static Stopwatch frameTimer = new();
 
-		public static void SubmitAndWait()
+		public static void WaitFrame()
 		{
-			// Execute default command list.
-			DefaultCommandList.Execute();
-			
 			// Wait for completion.
 			GPUContext.WaitFrame();
-			OnFrameStart.Invoke();
-
-			// Reopen default command list.
-			DefaultCommandList.Reset();
 
 			// Update frame timer.
 			frameTimer.Stop();
 			FrameTime = frameTimer.Elapsed.TotalSeconds;
 			frameTimer.Restart();
+
+			// Let systems know it's the start of a new frame.
+			OnFrameStart.Invoke();
 		}
 
 		public static void Flush()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Engine.GPU;
+using Engine.Rendering;
 using MeshOptimizer;
 
 namespace Engine.Resources
@@ -75,14 +76,14 @@ namespace Engine.Resources
 							// Upload meshlet-remapped verts.
 							var remapped = RemapVerts();
 							VertHandle = VertBuffer.Allocate(remapped.Length);
-							Graphics.DefaultCommandList.UploadBuffer(VertHandle, remapped);
+							Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
 						}
 
 						// Upload meshlet/index data to GPU.
 						PrimHandle = PrimBuffer.Allocate(prims.Length);
-						Graphics.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
+						Renderer.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
 						MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
-						Graphics.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
+						Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
 
 						TryUploadMesh();
 					}
@@ -100,7 +101,7 @@ namespace Engine.Resources
 			{
 				var remapped = RemapVerts();
 				VertHandle = VertBuffer.Allocate(remapped.Length);
-				Graphics.DefaultCommandList.UploadBuffer(VertHandle, remapped);
+				Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
 			}
 
 			TryUploadMesh();
@@ -116,7 +117,7 @@ namespace Engine.Resources
 			{
 				var remapped = RemapVerts();
 				VertHandle = VertBuffer.Allocate(remapped.Length);
-				Graphics.DefaultCommandList.UploadBuffer(VertHandle, remapped);
+				Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
 			}
 
 			TryUploadMesh();
@@ -136,7 +137,7 @@ namespace Engine.Resources
 			}
 
 			MeshHandle = MeshBuffer.Allocate(1);
-			Graphics.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
+			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
 			{
 				MeshletCount = (uint)MeshletHandle.Count,
 				MeshletOffset = (uint)MeshletHandle.Start,

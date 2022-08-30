@@ -8,6 +8,11 @@ namespace Engine.Rendering
 {
 	public static class Renderer
 	{
+		/// <summary>
+		/// Command list used for any command that needs to be done before the renderer does it's thing.
+		/// </summary>
+		public static CommandList DefaultCommandList { get; private set; } = new CommandList();
+
 		private static List<RenderStep> globalStage= new();
 		private static List<RenderStep> viewportStage= new();
 
@@ -56,7 +61,7 @@ namespace Engine.Rendering
 		public static void Render()
 		{
 			// Switch to the default command list.
-			RenderStep.List = Graphics.DefaultCommandList;
+			RenderStep.List = DefaultCommandList;
 
 			// Build and execute global commands on default command list.
 			RenderStep.List.PushEvent("Global");
@@ -73,6 +78,9 @@ namespace Engine.Rendering
 				}
 			}
 			RenderStep.List.PopEvent();
+
+			// Execute default command list and wait for it on the GPU.
+			DefaultCommandList.Execute(true);
 
 			// Build and execute viewport-level commands on viewport command lists.
 			foreach (var viewport in Viewport.All)
@@ -103,7 +111,7 @@ namespace Engine.Rendering
 			}
 
 			// Submit default command list and wait for completion.
-			Graphics.SubmitAndWait();
+			Graphics.WaitFrame();
 
 			// Present all windows.
 			foreach (var viewport in Viewport.All)
@@ -113,6 +121,9 @@ namespace Engine.Rendering
 				// Reopen viewport command list.
 				viewport.CommandList.Reset();
 			}
+
+			// Reset update command list.
+			DefaultCommandList.Reset();
 		}
 
 		public static void Cleanup()

@@ -13,6 +13,9 @@ namespace Engine.GPU
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
 
+		private ID3D12Fence waitFence;
+		private ulong waitValue = 0;
+
 		struct Command
 		{
 			public Action<ID3D12GraphicsCommandList6> BuildAction;
@@ -30,6 +33,8 @@ namespace Engine.GPU
 			allocator = new CommandAllocator(CommandListType.Direct);
 			list = GPUContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, allocator.commandAllocators[GPUContext.FrameIndex]);
 			list.Close();
+
+			waitFence = GPUContext.Device.CreateFence(0);
 
 			Reset();
 		}
@@ -444,6 +449,13 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
+		private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
+		public void CopyBuffer(GraphicsBuffer buffer, long startOffset, long destOffset, long numBytes)
+		{
+			CopyBuffer(buffer, intermediateCopyBuffer, startOffset, 0, numBytes);
+			CopyBuffer(intermediateCopyBuffer, buffer, 0, destOffset, numBytes);
+		}
+
 		public void CopyTexture(Texture source, Texture dest)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
@@ -677,13 +689,26 @@ namespace Engine.GPU
 			list.Close();
 		}
 
-		public void Execute()
+		/// <summary>
+		/// Executes all commands.
+		/// </summary>
+		/// <param name="wait">Perform a GPU-side wait (ensure all commands are complete before continuing?)</param>
+		public void Execute(bool wait = false)
 		{
 			// Build and execute command list.
 			Build();
 			GPUContext.GraphicsQueue.ExecuteCommandList(list);
+
+			if (wait)
+			{
+				GPUContext.GraphicsQueue.Signal(waitFence, ++waitValue);
+				GPUContext.GraphicsQueue.Wait(waitFence, waitValue);
+			}
 		}
 
+		/// <summary>
+		/// Resets command list and prepares it to be (re)built.
+		/// </summary>
 		public void Reset()
 		{
 			lock (commands)

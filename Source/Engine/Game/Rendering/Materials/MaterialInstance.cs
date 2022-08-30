@@ -59,7 +59,7 @@ namespace Engine.Rendering
 
 			// Upload data to GPU.
 			MaterialHandle = MaterialBuffer.Allocate(materialData.Count);
-			Graphics.DefaultCommandList.UploadBuffer(MaterialHandle, materialData.ToArray());
+			Renderer.DefaultCommandList.UploadBuffer(MaterialHandle, materialData.ToArray());
 		}
 
 		private byte[] StructureToByteArray(Type type, object data)

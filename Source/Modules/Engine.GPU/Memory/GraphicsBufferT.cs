@@ -61,7 +61,21 @@ namespace Engine.GPU
 							Count = count
 						};
 
-						allocations.Add(alloc);
+						// Maintain order - allocations that start further in buffer should start further in list
+						for (int j = allocations.Count - 1; j >= -1; j--)
+						{
+							if (j == -1)
+							{
+								allocations.Add(alloc);
+								break;
+							}
+							else if (allocations[j].Start < alloc.Start)
+							{
+								allocations.Insert(j + 1, alloc);
+								break;
+							}
+						}
+
 						break;
 					}
 				}

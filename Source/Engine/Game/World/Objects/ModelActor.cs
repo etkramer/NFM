@@ -104,7 +104,7 @@ namespace Engine.World
 					};
 
 					// Upload instance to buffer.
-					Graphics.DefaultCommandList.UploadBuffer(InstanceHandles[instanceID], instanceData);
+					Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[instanceID], instanceData);
 					instanceID++;
 				}
 			}
