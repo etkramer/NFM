@@ -11,24 +11,29 @@ namespace Engine.Frontend
 	public class BaseInput : UserControl, INotify
 	{
 		protected PropertyInfo Property { get; private set; }
-		protected event Action OnSelectedPropertyChanged = delegate {};
-		protected bool HasMultipleValues => Selection.Selected.HasVariation(o => Property.GetValue(o));
+		protected IEnumerable<object> Subjects { get; private set; }
 
-		public BaseInput(PropertyInfo property)
+		protected event Action OnSelectedPropertyChanged = delegate {};
+		protected bool HasMultipleValues => Subjects.HasVariation(o => Property.GetValue(o));
+
+		public BaseInput(PropertyInfo property, IEnumerable<object> subjects)
 		{
 			Property = property;
+			Subjects = subjects;
 			DataContext = this;
+
+			handlers = new PropertyChangedEventHandler[Subjects.Count()];
 		}
 
-		private PropertyChangedEventHandler[] handlers = new PropertyChangedEventHandler[Selection.Selected.Count];
+		private PropertyChangedEventHandler[] handlers;
 
 		protected sealed override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 		{
-			for (int i = 0; i < Selection.Selected.Count; i++)
+			for (int i = 0; i < Subjects.Count(); i++)
 			{
 				handlers[i] = (o, e) => OnSelectedPropertyChanged.Invoke();
 
-				if (Selection.Selected[i] is INotify notify)
+				if (Subjects.ElementAt(i) is INotify notify)
 				{
 					notify.PropertyChanged += handlers[i];
 				}
@@ -39,9 +44,9 @@ namespace Engine.Frontend
 
 		protected sealed override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
 		{
-			for (int i = 0; i < Selection.Selected.Count; i++)
+			for (int i = 0; i < Subjects.Count(); i++)
 			{
-				if (Selection.Selected[i] is INotify notify)
+				if (Subjects.ElementAt(i) is INotify notify)
 				{
 					notify.PropertyChanged -= handlers[i];
 				}
@@ -84,7 +89,7 @@ namespace Engine.Frontend
 
 		protected void SetValue<T>(T value)
 		{
-			foreach (var obj in Selection.Selected)
+			foreach (var obj in Subjects)
 			{
 				object originalVal = Property.GetValue(obj);
 
@@ -101,7 +106,7 @@ namespace Engine.Frontend
 
 		protected T GetFirstValue<T>()
 		{
-			return (T)Property.GetValue(Selection.Selected[0]);
+			return (T)Property.GetValue(Subjects.First());
 		}
 	}
 }

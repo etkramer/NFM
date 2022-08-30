@@ -38,7 +38,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		public NumInput(PropertyInfo property) : base(property)
+		public NumInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 

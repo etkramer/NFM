@@ -9,6 +9,7 @@ using System.Linq;
 using System.ComponentModel;
 using Avalonia.LogicalTree;
 using Engine.Resources;
+using Engine.Editor;
 
 namespace Engine.Frontend
 {
@@ -56,31 +57,31 @@ namespace Engine.Frontend
 			if (Property.PropertyType == typeof(bool))
 			{
 				// Boolean input field.
-				FieldContent = new BoolInput(Property);
+				FieldContent = new BoolInput(Property, Selection.Selected);
 			}
 			else if (Property.PropertyType == typeof(string))
 			{
 				// String input field.
-				FieldContent = new StringInput(Property);
+				FieldContent = new StringInput(Property, Selection.Selected);
 			}
 			else if (Property.PropertyType == typeof(sbyte) || Property.PropertyType == typeof(short) || Property.PropertyType == typeof(int) || Property.PropertyType == typeof(long)
 				|| Property.PropertyType == typeof(byte) || Property.PropertyType == typeof(ushort) || Property.PropertyType == typeof(uint) || Property.PropertyType == typeof(ulong)
 				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
 				// Numeric input field.
-				FieldContent = new NumInput(Property);
+				FieldContent = new NumInput(Property, Selection.Selected);
 			}
 			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
 			{
 				// Resource reference field.
-				FieldContent = new ResourceInput(Property);
+				FieldContent = new ResourceInput(Property, Selection.Selected);
 			}
 			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
 				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
 				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i) || Property.PropertyType == typeof(Vector4d))
 			{
 				// Vector input field.
-				FieldContent = new VectorInput(Subjects, Property);
+				FieldContent = new VectorInput(Property, Selection.Selected);
 			}
 			else
 			{

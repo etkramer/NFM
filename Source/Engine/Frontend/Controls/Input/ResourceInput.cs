@@ -20,7 +20,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		public ResourceInput(PropertyInfo property) : base(property)
+		public ResourceInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			Panel icon = new Panel()
 				.Background("#19E6E62E")

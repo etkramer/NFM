@@ -22,7 +22,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		public BoolInput(PropertyInfo property) : base(property)
+		public BoolInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 

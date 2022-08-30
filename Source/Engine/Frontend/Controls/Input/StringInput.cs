@@ -25,7 +25,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		public StringInput(PropertyInfo property) : base(property)
+		public StringInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 
