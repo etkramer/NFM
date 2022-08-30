@@ -40,6 +40,7 @@ namespace Engine
 			new Actor("Empty").Spawn();
 			new CameraActor().Spawn();
 			new PointLightActor().Spawn();
+			new PointLightActor().Spawn();
 			
 			// Flight helmet.
 			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();

@@ -9,9 +9,18 @@ using Engine.Resources;
 
 namespace Engine.Frontend
 {
-	public class ResourceInput : UserControl
+	public class ResourceInput : BaseInput
 	{
-		public ResourceInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
+		private string Value
+		{
+			get
+			{
+				Resource res = GetFirstValue<Resource>();
+				return HasMultipleValues ? "--" : res.Source == null ? res.GetType().Name : $"{res.Source.Path.Split('/').Last()} ({res.GetType().Name})";
+			}
+		}
+
+		public ResourceInput(PropertyInfo property) : base(property)
 		{
 			Panel icon = new Panel()
 				.Background("#19E6E62E")
@@ -26,13 +35,10 @@ namespace Engine.Frontend
 					.HorizontalAlignment(HorizontalAlignment.Center)
 				);
 
-			Resource value = getter.Invoke() as Resource;
-			string displayName = value.Source == null ? value.GetType().Name : $"{value.Source.Path.Split('/').Last()} ({value.GetType().Name})";
-
 			TextBlock textDisplay = new TextBlock();
 			textDisplay.Padding = new(4, 0);
 			textDisplay.VerticalAlignment = VerticalAlignment.Center;
-			textDisplay.Text = hasMultipleValues ? "--" : displayName;
+			textDisplay.Bind(TextBlock.TextProperty, nameof(Value), this);
 			textDisplay.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
 			textDisplay.TextTrimming = TextTrimming.CharacterEllipsis;
 

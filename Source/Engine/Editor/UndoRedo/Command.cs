@@ -12,6 +12,8 @@ namespace Engine
 	[Injection(typeof(CommandAspect))]
 	public class Command : Attribute
 	{
+		public const int UndoHistoryLength = 32;
+
 		private static List<(Action, Action, string)> undoHistory = new();
 		private static int undoIndex = -1;
 
@@ -47,6 +49,12 @@ namespace Engine
 			}
 		}
 
+		public static void DoCommand(Action command, Action undo, string name)
+		{
+			command.Invoke();
+			AddCommand(undo, command, name);
+		}
+
 		public static void AddCommand(Action undo, Action redo, string name)
 		{
 			if (undoHistory.Count > undoIndex + 1)
@@ -56,6 +64,12 @@ namespace Engine
 
 			undoHistory.Add(new(undo, redo, name));
 			undoIndex++;
+
+			if (undoIndex > UndoHistoryLength)
+			{
+				undoIndex--;
+				undoHistory.RemoveAt(0);
+			}
 		}
 
 		public string UndoMethod { get; set; }

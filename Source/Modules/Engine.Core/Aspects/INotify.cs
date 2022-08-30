@@ -20,7 +20,14 @@ namespace Engine.Core
 
 		public void Raise(string propertyName)
 		{
-			((Delegate)GetType().GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(this)).DynamicInvoke(this, new PropertyChangedEventArgs(propertyName));
+			FieldInfo eventField = GetType().GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.Public  | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+			if (eventField == null)
+			{
+				return;
+			}
+
+			PropertyChangedEventHandler eventHandler = (PropertyChangedEventHandler)eventField.GetValue(this);
+			eventHandler.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 

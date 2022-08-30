@@ -41,7 +41,7 @@ namespace Engine.Frontend
 					}
 				};
 
-				NumInput numInput = new NumInput(componentGetter, componentSetter, subjects.HasVariation((o) => vecIndexer.GetValue(property.GetValue(o), new object[] { iProxy })), GetIconChar(i));
+				NumInputLegacy numInput = new NumInputLegacy(componentGetter, componentSetter, subjects.HasVariation((o) => vecIndexer.GetValue(property.GetValue(o), new object[] { iProxy })), GetIconChar(i));
 				numInput.Margin = new(i == 0 ? 0 : spacing, 0, i == numComponents - 1 ? 0 : spacing, 0);
 
 				componentInputs.Add(numInput);

@@ -38,7 +38,6 @@ namespace Engine.Core
 		public NotifyAttribute(params string[] dependents) : this() => Dependents = dependents;
 	}
 
-
 	[Mixin(typeof(INotify))]
 	[Aspect(Scope.PerInstance)]
 	public sealed class NotifyAspect : INotify

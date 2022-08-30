@@ -51,61 +51,29 @@ namespace Engine.Frontend
 			CreateField();
 		}
 
-		private List<(INotifyPropertyChanged, PropertyChangedEventHandler)> handlers = new();
-
-		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
-		{
-			foreach (object subject in Subjects)
-			{
-				if (subject is INotifyPropertyChanged notifier)
-				{
-					PropertyChangedEventHandler handler = (o, e) =>
-					{
-						if (e.PropertyName == Property.Name)
-						{
-							CreateField();
-						}
-					};
-
-					handlers.Add(new(notifier, handler));
-					notifier.PropertyChanged += handler;
-				}
-			}
-		}
-
-		protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
-		{
-			foreach (var handler in handlers)
-			{
-				handler.Item1.PropertyChanged -= handler.Item2;
-			}
-		}
-
 		private void CreateField()
 		{
-			bool hasMultipleValues = Subjects.HasVariation((o) => Property.GetValue(o));
-
 			if (Property.PropertyType == typeof(bool))
 			{
 				// Boolean input field.
-				FieldContent = new BoolInput(Subjects, Property);
+				FieldContent = new BoolInput(Property);
 			}
 			else if (Property.PropertyType == typeof(string))
 			{
 				// String input field.
-				FieldContent = new StringInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
+				FieldContent = new StringInput(Property);
 			}
 			else if (Property.PropertyType == typeof(sbyte) || Property.PropertyType == typeof(short) || Property.PropertyType == typeof(int) || Property.PropertyType == typeof(long)
 				|| Property.PropertyType == typeof(byte) || Property.PropertyType == typeof(ushort) || Property.PropertyType == typeof(uint) || Property.PropertyType == typeof(ulong)
 				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
 				// Numeric input field.
-				FieldContent = new NumInput(Subjects, Property);
+				FieldContent = new NumInput(Property);
 			}
 			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
 			{
 				// Resource reference field.
-				FieldContent = new ResourceInput(() => Property.GetValue(Subjects.First()), (o) => Subjects.ForEach(subject => Property.SetValue(subject, o)), hasMultipleValues);
+				FieldContent = new ResourceInput(Property);
 			}
 			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
 				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
@@ -121,23 +89,6 @@ namespace Engine.Frontend
 						.With(o => o.Padding = new(4, 0))
 						.With(o => o.VerticalContentAlignment = VerticalAlignment.Center)
 						.Radius(2);
-			}
-		}
-
-		public static void SetProperty(IEnumerable<object> subjects, PropertyInfo property, object value)
-		{
-			foreach (object subject in subjects)
-			{
-				object initialValue = property.GetValue(subject);
-				property.SetValue(subject, value);
-
-				Command.AddCommand(() =>
-				{
-					property.SetValue(subject, initialValue);
-				}, () =>
-				{
-					property.SetValue(subject, value);
-				}, $"Set {property.Name} to {value}");
 			}
 		}
 	}

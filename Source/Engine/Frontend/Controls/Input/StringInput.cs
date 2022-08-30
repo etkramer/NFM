@@ -8,10 +8,27 @@ using Avalonia.Media;
 
 namespace Engine.Frontend
 {
-	public class StringInput : UserControl
+	public class StringInput : BaseInput
 	{
-		public StringInput(Func<object> getter, Action<object> setter, bool hasMultipleValues)
+		[Notify] private string Value
 		{
+			get
+			{
+				return HasMultipleValues ? "--" : GetFirstValue<string>();
+			}
+			set
+			{
+				if (value != "--")
+				{
+					SetValue(value);
+				}
+			}
+		}
+
+		public StringInput(PropertyInfo property) : base(property)
+		{
+			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
+
 			Panel icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
@@ -28,8 +45,9 @@ namespace Engine.Frontend
 			TextBox textEntry = new TextBox();
 			textEntry.Padding = new(4, 0);
 			textEntry.VerticalContentAlignment = VerticalAlignment.Center;
-			textEntry.Text = hasMultipleValues ? "--" : getter.Invoke() as string;
+			textEntry.Bind(TextBox.TextProperty, nameof(Value), this);
 			textEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
+			textEntry.LostFocus += (o, e) => (this as INotify).Raise(nameof(Value));
 
 			// Respond to keypresses.
 			textEntry.KeyDown += (o, e) =>
@@ -37,12 +55,6 @@ namespace Engine.Frontend
 				// Hit enter?
 				if (e.Key == Key.Enter)
 				{
-					// Apply value to subjects.
-					if (textEntry.Text != "--")
-					{
-						setter.Invoke(textEntry.Text);
-					}
-
 					// Switch focus to this instead.
 					Focus();
 				}

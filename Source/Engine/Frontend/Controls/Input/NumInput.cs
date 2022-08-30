@@ -1,29 +1,53 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using Avalonia.Data;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Engine.Editor;
+using System.Collections.Specialized;
 
 namespace Engine.Frontend
 {
-	public class NumInput : UserControl
+	public class NumInput : BaseInput
 	{
-		public NumInput(IEnumerable<object> subjects, PropertyInfo property)
-			: this(() => property.GetValue(subjects.First()), (o) => subjects.ForEach(subject => property.SetValue(subject, Convert.ChangeType(o, property.PropertyType))), subjects.HasVariation((o) => property.GetValue(o)))
+		[Notify] private string Value
 		{
-
+			get
+			{
+				return HasMultipleValues ? "--" : GetFirstValue<object>().ToString();
+			}
+			set
+			{
+				// Integer values
+				if (!IsFloat(Property.PropertyType) && long.TryParse(value, out long intResult))
+				{
+					if (!IsUnsigned(Property.PropertyType) || intResult >= 0)
+					{
+						SetValue(intResult);
+					}
+				}
+				// Floating point values
+				else if (IsFloat(Property.PropertyType) && double.TryParse(value, out double floatResult))
+				{
+					// Apply value to subjects.
+					SetValue(floatResult);
+				}
+			}
 		}
 
-		public NumInput(Func<object> getter, Action<object> setter, bool hasMultipleValues, char iconOverride = '\uE3C9')
+		public NumInput(PropertyInfo property) : base(property)
 		{
+			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
+
 			Control icon = new Panel()
 				.Background("#19E6E62E")
 				.Width(16)
 				.Height(16)
 				.Children(new TextBlock()
-					.Text(iconOverride.ToString())
+					.Text("\uE3C9")
 					.Size(12)
 					.Font(this.GetResource<FontFamily>("IconsFont"))
 					.Foreground("#E6E62E")
@@ -31,11 +55,13 @@ namespace Engine.Frontend
 					.HorizontalAlignment(HorizontalAlignment.Center)
 				);
 
+			// Create input box.
 			TextBox numEntry = new TextBox();
 			numEntry.Padding = new(4, 0);
 			numEntry.VerticalContentAlignment = VerticalAlignment.Center;
-			numEntry.Text = hasMultipleValues ? "--" : getter.Invoke().ToString();
+			numEntry.Bind(TextBox.TextProperty, nameof(Value), this);
 			numEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
+			numEntry.LostFocus += (o, e) => (this as INotify).Raise(nameof(Value));
 
 			// Ignore non-numeric inputs.
 			numEntry.KeyDown += (o, e) =>
@@ -47,26 +73,7 @@ namespace Engine.Frontend
 				// Hit enter?
 				else if (e.Key == Key.Enter)
 				{
-					// Integer values
-					if (long.TryParse(numEntry.Text, out long intResult))
-					{
-						// Apply value to subjects.
-						setter.Invoke(intResult);
-					}
-					// Floating point values
-					else if (double.TryParse(numEntry.Text, out double floatResult))
-					{
-						// Apply value to subjects.
-						setter.Invoke(floatResult);
-					}
-					// Invalid value
-					else
-					{
-						// Reset input.
-						numEntry.Text = hasMultipleValues ? "--" : getter.Invoke().ToString();
-					}
-
-					// Switch focus to this instead.
+					// Switch focus and reset input.
 					Focus();
 				}
 			};
@@ -80,24 +87,6 @@ namespace Engine.Frontend
 						.Columns("auto, *")
 						.Children(icon.Column(0), numEntry.Column(1))
 				);
-		}
-
-		private bool IsKeyNumeric(Key key)
-		{
-			return key == Key.D0
-				|| key == Key.D1
-				|| key == Key.D2
-				|| key == Key.D3
-				|| key == Key.D4
-				|| key == Key.D5
-				|| key == Key.D6
-				|| key == Key.D7
-				|| key == Key.D8
-				|| key == Key.D9
-				|| key == Key.OemMinus
-				|| key == Key.OemPeriod
-				|| key == Key.Back
-				|| key == Key.Enter;
 		}
 	}
 }

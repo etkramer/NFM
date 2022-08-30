@@ -1,26 +1,33 @@
 ﻿using System;
 using System.Reflection;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 
 namespace Engine.Frontend
 {
-	public class BoolInput : UserControl
+	public class BoolInput : BaseInput
 	{
-		public BoolInput(IEnumerable<object> subjects, PropertyInfo property)
+		[Notify] private bool? Value
 		{
-			bool hasMultipleValues = subjects.HasVariation((o) => property.GetValue(o));
+			get
+			{
+				return HasMultipleValues ? null : GetFirstValue<bool>();
+			}
+			set
+			{
+				if (value.HasValue)
+				{
+					SetValue(value.Value);
+				}
+			}
+		}
+
+		public BoolInput(PropertyInfo property) : base(property)
+		{
+			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 
 			CheckBox checkBox = new CheckBox();
-			checkBox.IsChecked = hasMultipleValues ? null : (bool)property.GetValue(subjects.First());
-
-			checkBox.Checked += (o, e) =>
-			{
-				PropertyInput.SetProperty(subjects, property, true);
-			};
-			checkBox.Unchecked += (o, e) =>
-			{
-				PropertyInput.SetProperty(subjects, property, false);
-			};
+			checkBox.Bind(ToggleButton.IsCheckedProperty, nameof(Value), this);
 
 			Content = checkBox;
 		}
