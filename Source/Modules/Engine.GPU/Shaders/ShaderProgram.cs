@@ -313,12 +313,15 @@ namespace Engine.GPU
 				// Build root parameters.
 				RootParameter1[] rootParameters = BuildRootParameters(compiledMesh, compiledPixel, compiledCompute);
 
+				// Create static samplers.
+				StaticSamplerDescription[] staticSamplers = new[]
+				{
+					new StaticSamplerDescription(SamplerDescription.AnisotropicWrap, ShaderVisibility.All, 0, 0)
+				};
+
 				// Create root signature.
 				RootSignature = GPUContext.Device.CreateRootSignature(new RootSignatureDescription1(
-					RootSignatureFlags.ConstantBufferViewShaderResourceViewUnorderedAccessViewHeapDirectlyIndexed
-					| RootSignatureFlags.SamplerHeapDirectlyIndexed,
-					rootParameters)
-				);
+					RootSignatureFlags.ConstantBufferViewShaderResourceViewUnorderedAccessViewHeapDirectlyIndexed, rootParameters, staticSamplers));
 
 				bool useDepth = depthWrite || (depthRead && depthMode != DepthMode.None);
 
