@@ -83,13 +83,13 @@ namespace Engine.Frontend
 				// Vector input field.
 				FieldContent = new VectorInput(Property, Selection.Selected);
 			}
+			else if (Property.PropertyType.IsPrimitive)
+			{
+				// Type is not a composite struct and we're not handling it explicitly. Therefore, it's unsupported.
+			}
 			else
 			{
-				FieldContent = new TextBox()
-						.Background(this.GetResourceBrush("ControlBackground"))
-						.With(o => o.Padding = new(4, 0))
-						.With(o => o.VerticalContentAlignment = VerticalAlignment.Center)
-						.Radius(2);
+
 			}
 		}
 	}

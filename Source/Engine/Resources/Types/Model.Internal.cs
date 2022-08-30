@@ -13,10 +13,10 @@ namespace Engine.Resources
 		internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
 		internal static GraphicsBuffer<MeshData> MeshBuffer = new(1000000);
 
-		internal BufferHandle<uint> PrimHandle;
-		internal BufferHandle<VertexData> VertHandle;
-		internal BufferHandle<Meshlet> MeshletHandle;
-		internal BufferHandle<MeshData> MeshHandle;
+		internal BufferAllocation<uint> PrimHandle;
+		internal BufferAllocation<VertexData> VertHandle;
+		internal BufferAllocation<Meshlet> MeshletHandle;
+		internal BufferAllocation<MeshData> MeshHandle;
 	}
 
 	internal struct MeshData

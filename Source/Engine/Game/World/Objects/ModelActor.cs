@@ -20,17 +20,19 @@ namespace Engine.World
 		public static GraphicsBuffer<InstanceData> InstanceBuffer = new(MaxInstanceCount);
 
 		[Inspect] public Model Model { get; set; } = null;
+		[Inspect] public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;
-		public BufferHandle<InstanceData>[] InstanceHandles;
+		public BufferAllocation<InstanceData>[] InstanceHandles;
 
 		// Material instances
-		public MaterialInstance[] MaterialInstances;
+		public MaterialInstance[] MaterialInstances { get; set; }
 		
 		public ModelActor(string name = null) : base(name)
 		{
 			(this as INotify).Subscribe(nameof(Model), () => IsInstanceDirty = true);
+			(this as INotify).Subscribe(nameof(IsVisible), () => IsInstanceDirty = true);
 		}
 
 		public override void Dispose()
@@ -47,8 +49,15 @@ namespace Engine.World
 
 		public void UpdateInstances()
 		{
-			if (Model == null ||Model?.Parts == null)
+			if (Model == null || Model?.Parts == null || !IsVisible)
 			{
+				for (int i = 0; i < InstanceHandles?.Length; i++)
+				{
+					MaterialInstances[i].Dispose();
+					InstanceHandles[i].Dispose();
+					InstanceCount--;
+				}
+
 				InstanceHandles = null;
 				MaterialInstances = null;
 				return;
@@ -67,12 +76,9 @@ namespace Engine.World
 			// (Re)build the array of instance handles.
 			if (InstanceHandles == null || InstanceHandles.Length != instanceCount)
 			{
-				MaterialInstances?.ForEach(o => o.Dispose());
-				InstanceHandles?.ForEach(o => o.Dispose());
-
 				// Allocate a handful of new ones.
 				MaterialInstances = new MaterialInstance[instanceCount];
-				InstanceHandles = new BufferHandle<InstanceData>[instanceCount];
+				InstanceHandles = new BufferAllocation<InstanceData>[instanceCount];
 				for (int i = 0; i < instanceCount; i++)
 				{
 					InstanceHandles[i] = InstanceBuffer.Allocate(1);

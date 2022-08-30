@@ -31,6 +31,7 @@ namespace Engine
 
 			// Precache model.
 			Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
+			Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -47,6 +48,11 @@ namespace Engine
 			helmObject.Position = new Vector3(0, -0.4f, 1);
 			helmObject.Rotation = new Vector3(0, 180, 0);
 			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
+
+			var sponzaObject = new ModelActor("Sponza").Spawn<ModelActor>();
+			sponzaObject.Position = new Vector3(0, -0.4f, 0);
+			sponzaObject.Rotation = new Vector3(0, 0, 0);
+			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

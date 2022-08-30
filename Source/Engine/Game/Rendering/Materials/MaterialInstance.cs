@@ -14,7 +14,7 @@ namespace Engine.Rendering
 		[Inspect] public Material Material { get; set; }
 		[Inspect] public ShaderStack ShaderStack { get; set; }
 
-		public BufferHandle<byte> MaterialHandle = null;
+		public BufferAllocation<byte> MaterialHandle = null;
 
 		public MaterialInstance(Material baseMaterial)
 		{

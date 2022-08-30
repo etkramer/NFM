@@ -31,11 +31,11 @@ void LightingCS(uint3 pixel : SV_DispatchThreadID)
 	}
 
 	// Sample material (G-) buffers.
-	float4 mat0 = MatBuffer0.Load(pixel);
-	float4 mat1 = MatBuffer1.Load(pixel);
+	float4 material0 = MatBuffer0.Load(pixel);
+	float4 material1 = MatBuffer1.Load(pixel);
 
 	// Reconstruct normal Z component.
-	float3 norm = float3(mat1.xy * 2 - 1, 0);
+	float3 norm = float3(material1.xy * 2 - 1, 0);
 	norm.z = sqrt(1 - dot(norm.xy, norm.xy));
 
 	Output[pixel.xy] = float4(norm, 1);

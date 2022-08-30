@@ -379,12 +379,12 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadBuffer<T>(BufferHandle<T> handle, T data) where T : unmanaged
+		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, T data) where T : unmanaged
 		{
 			UploadBuffer(handle.Buffer, data, handle.ElementStart);
 		}
 
-		public unsafe void UploadBuffer<T>(BufferHandle<T> handle, Span<T> data) where T : unmanaged
+		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, Span<T> data) where T : unmanaged
 		{
 			UploadBuffer(handle.Buffer, data, handle.ElementStart);
 		}

@@ -49,7 +49,7 @@ namespace Engine.World
 		// Transform buffer
 		public bool IsTransformDirty = true;
 		public static GraphicsBuffer<GPUTransform> TransformBuffer = new(ModelActor.MaxInstanceCount);
-		public BufferHandle<GPUTransform> TransformHandle;
+		public BufferAllocation<GPUTransform> TransformHandle;
 
 		public Actor(string name = null)
 		{

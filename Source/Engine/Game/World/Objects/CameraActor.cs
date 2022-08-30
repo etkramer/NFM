@@ -6,7 +6,6 @@ namespace Engine.World
 	{
 		[Inspect] public uint FocalLength { get; set; } = 35;
 		[Inspect] public uint SensorSize { get; set; } = 36;
-		[Inspect] public bool IsCinematic { get; set; } = true;
 
 		/// <summary>
 		/// Calculates the vertical field of view from physical camera properties.

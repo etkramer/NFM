@@ -74,7 +74,6 @@ namespace Engine.Frontend
 								.Orientation(Orientation.Horizontal)
 								.Children(
 									new TextBlock()
-										//.Text("\uEB8B")
 										.Text(nameof(objectIcon), BindingMode.Default)
 										.VerticalAlignment(VerticalAlignment.Center)
 										.Size(26)
@@ -101,7 +100,7 @@ namespace Engine.Frontend
 						.Row(2)
 						.Content(nameof(InspectorContent), BindingMode.Default)
 				);
-			
+
 			Selection.Selected.Subscribe(() => Refresh());
 			(this as INotify).Subscribe(nameof(currentFilter), () => Refresh());
 			Refresh();
