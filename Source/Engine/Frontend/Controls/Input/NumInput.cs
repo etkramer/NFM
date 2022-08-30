@@ -19,13 +19,6 @@ namespace Engine.Frontend
 			{
 				return HasMultipleValues ? "--" : GetFirstValue<object>().ToString();
 			}
-			set
-			{
-				if (TryParseNum(value, Property.PropertyType, out object num))
-				{
-					SetValue(num);
-				}
-			}
 		}
 
 		public NumInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
@@ -63,7 +56,13 @@ namespace Engine.Frontend
 				// Hit enter?
 				else if (e.Key == Key.Enter)
 				{
-					// Switch focus and reset input.
+					// Set input to new value.
+					if (TryParseNum(Value, Property.PropertyType, out object num))
+					{
+						SetValue(num);
+					}
+
+					// Switch focus.
 					Focus();
 				}
 			};

@@ -21,15 +21,6 @@ namespace Engine.Frontend
 				object vec = GetFirstValue<object>();
 				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 0 }).ToString();
 			}
-			set
-			{
-				object vec = GetFirstValue<object>();
-				if (TryParseNum(value, typeof(float), out object num))
-				{
-					vecIndexer.SetValue(vec, num, new object[] { 0 });
-					SetValue(vec);
-				}
-			}
 		}
 
 		[Notify] private string ValueY
@@ -38,15 +29,6 @@ namespace Engine.Frontend
 			{
 				object vec = GetFirstValue<object>();
 				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 1 }).ToString();
-			}
-			set
-			{
-				object vec = GetFirstValue<object>();
-				if (TryParseNum(value, typeof(float), out object num))
-				{
-					vecIndexer.SetValue(vec, num, new object[] { 1 });
-					SetValue(vec);
-				}
 			}
 		}
 
@@ -57,15 +39,6 @@ namespace Engine.Frontend
 				object vec = GetFirstValue<object>();
 				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 2 }).ToString();
 			}
-			set
-			{
-				object vec = GetFirstValue<object>();
-				if (TryParseNum(value, typeof(float), out object num))
-				{
-					vecIndexer.SetValue(vec, num, new object[] { 2 });
-					SetValue(vec);
-				}
-			}
 		}
 
 		[Notify] private string ValueW
@@ -74,15 +47,6 @@ namespace Engine.Frontend
 			{
 				object vec = GetFirstValue<object>();
 				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 3 }).ToString();
-			}
-			set
-			{
-				object vec = GetFirstValue<object>();
-				if (TryParseNum(value, typeof(float), out object num))
-				{
-					vecIndexer.SetValue(vec, num, new object[] { 3 });
-					SetValue(vec);
-				}
 			}
 		}
 
@@ -103,6 +67,8 @@ namespace Engine.Frontend
 
 			for (int i = 0; i < numComponents; i++)
 			{
+				int iCaptured = i;
+
 				Control icon = new Panel()
 					.Background("#19E6E62E")
 					.Width(16)
@@ -151,7 +117,15 @@ namespace Engine.Frontend
 					// Hit enter?
 					else if (e.Key == Key.Enter)
 					{
-						// Switch focus and reset input.
+						// Set input to new value.
+						object vec = GetFirstValue<object>();
+						if (TryParseNum(numEntry.Text, typeof(float), out object num))
+						{
+							vecIndexer.SetValue(vec, num, new object[] { iCaptured });
+							SetValue(vec);
+						}
+
+						// Switch focus.
 						Focus();
 					}
 				};

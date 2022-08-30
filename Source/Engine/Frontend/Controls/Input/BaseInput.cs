@@ -108,7 +108,7 @@ namespace Engine.Frontend
 		{
 			if (IsFloat(numType))
 			{
-				if (double.TryParse(value, out double floatValue) && !value.EndsWith('.'))
+				if (double.TryParse(value, out double floatValue))
 				{
 					num = Convert.ChangeType(floatValue, numType);
 					return true;
