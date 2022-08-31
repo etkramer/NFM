@@ -49,7 +49,7 @@ namespace Engine
 
 			// Sponza
 			var sponzaObject = new ModelActor("Sponza").Spawn<ModelActor>();
-			sponzaObject.Position = new Vector3(0, -0.4f, 0);
+			sponzaObject.Position = new Vector3(0, -0.5f, 0);
 			sponzaObject.Rotation = new Vector3(0, 0, 0);
 			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;
 

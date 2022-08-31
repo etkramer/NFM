@@ -19,7 +19,6 @@ namespace Engine.Resources
 	{
 		public string ShaderSource { get; set; }
 
-		public int ParameterCount => Parameters.Count;
 		public List<ShaderParameter> Parameters { get; } = new();
 		public BlendMode BlendMode = BlendMode.Opaque;
 
@@ -35,6 +34,18 @@ namespace Engine.Resources
 				Name = param,
 				Value = defaultValue,
 				Type = typeof(Color)
+			});
+
+			return this;
+		}
+
+		public Shader AddTexture(string param, Texture2D defaultValue = default)
+		{
+			Parameters.Add(new ShaderParameter()
+			{
+				Name = param,
+				Value = defaultValue,
+				Type = typeof(Texture2D)
 			});
 
 			return this;

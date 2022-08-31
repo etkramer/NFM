@@ -78,7 +78,7 @@ namespace Engine.GPU
 		public int Width { get; private set; }
 		public int Height { get; private set; }
 		public Vector2i Size => new(Width, Height);
-		public byte Levels;
+		public byte Depth;
 		public byte Samples;
 
 		internal ClearValue ClearValue { get; private set; }
@@ -97,7 +97,7 @@ namespace Engine.GPU
 			Format = format;
 			Width = width;
 			Height = height;
-			Levels = levels;
+			Depth = levels;
 			Samples = samples;
 
 			DSFormat = dsFormat;
@@ -134,7 +134,7 @@ namespace Engine.GPU
 			Width = width;
 			Height = height;
 			Format = GPUContext.RTFormat;
-			Levels = 1;
+			Depth = 1;
 			State = ResourceStates.CopyDest;
 
 			Resource.Name = "Resource texture";
@@ -169,12 +169,12 @@ namespace Engine.GPU
 		{
 			return new()
 			{
-				Dimension = Levels == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
+				Dimension = Depth == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
 				Alignment = 0,
 				Width = (ulong)Width,
 				Height = Height,
 				DepthOrArraySize = 1,
-				MipLevels = Levels,
+				MipLevels = Depth,
 				Format = Format,
 				SampleDescription = new SampleDescription(Samples, 0),
 				Flags = Format.IsDepthStencil() || Format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget

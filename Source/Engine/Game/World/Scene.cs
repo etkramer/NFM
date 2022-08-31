@@ -4,16 +4,25 @@ using System.Collections.ObjectModel;
 
 namespace Engine.World
 {
-	public class Scene
+	public class Scene : IDisposable
 	{
+		private static List<Scene> all { get; } = new();
+		public static ReadOnlyCollection<Scene> All { get; }
+
 		[Notify, Save] public static Scene Main { get; set; }
 
 		[Save] private ObservableCollection<Actor> actors { get; set; } = new();
 		[Notify] public ReadOnlyObservableCollection<Actor> Actors { get; }
 
+		static Scene()
+		{
+			All = new ReadOnlyCollection<Scene>(all);
+		}
+
 		public Scene()
 		{
 			Actors = new(actors);
+			all.Add(this);
 		}
 
 		public void Add(Actor actor)
@@ -27,6 +36,11 @@ namespace Engine.World
 		public void Remove(Actor actor)
 		{
 			actors.Remove(actor);
+		}
+
+		public void Dispose()
+		{
+			all.Remove(this);
 		}
 	}
 }

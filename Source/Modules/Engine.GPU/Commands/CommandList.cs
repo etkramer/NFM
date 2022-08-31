@@ -428,6 +428,46 @@ namespace Engine.GPU
 			}
 		}
 
+		public unsafe void UploadTexture(Texture texture, Span<byte> data)
+		{
+			fixed (byte* dataPtr = data)
+			{
+				UploadTexture(texture, dataPtr, data.Length * sizeof(byte));
+			}
+		}
+
+		public unsafe void UploadTexture(Texture texture, void* data, int dataSize)
+		{
+			lock (UploadHelper.Lock)
+			{
+				int uploadRing = UploadHelper.Ring;
+				int uploadOffset = UploadHelper.UploadOffset;
+
+				// Realign upload offset for 512b alignment requirement.
+				UploadHelper.UploadOffset = uploadOffset = (int)MathHelper.Align(UploadHelper.UploadOffset, 512);
+
+				// Copy data to upload buffer.
+				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
+				UploadHelper.UploadOffset += dataSize;
+
+				// Copy from upload to dest buffer.
+				CustomCommand((o) =>
+				{
+					int formatPixelSize = 4; // Size of one pixel in bytes
+					int rowPitch = (int)MathHelper.Align(texture.Width, 256) * formatPixelSize;
+
+					TextureCopyLocation uploadLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], new PlacedSubresourceFootPrint()
+					{
+						Offset = (ulong)uploadOffset,
+						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, texture.Depth, rowPitch)
+					});
+
+					o.CopyTextureRegion(new TextureCopyLocation(texture, 0), 0, 0, 0, uploadLocation);
+				},
+				new[] { new CommandInput(texture, ResourceStates.CopyDest) });
+			}
+		}
+
 		public void CompactBuffer<T>(GraphicsBuffer<T> buffer) where T : unmanaged
 		{
 			buffer.Compact(this);

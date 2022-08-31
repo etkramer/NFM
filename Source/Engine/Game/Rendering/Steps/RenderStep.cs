@@ -11,6 +11,7 @@ namespace Engine.Rendering
 	public enum RenderStage
 	{
 		Global,
+		Scene,
 		Viewport,
 	}
 

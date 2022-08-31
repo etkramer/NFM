@@ -18,7 +18,7 @@ float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET0
 	#insert SETUP
 
 	// Get params from surface shader.
-	SurfaceInfo surfaceInfo = SurfaceMain();
+	Surface surface = SurfaceMain(GetDefaultSurface());
 
 	// Calculate normal vector from combined vert/surface normals.
 	float3 normal = vert.Normal.xyz / 2 + 0.5;

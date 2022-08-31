@@ -28,7 +28,9 @@ namespace Engine.Rendering
 		public Vector2i Size => Host.Swapchain.RT.Size;
 
 		// Work camera settings
-		public CameraActor WorkCamera = new CameraActor();
+		private CameraActor workCamera = new();
+		public CameraActor Camera => workCamera;
+		public Scene Scene => Scene.Main;
 
 		#region Rendering
 
@@ -65,18 +67,18 @@ namespace Engine.Rendering
 		{
 			const float lookSens = 0.15f;
 			const float dampingCoefficient = 5;
-			const float acceleration = 5;
+			const float acceleration = 10;
 			const float sprintMult = 2.5f;
 
 			// Process input only if right click is down.
 			if (InputHelper.RightMouseButton == KeyState.Down && InputHelper.InputSource == Host)
 			{
 				// Mouse look
-				Vector3 cameraRotation = WorkCamera.Rotation;
+				Vector3 cameraRotation = Camera.Rotation;
 				cameraRotation.Y += InputHelper.MouseDelta.X * lookSens;
 				cameraRotation.X += InputHelper.MouseDelta.Y * lookSens;
 				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
-				WorkCamera.Rotation = cameraRotation;
+				Camera.Rotation = cameraRotation;
 
 				// Movement
 				Vector3 accelVector = Vector3.Zero;
@@ -98,7 +100,7 @@ namespace Engine.Rendering
 				}
 
 				// Transform WASD accelerations by camera direction.
-				accelVector = Vector3.TransformVector(accelVector, Matrix4.CreateRotation(WorkCamera.Rotation));
+				accelVector = Vector3.TransformVector(accelVector, Matrix4.CreateRotation(Camera.Rotation));
 
 				if (InputHelper.Space == KeyState.Down)
 				{
@@ -115,14 +117,14 @@ namespace Engine.Rendering
 
 			// Flycam physics.
 			flyVelocity = Vector3.Lerp(flyVelocity, Vector3.Zero, dampingCoefficient * (float)deltaTime);
-			WorkCamera.Position += flyVelocity * (float)deltaTime;
+			Camera.Position += flyVelocity * (float)deltaTime;
 		}
 
 		public void UpdateView()
 		{
 			// Calculate view/projection matrices.
-			Matrix4 view = Matrix4.CreateTransform(WorkCamera.Position, WorkCamera.Rotation, Vector3.One).Inverse();
-			Matrix4 projection = Matrix4.CreatePerspectiveReversed(WorkCamera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
+			Matrix4 view = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
+			Matrix4 projection = Matrix4.CreatePerspectiveReversed(Camera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
 
 			// Orient the camera in the opposite direction (facing +Z).
 			view = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * view;

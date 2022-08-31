@@ -14,6 +14,7 @@ namespace Engine.Rendering
 		public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
 		private static List<RenderStep> globalStage= new();
+		private static List<RenderStep> sceneStage= new();
 		private static List<RenderStep> viewportStage= new();
 
 		public static void AddStep(RenderStep step, RenderStage stage)
@@ -23,6 +24,10 @@ namespace Engine.Rendering
 				case RenderStage.Global:
 					Debug.Assert(!globalStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
 					globalStage.Add(step);
+					break;
+				case RenderStage.Scene:
+					Debug.Assert(!sceneStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
+					sceneStage.Add(step);
 					break;
 				case RenderStage.Viewport:
 					Debug.Assert(!viewportStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
@@ -40,6 +45,11 @@ namespace Engine.Rendering
 				if (step is T)
 					return step as T;
 			}
+			foreach (var step in sceneStage)
+			{
+				if (step is T)
+					return step as T;
+			}
 			foreach (var step in globalStage)
 			{
 				if (step is T)
@@ -51,7 +61,7 @@ namespace Engine.Rendering
 
 		public static void Init()
 		{
-			AddStep(new SceneUpdateStep(), RenderStage.Global);
+			AddStep(new SceneUpdateStep(), RenderStage.Scene);
 			AddStep(new PrepassStep(), RenderStage.Viewport);
 			AddStep(new MaterialStep(), RenderStage.Viewport);
 			AddStep(new ResolveStep(), RenderStage.Viewport);
@@ -59,55 +69,63 @@ namespace Engine.Rendering
 
 		public static void Render()
 		{
-			// Switch to the default command list.
-			RenderStep.List = DefaultCommandList;
-
-			// Build and execute global commands on default command list.
-			RenderStep.List.PushEvent("Global");
+			// Execute global render steps.
 			foreach (RenderStep step in globalStage)
 			{
+				RenderStep.List = DefaultCommandList;
 				RenderStep.Viewport = null;
-				RenderStep.Scene = Scene.Main;
+				RenderStep.Scene = null;
 
-				if (RenderStep.Scene != null)
-				{
-					RenderStep.List.PushEvent(step.GetType().Name);
-					step.Run();
-					RenderStep.List.PopEvent();
-				}
+				step.Run();
 			}
 
-			RenderStep.List.PopEvent();
+			// Loop through scenes.
+			foreach (Scene scene in Scene.All)
+			{
+				RenderStep.List = DefaultCommandList;
+				RenderStep.Scene = scene;
+
+				// Execute per-scene render steps.
+				foreach (RenderStep step in sceneStage)
+				{
+					RenderStep.Viewport = null;
+					step.Run();
+				}
+			}
 
 			// Execute default command list and wait for it on the GPU.
 			DefaultCommandList.Execute(true);
 
-			// Build and execute viewport-level commands on viewport command lists.
-			foreach (var viewport in Viewport.All)
+			// Loop through scenes (again).
+			foreach (Scene scene in Scene.All)
 			{
-				// Switch to this viewport's command list.
-				RenderStep.List = viewport.CommandList;
-				RenderStep.List.PushEvent("Viewport");
-				RenderStep.Viewport = viewport;
+				RenderStep.Scene = scene;
 
-				foreach (RenderStep step in viewportStage)
+				// Build and execute per-viewport commands on viewport command lists.
+				foreach (var viewport in Viewport.All)
 				{
-					RenderStep.Scene = Scene.Main;
-
-					if (RenderStep.Scene != null)
+					// Skip viewports that belong to other scenes.
+					if (viewport.Scene != scene)
 					{
-						RenderStep.List.PushEvent(step.GetType().Name);
-						step.Run();
-						RenderStep.List.PopEvent();
+						continue;
 					}
+
+					// Switch to this viewport's command list.
+					RenderStep.List = viewport.CommandList;
+					RenderStep.Viewport = viewport;
+
+					foreach (RenderStep step in viewportStage)
+					{
+						step.Run();
+					}
+
+					// Make sure the viewport's backbuffer is in the right state for presentation.
+					RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
+					RenderStep.List.PopEvent();
+
+					// Make sure this viewport's commands are executing while we submit the next.
+					viewport.CommandList.Execute();
 				}
-
-				// Make sure the viewport's backbuffer is in the right state for presentation.
-				RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
-				RenderStep.List.PopEvent();
-
-				// Make sure this viewport's commands are executing while we submit the next.
-				viewport.CommandList.Execute();
 			}
 
 			// Submit default command list and wait for completion.

@@ -117,6 +117,10 @@ namespace Engine.World
 			{
 				Scene = Scene.Main;
 			}
+			else
+			{
+				Scene = scene;
+			}
 
 			if (parent == null)
 			{

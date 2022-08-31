@@ -7,6 +7,11 @@ namespace Engine.World
 		[Inspect] public uint FocalLength { get; set; } = 35;
 		[Inspect] public uint SensorSize { get; set; } = 36;
 
+		public CameraActor(string name = null) : base(name)
+		{
+
+		}
+
 		/// <summary>
 		/// Calculates the vertical field of view from physical camera properties.
 		/// </summary>
