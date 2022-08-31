@@ -27,25 +27,24 @@ namespace  Engine.Mathematics
 		#region Constructors
 		public static Color FromHex(int value)
 		{
-			byte[] Bytes = BitConverter.GetBytes(value);
+			return new Color()
+			{
+				B = (1f / 255f) * (byte)(value >> 0),
+				G = (1f / 255f) * (byte)(value >> 8),
+				R = (1f / 255f) * (byte)(value >> 16),
+				A = 1,
+			};
+		}
 
-			Color Col = new();
-
-			string Hex = value.ToString("X6");
-			string SR = Hex[0].ToString() + Hex[1].ToString();
-			string SG = Hex[2].ToString() + Hex[3].ToString();
-			string SB = Hex[4].ToString() + Hex[5].ToString();
-
-			int IR = int.Parse(SR, System.Globalization.NumberStyles.HexNumber);
-			int IG = int.Parse(SG, System.Globalization.NumberStyles.HexNumber);
-			int IB = int.Parse(SB, System.Globalization.NumberStyles.HexNumber);
-
-			Col.R = (1f / 255f) * IR;
-			Col.G = (1f / 255f) * IG;
-			Col.B = (1f / 255f) * IB;
-			Col.A = 1;
-
-			return Col;
+		public static Color FromHex(uint value)
+		{
+			return new Color()
+			{
+				B = (1f / 255f) * (byte)(value >> 0),
+				G = (1f / 255f) * (byte)(value >> 8),
+				R = (1f / 255f) * (byte)(value >> 16),
+				A = (1f / 255f) * (byte)(value >> 24),
+			};
 		}
 
 		public Color(float rgb)
@@ -76,14 +75,14 @@ namespace  Engine.Mathematics
 		#region Conversions
 		public static implicit operator System.Drawing.Color(Color col)
 		{
-			int a = (int)(col.A / (1f/255f));
+			int a = (int)(col.A / (1f / 255f));
 			int r = (int)(col.R / (1f / 255f));
 			int g = (int)(col.G / (1f / 255f));
 			int b = (int)(col.B / (1f / 255f));
 			return System.Drawing.Color.FromArgb(a, r, g, b);
 		}
 
-		public static implicit operator Color(int col)
+		public static implicit operator Color(uint col)
 		{
 			return FromHex(col);
 		}
