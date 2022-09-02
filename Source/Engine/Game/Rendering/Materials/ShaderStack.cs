@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
@@ -43,21 +44,32 @@ namespace Engine.Rendering
 				int paramOffset = 4;
 				foreach (var param in Parameters)
 				{
-					int paramSize = Marshal.SizeOf(param.Type);
+					int paramSize = 0;
 
 					// Override sizes where needed.
 					switch (param.Value)
 					{
+						// Descriptor handles
+						case Texture2D:
+							paramSize = sizeof(uint);
+							break;
+						// Enforce minimum 4b alignment
 						case bool:
 						case byte:
 						case sbyte:
 							paramSize = Marshal.SizeOf(typeof(int));
+							break;
+						default:
+							paramSize = Marshal.SizeOf(param.Type);
 							break;
 					}
 
 					// Write actual loader statements.
 					switch (param.Value)
 					{
+						case Texture2D:
+							setupSource += $"{param.Name} = ResourceDescriptorHeap[MaterialParams.Load(materialID + {paramOffset})];\n";
+							break;
 						case bool:
 							setupSource += $"{param.Name} = (bool)MaterialParams.Load(materialID + {paramOffset});\n";
 							break;
@@ -101,7 +113,7 @@ namespace Engine.Rendering
 
 				// Build program from source code.
 				string source = Embed.GetString("HLSL/Material/BaseMaterialPS.hlsl");
-				source = source.Replace("#insert MATERIAL", surfaceSource).Replace("#insert SETUP", setupSource);
+				source = source.Replace("#insert SURFACE", surfaceSource).Replace("#insert SETUP", setupSource);
 
 				// Compile program.
 				ShaderProgram program = new ShaderProgram()

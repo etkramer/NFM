@@ -49,6 +49,10 @@ namespace Engine.Rendering
 					// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
 					materialData.AddRange(StructureToByteArray(typeof(int), (bool)value ? 1 : 0));
 				}
+				else if (param.Type == typeof(Texture2D))
+				{
+					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).Resource.SRV.Handle.Index));
+				}
 				else
 				{
 					materialData.AddRange(StructureToByteArray(param.Type, value));

@@ -24,7 +24,7 @@ namespace Engine.Resources
 			return this;
 		}
 
-		public Material SetTextures(string param, Texture2D value)
+		public Material SetTexture(string param, Texture2D value)
 		{
 			OverrideParameters.Add(new ShaderParameter()
 			{

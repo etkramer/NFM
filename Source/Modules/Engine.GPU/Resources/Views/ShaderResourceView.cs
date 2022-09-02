@@ -4,10 +4,10 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	internal class ShaderResourceView
+	public class ShaderResourceView
 	{
 		internal static DescriptorHeap Heap = new DescriptorHeap(HeapType.SRV, 4096, true);
-		internal DescriptorHandle Handle;
+		public DescriptorHandle Handle;
 
 		public ShaderResourceView(ID3D12Resource resource, int stride, int capacity, bool isRaw)
 		{

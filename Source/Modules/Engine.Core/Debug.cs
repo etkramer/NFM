@@ -42,6 +42,11 @@ namespace Engine.Core
 			LogBase($"ERROR: {message}");
 		}
 
+		public static void LogError(Exception ex)
+		{
+			LogBase($"ERROR: {ex.GetType().Name}: {ex.Message}");
+		}
+
 		public static void Throw(string message)
 		{
 			throw new Exception(message);

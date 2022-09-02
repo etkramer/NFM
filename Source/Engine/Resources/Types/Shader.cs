@@ -27,7 +27,7 @@ namespace Engine.Resources
 			ShaderSource = source;
 		}
 
-		public Shader AddColor(string param, Color defaultValue = default)
+		public void AddColor(string param, Color defaultValue = default)
 		{
 			Parameters.Add(new ShaderParameter()
 			{
@@ -35,11 +35,9 @@ namespace Engine.Resources
 				Value = defaultValue,
 				Type = typeof(Color)
 			});
-
-			return this;
 		}
 
-		public Shader AddTexture(string param, Texture2D defaultValue = default)
+		public void AddTexture(string param, Texture2D defaultValue = default)
 		{
 			Parameters.Add(new ShaderParameter()
 			{
@@ -47,8 +45,6 @@ namespace Engine.Resources
 				Value = defaultValue,
 				Type = typeof(Texture2D)
 			});
-
-			return this;
 		}
 
 		public void SetBlendMode(BlendMode mode)

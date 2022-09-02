@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	internal class DepthStencilView
+	public class DepthStencilView
 	{
 		public static DescriptorHeap Heap = new DescriptorHeap(HeapType.DSV, 4096, false);
 

@@ -40,10 +40,36 @@ namespace Engine.Resources
 		/// </summary>
 		public void LoadData(Span<byte> data, TextureCompression sourceCompression = TextureCompression.None)
 		{
-			/*Format format = IsLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb;
+			Format format = IsLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb;
 
 			Resource = new Texture(Width, Height, 1, format);
-			Renderer.DefaultCommandList.UploadTexture(Resource, data);*/
+			Renderer.DefaultCommandList.UploadTexture(Resource, data);
 		}
+
+		public override void Dispose()
+		{
+			Resource.Dispose();
+		}
+
+		public static Texture2D FromColor(Color color)
+		{
+			byte[] data = new byte[1 * 1 * 4];
+			for (int i = 0; i < data.Length / 4; i += 4)
+			{
+				data[i] = (byte)(color.R * 255);
+				data[i + 1] = (byte)(color.G * 255);
+				data[i + 2] = (byte)(color.B * 255);
+				data[i + 3] = (byte)(color.A * 255);
+			};
+
+			Texture2D texture = new Texture2D(1, 1);
+			texture.LoadData(data);
+			return texture;
+		}
+
+		public static Texture2D White = FromColor(Color.White);
+		public static Texture2D Black = FromColor(Color.Black);
+		public static Texture2D Normal = FromColor(new Color(0.5f, 0.5f, 1));
+		public static Texture2D Purple = FromColor(new Color(1, 0, 1));
 	}
 }

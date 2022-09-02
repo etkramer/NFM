@@ -45,13 +45,20 @@ namespace Engine.Frontend
 			SplashScreen splash = new SplashScreen();
 			desktopLifetime.MainWindow = splash;
 
-			Task initTask = Task.Run(() => Game.Init().Wait())
-				.ContinueWith((t) =>
+			Task startupTask = Task.Run(Game.Init);
+			startupTask.ContinueWith((t) =>
 				{
-					// Show error dialog if failed.
-					if (t.IsFaulted) Dispatcher.UIThread.Post(() => new ExceptionDialog(ExceptionDispatchInfo.Capture(t.Exception.InnerException)).Show());
-					// Otherwise, go ahead and open the main window.
-					else Dispatcher.UIThread.Post(() => { desktopLifetime.MainWindow = new MainWindow(); desktopLifetime.MainWindow.Show(); splash.Close(); });
+					if (t.IsFaulted)
+					{
+						Dispatcher.UIThread.Post(() => new ExceptionDialog(ExceptionDispatchInfo.Capture(t.Exception.InnerException)).Show());
+					}
+					else
+					{
+						Dispatcher.UIThread.Post(() =>
+						{
+							desktopLifetime.MainWindow = new MainWindow(); desktopLifetime.MainWindow.Show(); splash.Close();
+						});
+					}
 				});
 		}
 

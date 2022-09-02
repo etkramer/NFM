@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	internal class UnorderedAccessView
+	public class UnorderedAccessView
 	{
 		public DescriptorHandle Handle;
 

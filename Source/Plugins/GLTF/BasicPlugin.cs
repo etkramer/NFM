@@ -51,7 +51,8 @@ namespace Basic
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
-			shader.AddColor("DebugColor", new Color(1, 0, 1));
+			shader.AddTexture("BaseColor", Texture2D.Purple);
+			shader.AddTexture("Normal", Texture2D.Normal);
 
 			return shader;
 		}

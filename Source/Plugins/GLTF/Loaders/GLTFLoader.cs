@@ -60,6 +60,7 @@ namespace Basic.Loaders
 					}
 					
 					texture.LoadData(imageData, TextureCompression.None);
+					textures[i] = texture;
 				}
 			});*/
 
@@ -69,7 +70,20 @@ namespace Basic.Loaders
 			{
 				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR");
 				Material material = new Material(shader);
-				material.SetColor("DebugColor", i % 2 == 0 ? new Color(0, 0, 1) : new Color(1, 0, 0));
+
+				AI.Material importMaterial = importScene.Materials[i];
+
+				// Assign textures.
+				/*if (importMaterial.HasTextureDiffuse)
+				{
+					int textureIdx = int.Parse(importMaterial.TextureDiffuse.FilePath.Split('*')[1]);
+					material.SetTexture("BaseColor", textures[textureIdx]);
+				}
+				if (importMaterial.HasTextureNormal)
+				{
+					int textureIdx = int.Parse(importMaterial.TextureNormal.FilePath.Split('*')[1]);
+					material.SetTexture("Normal", textures[textureIdx]);
+				}*/
 
 				materials[i] = material;
 			}
@@ -82,19 +96,25 @@ namespace Basic.Loaders
 
 				Vector3[] vertices = new Vector3[importMesh.VertexCount];
 				Vector3[] normals = new Vector3[importMesh.VertexCount];
+				Vector3[] uvs = new Vector3[importMesh.VertexCount];
 
 				// Interpret vertices/normals.
 				for (int i = 0; i < importMesh.VertexCount; i++)
 				{
 					vertices[i] = new(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z);
 					normals[i] = new(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z);
+					uvs[i] = new(importMesh.TextureCoordinateChannels[0][i].X, importMesh.TextureCoordinateChannels[0][i].Y, importMesh.TextureCoordinateChannels[0][i].Z);
 				}
 
 				// Create submesh.
 				Mesh submesh = new Mesh();
 				submesh.SetMaterial(materials[importMesh.MaterialIndex]);
+
+				// Note: merge these?
 				submesh.SetVertices(vertices);
+				//submesh.SetUVs(uvs);
 				submesh.SetNormals(normals);
+
 				submesh.SetIndices(importMesh.GetUnsignedIndices());
 
 				meshes.Add(submesh);

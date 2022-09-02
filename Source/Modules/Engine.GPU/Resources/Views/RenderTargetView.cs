@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	internal class RenderTargetView
+	public class RenderTargetView
 	{
 		public static DescriptorHeap Heap = new DescriptorHeap(HeapType.RTV, 4096, false);
 

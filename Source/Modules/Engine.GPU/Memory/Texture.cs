@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace Engine.GPU
 {
-	public unsafe sealed class Texture : Resource, IDisposable
+	public unsafe class Texture : Resource, IDisposable
 	{
 		public bool IsRT => rtv != null;
 		public bool IsDS => dsv != null;
 
 		private UnorderedAccessView uav;
-		internal UnorderedAccessView UAV
+		public UnorderedAccessView UAV
 		{
 			get
 			{
@@ -25,7 +25,7 @@ namespace Engine.GPU
 		}
 
 		private ShaderResourceView srv;
-		internal ShaderResourceView SRV
+		public ShaderResourceView SRV
 		{
 			get
 			{
@@ -39,7 +39,7 @@ namespace Engine.GPU
 		}
 
 		private RenderTargetView rtv;
-		internal RenderTargetView RTV
+		public RenderTargetView RTV
 		{
 			get
 			{
@@ -55,7 +55,7 @@ namespace Engine.GPU
 		}
 
 		private DepthStencilView dsv;
-		internal DepthStencilView DSV
+		public DepthStencilView DSV
 		{
 			get
 			{
