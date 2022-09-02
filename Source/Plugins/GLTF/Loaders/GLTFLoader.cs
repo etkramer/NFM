@@ -94,27 +94,21 @@ namespace Basic.Loaders
 			{
 				Debug.Assert(importMesh.PrimitiveType == PrimitiveType.Triangle, "Engine does not support non-triangle geometry.");
 
-				Vector3[] vertices = new Vector3[importMesh.VertexCount];
-				Vector3[] normals = new Vector3[importMesh.VertexCount];
-				Vector3[] uvs = new Vector3[importMesh.VertexCount];
-
-				// Interpret vertices/normals.
+				// Format vertices.
+				Vertex[] vertices = new Vertex[importMesh.VertexCount];
 				for (int i = 0; i < importMesh.VertexCount; i++)
 				{
-					vertices[i] = new(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z);
-					normals[i] = new(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z);
-					uvs[i] = new(importMesh.TextureCoordinateChannels[0][i].X, importMesh.TextureCoordinateChannels[0][i].Y, importMesh.TextureCoordinateChannels[0][i].Z);
+					vertices[i] = new Vertex()
+					{
+						Position = new Vector3(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z),
+						Normal = new Vector3(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z)
+					};
 				}
 
 				// Create submesh.
 				Mesh submesh = new Mesh();
 				submesh.SetMaterial(materials[importMesh.MaterialIndex]);
-
-				// Note: merge these?
 				submesh.SetVertices(vertices);
-				//submesh.SetUVs(uvs);
-				submesh.SetNormals(normals);
-
 				submesh.SetIndices(importMesh.GetUnsignedIndices());
 
 				meshes.Add(submesh);

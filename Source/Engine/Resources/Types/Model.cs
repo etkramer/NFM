@@ -30,18 +30,18 @@ namespace Engine.Resources
 		public Material Material { get; set; }
 
 		public uint[] Indices { get => indices; set => SetIndices(value); }
-		public Vector3[] Vertices { get => vertices; set => SetVertices(value); }
-		public Vector3[] Normals { get => normals; set => SetNormals(value); }
+		public Vertex[] Vertices { get => vertices; set => SetVertices(value); }
 
 		private uint[] indices;
-		private Vector3[] vertices;
-		private Vector3[] normals;
+		private Vertex[] vertices;
 
 		public void Clear()
 		{
 			indices = null;
 			vertices = null;
-			normals = null;
+
+			areVerticesUploaded = false;
+			areIndicesUploaded = false;
 
 			PrimHandle?.Dispose();
 			VertHandle?.Dispose();
@@ -50,77 +50,30 @@ namespace Engine.Resources
 		}
 
 		private uint[] vertMapping = null;
+		private bool areIndicesUploaded = false;
+		private bool areVerticesUploaded = false;
 
 		public void SetIndices(uint[] value)
 		{
-			Debug.Assert(indices == null, "Cannot set mesh indices multiple times between calls to Mesh.Clear()");
 			indices = value;
 
-			foreach (uint index in value)
+			if (vertices != null && !areVerticesUploaded)
 			{
-				Debug.Assert(index < vertices.Length, "Supplied mesh indices are out of bounds.");
-			}
-
-			unsafe
-			{
-				fixed (uint* indicesPtr = indices)
-				{
-					fixed (Vector3* vertsPtr = vertices)
-					{
-						// Build meshlet data.
-						MeshOperations.BuildMeshlets(indicesPtr, indices.Length, vertsPtr, vertices.Length, sizeof(Vector3), out var prims, out var verts, out var meshlets);
-
-						vertMapping = verts;
-						if (vertices != null && normals != null)
-						{
-							// Upload meshlet-remapped verts.
-							var remapped = RemapVerts();
-							VertHandle = VertBuffer.Allocate(remapped.Length);
-							Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
-						}
-
-						// Upload meshlet/index data to GPU.
-						PrimHandle = PrimBuffer.Allocate(prims.Length);
-						Renderer.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
-						MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
-						Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
-
-						TryUploadMesh();
-					}
-				}
+				UploadVertices();
+				UploadIndices(); // Also builds meshlets, thus requiring vertex data.
 			}
 		}
 
-		public void SetVertices(Vector3[] value)
+		public void SetVertices(Vertex[] value)
 		{
-			Debug.Assert(normals == null || normals?.Length == value?.Length, "Vertex/normal count must match!");
 			vertices = value;
 
-			// Upload meshlet-remapped verts.
-			if (vertMapping != null && normals != null)
+			UploadVertices();
+
+			if (!areIndicesUploaded && indices != null)
 			{
-				var remapped = RemapVerts();
-				VertHandle = VertBuffer.Allocate(remapped.Length);
-				Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
+				UploadIndices();
 			}
-
-			TryUploadMesh();
-		}
-
-		public void SetNormals(Vector3[] value)
-		{
-			Debug.Assert(vertices == null || vertices?.Length == value?.Length, "Vertex/normal count must match!");
-			normals = value;
-
-			// Upload meshlet-remapped verts.
-			if (vertMapping != null && vertices != null)
-			{
-				var remapped = RemapVerts();
-				VertHandle = VertBuffer.Allocate(remapped.Length);
-				Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
-			}
-
-			TryUploadMesh();
 		}
 
 		public void SetMaterial(Material value)
@@ -128,14 +81,77 @@ namespace Engine.Resources
 			Material = value;
 		}
 
-		private void TryUploadMesh()
+		private void UploadIndices()
 		{
-			// Not ready to do the final upload yet.
-			if (MeshHandle != null || VertHandle == null || MeshletHandle == null || PrimHandle == null)
+			unsafe
+			{
+				fixed (uint* indicesPtr = indices)
+				{
+					fixed (Vertex* vertsPtr = vertices)
+					{
+						// Build meshlet data.
+						MeshOperations.BuildMeshlets(indicesPtr, indices.Length, vertsPtr, vertices.Length, sizeof(Vertex), out var prims, out var verts, out var meshlets);
+						vertMapping = verts;
+
+						// Upload meshlet/index data to GPU.
+						PrimHandle = PrimBuffer.Allocate(prims.Length);
+						Renderer.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
+						MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
+						Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
+					}
+				}
+			}
+
+			// Mark indices as uploaded.
+			areIndicesUploaded = true;
+
+			if (!areVerticesUploaded)
+			{
+				UploadVertices();
+			}
+			
+			if (areVerticesUploaded)
+			{
+				TryUploadMesh();
+			}
+		}
+
+		private void UploadVertices()
+		{
+			// We haven't generated meshlets yet, so we can't remap these vertices.
+			// Should try to call this again in UploadIndices().
+			if (!areIndicesUploaded)
 			{
 				return;
 			}
 
+			// Remap vertices to fit meshlets.
+			Vertex[] remapped = RemapVerts();
+
+			// Upload remapped verts to the vertex buffer.
+			VertHandle?.Dispose();
+			VertHandle = VertBuffer.Allocate(remapped.Length);
+			Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
+
+			// Mark vertices as uploaded.
+			areVerticesUploaded = true;
+
+			// See if we can upload the final mesh data yet.
+			if (areIndicesUploaded)
+			{
+				TryUploadMesh();
+			}
+		}
+
+		private void TryUploadMesh()
+		{
+			// Not ready to do the final upload yet.
+			if (VertHandle == null || MeshletHandle == null || PrimHandle == null)
+			{
+				return;
+			}
+
+			MeshHandle?.Dispose();
 			MeshHandle = MeshBuffer.Allocate(1);
 			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
 			{
@@ -146,16 +162,12 @@ namespace Engine.Resources
 			});
 		}
 
-		private VertexData[] RemapVerts()
+		private Vertex[] RemapVerts()
 		{
-			VertexData[] vertData = new VertexData[vertMapping.Length];
+			Vertex[] vertData = new Vertex[vertMapping.Length];
 			for (int i = 0; i < vertMapping.Length; i++)
 			{
-				vertData[i] = new VertexData()
-				{
-					Position = vertices[vertMapping[i]],
-					Normal = normals[vertMapping[i]]
-				};
+				vertData[i] = vertices[vertMapping[i]];
 			}
 
 			return vertData;
