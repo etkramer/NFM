@@ -1,7 +1,7 @@
 ﻿using System;
 using Engine.GPU;
 using Engine.Rendering;
-using StbImageSharp;
+using StbiSharp;
 using Vortice.DXGI;
 
 namespace Engine.Resources
@@ -26,25 +26,7 @@ namespace Engine.Resources
 			return this;
 		}
 
-		/// <summary>
-		/// Loads raw, uncompressed data (in 8-bit SDR format) into the texture.
-		/// </summary>
-		public void LoadData(byte[] data)
-		{
-			Commit(data);
-		}
-
-		/// <summary>
-		/// Loads raw, uncompressed data (in 32-bit HDR format) into the texture.
-		/// </summary>
-		public void LoadData(float[] data)
-		{
-			byte[] byteData = new byte[data.Length * sizeof(float)];
-			Buffer.BlockCopy(data, 0, byteData, 0, data.Length * sizeof(float));
-			Commit(byteData);
-		}
-
-		private void Commit(byte[] data)
+		private void Commit(Span<byte> data)
 		{
 			Format format = IsLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb;
 			Resource = new Texture(Width, Height, 1, format);
@@ -53,23 +35,32 @@ namespace Engine.Resources
 		}
 
 		/// <summary>
+		/// Loads raw, uncompressed data (in 8bpc SDR format) into the texture.
+		/// </summary>
+		public void LoadData(Span<byte> data)
+		{
+			Commit(data);
+		}
+
+		/// <summary>
 		/// Loads compressed data in JPG/PNG/BMP/TGA/PSD/GIF formats into the texture.
 		/// </summary>
-		public void LoadData(byte[] data, TextureFormat sourceFormat, bool hdr = false)
+		public void LoadData(byte[] data, TextureFormat sourceFormat)
 		{
-			if (hdr)
+			// Decompress image
+			StbiImage image = Stbi.LoadFromMemory(data, 4);
+			Width = image.Width;
+			Height = image.Height;
+
+			// ..and load it.
+			LoadData(SpanFromReadonly(image.Data));
+		}
+
+		private unsafe Span<T> SpanFromReadonly<T>(ReadOnlySpan<T> readOnly) where T : unmanaged
+		{
+			fixed (T* dataPtr = readOnly)
 			{
-				ImageResultFloat image = ImageResultFloat.FromMemory(data, sourceFormat == TextureFormat.RGB ? ColorComponents.RedGreenBlue : ColorComponents.RedGreenBlueAlpha);
-				Width = image.Width;
-				Height = image.Height;
-				LoadData(image.Data);
-			}
-			else
-			{
-				ImageResult image = ImageResult.FromMemory(data, sourceFormat == TextureFormat.RGB ? ColorComponents.RedGreenBlue : ColorComponents.RedGreenBlueAlpha);
-				Width = image.Width;
-				Height = image.Height;
-				LoadData(image.Data);
+				return new Span<T>(dataPtr, readOnly.Length * sizeof(T));
 			}
 		}
 	}

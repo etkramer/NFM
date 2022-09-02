@@ -41,6 +41,16 @@ namespace Basic.Loaders
 			//steps |= PostProcessSteps.CalculateTangentSpace;
 			AI.Scene importScene = importContext.ImportFile(Path, steps);
 
+			// Load embedded textures.
+			/*Texture2D[] textures = new Texture2D[importScene.TextureCount];
+			Parallel.For(0, importScene.TextureCount, (i) =>
+			{
+				Texture2D tex = new Texture2D();
+				tex.LoadData(importScene.Textures[i].CompressedData, TextureFormat.RGB);
+
+				textures[i] = tex;
+			});*/
+
 			// Create embedded materials.
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
