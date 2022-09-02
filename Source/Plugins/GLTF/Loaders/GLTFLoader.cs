@@ -10,6 +10,7 @@ using Material = Engine.Resources.Material;
 using System.Collections.Concurrent;
 using Engine.Core;
 using Mesh = Engine.Resources.Mesh;
+using StbiSharp;
 
 namespace Basic.Loaders
 {
@@ -45,10 +46,21 @@ namespace Basic.Loaders
 			/*Texture2D[] textures = new Texture2D[importScene.TextureCount];
 			Parallel.For(0, importScene.TextureCount, (i) =>
 			{
-				Texture2D tex = new Texture2D();
-				tex.LoadData(importScene.Textures[i].CompressedData, TextureFormat.RGB);
+				using (StbiImage image = Stbi.LoadFromMemory(importScene.Textures[i].CompressedData, 4))
+				{
+					Texture2D texture = new Texture2D(image.Width, image.Height);
 
-				textures[i] = tex;
+					Span<byte> imageData = null;
+					unsafe
+					{
+						fixed (byte* dataPtr = image.Data)
+						{
+							imageData = new Span<byte>(dataPtr, image.Data.Length * sizeof(byte));
+						}
+					}
+					
+					texture.LoadData(imageData, TextureCompression.None);
+				}
 			});*/
 
 			// Create embedded materials.

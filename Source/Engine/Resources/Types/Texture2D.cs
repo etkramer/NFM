@@ -1,67 +1,49 @@
 ﻿using System;
 using Engine.GPU;
 using Engine.Rendering;
-using StbiSharp;
 using Vortice.DXGI;
 
 namespace Engine.Resources
 {
-	public enum TextureFormat
+	public enum TextureCompression
 	{
-		RGB,
-		RGBA,
+		None = 0,
+
+		// Block Compression
+		BC1,
+		BC2,
+		BC3,
+		BC5,
+
+		// DXT aliases
+		DXT1 = BC1,
+		DXT3 = BC2,
+		DXT5 = BC3,
 	}
 
 	public sealed class Texture2D : Resource
 	{
 		internal Texture Resource = null;
 
+		public int Width { get; }
+		public int Height { get; }
 		public bool IsLinear { get; set; }
-		public int Width { get; set; }
-		public int Height { get; set; }
 
-		public Texture2D SetLinear(bool value)
+		public Texture2D(int width, int height)
 		{
-			IsLinear = value;
-			return this;
+			Width = width;
+			Height = height;
 		}
 
-		private void Commit(Span<byte> data)
+		/// <summary>
+		/// Loads raw image data into the texture.
+		/// </summary>
+		public void LoadData(Span<byte> data, TextureCompression sourceCompression = TextureCompression.None)
 		{
-			Format format = IsLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb;
+			/*Format format = IsLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb;
+
 			Resource = new Texture(Width, Height, 1, format);
-
-			Renderer.DefaultCommandList.UploadTexture(Resource, data);
-		}
-
-		/// <summary>
-		/// Loads raw, uncompressed data (in 8bpc SDR format) into the texture.
-		/// </summary>
-		public void LoadData(Span<byte> data)
-		{
-			Commit(data);
-		}
-
-		/// <summary>
-		/// Loads compressed data in JPG/PNG/BMP/TGA/PSD/GIF formats into the texture.
-		/// </summary>
-		public void LoadData(byte[] data, TextureFormat sourceFormat)
-		{
-			// Decompress image
-			StbiImage image = Stbi.LoadFromMemory(data, 4);
-			Width = image.Width;
-			Height = image.Height;
-
-			// ..and load it.
-			LoadData(SpanFromReadonly(image.Data));
-		}
-
-		private unsafe Span<T> SpanFromReadonly<T>(ReadOnlySpan<T> readOnly) where T : unmanaged
-		{
-			fixed (T* dataPtr = readOnly)
-			{
-				return new Span<T>(dataPtr, readOnly.Length * sizeof(T));
-			}
+			Renderer.DefaultCommandList.UploadTexture(Resource, data);*/
 		}
 	}
 }
