@@ -45,7 +45,7 @@ namespace Engine.Frontend
 			SplashScreen splash = new SplashScreen();
 			desktopLifetime.MainWindow = splash;
 
-			Task initTask = Task.Run(Game.Init)
+			Task initTask = Task.Run(() => Game.Init().Wait())
 				.ContinueWith((t) =>
 				{
 					// Show error dialog if failed.

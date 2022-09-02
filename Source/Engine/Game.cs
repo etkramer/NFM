@@ -20,7 +20,7 @@ namespace Engine
 	{
 		public static event Action<double> OnTick = delegate {};
 
-		public static void Init()
+		public static async Task Init()
 		{
 			// Init basic systems.
 			GPUContext.Init();
@@ -29,9 +29,10 @@ namespace Engine
 			// Load all plugins.
 			PluginSystem.LoadAll();
 
-			// Precache model.
-			Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Wait();
-			Asset.GetAsync<Model>("USER:Objects/Sponza").Wait();
+			// Kick off model loading. We're not awaiting this right now because
+			// opening the window takes long enough to hide the load time.
+			var loadSponza = Asset.GetAsync<Model>("USER:Objects/Sponza");
+			var loadHelmet = Asset.GetAsync<Model>("USER:Objects/FlightHelmet");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}

@@ -5,11 +5,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Engine.Editor;
+using Avalonia.Layout;
 
 namespace Engine.Frontend
 {
 	public class BaseInput : UserControl, INotify
 	{
+		public string PropertyName => Property.Name.PascalToDisplay();
+
 		protected PropertyInfo Property { get; private set; }
 		protected IEnumerable<object> Subjects { get; private set; }
 
@@ -106,6 +109,13 @@ namespace Engine.Frontend
 
 		protected bool TryParseNum(string value, Type numType, out object num)
 		{
+			// Interpret emptied field as zero.
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				num = Convert.ChangeType(0, numType);
+				return true;
+			}
+
 			if (IsFloat(numType))
 			{
 				if (double.TryParse(value, out double floatValue))

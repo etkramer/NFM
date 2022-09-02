@@ -50,13 +50,6 @@ namespace Engine.Frontend
 						.Content(nameof(FieldContent), BindingMode.Default)
 				);
 
-			CreateField();
-		}
-
-		private void CreateField()
-		{
-			var subjects = Selection.Selected.ToArray();
-
 			if (Property.PropertyType == typeof(bool))
 			{
 				// Boolean input field.
@@ -95,5 +88,6 @@ namespace Engine.Frontend
 
 			}
 		}
+
 	}
 }

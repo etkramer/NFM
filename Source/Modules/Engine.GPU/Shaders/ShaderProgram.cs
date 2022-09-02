@@ -35,8 +35,8 @@ namespace Engine.GPU
 	[AutoDispose]
 	public sealed class ShaderProgram : IDisposable
 	{
+		public bool IsGraphics { get; private set; } = false;
 		public bool IsCompute { get; private set; } = false;
-		public bool IsMeshPixel { get; private set; } = false;
 
 		static readonly DxcCompilerOptions compilerOptions = new()
 		{
@@ -149,7 +149,7 @@ namespace Engine.GPU
 				Debug.LogError($"Mesh shader failed to compile with message: \n{meshResult.GetErrors()}");
 			}
 
-			IsMeshPixel = true;
+			IsGraphics = true;
 			return this;
 		}
 
@@ -168,20 +168,8 @@ namespace Engine.GPU
 				Debug.LogError($"Pixel shader failed to compile with message: \n{pixelResult.GetErrors()}");
 			}
 
-			IsMeshPixel = true;
+			IsGraphics = true;
 			return this;
-		}
-
-		/// <summary>
-		/// Specifies that a parameter should be interpreted as a 32-bit root constant.
-		/// </summary>
-		public ShaderProgram Constant<T>(int slot, int space = 0) where T : unmanaged
-		{
-			unsafe
-			{
-				int count = sizeof(T) / 32;
-				return AsRootConstant(slot, count, space);
-			}
 		}
 
 		/// <summary>
@@ -300,12 +288,12 @@ namespace Engine.GPU
 		{
 			return Task.Run(() =>
 			{
-				if (IsMeshPixel && (compiledPixel == null || compiledMesh == null))
+				if (IsGraphics && (compiledPixel == null || compiledMesh == null))
 				{
 					throw new NotSupportedException("Cannot use a pixel shader without a mesh shader, or vice versa");
 				}
 
-				if (IsCompute && IsMeshPixel)
+				if (IsCompute && IsGraphics)
 				{
 					throw new NotSupportedException("Cannot use a compute shader in the same program as a mesh or pixel shader");
 				}
@@ -327,7 +315,7 @@ namespace Engine.GPU
 
 				// Create PSO.
 				Result result = default;
-				if (IsMeshPixel)
+				if (IsGraphics)
 				{
 					result = CreatePipelineState(new GraphicsPipelineStateStream()
 					{

@@ -1,4 +1,6 @@
 ﻿using System;
+using Engine.Rendering;
+using Engine.Resources;
 
 namespace Engine.World
 {
@@ -7,18 +9,11 @@ namespace Engine.World
 		[Inspect] public uint FocalLength { get; set; } = 35;
 		[Inspect] public uint SensorSize { get; set; } = 36;
 
+		public float FOV => MathHelper.RadiansToDegrees(2 * (float)Math.Atan(SensorSize / 2f / FocalLength));
+
 		public CameraActor(string name = null) : base(name)
 		{
 
-		}
-
-		/// <summary>
-		/// Calculates the vertical field of view from physical camera properties.
-		/// </summary>
-		/// <returns></returns>
-		public float CalcFOV()
-		{
-			return MathHelper.RadiansToDegrees(2 * (float)Math.Atan(SensorSize / 2f /FocalLength));
 		}
 	}
 }

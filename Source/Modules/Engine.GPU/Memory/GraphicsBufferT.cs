@@ -16,7 +16,8 @@ namespace Engine.GPU
 		/// <summary>
 		/// Allocates space in the buffer and returns a handle.
 		/// </summary>
-		public BufferAllocation<T> Allocate(int count)
+		/// <param name="resizeList">The command list to be used for resizing, if necessary.</param>
+		public BufferAllocation<T> Allocate(int count, CommandList resizeList = null)
 		{
 			lock (allocations)
 			{
@@ -83,17 +84,12 @@ namespace Engine.GPU
 				// Couldn't find a large enough block.
 				if (alloc == null)
 				{
-					Resize(Capacity * 2);
+					Resize((Capacity * 2) * sizeof(T));
 					return Allocate(count);
 				}
 
 				return alloc;
 			}
-		}
-
-		public void Resize(long newCapacity)
-		{
-			throw new NotImplementedException("Buffer resizing not yet supported");
 		}
 
 		public void Free(BufferAllocation<T> handle)

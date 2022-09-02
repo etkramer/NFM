@@ -1,4 +1,5 @@
 ﻿using System;
+using Engine.Editor;
 using Engine.Frontend;
 using Engine.GPU;
 using Engine.World;
@@ -124,7 +125,7 @@ namespace Engine.Rendering
 		{
 			// Calculate view/projection matrices.
 			Matrix4 view = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
-			Matrix4 projection = Matrix4.CreatePerspectiveReversed(Camera.CalcFOV(), Size.X / (float)Size.Y, 0.01f);
+			Matrix4 projection = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
 			// Orient the camera in the opposite direction (facing +Z).
 			view = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * view;

@@ -60,6 +60,16 @@ namespace Engine.GPU
 			public ResourceStates AfterState;
 		}
 
+		public void DispatchMeshGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
+		{
+			Action<ID3D12GraphicsCommandList6> buildDelegate = (list) =>
+			{
+				list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
+			};
+
+			AddCommand(buildDelegate, null);
+		}
+
 		public void DispatchGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
@@ -172,7 +182,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					unsafe
 					{
@@ -207,7 +217,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootDescriptorTable(parameterIndex, target.CBV.Handle);
 				}
@@ -235,7 +245,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
 				}
@@ -263,7 +273,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
 				}
@@ -291,7 +301,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
 				}
@@ -319,7 +329,7 @@ namespace Engine.GPU
 					return;
 				}
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
 				}
@@ -344,7 +354,7 @@ namespace Engine.GPU
 				list.SetPipelineState(program.PSO);
 				CurrentProgram = program;
 
-				if (program.IsMeshPixel)
+				if (program.IsGraphics)
 				{
 					list.SetGraphicsRootSignature(program.RootSignature);
 				}
@@ -352,16 +362,6 @@ namespace Engine.GPU
 				{
 					list.SetComputeRootSignature(program.RootSignature);
 				}
-			};
-
-			AddCommand(buildDelegate, null);
-		}
-
-		public void DrawMesh(int instanceCount)
-		{
-			Action<ID3D12GraphicsCommandList6> buildDelegate = (list) =>
-			{
-				list.DispatchMesh(instanceCount, 1, 1);
 			};
 
 			AddCommand(buildDelegate, null);

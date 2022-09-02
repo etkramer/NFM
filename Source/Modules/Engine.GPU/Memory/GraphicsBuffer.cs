@@ -114,6 +114,11 @@ namespace Engine.GPU
 			Name = GetType().Name;
 		}
 
+		public void Resize(long sizeBytes)
+		{
+			throw new NotImplementedException("Buffer resizing is not yet supported.");
+		}
+
 		public void Dispose()
 		{
 			Resource.Dispose();

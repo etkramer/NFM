@@ -49,6 +49,7 @@ namespace Engine.World
 
 		public void UpdateInstances()
 		{
+			// Get rid of existing instances.
 			if (Model == null || Model?.Parts == null || !IsVisible)
 			{
 				for (int i = 0; i < InstanceHandles?.Length; i++)
