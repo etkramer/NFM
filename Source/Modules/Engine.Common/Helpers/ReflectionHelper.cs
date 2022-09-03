@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public static class ReflectionHelper
 	{

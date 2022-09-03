@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public interface ICustomSave
 	{

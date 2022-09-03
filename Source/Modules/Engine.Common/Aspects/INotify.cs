@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public interface INotify : INotifyPropertyChanged
 	{

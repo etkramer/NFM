@@ -1,4 +1,4 @@
-﻿global using Engine.Core;
+﻿global using Engine.Common;
 global using Engine.Mathematics;
 using Vortice.DXGI;
 using Vortice.Direct3D12;

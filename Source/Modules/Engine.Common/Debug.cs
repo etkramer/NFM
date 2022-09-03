@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public class AssertionFailedException : Exception
 	{

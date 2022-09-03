@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 	public class SaveAttribute : Attribute

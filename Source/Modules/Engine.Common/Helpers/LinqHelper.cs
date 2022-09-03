@@ -5,7 +5,7 @@ using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public static class LinqHelper
 	{

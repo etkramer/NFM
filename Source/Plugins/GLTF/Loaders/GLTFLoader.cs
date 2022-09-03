@@ -8,7 +8,7 @@ using AI = Assimp;
 using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
 using System.Collections.Concurrent;
-using Engine.Core;
+using Engine.Common;
 using Mesh = Engine.Resources.Mesh;
 using StbiSharp;
 

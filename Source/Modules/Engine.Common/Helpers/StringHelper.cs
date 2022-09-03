@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public static class StringHelper
 	{

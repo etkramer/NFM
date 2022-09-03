@@ -9,8 +9,12 @@
 	
 	<Grid ColumnDefinitions="0.14*, 6, *">
 		<!--Folder view-->
-		<TreeView Grid.Column="0" Background="{StaticResource ControlBackground}" BorderThickness="0">
-			
+		<TreeView Grid.Column="0" Background="{StaticResource ControlBackground}" BorderThickness="0" Items="{Binding Folders}">
+			<TreeView.ItemTemplate>
+				<TreeDataTemplate ItemsSource="{Binding Subfolders}">
+					<TextBlock Text="{Binding Name}"/>
+				</TreeDataTemplate>
+			</TreeView.ItemTemplate>
 		</TreeView>
 		
 		<!--Separator-->

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using AspectInjector.Broker;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public static class StaticNotify
 	{

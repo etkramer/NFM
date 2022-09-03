@@ -8,14 +8,14 @@ namespace Engine.Resources
 	{
 		public string Path { get; set; }
 
-		private static readonly ConcurrentDictionary<string, Asset> assets = new(StringComparer.OrdinalIgnoreCase);
+		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Submits the given asset to the asset system
 		/// </summary>
 		public static bool Submit<T>(Asset<T> asset) where T : Resource
 		{
-			return assets.TryAdd(asset.Path, asset);
+			return Assets.TryAdd(asset.Path, asset);
 		}
 
 		/// <summary>
@@ -23,7 +23,7 @@ namespace Engine.Resources
 		/// </summary>
 		public static Task<T> GetAsync<T>(string path) where T : Resource
 		{
-			if (assets.TryGetValue(path, out Asset foundAsset))
+			if (Assets.TryGetValue(path, out Asset foundAsset))
 			{
 				if (foundAsset is Asset<T> asset)
 				{

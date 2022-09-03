@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{80F5D162-B1E6-457B-BC22-C86016F278AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Core", "Modules\Engine.Core\Engine.Core.csproj", "{29BC0F43-0EEF-405A-A205-C0A976EAA2C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Common", "Modules\Engine.Common\Engine.Common.csproj", "{29BC0F43-0EEF-405A-A205-C0A976EAA2C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Roslyn", "Modules\Engine.Roslyn\Engine.Roslyn.csproj", "{16304FAD-2292-4E14-A9B3-4A14A834B091}"
 EndProject

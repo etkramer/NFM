@@ -5,7 +5,7 @@ global using System.Threading.Tasks;
 global using System.Runtime.InteropServices;
 global using System.IO;
 global using System.Linq;
-global using Engine.Core;
+global using Engine.Common;
 global using Engine.Mathematics;
 using Engine.GPU;
 using Engine.Plugins;

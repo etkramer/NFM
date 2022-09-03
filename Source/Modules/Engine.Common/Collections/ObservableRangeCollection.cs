@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace Engine.Core
+namespace Engine.Common
 {
 	public class ObservableRangeCollection<T> : ObservableCollection<T>
 	{

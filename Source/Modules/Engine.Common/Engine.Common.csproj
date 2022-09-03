@@ -4,11 +4,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <Deterministic>true</Deterministic>
-    <RootNamespace>Engine.Core</RootNamespace>
+    <RootNamespace>Engine.Common</RootNamespace>
     <OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<WarningLevel>3</WarningLevel>
-    <AssemblyName>Engine.Core</AssemblyName>
+    <AssemblyName>Engine.Common</AssemblyName>
     <Platforms>x64</Platforms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
