@@ -6,6 +6,10 @@ This project is a 3D animation tool designed to modernize more traditional anima
 - An extensible asset system that can support arbitrary file formats, including other games
 Note that this project is still in early development, and it's goals are continually in flux.
 
-## 🚀 Status
+## ⚠ Status
 
 This project has been in development for more than a year across various forms, but is still *far* from feature-complete. The repository has been made public solely for the sake of transparency, and is not expected to be built or contributed to.
+
+## 💡 Licence
+
+This project is licenced under the [MIT licence](LICENSE.md).
