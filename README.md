@@ -8,7 +8,7 @@ Note that this project is still in early development, and it's goals are continu
 
 ## ⚠ Status
 
-This project has been in development for more than a year across various forms, but is still *far* from feature-complete. The repository has been made public solely for the sake of transparency, and is not expected to be built or contributed to.
+While this project has been in development for more than a year in various forms, it is still *far* from feature-complete. The repository has been made public solely for the sake of transparency, and is not expected to be built or contributed to.
 
 ## 💡 Licence
 
