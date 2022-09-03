@@ -131,6 +131,7 @@ namespace Engine.Frontend
 				};
 
 				componentInputs.Add(new ContentControl()
+					.Margin(i == 0 ? 0 : 4, 0, (i == numComponents - 1 ? 0 : 4), 0)
 					.Radius(2)
 					.Background(this.GetResourceBrush("ControlBackground"))
 					.With(o => o.Padding = new(1))

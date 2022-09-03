@@ -237,6 +237,8 @@ namespace Engine.GPU
 
 		public void SetProgramUAV(int slot, int space, Texture target)
 		{
+			Debug.Assert(target.Samples <= 1, "Cannot use a multisampled texture as a UAV");
+
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
@@ -525,8 +527,6 @@ namespace Engine.GPU
 				CopyTexture(source, dest);
 				return;
 			}
-
-			Debug.Log($"{source.Samples}, {dest.Samples}");
 
 			Debug.Assert(source.Samples > 1 && dest.Samples <= 1, "Cannot resolve a non-multisampled texture or to a multisampled texture");
 
