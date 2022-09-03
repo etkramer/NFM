@@ -27,7 +27,7 @@ float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET0
 	// Build surface shader state.
 	SurfaceState state;
 	state.Defaults = GetDefaultSurface();
-	state.UV = float2(0, 0);
+	state.UV = vert.UV0;
 
 	// Get params from surface shader.
 	Surface surface = SurfaceMain(state);
@@ -36,5 +36,5 @@ float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET0
 	float3 normal = vert.Normal.xyz / 2 + 0.5;
 
 	//return float4(surface.Albedo.xyz, 1);
-	return float4(normal, 1);
+	return float4(LinearToSRGB(normal), 1);
 }

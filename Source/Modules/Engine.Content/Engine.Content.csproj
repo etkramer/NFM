@@ -13,6 +13,7 @@
     <None Remove="HLSL\Include\Common.h" />
     <None Remove="HLSL\Material\BaseMaterialPS.h" />
     <None Remove="HLSL\Material\BaseMaterialPS.hlsl" />
+    <None Remove="HLSL\PostProcess\GammaCorrectCS.hlsl" />
     <None Remove="HLSL\Prepass\DepthPS.hlsl" />
     <None Remove="HLSL\Utils\BitonicCommon.h" />
     <None Remove="HLSL\Utils\BitonicIndirectCS.hlsl" />
@@ -25,6 +26,7 @@
     <EmbeddedResource Include="HLSL\BaseMS.h" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.h" />
     <EmbeddedResource Include="HLSL\Material\BaseMaterialPS.hlsl" />
+    <EmbeddedResource Include="HLSL\PostProcess\GammaCorrectCS.hlsl" />
     <EmbeddedResource Include="HLSL\Prepass\CullCS.hlsl" />
     <EmbeddedResource Include="HLSL\Include\Common.h" />
     <EmbeddedResource Include="HLSL\Include\Geometry.h" />

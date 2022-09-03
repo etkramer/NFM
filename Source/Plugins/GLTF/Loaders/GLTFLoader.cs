@@ -39,12 +39,11 @@ namespace Basic.Loaders
 
 			// Load GLTF file from thread-local context.
 			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords;
-			//steps |= PostProcessSteps.CalculateTangentSpace;
 			AI.Scene importScene = importContext.ImportFile(Path, steps);
 
 			// Load embedded textures.
-			/*Texture2D[] textures = new Texture2D[importScene.TextureCount];
-			Parallel.For(0, importScene.TextureCount, (i) =>
+			Texture2D[] textures = new Texture2D[importScene.TextureCount];
+			/*Parallel.For(0, importScene.TextureCount, (i) =>
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(importScene.Textures[i].CompressedData, 4))
 				{
@@ -101,7 +100,8 @@ namespace Basic.Loaders
 					vertices[i] = new Vertex()
 					{
 						Position = new Vector3(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z),
-						Normal = new Vector3(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z)
+						Normal = new Vector3(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z),
+						UV0 = new Vector2(importMesh.TextureCoordinateChannels[0][i].X, importMesh.TextureCoordinateChannels[0][i].Y)
 					};
 				}
 

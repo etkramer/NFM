@@ -3,7 +3,8 @@
 struct VertAttribute
 {
 	float4 Position : SV_POSITION;
-	float4 Normal : NORMAL;
+	float3 Normal : NORMAL;
+	float2 UV0 : UV0;
 };
 
 struct PrimAttribute

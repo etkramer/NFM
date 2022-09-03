@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using Engine.GPU;
 using MeshOptimizer;
 
@@ -19,6 +17,7 @@ namespace Engine.Resources
 		internal BufferAllocation<MeshData> MeshHandle;
 	}
 
+	[StructLayout(LayoutKind.Sequential)]
 	internal struct MeshData
 	{
 		public uint VertOffset; // Start of submesh in vertex buffer.
@@ -32,5 +31,6 @@ namespace Engine.Resources
 	{
 		public Vector3 Position;
 		public Vector3 Normal;
+		public Vector2 UV0;
 	}
 }

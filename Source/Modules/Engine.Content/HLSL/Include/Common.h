@@ -1,4 +1,16 @@
-﻿uint BitPack(uint low, uint high, int lowBits)
+﻿float3 LinearToSRGB(in float3 color)
+{
+	const float gamma = 2.2;
+	return pow(color, gamma);
+}
+
+float3 SRGBToLinear(in float3 color)
+{
+	const float gamma = 2.2;
+	return pow(color, 1.0 / gamma);
+}
+
+uint BitPack(uint low, uint high, int lowBits)
 {
 	return (high << lowBits) | low;
 }

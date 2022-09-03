@@ -37,8 +37,6 @@ namespace Engine
 			Project.OnProjectCreated += OnProjectCreated;
 		}
 
-		private static Mesh mesh;
-
 		public static void OnProjectCreated()
 		{
 			new CameraActor().Spawn();
