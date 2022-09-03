@@ -13,26 +13,27 @@ namespace Engine.Resources
 			Shader = shader;
 		}
 
-		public Material SetColor(string param, Color value)
+		public void SetColor(string param, Color value)
 		{
 			OverrideParameters.Add(new ShaderParameter()
 			{
 				Name = param,
 				Value = value
 			});
-
-			return this;
 		}
 
-		public Material SetTexture(string param, Texture2D value)
+		public void SetTexture(string param, Texture2D value)
 		{
+			if (value == null)
+			{
+				return;
+			}
+
 			OverrideParameters.Add(new ShaderParameter()
 			{
 				Name = param,
 				Value = value
 			});
-
-			return this;
 		}
 	}
 }

@@ -1,17 +1,11 @@
 using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Markup.Xaml.Templates;
 using Engine.Editor;
 using Engine.World;
-using ISelectable = Engine.Editor.ISelectable;
-using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Input;
 
 namespace Engine.Frontend
 {

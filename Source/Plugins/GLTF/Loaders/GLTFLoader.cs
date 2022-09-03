@@ -38,7 +38,7 @@ namespace Basic.Loaders
 			}
 
 			// Load GLTF file from thread-local context.
-			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords;
+			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.EmbedTextures;
 			AI.Scene importScene = importContext.ImportFile(Path, steps);
 
 			// Load embedded textures.
@@ -73,16 +73,16 @@ namespace Basic.Loaders
 				AI.Material importMaterial = importScene.Materials[i];
 
 				// Assign textures.
-				/*if (importMaterial.HasTextureDiffuse)
+				if (importMaterial.HasTextureDiffuse)
 				{
-					int textureIdx = int.Parse(importMaterial.TextureDiffuse.FilePath.Split('*')[1]);
-					material.SetTexture("BaseColor", textures[textureIdx]);
+					int textureIndex = int.Parse(importMaterial.TextureDiffuse.FilePath.Split('*')[1]);
+					material.SetTexture("BaseColor", textures[textureIndex]);
 				}
 				if (importMaterial.HasTextureNormal)
 				{
-					int textureIdx = int.Parse(importMaterial.TextureNormal.FilePath.Split('*')[1]);
-					material.SetTexture("Normal", textures[textureIdx]);
-				}*/
+					int textureIndex = int.Parse(importMaterial.TextureNormal.FilePath.Split('*')[1]);
+					material.SetTexture("Normal", textures[textureIndex]);
+				}
 
 				materials[i] = material;
 			}

@@ -10,11 +10,17 @@ namespace Engine.Resources
 
 		private static readonly ConcurrentDictionary<string, Asset> assets = new(StringComparer.OrdinalIgnoreCase);
 
+		/// <summary>
+		/// Submits the given asset to the asset system
+		/// </summary>
 		public static bool Submit<T>(Asset<T> asset) where T : Resource
 		{
 			return assets.TryAdd(asset.Path, asset);
 		}
 
+		/// <summary>
+		/// Asynchronously retrieves the asset at the given path
+		/// </summary>
 		public static Task<T> GetAsync<T>(string path) where T : Resource
 		{
 			if (assets.TryGetValue(path, out Asset foundAsset))

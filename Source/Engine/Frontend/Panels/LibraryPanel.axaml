@@ -1,0 +1,24 @@
+<engine:ToolPanel xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="Engine.Frontend.LibraryPanel"
+		xmlns:engine="using:Engine.Frontend"
+        Title="Library">
+	
+	<Grid ColumnDefinitions="0.14*, 6, *">
+		<!--Folder view-->
+		<TreeView Grid.Column="0" Background="{StaticResource ControlBackground}" BorderThickness="0">
+			
+		</TreeView>
+		
+		<!--Separator-->
+		<GridSplitter Grid.Column="1" Background="{StaticResource WindowBackground}"/>
+		
+		<!--Asset view-->
+		<UniformGrid Grid.Column="2">
+			
+		</UniformGrid>
+	</Grid>
+</engine:ToolPanel>

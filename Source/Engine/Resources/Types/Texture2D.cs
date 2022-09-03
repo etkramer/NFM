@@ -36,7 +36,7 @@ namespace Engine.Resources
 		}
 
 		/// <summary>
-		/// Loads raw image data into the texture.
+		/// Loads raw image data into the texture
 		/// </summary>
 		public void LoadData(Span<byte> data, TextureCompression sourceCompression = TextureCompression.None)
 		{
@@ -65,6 +65,9 @@ namespace Engine.Resources
 			Resource.Dispose();
 		}
 
+		/// <summary>
+		/// Creates a new Texture2D from the given color
+		/// </summary>
 		public static Texture2D FromColor(Color color)
 		{
 			byte[] data = new byte[1 * 1 * 4];
