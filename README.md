@@ -4,6 +4,7 @@ This project is a 3D animation tool designed to modernize more traditional anima
 - A non-destructive, layer-based animation workflow
 - A cutting-edge 3D renderer with wholly dynamic lighting
 - An extensible asset system that can support arbitrary file formats, including other games
+
 Note that this project is still in early development, and it's goals are continually in flux.
 
 ## ⚠ Status
