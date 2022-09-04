@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	public class DepthStencilView
+	public class DepthStencilView : IDisposable
 	{
 		public static DescriptorHeap Heap = new DescriptorHeap(HeapType.DSV, 4096, false);
 
@@ -16,11 +16,6 @@ namespace Engine.GPU
 			Target = target;
 			Handle = Heap.Allocate();
 
-			Recreate();
-		}
-
-		public void Recreate()
-		{
 			DepthStencilViewDescription desc = new()
 			{
 				Format = Target.DSFormat == default ? Target.Format : Target.DSFormat,
@@ -29,6 +24,11 @@ namespace Engine.GPU
 			};
 
 			GPUContext.Device.CreateDepthStencilView(Target.GetBaseResource(), desc, Handle);
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

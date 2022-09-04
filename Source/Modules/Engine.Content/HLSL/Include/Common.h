@@ -1,4 +1,9 @@
-﻿float3 LinearToSRGB(in float3 color)
+﻿SamplerState AnisotropicSampler : register(s0, space1);
+SamplerState DefaultSampler : register(s0, space1); // Same as above
+SamplerState LinearSampler : register(s1, space1);
+SamplerState PointSampler : register(s2, space1);
+
+float3 LinearToSRGB(in float3 color)
 {
 	const float gamma = 2.2;
 	return pow(color, gamma);

@@ -1,7 +1,6 @@
 ﻿using System;
 using Vortice.DXGI;
 using Vortice.Direct3D12;
-using System.Runtime.InteropServices;
 
 namespace Engine.GPU
 {
@@ -10,64 +9,10 @@ namespace Engine.GPU
 		public bool IsRT => rtv != null;
 		public bool IsDS => dsv != null;
 
-		private UnorderedAccessView uav;
-		public UnorderedAccessView UAV
-		{
-			get
-			{
-				if (uav == null)
-				{
-					uav = new UnorderedAccessView(this);
-				}
-
-				return uav;
-			}
-		}
-
+		private UnorderedAccessView[] uavs;
 		private ShaderResourceView srv;
-		public ShaderResourceView SRV
-		{
-			get
-			{
-				if (srv == null)
-				{
-					srv = new ShaderResourceView(this);
-				}
-
-				return srv;
-			}
-		}
-
 		private RenderTargetView rtv;
-		public RenderTargetView RTV
-		{
-			get
-			{
-				if (rtv == null)
-				{
-					Debug.Assert(dsv == null, "Cannot use one texture for both depth/stencil and render target");
-					Debug.Assert(!Format.IsDepthStencil(), "Cannot use a depth/stencil texture as a render target");
-					rtv = new RenderTargetView(this);
-				}
-
-				return rtv;
-			}
-		}
-
 		private DepthStencilView dsv;
-		public DepthStencilView DSV
-		{
-			get
-			{
-				if (dsv == null)
-				{
-					Debug.Assert(rtv == null, "Cannot use one texture for both depth/stencil and render target");
-					dsv = new DepthStencilView(this);
-				}
-
-				return dsv;
-			}
-		}
 
 		internal ID3D12Resource Resource;
 
@@ -78,7 +23,7 @@ namespace Engine.GPU
 		public int Width { get; private set; }
 		public int Height { get; private set; }
 		public Vector2i Size => new(Width, Height);
-		public byte Depth;
+		public byte MipmapCount { get; private set; }
 		public byte Samples;
 
 		internal ClearValue ClearValue { get; private set; }
@@ -92,12 +37,12 @@ namespace Engine.GPU
 		/// <summary>
 		/// Constructs a Texture object
 		/// </summary>
-		public Texture(int width, int height, byte levels = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default, byte samples = 1)
+		public Texture(int width, int height, byte mipmapCount = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default, byte samples = 1)
 		{
 			Format = format;
 			Width = width;
 			Height = height;
-			Depth = levels;
+			MipmapCount = mipmapCount;
 			Samples = samples;
 
 			DSFormat = dsFormat;
@@ -122,6 +67,8 @@ namespace Engine.GPU
 			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
 
+			uavs = new UnorderedAccessView[mipmapCount];
+
 			Resource.Name = "Standard texture";
 		}
 
@@ -134,7 +81,7 @@ namespace Engine.GPU
 			Width = width;
 			Height = height;
 			Format = GPUContext.RTFormat;
-			Depth = 1;
+			MipmapCount = 1;
 			State = ResourceStates.CopyDest;
 
 			Resource.Name = "Resource texture";
@@ -153,11 +100,60 @@ namespace Engine.GPU
 			srv = null;
 			rtv = null;
 			dsv = null;
-			uav = null;
+			for (int i = 0; i < MipmapCount; i++)
+			{
+				uavs[i] = null;
+			}
 
 			// Create new resource with new size.
 			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
 			State = ResourceStates.CopyDest;
+		}
+
+		public UnorderedAccessView GetUAV(int mipLevel = 0)
+		{
+			if (uavs[mipLevel] == null)
+			{
+				uavs[mipLevel] = new UnorderedAccessView(this, mipLevel);
+			}
+
+			return uavs[mipLevel];
+		}
+
+		public ShaderResourceView GetSRV()
+		{
+			if (srv == null)
+			{
+				srv = new ShaderResourceView(this);
+			}
+
+			return srv;
+		}
+
+		public RenderTargetView GetRTV()
+		{
+			if (rtv == null)
+			{
+				Debug.Assert(dsv == null, "Cannot use one texture for both depth/stencil and render target");
+				Debug.Assert(!Format.IsDepthStencil(), $"{Format} is not a supported render target format");
+
+				rtv = new RenderTargetView(this);
+			}
+
+			return rtv;
+		}
+
+		public DepthStencilView GetDSV()
+		{
+			if (dsv == null)
+			{
+				Debug.Assert(rtv == null, "Cannot use one texture for both depth/stencil and render target");
+				Debug.Assert(Format.IsDepthStencil() || DSFormat.IsDepthStencil(), $"{Format} is not a supported depth/stencil format");
+
+				dsv = new DepthStencilView(this);
+			}
+
+			return dsv;
 		}
 
 		public void Dispose()
@@ -169,12 +165,12 @@ namespace Engine.GPU
 		{
 			return new()
 			{
-				Dimension = Depth == 1 ? ResourceDimension.Texture2D : ResourceDimension.Texture3D,
+				Dimension = ResourceDimension.Texture2D,
 				Alignment = 0,
 				Width = (ulong)Width,
 				Height = Height,
 				DepthOrArraySize = 1,
-				MipLevels = Depth,
+				MipLevels = MipmapCount,
 				Format = Format,
 				SampleDescription = new SampleDescription(Samples, 0),
 				Flags = Format.IsDepthStencil() || Format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget

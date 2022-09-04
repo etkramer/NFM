@@ -4,10 +4,10 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	public class ShaderResourceView
+	public class ShaderResourceView : IDisposable
 	{
 		internal static DescriptorHeap Heap = new DescriptorHeap(HeapType.SRV, 4096, true);
-		public DescriptorHandle Handle;
+		internal DescriptorHandle Handle;
 
 		public ShaderResourceView(ID3D12Resource resource, int stride, int capacity, bool isRaw)
 		{
@@ -49,6 +49,11 @@ namespace Engine.GPU
 			};
 
 			GPUContext.Device.CreateShaderResourceView(target.Resource, desc, Handle);
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

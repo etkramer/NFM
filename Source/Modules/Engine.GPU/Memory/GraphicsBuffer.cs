@@ -1,15 +1,18 @@
 ﻿using System;
 using Vortice.DXGI;
 using Vortice.Direct3D12;
-using System.Runtime.InteropServices;
 using Engine.Aspects;
-using System.Runtime.CompilerServices;
 
 namespace Engine.GPU
 {
-	[AutoDispose]
 	public unsafe partial class GraphicsBuffer : Resource, IDisposable
 	{
+		private ShaderResourceView srv;
+		private UnorderedAccessView uav;
+		private ConstantBufferView cbv;
+
+		internal ID3D12Resource Resource;
+
 		public const int ConstantAlignment = 256;
 		public const int CounterAlignment = 4096;
 		public int Capacity;
@@ -20,50 +23,36 @@ namespace Engine.GPU
 		public bool IsRaw { get; private set; }
 		public long CounterOffset { get; private set; } = 0;
 
-		internal ID3D12Resource Resource;
-
-		private ShaderResourceView srv;
-		internal ShaderResourceView SRV
+		public ShaderResourceView GetSRV()
 		{
-			get
+			if (srv == null)
 			{
-				if (srv == null)
-				{
-					srv = new ShaderResourceView(Resource, Stride, Capacity, IsRaw && Stride == 1);
-				}
-
-				return srv;
+				srv = new ShaderResourceView(Resource, Stride, Capacity, IsRaw && Stride == 1);
 			}
+
+			return srv;
 		}
 
-		private UnorderedAccessView uav;
-		internal UnorderedAccessView UAV
+		public UnorderedAccessView GetUAV()
 		{
-			get
+			if (uav == null)
 			{
-				if (uav == null)
-				{
-					uav = new UnorderedAccessView(Resource, Stride, Capacity, HasCounter, CounterOffset);
-				}
-
-				return uav;
+				uav = new UnorderedAccessView(Resource, Stride, Capacity, HasCounter, CounterOffset);
 			}
+
+			return uav;
 		}
 
-		private ConstantBufferView cbv;
-		internal ConstantBufferView CBV
+		public ConstantBufferView GetCBV()
 		{
-			get
+			if (cbv == null)
 			{
-				if (cbv == null)
-				{
-					Debug.Assert(Capacity * Stride < 65536, "Buffers larger than 64kb cannot be used as program constants");
-					Debug.Assert((Capacity * Stride % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
-					cbv = new ConstantBufferView(Resource, Stride, Capacity);
-				}
-
-				return cbv;
+				Debug.Assert(Capacity * Stride < 65536, "Buffers larger than 64kb cannot be used as program constants");
+				Debug.Assert((Capacity * Stride % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
+				cbv = new ConstantBufferView(Resource, Stride, Capacity);
 			}
+
+			return cbv;
 		}
 
 		public string Name

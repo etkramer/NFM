@@ -32,7 +32,6 @@ namespace Engine.GPU
         Always = ComparisonFunction.Always
 	}
 
-	[AutoDispose]
 	public sealed class ShaderProgram : IDisposable
 	{
 		public bool IsGraphics { get; private set; } = false;
@@ -304,7 +303,9 @@ namespace Engine.GPU
 				// Create static samplers.
 				StaticSamplerDescription[] staticSamplers = new[]
 				{
-					new StaticSamplerDescription(SamplerDescription.AnisotropicWrap, ShaderVisibility.All, 0, 0)
+					new StaticSamplerDescription(SamplerDescription.AnisotropicWrap, ShaderVisibility.All, 0, 1) { MaxAnisotropy = 16 },
+					new StaticSamplerDescription(SamplerDescription.LinearWrap, ShaderVisibility.All, 1, 1),
+					new StaticSamplerDescription(SamplerDescription.PointWrap, ShaderVisibility.All, 2, 1)
 				};
 
 				// Create root signature.

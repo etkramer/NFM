@@ -4,9 +4,9 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	public class UnorderedAccessView
+	public class UnorderedAccessView : IDisposable
 	{
-		public DescriptorHandle Handle;
+		internal DescriptorHandle Handle;
 
 		public UnorderedAccessView(ID3D12Resource resource, int stride, int capacity, bool hasCounter, long counterOffset)
 		{
@@ -29,7 +29,7 @@ namespace Engine.GPU
 			GPUContext.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
 		}
 
-		public UnorderedAccessView(Texture texture)
+		public UnorderedAccessView(Texture texture, int mipLevel)
 		{
 			Handle = ShaderResourceView.Heap.Allocate();
 
@@ -39,12 +39,17 @@ namespace Engine.GPU
 				ViewDimension = UnorderedAccessViewDimension.Texture2D,
 				Texture2D = new()
 				{
-					MipSlice = 0,
+					MipSlice = mipLevel,
 					PlaneSlice = 0
 				}
 			};
 
 			GPUContext.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

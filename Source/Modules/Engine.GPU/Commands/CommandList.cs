@@ -219,11 +219,11 @@ namespace Engine.GPU
 
 				if (program.IsGraphics)
 				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.CBV.Handle);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.CBV.Handle);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
 				}
 			};
 
@@ -235,7 +235,7 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramUAV(int slot, int space, Texture target)
+		public void SetProgramUAV(int slot, int space, Texture target, int mipLevel = 0)
 		{
 			Debug.Assert(target.Samples <= 1, "Cannot use a multisampled texture as a UAV");
 
@@ -249,11 +249,11 @@ namespace Engine.GPU
 
 				if (program.IsGraphics)
 				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.UAV.Handle);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
 				}
 			};
 
@@ -277,11 +277,11 @@ namespace Engine.GPU
 
 				if (program.IsGraphics)
 				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.UAV.Handle);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.UAV.Handle);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
 				}
 			};
 
@@ -305,11 +305,11 @@ namespace Engine.GPU
 
 				if (program.IsGraphics)
 				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.SRV.Handle);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 				}
 			};
 
@@ -333,11 +333,11 @@ namespace Engine.GPU
 
 				if (program.IsGraphics)
 				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.SRV.Handle);
+					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 				}
 				if (program.IsCompute)
 				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.SRV.Handle);
+					list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 				}
 			};
 
@@ -461,7 +461,7 @@ namespace Engine.GPU
 					TextureCopyLocation uploadLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], new PlacedSubresourceFootPrint()
 					{
 						Offset = (ulong)uploadOffset,
-						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, texture.Depth, rowPitch)
+						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, texture.MipmapCount, rowPitch)
 					});
 
 					o.CopyTextureRegion(new TextureCopyLocation(texture, 0), 0, 0, 0, uploadLocation);
@@ -566,13 +566,13 @@ namespace Engine.GPU
 			{
 				if (renderTarget == null)
 				{
-					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.DSV.Handle);
+					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.GetDSV().Handle);
 					list.RSSetViewport(0, 0, depthStencil.Width, depthStencil.Height);
 					list.RSSetScissorRect(depthStencil.Width, depthStencil.Height);
 				}
 				else
 				{
-					list.OMSetRenderTargets(renderTarget.RTV.Handle, depthStencil?.DSV.Handle);
+					list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
 					list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
 					list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
 				}
@@ -591,7 +591,7 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.RTV.Handle.CPUHandle).ToArray(), depthStencil?.DSV.Handle);
+				list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
 				list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
 				list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
 			};
@@ -625,7 +625,7 @@ namespace Engine.GPU
 					value = new ClearValue(target.Format, new Vortice.Mathematics.Color(color.R, color.G, color.B, color.A));
 				}
 
-				list.ClearRenderTargetView(target.RTV.Handle, value.Color);
+				list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
 			};
 
 			CommandInput[] inputs = new[]
@@ -640,7 +640,7 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.ClearDepthStencilView(target.DSV.Handle, ClearFlags.Depth, target.ClearValue.DepthStencil.Depth, target.ClearValue.DepthStencil.Stencil);
+				list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.DepthStencil.Depth, target.ClearValue.DepthStencil.Stencil);
 			};
 
 			CommandInput[] inputs = new[]

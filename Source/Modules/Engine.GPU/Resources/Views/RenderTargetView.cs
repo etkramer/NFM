@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	public class RenderTargetView
+	public class RenderTargetView : IDisposable
 	{
 		public static DescriptorHeap Heap = new DescriptorHeap(HeapType.RTV, 4096, false);
 
@@ -16,11 +16,6 @@ namespace Engine.GPU
 			Target = target;
 			Handle = Heap.Allocate();
 
-			Recreate();
-		}
-
-		public void Recreate()
-		{
 			RenderTargetViewDescription desc = new()
 			{
 				Format = Target.Format,
@@ -28,6 +23,11 @@ namespace Engine.GPU
 			};
 
 			GPUContext.Device.CreateRenderTargetView(Target.GetBaseResource(), desc, Handle);
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

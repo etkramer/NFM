@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace Engine.GPU
 {
-	internal class ConstantBufferView
+	public class ConstantBufferView : IDisposable
 	{
 		public DescriptorHandle Handle;
 
@@ -19,6 +19,11 @@ namespace Engine.GPU
 			};
 
 			GPUContext.Device.CreateConstantBufferView(desc, Handle);
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

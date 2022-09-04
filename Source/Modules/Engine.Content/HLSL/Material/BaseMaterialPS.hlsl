@@ -8,7 +8,6 @@ struct SurfaceState
 	float2 UV;
 };
 
-SamplerState DefaultSampler : register(s0);
 ByteAddressBuffer MaterialParams : register(t0);
 
 #insert SURFACE

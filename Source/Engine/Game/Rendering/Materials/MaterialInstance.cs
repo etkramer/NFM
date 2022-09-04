@@ -2,6 +2,7 @@
 using System.Linq;
 using Engine.Content;
 using Engine.GPU;
+using Engine.GPU.Native;
 using Engine.Resources;
 using Engine.World;
 
@@ -51,7 +52,7 @@ namespace Engine.Rendering
 				}
 				else if (param.Type == typeof(Texture2D))
 				{
-					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).Resource.SRV.Handle.Index));
+					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).Resource.GetSRV().GetDescriptorIndex()));
 				}
 				else
 				{
