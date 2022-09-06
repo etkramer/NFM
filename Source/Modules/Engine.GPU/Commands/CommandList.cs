@@ -52,7 +52,7 @@ namespace Engine.GPU
 			allocator.Dispose();
 		}
 
-		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, CommandInput[] inputs)
+		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, params CommandInput[] inputs)
 		{
 			lock (commands)
 			{
@@ -348,12 +348,7 @@ namespace Engine.GPU
 				}
 			};
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(target, ResourceStates.AllShaderResource)
-			};
-
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(target, ResourceStates.AllShaderResource));
 		}
 
 		public void SetProgram(ShaderProgram program)
@@ -376,7 +371,7 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate, CommandInput[] inputs)
+		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate, params CommandInput[] inputs)
 		{
 			AddCommand(buildDelegate, inputs);
 		}
@@ -432,8 +427,7 @@ namespace Engine.GPU
 				CustomCommand((o) =>
 				{
 					o.CopyBufferRegion(buffer.Resource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
-				},
-				new[] { new CommandInput(buffer, ResourceStates.CopyDest) });
+				}, new CommandInput(buffer, ResourceStates.CopyDest));
 			}
 		}
 
@@ -472,8 +466,7 @@ namespace Engine.GPU
 					});
 
 					o.CopyTextureRegion(new TextureCopyLocation(texture, mipLevel), 0, 0, 0, uploadLocation);
-				},
-				new[] { new CommandInput(texture, ResourceStates.CopyDest) });
+				}, new CommandInput(texture, ResourceStates.CopyDest));
 			}
 		}
 
@@ -493,14 +486,8 @@ namespace Engine.GPU
 
 				list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
 			};
-
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(source, ResourceStates.CopySource),
-				new CommandInput(dest, ResourceStates.CopyDest),
-			};
 			
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource),new CommandInput(dest, ResourceStates.CopyDest));
 		}
 
 		private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
@@ -517,13 +504,7 @@ namespace Engine.GPU
 				list.CopyTextureRegion(new TextureCopyLocation(dest.Resource), 0, 0, 0, new TextureCopyLocation(source.Resource));
 			};
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(source, ResourceStates.CopySource),
-				new CommandInput(dest, ResourceStates.CopyDest),
-			};
-			
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
 		}
 
 		public void ResolveTexture(Texture source, Texture dest)
@@ -541,14 +522,8 @@ namespace Engine.GPU
 			{
 				list.ResolveSubresource(dest, 0, source, 0, dest.Format);
 			};
-
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(source, ResourceStates.ResolveSource),
-				new CommandInput(dest, ResourceStates.ResolveDest),
-			};
 			
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.ResolveSource), new CommandInput(dest, ResourceStates.ResolveDest));
 		}
 
 		public void CopyResource(Resource source, Resource dest)
@@ -557,14 +532,8 @@ namespace Engine.GPU
 			{
 				list.CopyResource(dest.GetBaseResource(), source.GetBaseResource());
 			};
-
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(source, ResourceStates.CopySource),
-				new CommandInput(dest, ResourceStates.CopyDest),
-			};
 			
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
 		}
 
 		public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
@@ -585,13 +554,7 @@ namespace Engine.GPU
 				}
 			};
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(renderTarget, ResourceStates.RenderTarget),
-				new CommandInput(depthStencil, ResourceStates.DepthWrite),
-			};
-
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(renderTarget, ResourceStates.RenderTarget), 	new CommandInput(depthStencil, ResourceStates.DepthWrite));
 		}
 
 		public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
@@ -635,12 +598,7 @@ namespace Engine.GPU
 				list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
 			};
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(target, ResourceStates.RenderTarget)
-			};
-
-			AddCommand(buildDelegate, inputs);
+			AddCommand(buildDelegate, new CommandInput(target, ResourceStates.RenderTarget));
 		}
 
 		public void ClearDepth(Texture target)
@@ -660,42 +618,39 @@ namespace Engine.GPU
 
 		public void GenerateMips(Texture texture)
 		{
-			if (texture.MipmapCount <= 1)
+			// This is a composite command (not run through AddCommand()), and it's important that it's executed in order.
+			lock (commands)
 			{
-				return;
-			}
-			else
-			{
-				SetProgram(MipGenProgram);
-
-				for (int i = 1; i < texture.MipmapCount; i++)
+				if (texture.MipmapCount <= 1)
 				{
-					uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
-					uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
+					return;
+				}
+				else
+				{
+					SetProgram(MipGenProgram);
 
-					unsafe
+					for (int i = 1; i < texture.MipmapCount; i++)
 					{
-						Vector2 texCoords = new(1.0f / dstWidth, 1.0f / dstHeight);
-						SetProgramConstants(0, *(int*)&texCoords.X, *(int*)&texCoords.Y);
-					}
+						uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
+						uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
 
-					RequestState(texture, ResourceStates.NonPixelShaderResource);
+						unsafe
+						{
+							Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
+							SetProgramConstants(0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
+						}
 
-					int capturedMip = i;
-					CustomCommand(o =>
-					{
-						if (MipGenProgram.tRegisterMapping.TryGetValue(0, out int srvIndex))
+						int capturedMip = i;
+						CustomCommand(o =>
 						{
 							list.SetComputeRootDescriptorTable(MipGenProgram.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(capturedMip - 1).Handle);
-						}
-						if (MipGenProgram.uRegisterMapping.TryGetValue(0, out int uavIndex))
-						{
 							list.SetComputeRootDescriptorTable(MipGenProgram.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(capturedMip).Handle);
-						}
-					}, null);
+						}, new CommandInput(texture, ResourceStates.AllShaderResource));
 					
-					DispatchThreads(texture.Width / (int)Math.Pow(2, i), 8, texture.Height / (int)Math.Pow(2, i), 8);
-					BarrierUAV(texture);
+					
+						DispatchGroups((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
+						BarrierUAV(texture);
+					}
 				}
 			}
 		}
@@ -707,7 +662,7 @@ namespace Engine.GPU
 				new CommandInput(resource, state)
 			};
 
-			AddCommand(null, inputs);
+			AddCommand(null, new CommandInput(resource, state));
 		}
 
 		public void PushEvent(string name)
