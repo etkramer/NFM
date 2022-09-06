@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Engine.Editor;
 using Avalonia.Layout;
+using System.Data;
 
 namespace Engine.Frontend
 {
@@ -70,8 +71,11 @@ namespace Engine.Frontend
 				|| key == Key.D7
 				|| key == Key.D8
 				|| key == Key.D9
-				|| key == Key.OemMinus
 				|| key == Key.OemPeriod
+				|| key == Key.OemPlus
+				|| key == Key.OemMinus
+				|| key == Key.Multiply
+				|| key == Key.Divide
 				|| key == Key.Back
 				|| key == Key.Enter;
 		}
@@ -107,18 +111,28 @@ namespace Engine.Frontend
 			}
 		}
 
-		protected bool TryParseNum(string value, Type numType, out object num)
+		private static DataTable computeTable = new();
+
+		protected bool TryParseNum(string text, Type numType, out object num)
 		{
 			// Interpret emptied field as zero.
-			if (string.IsNullOrWhiteSpace(value))
+			if (string.IsNullOrWhiteSpace(text))
 			{
 				num = Convert.ChangeType(0, numType);
 				return true;
 			}
 
+			// Try to evaluate the text as an expression.
+			try
+			{
+				object computedValue = computeTable.Compute(text, null);
+				text = computedValue.ToString();
+			}
+			catch {} // No problem, probably just not a valid expression.
+
 			if (IsFloat(numType))
 			{
-				if (double.TryParse(value, out double floatValue))
+				if (double.TryParse(text, out double floatValue))
 				{
 					num = Convert.ChangeType(floatValue, numType);
 					return true;
@@ -126,12 +140,12 @@ namespace Engine.Frontend
 			}
 			else
 			{
-				if (ulong.TryParse(value, out ulong uintValue))
+				if (ulong.TryParse(text, out ulong uintValue))
 				{
 					num = Convert.ChangeType(uintValue, numType);
 					return true;
 				}
-				else if (long.TryParse(value, out long intValue))
+				else if (long.TryParse(text, out long intValue))
 				{
 					num = Convert.ChangeType(intValue, numType);
 					return true;
