@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Engine.Editor;
 using Avalonia.Layout;
 using System.Data;
+using Avalonia.Input.Platform;
 
 namespace Engine.Frontend
 {
@@ -57,27 +58,6 @@ namespace Engine.Frontend
 			}
 
 			base.OnDetachedFromVisualTree(e);
-		}
-
-		protected bool IsKeyNumeric(Key key)
-		{
-			return key == Key.D0
-				|| key == Key.D1
-				|| key == Key.D2
-				|| key == Key.D3
-				|| key == Key.D4
-				|| key == Key.D5
-				|| key == Key.D6
-				|| key == Key.D7
-				|| key == Key.D8
-				|| key == Key.D9
-				|| key == Key.OemPeriod
-				|| key == Key.OemPlus
-				|| key == Key.OemMinus
-				|| key == Key.Multiply
-				|| key == Key.Divide
-				|| key == Key.Back
-				|| key == Key.Enter;
 		}
 
 		protected bool IsUnsigned(Type type)

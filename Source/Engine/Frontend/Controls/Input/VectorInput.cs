@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Engine.Editor;
 using System.Collections.Specialized;
 using Avalonia.Controls.Primitives;
+using Avalonia.Interactivity;
 
 namespace Engine.Frontend
 {
@@ -107,15 +108,20 @@ namespace Engine.Frontend
 				numEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
 				numEntry.LostFocus += (o, e) => (this as INotify).Raise(componentProp);
 
-				// Ignore non-numeric inputs.
-				numEntry.KeyDown += (o, e) =>
+				// Ignore alphabetical inputs.
+				numEntry.AddHandler(TextInputEvent, (o, e) =>
 				{
-					if (!IsKeyNumeric(e.Key))
+					if (!e.Text.All(c => !char.IsLetter(c)))
 					{
 						e.Handled = true;
 					}
-					// Hit enter?
-					else if (e.Key == Key.Enter)
+				},
+				RoutingStrategies.Tunnel);
+
+				// Respond to enter key.
+				numEntry.KeyDown += (o, e) =>
+				{
+					if (e.Key == Key.Enter)
 					{
 						// Set input to new value.
 						object vec = GetFirstValue<object>();
