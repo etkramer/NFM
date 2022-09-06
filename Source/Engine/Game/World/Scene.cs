@@ -9,7 +9,7 @@ namespace Engine.World
 		private static List<Scene> all { get; } = new();
 		public static ReadOnlyCollection<Scene> All { get; }
 
-		[Notify, Save] public static Scene Main { get; set; }
+		[Notify, Save] public static Scene Main { get; set; } = new();
 
 		[Save] private ObservableCollection<Actor> actors { get; set; } = new();
 		[Notify] public ReadOnlyObservableCollection<Actor> Actors { get; }
@@ -40,6 +40,11 @@ namespace Engine.World
 
 		public void Dispose()
 		{
+			for (int i = actors.Count - 1; i >= 0; i--)
+			{
+				actors[i].Dispose();
+			}
+
 			all.Remove(this);
 		}
 	}

@@ -67,7 +67,7 @@ namespace Basic.Loaders
 			Material[] materials = new Material[importScene.MaterialCount];
 			for (int i = 0; i < importScene.MaterialCount; i++)
 			{
-				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR");
+				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR.hlsl");
 				Material material = new Material(shader);
 
 				AI.Material importMaterial = importScene.Materials[i];

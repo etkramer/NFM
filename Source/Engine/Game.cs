@@ -31,8 +31,7 @@ namespace Engine
 
 			// Kick off model loading. We're not awaiting this right now because
 			// opening the window takes long enough to hide the load time.
-			//var loadSponza = Asset.GetAsync<Model>("USER:Objects/Sponza");
-			var loadHelmet = Asset.GetAsync<Model>("USER:Objects/FlightHelmet");
+			var loadHelmet = Asset.GetAsync<Model>("USER:Objects/FlightHelmet.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -41,18 +40,12 @@ namespace Engine
 		{
 			new CameraActor().Spawn();
 			new PointLightActor().Spawn();
-
-			// Sponza
-			/*var sponzaObject = new ModelActor("Sponza").Spawn<ModelActor>();
-			sponzaObject.Position = new Vector3(0, -0.5f, 0);
-			sponzaObject.Rotation = new Vector3(0, 0, 0);
-			sponzaObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza").Result;*/
 			
 			// Helmet
 			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();
 			helmObject.Position = new Vector3(0, -0.4f, 1);
 			helmObject.Rotation = new Vector3(0, 180, 0);
-			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet").Result;
+			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

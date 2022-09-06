@@ -24,7 +24,7 @@ namespace Basic
 				{
 					string fullPath = Path.GetFullPath(path);
 					string extension = Path.GetExtension(fullPath);
-					string shortPath = Path.GetRelativePath(searchPath, fullPath).Split('.')[0];
+					string shortPath = Path.GetRelativePath(searchPath, fullPath);
 
 					if (extension == ".glb")
 					{

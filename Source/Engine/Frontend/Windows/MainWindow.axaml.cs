@@ -35,13 +35,12 @@ namespace Engine.Frontend.Controls
 			dockspace.Dock(group3, group2, DockPosition.Left, 0.88f);
 
 			// Create group (timeline).
-			TabGroup group4 = new TabGroup();
-			ToolPanel.Spawn<LibraryPanel>(group4);
+			/*TabGroup group4 = new TabGroup();
 			ToolPanel.Spawn<TimelinePanel>(group4);
 			dockspace.Dock(group4, group3, DockPosition.Bottom, 0.30f);
 
 			// Create group (viewport 2).
-			/*TabGroup group5 = new TabGroup();
+			TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
 			dockspace.Dock(group5, group3, DockPosition.Right, 0.4f);*/
 
