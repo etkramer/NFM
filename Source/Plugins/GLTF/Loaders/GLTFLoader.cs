@@ -59,6 +59,7 @@ namespace Basic.Loaders
 					}
 					
 					texture.LoadData(imageData, TextureCompression.None);
+					texture.GenerateMips();
 					textures[i] = texture;
 				}
 			});
@@ -71,18 +72,6 @@ namespace Basic.Loaders
 				Material material = new Material(shader);
 
 				AI.Material importMaterial = importScene.Materials[i];
-
-				// Assign textures.
-				/*if (importMaterial.HasTextureDiffuse)
-				{
-					int textureIndex = int.Parse(importMaterial.TextureDiffuse.FilePath.Split('*')[1]);
-					material.SetTexture("BaseColor", textures[textureIndex]);
-				}
-				if (importMaterial.HasTextureNormal)
-				{
-					int textureIndex = int.Parse(importMaterial.TextureNormal.FilePath.Split('*')[1]);
-					material.SetTexture("Normal", textures[textureIndex]);
-				}*/
 
 				importMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var color);
 				importMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);

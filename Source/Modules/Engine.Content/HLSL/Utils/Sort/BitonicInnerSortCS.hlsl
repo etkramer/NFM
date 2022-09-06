@@ -20,7 +20,7 @@
 // issuing sequential dispatches and barriers.)
 
 
-#include "HLSL/Utils/BitonicCommon.h"
+#include "HLSL/Utils/Sort/BitonicCommon.h"
 
 RWByteAddressBuffer g_SortBuffer : register(u0);
 

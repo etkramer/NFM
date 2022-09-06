@@ -20,6 +20,12 @@
     <None Remove="HLSL\Utils\BitonicInnerSortCS.hlsl" />
     <None Remove="HLSL\Utils\BitonicOuterSortCS.hlsl" />
     <None Remove="HLSL\Utils\BitonicPreSortCS.hlsl" />
+    <None Remove="HLSL\Utils\MipGenCS.hlsl" />
+    <None Remove="HLSL\Utils\Sort\BitonicCommon.h" />
+    <None Remove="HLSL\Utils\Sort\BitonicIndirectCS.hlsl" />
+    <None Remove="HLSL\Utils\Sort\BitonicInnerSortCS.hlsl" />
+    <None Remove="HLSL\Utils\Sort\BitonicOuterSortCS.hlsl" />
+    <None Remove="HLSL\Utils\Sort\BitonicPreSortCS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,11 +38,12 @@
     <EmbeddedResource Include="HLSL\Include\Geometry.h" />
     <EmbeddedResource Include="HLSL\BaseMS.hlsl" />
     <EmbeddedResource Include="HLSL\Prepass\DepthPS.hlsl" />
-    <EmbeddedResource Include="HLSL\Utils\BitonicCommon.h" />
-    <EmbeddedResource Include="HLSL\Utils\BitonicIndirectCS.hlsl" />
-    <EmbeddedResource Include="HLSL\Utils\BitonicInnerSortCS.hlsl" />
-    <EmbeddedResource Include="HLSL\Utils\BitonicOuterSortCS.hlsl" />
-    <EmbeddedResource Include="HLSL\Utils\BitonicPreSortCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\MipGenCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\Sort\BitonicCommon.h" />
+    <EmbeddedResource Include="HLSL\Utils\Sort\BitonicIndirectCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\Sort\BitonicInnerSortCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\Sort\BitonicOuterSortCS.hlsl" />
+    <EmbeddedResource Include="HLSL\Utils\Sort\BitonicPreSortCS.hlsl" />
   </ItemGroup>
 
 </Project>

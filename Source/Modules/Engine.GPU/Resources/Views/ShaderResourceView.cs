@@ -30,7 +30,7 @@ namespace Engine.GPU
 			GPUContext.Device.CreateShaderResourceView(resource, desc, Handle);
 		}
 
-		public ShaderResourceView(Texture target)
+		public ShaderResourceView(Texture target, int mipLevel = -1)
 		{
 			Handle = Heap.Allocate();
 
@@ -41,8 +41,8 @@ namespace Engine.GPU
 				Format = target.SRFormat == default ? target.Format : target.SRFormat,
 				Texture2D = new()
 				{
-					MipLevels = 1,
-					MostDetailedMip = 0,
+					MipLevels = mipLevel == -1 ? target.MipmapCount : 1,
+					MostDetailedMip = mipLevel == -1 ? 0 : mipLevel,
 					PlaneSlice = 0,
 					ResourceMinLODClamp = 0,
 				},

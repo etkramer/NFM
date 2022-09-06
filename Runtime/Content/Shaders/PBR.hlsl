@@ -12,8 +12,8 @@ Surface SurfaceMain(in SurfaceState state)
 	// so we just convert it in the shader.
 	surface.Albedo = LinearToSRGB(BaseColor.Sample(DefaultSampler, state.UV));
 	surface.Normal = Normal.Sample(DefaultSampler, state.UV);
-	surface.Roughness = orm.y;
-	surface.Metallic = orm.z;
+	surface.Roughness = orm[1];
+	surface.Metallic = orm[2];
 	
 	return surface;
 }

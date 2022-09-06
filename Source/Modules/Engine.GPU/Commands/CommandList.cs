@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using Engine.Content;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
@@ -15,6 +16,12 @@ namespace Engine.GPU
 
 		private ID3D12Fence waitFence;
 		private ulong waitValue = 0;
+
+		private static ShaderProgram MipGenProgram = new ShaderProgram()
+			.UseIncludes(typeof(Embed).Assembly)
+			.SetComputeShader(Embed.GetString("HLSL/Utils/MipGenCS.hlsl"), "MipGenCS")
+			.AsRootConstant(0, 2)
+			.Compile().Result;
 
 		struct Command
 		{
@@ -172,7 +179,7 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramConstants(Register binding, params int[] constants)
+		public void SetProgramConstants(BindPoint binding, params int[] constants)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
@@ -430,7 +437,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadTexture(Texture texture, Span<byte> data)
+		public unsafe void UploadTexture(Texture texture, Span<byte> data, int mipLevel = 0)
 		{
 			fixed (byte* dataPtr = data)
 			{
@@ -438,7 +445,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadTexture(Texture texture, void* data, int dataSize)
+		public unsafe void UploadTexture(Texture texture, void* data, int dataSize, int mipLevel = 0)
 		{
 			lock (UploadHelper.Lock)
 			{
@@ -461,10 +468,10 @@ namespace Engine.GPU
 					TextureCopyLocation uploadLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], new PlacedSubresourceFootPrint()
 					{
 						Offset = (ulong)uploadOffset,
-						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, texture.MipmapCount, rowPitch)
+						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, 1, rowPitch)
 					});
 
-					o.CopyTextureRegion(new TextureCopyLocation(texture, 0), 0, 0, 0, uploadLocation);
+					o.CopyTextureRegion(new TextureCopyLocation(texture, mipLevel), 0, 0, 0, uploadLocation);
 				},
 				new[] { new CommandInput(texture, ResourceStates.CopyDest) });
 			}
@@ -649,6 +656,48 @@ namespace Engine.GPU
 			};
 
 			AddCommand(buildDelegate, inputs);
+		}
+
+		public void GenerateMips(Texture texture)
+		{
+			if (texture.MipmapCount <= 1)
+			{
+				return;
+			}
+			else
+			{
+				SetProgram(MipGenProgram);
+
+				for (int i = 1; i < texture.MipmapCount; i++)
+				{
+					uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
+					uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
+
+					unsafe
+					{
+						Vector2 texCoords = new(1.0f / dstWidth, 1.0f / dstHeight);
+						SetProgramConstants(0, *(int*)&texCoords.X, *(int*)&texCoords.Y);
+					}
+
+					RequestState(texture, ResourceStates.NonPixelShaderResource);
+
+					int capturedMip = i;
+					CustomCommand(o =>
+					{
+						if (MipGenProgram.tRegisterMapping.TryGetValue(0, out int srvIndex))
+						{
+							list.SetComputeRootDescriptorTable(MipGenProgram.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(capturedMip - 1).Handle);
+						}
+						if (MipGenProgram.uRegisterMapping.TryGetValue(0, out int uavIndex))
+						{
+							list.SetComputeRootDescriptorTable(MipGenProgram.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(capturedMip).Handle);
+						}
+					}, null);
+					
+					DispatchThreads(texture.Width / (int)Math.Pow(2, i), 8, texture.Height / (int)Math.Pow(2, i), 8);
+					BarrierUAV(texture);
+				}
+			}
 		}
 
 		public void RequestState(Resource resource, ResourceStates state)

@@ -45,7 +45,7 @@ namespace Engine
 			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();
 			helmObject.Position = new Vector3(0, -0.4f, 1);
 			helmObject.Rotation = new Vector3(0, 180, 0);
-			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet.glb").Result;
+			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/Sponza.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

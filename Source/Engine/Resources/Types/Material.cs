@@ -6,7 +6,7 @@ namespace Engine.Resources
 	{
 		public Shader Shader { get; }
 
-		public List<ShaderParameter> OverrideParameters { get; } = new();
+		public List<ShaderParameter> MaterialOverrides { get; } = new();
 
 		public Material(Shader shader)
 		{
@@ -15,7 +15,7 @@ namespace Engine.Resources
 
 		public void SetColor(string param, Color value)
 		{
-			OverrideParameters.Add(new ShaderParameter()
+			MaterialOverrides.Add(new ShaderParameter()
 			{
 				Name = param,
 				Value = value
@@ -29,7 +29,7 @@ namespace Engine.Resources
 				return;
 			}
 
-			OverrideParameters.Add(new ShaderParameter()
+			MaterialOverrides.Add(new ShaderParameter()
 			{
 				Name = param,
 				Value = value

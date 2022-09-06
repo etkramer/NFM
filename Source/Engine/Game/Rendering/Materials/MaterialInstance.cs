@@ -40,7 +40,7 @@ namespace Engine.Rendering
 				object value = param.Value;
 
 				// Is parameter overriden by material?
-				if (Material.OverrideParameters.TryFirst(o => o.Name == param.Name, out var overrideParam))
+				if (Material.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
 				{
 					value = overrideParam.Value;
 				}

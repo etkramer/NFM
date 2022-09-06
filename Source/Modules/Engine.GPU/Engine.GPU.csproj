@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\Engine.Content\Engine.Content.csproj" />
     <ProjectReference Include="..\Engine.Roslyn\Engine.Roslyn.csproj" />
   </ItemGroup>
 

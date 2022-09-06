@@ -56,8 +56,16 @@ namespace Engine.Resources
 			};
 
 			// Create resource and upload texture data.
-			Resource = new Texture(Width, Height, 1, format);
+			Resource = new Texture(Width, Height, 4, format);
 			Renderer.DefaultCommandList.UploadTexture(Resource, data);
+		}
+
+		/// <summary>
+		/// Automatically generates mipmaps. Compressed textures are not supported.
+		/// </summary>
+		public void GenerateMips()
+		{
+			Renderer.DefaultCommandList.GenerateMips(Resource);
 		}
 
 		public override void Dispose()

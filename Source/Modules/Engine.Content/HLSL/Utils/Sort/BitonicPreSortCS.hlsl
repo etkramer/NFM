@@ -23,7 +23,7 @@
 // thread group can use as much as 32KB of LDS.)
 
 
-#include "HLSL/Utils/BitonicCommon.h"
+#include "HLSL/Utils/Sort/BitonicCommon.h"
 
 RWByteAddressBuffer g_SortBuffer : register(u0);
 

@@ -11,7 +11,7 @@
 // Author:  James Stanard 
 //
 
-#include "HLSL/Utils/BitonicCommon.h"
+#include "HLSL/Utils/Sort/BitonicCommon.h"
 
 RWByteAddressBuffer g_IndirectArgsBuffer : register(u0);
 

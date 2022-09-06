@@ -49,9 +49,9 @@ namespace Engine.GPU
 		internal ID3D12RootSignature RootSignature = null;
 
 		// RootParameter <-> register mappings. TODO: Doesn't account for register spaces.
-		internal Dictionary<Register, int> tRegisterMapping = new();
-		internal Dictionary<Register, int> uRegisterMapping = new();
-		internal Dictionary<Register, int> cRegisterMapping = new();
+		internal Dictionary<BindPoint, int> tRegisterMapping = new();
+		internal Dictionary<BindPoint, int> uRegisterMapping = new();
+		internal Dictionary<BindPoint, int> cRegisterMapping = new();
 
 		// Parameters
 		private List<RootParameter1> rootParams = new();
@@ -419,18 +419,18 @@ namespace Engine.GPU
 		#endregion
 	}
 
-	public struct Register
+	public struct BindPoint
 	{
 		public int Slot;
 		public int Space;
 
-		public Register(int slot, int space)
+		public BindPoint(int slot, int space)
 		{
 			Slot = slot;
 			Space = space;
 		}
 
-		public static implicit operator Register(int slot) => new(slot, 0);
+		public static implicit operator BindPoint(int slot) => new(slot, 0);
 
 		public override string ToString()
 		{

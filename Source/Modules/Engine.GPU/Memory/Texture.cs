@@ -10,7 +10,7 @@ namespace Engine.GPU
 		public bool IsDS => dsv != null;
 
 		private UnorderedAccessView[] uavs;
-		private ShaderResourceView srv;
+		private ShaderResourceView[] srvs;
 		private RenderTargetView rtv;
 		private DepthStencilView dsv;
 
@@ -39,10 +39,19 @@ namespace Engine.GPU
 		/// </summary>
 		public Texture(int width, int height, byte mipmapCount = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default, byte samples = 1)
 		{
+			// Clamp mipmap count to avoid overly small sizes.
+			int maxMipmaps = Math.Max(1, (int)Math.Floor(width / Math.Pow(2, mipmapCount)));
+
+			// Mipmap generation requires a UAV-supported format.
+			if (!format.SupportsUAV())
+			{
+				maxMipmaps = 1;
+			}
+
 			Format = format;
 			Width = width;
 			Height = height;
-			MipmapCount = mipmapCount;
+			MipmapCount = (byte)Math.Min(mipmapCount, maxMipmaps);
 			Samples = samples;
 
 			DSFormat = dsFormat;
@@ -68,6 +77,7 @@ namespace Engine.GPU
 			State = ResourceStates.CopyDest;
 
 			uavs = new UnorderedAccessView[mipmapCount];
+			srvs = new ShaderResourceView[mipmapCount + 1]; // Extra index for "all mips"
 
 			Resource.Name = "Standard texture";
 		}
@@ -97,12 +107,15 @@ namespace Engine.GPU
 
 			// Release existing D3D resource.
 			Resource.Release();
-			srv = null;
 			rtv = null;
 			dsv = null;
 			for (int i = 0; i < MipmapCount; i++)
 			{
 				uavs[i] = null;
+			}
+			for (int i = 0; i < MipmapCount + 1; i++)
+			{
+				srvs[i] = null;
 			}
 
 			// Create new resource with new size.
@@ -120,14 +133,14 @@ namespace Engine.GPU
 			return uavs[mipLevel];
 		}
 
-		public ShaderResourceView GetSRV()
+		public ShaderResourceView GetSRV(int mipLevel = -1)
 		{
-			if (srv == null)
+			if (srvs[mipLevel + 1] == null)
 			{
-				srv = new ShaderResourceView(this);
+				srvs[mipLevel + 1] = new ShaderResourceView(this, mipLevel);
 			}
 
-			return srv;
+			return srvs[mipLevel + 1];
 		}
 
 		public RenderTargetView GetRTV()
