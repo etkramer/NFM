@@ -43,7 +43,7 @@ namespace Basic.Loaders
 
 			// Load embedded textures.
 			Texture2D[] textures = new Texture2D[importScene.TextureCount];
-			/*Parallel.For(0, importScene.TextureCount, (i) =>
+			Parallel.For(0, importScene.TextureCount, (i) =>
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(importScene.Textures[i].CompressedData, 4))
 				{
@@ -61,7 +61,7 @@ namespace Basic.Loaders
 					texture.LoadData(imageData, TextureCompression.None);
 					textures[i] = texture;
 				}
-			});*/
+			});
 
 			// Create embedded materials.
 			Material[] materials = new Material[importScene.MaterialCount];
@@ -73,7 +73,7 @@ namespace Basic.Loaders
 				AI.Material importMaterial = importScene.Materials[i];
 
 				// Assign textures.
-				if (importMaterial.HasTextureDiffuse)
+				/*if (importMaterial.HasTextureDiffuse)
 				{
 					int textureIndex = int.Parse(importMaterial.TextureDiffuse.FilePath.Split('*')[1]);
 					material.SetTexture("BaseColor", textures[textureIndex]);
@@ -82,6 +82,28 @@ namespace Basic.Loaders
 				{
 					int textureIndex = int.Parse(importMaterial.TextureNormal.FilePath.Split('*')[1]);
 					material.SetTexture("Normal", textures[textureIndex]);
+				}*/
+
+				importMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var color);
+				importMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);
+				importMaterial.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
+
+				if (color.FilePath != null)
+				{
+					int textureIndex = int.Parse(color.FilePath.Split('*')[1]);
+					material.SetTexture("BaseColor", textures[textureIndex]);
+				}
+
+				if (normal.FilePath != null)
+				{
+					int textureIndex = int.Parse(normal.FilePath.Split('*')[1]);
+					material.SetTexture("Normal", textures[textureIndex]);
+				}
+
+				if (orm.FilePath != null)
+				{
+					int textureIndex = int.Parse(orm.FilePath.Split('*')[1]);
+					material.SetTexture("ORM", textures[textureIndex]);
 				}
 
 				materials[i] = material;

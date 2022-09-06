@@ -53,6 +53,7 @@ namespace Basic
 			shader.SetBlendMode(BlendMode.Opaque);
 			shader.AddTexture("BaseColor", Texture2D.Purple);
 			shader.AddTexture("Normal", Texture2D.Normal);
+			shader.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 			return shader;
 		}

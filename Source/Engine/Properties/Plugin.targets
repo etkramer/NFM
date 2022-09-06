@@ -4,7 +4,6 @@
 	<ItemGroup>
 		<Reference Include="Engine" HintPath="$(MSBuildThisFileDirectory)..\Engine.dll" Private="False" />
 		<Reference Include="Engine.Common" HintPath="$(MSBuildThisFileDirectory)..\Engine.Common.dll" Private="False" />
-		<Reference Include="Engine.Math" HintPath="$(MSBuildThisFileDirectory)..\Engine.Math.dll" Private="False" />
 		<Reference Include="Engine.GPU" HintPath="$(MSBuildThisFileDirectory)..\Engine.GPU.dll" Private="False" />
 	</ItemGroup>
 </Project>
