@@ -125,7 +125,7 @@ namespace Engine.Frontend
 					num = Convert.ChangeType(uintValue, numType);
 					return true;
 				}
-				else if (long.TryParse(text, out long intValue))
+				else if (!IsUnsigned(numType) && long.TryParse(text, out long intValue))
 				{
 					num = Convert.ChangeType(intValue, numType);
 					return true;

@@ -10,11 +10,33 @@ namespace Engine
 {
 	[AttributeUsage(AttributeTargets.Method)]
 	[Injection(typeof(CommandAspect))]
-	public class Command : Attribute
+	public class CommandAttribute : Attribute
 	{
+		public string UndoMethod { get; set; }
+		public CommandAttribute(string undoMethod)
+		{
+			UndoMethod = undoMethod;
+		}
+	}
+
+	public class Command
+	{
+		#region Instance
+		public string Name;
+		public readonly Action UndoAction;
+		public readonly Action RedoAction;
+
+		public Command(string name, Action undoAction, Action redoAction)
+		{
+			Name = name;
+			UndoAction = undoAction;
+			RedoAction = redoAction;
+		}
+		#endregion
+
 		public const int UndoHistoryLength = 32;
 
-		private static List<(Action, Action, string)> undoHistory = new();
+		private static List<Command> undoHistory = new();
 		private static int undoIndex = -1;
 
 		public static void Undo()
@@ -23,9 +45,7 @@ namespace Engine
 				return;
 
 			// Invoke the undo action.
-			undoHistory[undoIndex].Item1.Invoke();
-
-			Debug.Log($"Undid command {undoHistory[undoIndex].Item3}");
+			undoHistory[undoIndex].UndoAction.Invoke();
 
 			// Don't decrement the index if this was the first command.
 			if (undoIndex > 0)
@@ -37,10 +57,12 @@ namespace Engine
 		public static void Redo()
 		{
 			if (undoIndex == -1)
+			{
 				return;
+			}
 
 			// Invoke the redo action.
-			undoHistory[undoIndex].Item2.Invoke();
+			undoHistory[undoIndex].RedoAction?.Invoke();
 
 			// Don't decrement the index if this was the most recent command.
 			if (undoIndex < undoHistory.Count - 1)
@@ -62,7 +84,7 @@ namespace Engine
 				undoHistory.RemoveRange(undoIndex + 1, undoHistory.Count); // Clear potential redos.
 			}
 
-			undoHistory.Add(new(undo, redo, name));
+			undoHistory.Add(new Command(name, undo, redo));
 			undoIndex++;
 
 			if (undoIndex > UndoHistoryLength)
@@ -70,12 +92,6 @@ namespace Engine
 				undoIndex--;
 				undoHistory.RemoveAt(0);
 			}
-		}
-
-		public string UndoMethod { get; set; }
-		public Command(string undoMethod)
-		{
-			UndoMethod = undoMethod;
 		}
 	}
 
@@ -85,7 +101,7 @@ namespace Engine
 		[Advice(Kind.Around, Targets = Target.Method | Target.AnyAccess)]
 		public object AroundMethod([Argument(Source.Instance)] object source, [Argument(Source.Triggers)] Attribute[] triggers, [Argument(Source.Type)] Type type, [Argument(Source.Arguments)] object[] args, [Argument(Source.Target)] Func<object[], object> func, [Argument(Source.Name)] string name)
 		{
-			Command commandAttribute = triggers.OfType<Command>().FirstOrDefault();
+			CommandAttribute commandAttribute = triggers.OfType<CommandAttribute>().FirstOrDefault();
 			if (commandAttribute != null)
 			{
 				MethodInfo undoMethod = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).Where(o => o.Name == commandAttribute.UndoMethod).FirstOrDefault();

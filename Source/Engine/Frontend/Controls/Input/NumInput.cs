@@ -63,7 +63,7 @@ namespace Engine.Frontend
 				if (e.Key == Key.Enter)
 				{
 					// Set input to new value.
-					if (TryParseNum(Value, Property.PropertyType, out object num))
+					if (TryParseNum(numEntry.Text, Property.PropertyType, out object num))
 					{
 						SetValue(num);
 					}
