@@ -71,7 +71,7 @@ namespace Engine.Resources
 					loadingTask = Task.Run(async () =>
 					{
 						cache = await loader.Load();
-						if (!cache.IsLoaded)
+						if ((!cache?.IsLoaded) ?? false)
 						{
 							cache.OnLoad();
 							cache.Source = this;

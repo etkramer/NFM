@@ -39,7 +39,7 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 		// Write output vertex.
 		verts[groupThreadID].Position = position;
 		verts[groupThreadID].Normal = float4(normal, 1);
-		verts[groupThreadID].UV0 = vertex.UV0 * float2(1, -1);
+		verts[groupThreadID].UV0 = vertex.UV0;
 
 	}
 	if (groupThreadID < meshlet.PrimCount)

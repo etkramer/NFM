@@ -38,7 +38,7 @@ namespace Basic.Loaders
 			}
 
 			// Load GLTF file from thread-local context.
-			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.EmbedTextures;
+			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.EmbedTextures | PostProcessSteps.FlipUVs;
 			AI.Scene importScene = importContext.ImportFile(Path, steps);
 
 			// Load embedded textures.
