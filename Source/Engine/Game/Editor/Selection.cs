@@ -9,7 +9,7 @@ namespace Engine.Editor
 {
 	public interface ISelectable
 	{
-		string GetName();
+		string Name { get; }
 	}
 
 	public static class Selection

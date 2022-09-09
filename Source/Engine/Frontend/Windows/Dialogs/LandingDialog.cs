@@ -76,7 +76,7 @@ namespace Engine.Frontend
 
 		public async void LoadPressed()
 		{
-			string openPath = await Dialog.ShowOpenDialog(this, new FileFilter("Project file", "project"));
+			string openPath = await ShowOpenDialog(this, new FileFilter("Project file", "project"));
 
 			if (openPath != null)
 			{

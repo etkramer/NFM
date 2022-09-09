@@ -4,6 +4,7 @@ using Engine.Resources;
 
 namespace Engine.World
 {
+	[Icon('\uE412')]
 	public class CameraActor : Actor
 	{
 		[Inspect] public uint FocalLength { get; set; } = 35;

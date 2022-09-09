@@ -50,7 +50,19 @@ namespace Engine.Frontend
 				{
 					if (t.IsFaulted)
 					{
-						Dispatcher.UIThread.Post(() => new ExceptionDialog(ExceptionDispatchInfo.Capture(t.Exception.InnerException)).Show());
+						// Capture stack trace.
+						ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(t.Exception.InnerException);
+
+						// Create exception dialog.
+						Dispatcher.UIThread.Post(() => 
+							new Popup(
+									info.SourceException.GetType().Name,
+									$"An unhandled exception has occured. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
+									$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
+									$"{info.SourceException.StackTrace}")
+								.Button("Break", () => info.Throw())
+								.Button("Abort", () => Environment.Exit(-1)).Open()
+						);
 					}
 					else
 					{

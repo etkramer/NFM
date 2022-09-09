@@ -2,6 +2,7 @@
 
 namespace Engine.World
 {
+	[Icon('\uEA24')]
 	public class PointLightActor : Actor
 	{
 		/// <summary>

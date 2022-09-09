@@ -10,13 +10,13 @@ namespace Engine
 	[Injection(typeof(NotifyAspect))]
 	public class InspectAttribute : Attribute
 	{
-		public string Category { get; set; }
+		public string Tooltip { get; set; }
 
 		public InspectAttribute() {}
 
-		public InspectAttribute(string category)
+		public InspectAttribute(string tooltip)
 		{
-			Category = category;
+			Tooltip = tooltip;
 		}
 	}
 }

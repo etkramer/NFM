@@ -32,7 +32,7 @@ namespace Engine.Frontend.Controls
 			// Create group (viewport 1).
 			TabGroup group3 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group3);
-			dockspace.Dock(group3, group2, DockPosition.Left, 0.88f);
+			dockspace.Dock(group3, group2, DockPosition.Left, 0.86f);
 
 			// Create group (timeline).
 			/*TabGroup group4 = new TabGroup();
@@ -68,7 +68,24 @@ namespace Engine.Frontend.Controls
 				}
 				catch (Exception e)
 				{
-					new ExceptionDialog(ExceptionDispatchInfo.Capture(e)).Show();
+					// Use the inner exception, if it exists.
+					if (e.InnerException != null)
+					{
+						e = e.InnerException;
+					}
+
+					// Capture stack trace.
+					ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(e);
+
+					// Create exception dialog.
+					new Popup(
+							info.SourceException.GetType().Name,
+							$"An unhandled exception has occured. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
+							$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
+							$"{info.SourceException.StackTrace}")
+						.Button("Break", () => info.Throw())
+						.Button("Abort", () => Environment.Exit(-1)).Open();
+
 					return false;
 				}
 			},

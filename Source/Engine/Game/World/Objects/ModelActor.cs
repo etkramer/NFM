@@ -13,6 +13,7 @@ namespace Engine.World
 		public uint TransformID;
 	}
 
+	[Icon('\uE9FE')]
 	public partial class ModelActor : Actor
 	{
 		public const int MaxInstanceCount = 100;

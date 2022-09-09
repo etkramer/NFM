@@ -5,7 +5,10 @@ namespace Engine.Common
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 	public class SaveAttribute : Attribute
 	{
-		public bool Global { get; set; } = false;
+		/// <summary>
+		/// Should this be saved as part of the project or the user settings?
+		/// </summary>
+		public bool IsUserConfig { get; set; } = false;
 
 		public SaveAttribute()
 		{

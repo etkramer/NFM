@@ -52,7 +52,7 @@ namespace Engine.Frontend
 
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
-			InputHelper.UpdateKey(e.Key, true);
+			Input.UpdateKey(e.Key, true);
 
 			e.Handled = true;
 			base.OnKeyDown(e);
@@ -60,7 +60,7 @@ namespace Engine.Frontend
 
 		protected override void OnKeyUp(KeyEventArgs e)
 		{
-			InputHelper.UpdateKey(e.Key, false);
+			Input.UpdateKey(e.Key, false);
 
 			e.Handled = true;
 			base.OnKeyDown(e);
@@ -105,7 +105,7 @@ namespace Engine.Frontend
 			// Update input.
 			PointerPointProperties props = e.GetCurrentPoint(this).Properties;
 			PointerPoint point = e.GetCurrentPoint(null);
-			InputHelper.UpdateMouse(point);
+			Input.UpdateMouse(point);
 
 			// Capture when held.
 			if (props.IsLeftButtonPressed || props.IsRightButtonPressed)

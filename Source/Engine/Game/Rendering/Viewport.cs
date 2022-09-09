@@ -72,30 +72,30 @@ namespace Engine.Rendering
 			const float sprintMult = 2.5f;
 
 			// Process input only if right click is down.
-			if (InputHelper.RightMouseButton == KeyState.Down && InputHelper.InputSource == Host)
+			if (Input.RightMouseButton == KeyState.Down && Input.InputSource == Host)
 			{
 				// Mouse look
 				Vector3 cameraRotation = Camera.Rotation;
-				cameraRotation.Y += InputHelper.MouseDelta.X * lookSens;
-				cameraRotation.X += InputHelper.MouseDelta.Y * lookSens;
+				cameraRotation.Y += Input.MouseDelta.X * lookSens;
+				cameraRotation.X += Input.MouseDelta.Y * lookSens;
 				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
 				Camera.Rotation = cameraRotation;
 
 				// Movement
 				Vector3 accelVector = Vector3.Zero;
-				if (InputHelper.W == KeyState.Down)
+				if (Input.W == KeyState.Down)
 				{
 					accelVector.Z -= 1;
 				}
-				if (InputHelper.A == KeyState.Down)
+				if (Input.A == KeyState.Down)
 				{
 					accelVector.X -= 1;
 				}
-				if (InputHelper.S == KeyState.Down)
+				if (Input.S == KeyState.Down)
 				{
 					accelVector.Z += 1;
 				}
-				if (InputHelper.D == KeyState.Down)
+				if (Input.D == KeyState.Down)
 				{
 					accelVector.X += 1;
 				}
@@ -103,17 +103,17 @@ namespace Engine.Rendering
 				// Transform WASD accelerations by camera direction.
 				accelVector = Vector3.TransformVector(accelVector, Matrix4.CreateRotation(Camera.Rotation));
 
-				if (InputHelper.Space == KeyState.Down)
+				if (Input.Space == KeyState.Down)
 				{
 					accelVector.Y += 1;
 				}
-				if (InputHelper.C == KeyState.Down)
+				if (Input.C == KeyState.Down)
 				{
 					accelVector.Y -= 1;
 				}
 
 				// Apply acceleration to velocity.
-				flyVelocity += (accelVector * acceleration * (InputHelper.Shift == KeyState.Down ? sprintMult : 1)) * (float)deltaTime;
+				flyVelocity += (accelVector * acceleration * (Input.Shift == KeyState.Down ? sprintMult : 1)) * (float)deltaTime;
 			}
 
 			// Flycam physics.

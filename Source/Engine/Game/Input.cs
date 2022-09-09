@@ -11,7 +11,7 @@ namespace Engine.Frontend
 		Down
 	}
 
-	public static class InputHelper
+	public static class Input
 	{
 		public static Vector2 MouseDelta { get; private set; }
 		public static Control InputSource { get; private set; }
@@ -35,7 +35,7 @@ namespace Engine.Frontend
 		private static Vector2 mousePos = Vector2.NaN;
 		private static Vector2 lastMousePos = Vector2.NaN;
 
-		static InputHelper()
+		static Input()
 		{
 			DispatcherTimer.Run(() =>
 			{

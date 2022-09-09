@@ -79,7 +79,7 @@ namespace Engine.Frontend
 										.Size(26)
 										.Margin(7, 0, 7, 0)
 										.Foreground("#B0E24D")
-										.Font(this.GetResource<FontFamily>("IconsFont")),
+										.Font(this.GetResource<FontFamily>("IconsFont2")),
 									new StackPanel()
 										.Orientation(Orientation.Vertical)
 										.VerticalAlignment(VerticalAlignment.Center)
@@ -123,9 +123,18 @@ namespace Engine.Frontend
 			Type selectedType = ReflectionHelper.FindCommonAncestor(Selection.Selected.Select(o => o.GetType()));
 
 			// Update the name display.
-			objectName = (Selection.Selected.Count > 1) ? $"({Selection.Selected.Count} objects)" : Selection.Selected[0].GetName();
+			objectName = (Selection.Selected.Count > 1) ? $"({Selection.Selected.Count} objects)" : Selection.Selected[0].Name;
 			objectTypeName = selectedType.Name;
-			objectIcon = '\uE3C2';
+
+			// Get per-type icon.
+			if (selectedType.TryGetAttribute(out IconAttribute icon))
+			{
+				objectIcon = icon.IconGlyph;
+			}
+			else
+			{
+				objectIcon = '\uEB8B';
+			}
 
 			// Filter and bucket properties by category.
 			var buckets = selectedType.GetProperties()

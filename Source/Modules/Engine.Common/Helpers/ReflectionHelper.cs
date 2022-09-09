@@ -106,6 +106,12 @@ namespace Engine.Common
 			return type.GetProperties(BindingFlagsAllStatic).Length != 0;
 		}
 
+		public static bool TryGetAttribute<T>(this Type type, out T result) where T : Attribute
+		{
+			result = type.GetCustomAttribute<T>();
+			return result != null;
+		}
+
 		public static bool HasPropertiesWithAttribute<T>(this Type type) where T : Attribute
 		{
 			foreach (PropertyInfo property in type.GetProperties(BindingFlagsAll))

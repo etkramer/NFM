@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Engine.Editor;
 using Engine.GPU;
 using Engine.Rendering;
@@ -11,6 +12,7 @@ namespace Engine.World
 		public Matrix4 WorldToObject;
 	}
 
+	[Icon('\uE3C2')]
 	public class Actor : ISelectable, IDisposable
 	{
 		// Properties (inspectable)
@@ -140,7 +142,5 @@ namespace Engine.World
 				WorldToObject = transform.Inverse()
 			});
 		}
-
-		string ISelectable.GetName() => Name;
 	}
 }
