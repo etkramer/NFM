@@ -35,12 +35,12 @@ namespace Basic
 				}
 			}
 
-			LoadPBRShader(basicPrefix);
+			LoadShaders(basicPrefix);
 		}
 
-		private void LoadPBRShader(AssetPrefix prefix)
+		private void LoadShaders(AssetPrefix prefix)
 		{
-			string source = Embed.GetString("Shaders/PBR.hlsl", typeof(BasicPlugin).Assembly);
+			string source = Embed.GetString("Shaders/Opaque.hlsl", typeof(BasicPlugin).Assembly);
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
@@ -48,7 +48,7 @@ namespace Basic
 			shader.AddTexture("Normal", Texture2D.Normal);
 			shader.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
-			Asset.Submit(new Asset<Shader>("Shaders/PBR.hlsl", prefix, shader));
+			Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", prefix, shader));
 		}
 	}
 }

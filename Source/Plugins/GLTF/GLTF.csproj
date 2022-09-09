@@ -21,7 +21,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Shaders\PBR.hlsl" />
+	  <None Remove="Shaders\Opaque.hlsl" />
 	  <None Remove="stbi.dll" />
 	</ItemGroup>
 
@@ -32,7 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Shaders\PBR.hlsl" />
+	  <EmbeddedResource Include="Shaders\Opaque.hlsl" />
 	</ItemGroup>
 
 	<ItemGroup>

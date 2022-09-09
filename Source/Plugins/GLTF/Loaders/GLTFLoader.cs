@@ -2,24 +2,20 @@
 using Engine;
 using Engine.Resources;
 using Engine.Mathematics;
-using Assimp;
-using Assimp.Configs;
-using AI = Assimp;
 using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
 using System.Collections.Concurrent;
 using Engine.Common;
 using Mesh = Engine.Resources.Mesh;
 using StbiSharp;
+using SharpGLTF.Schema2;
+using Asset = Engine.Resources.Asset;
 
 namespace Basic.Loaders
 {
 	public class GLTFLoader : AssetLoader<Model>
 	{
 		public string Path;
-
-		[ThreadStatic]
-		private static AssimpContext aiContext = new();
 
 		public GLTFLoader(string path)
 		{
@@ -28,24 +24,16 @@ namespace Basic.Loaders
 
 		public override async Task<Model> Load()
 		{
-			// Create import context if needed.
-			if (aiContext == null)
+			// Load GLTF model from file.
+			ModelRoot model = ModelRoot.Load(Path);
+
+			// Load textures from GLTF
+			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
+			Parallel.For(0, model.LogicalTextures.Count, (i) =>
 			{
-				aiContext = new AssimpContext();
+				var texture = model.LogicalTextures[i];
 
-				aiContext.SetConfig(new AppScaleConfig(1));
-				aiContext.SetConfig(new FavorSpeedConfig(true));
-			}
-
-			// Load GLTF file from thread-local context.
-			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.EmbedTextures | PostProcessSteps.FlipUVs;
-			AI.Scene scene = aiContext.ImportFile(Path, steps);
-
-			// Load embedded textures.
-			Texture2D[] textures = new Texture2D[scene.TextureCount];
-			Parallel.For(0, scene.TextureCount, (i) =>
-			{
-				using (StbiImage image = Stbi.LoadFromMemory(scene.Textures[i].CompressedData, 4))
+				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
 					Texture2D gameTexture = new Texture2D(image.Width, image.Height);
 
@@ -60,78 +48,88 @@ namespace Basic.Loaders
 					
 					gameTexture.LoadData(imageData, TextureCompression.None);
 					gameTexture.GenerateMips();
-					textures[i] = gameTexture;
+					gameTextures[i] = gameTexture;
 				}
 			});
 
-			// Create embedded materials.
-			Material[] gameMaterials = new Material[scene.MaterialCount];
-			for (int i = 0; i < scene.MaterialCount; i++)
+			// Load materials from GLTF
+			Material[] gameMaterials = new Material[model.LogicalMaterials.Count];
+			for (int i = 0; i < model.LogicalMaterials.Count; i++)
 			{
-				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR.hlsl");
+				var material = model.LogicalMaterials[i];
+
+				// Determine shader and create material.
+				Shader shader = material.Alpha switch
+				{
+					AlphaMode.OPAQUE => await Asset.GetAsync<Shader>("USER:Shaders/Opaque.hlsl"),
+					_ => await Asset.GetAsync<Shader>("USER:Shaders/Opaque.hlsl")
+				};
 				Material gameMaterial = new Material(shader);
 
-				AI.Material material = scene.Materials[i];
-
-				material.GetMaterialTexture(TextureType.Diffuse, 0, out var color);
-				material.GetMaterialTexture(TextureType.Normals, 0, out var normal);
-				material.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
-
-				if (color.FilePath != null)
+				// Loop over material channels
+				foreach (var channel in material.Channels)
 				{
-					int textureIndex = int.Parse(color.FilePath.Split('*')[1]);
-					gameMaterial.SetTexture("BaseColor", textures[textureIndex]);
-				}
-
-				if (normal.FilePath != null)
-				{
-					int textureIndex = int.Parse(normal.FilePath.Split('*')[1]);
-					gameMaterial.SetTexture("Normal", textures[textureIndex]);
-				}
-
-				if (orm.FilePath != null)
-				{
-					int textureIndex = int.Parse(orm.FilePath.Split('*')[1]);
-					gameMaterial.SetTexture("ORM", textures[textureIndex]);
+					if (channel.Key == "BaseColor" && channel.Texture != null)
+					{
+						gameMaterial.SetTexture("BaseColor", gameTextures[channel.Texture.LogicalIndex]);
+					}
+					else if (channel.Key == "Normal" && channel.Texture != null)
+					{
+						gameMaterial.SetTexture("Normal", gameTextures[channel.Texture.LogicalIndex]);
+					}
+					else if (channel.Key == "MetallicRoughness" && channel.Texture != null)
+					{
+						gameMaterial.SetTexture("MetallicRoughness", gameTextures[channel.Texture.LogicalIndex]);
+					}
 				}
 
 				gameMaterials[i] = gameMaterial;
 			}
 
-			// Create submeshes.
-			ConcurrentBag<Mesh> gameMeshes = new();
-			Parallel.ForEach(scene.Meshes, (mesh, state) =>
+			// Load meshes from GLTF.
+			Mesh[] gameMeshes = new Mesh[model.LogicalMeshes[0].Primitives.Count];
+			Parallel.ForEach(model.LogicalMeshes[0].Primitives, (primitive) =>
 			{
-				Debug.Assert(mesh.PrimitiveType == PrimitiveType.Triangle, "Engine does not support non-triangle geometry.");
+				// Grab vertex accessors from GLTF.
+				var positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
+				var normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
+				var uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
 
-				// Format vertices.
-				Vertex[] vertices = new Vertex[mesh.VertexCount];
-				for (int i = 0; i < mesh.VertexCount; i++)
+				// Read vertex data from accessor streams.
+				Vertex[] vertices = new Vertex[positions.Count];
+				for (int i = 0; i < positions.Count; i++)
 				{
 					vertices[i] = new Vertex()
 					{
-						Position = new Vector3(mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z),
-						Normal = new Vector3(mesh.Normals[i].X, mesh.Normals[i].Y, mesh.Normals[i].Z),
-						UV0 = new Vector2(mesh.TextureCoordinateChannels[0][i].X, mesh.TextureCoordinateChannels[0][i].Y)
+						Position = new Vector3(positions[i].X, positions[i].Y, positions[i].Z),
+						Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z),
+						UV0 = new Vector2(uvs[i].X, uvs[i].Y),
 					};
 				}
 
-				// Create submesh.
+				// Create mesh.
 				Mesh gameMesh = new Mesh();
-				gameMesh.SetMaterial(gameMaterials[mesh.MaterialIndex]);
+				gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
 				gameMesh.SetVertices(vertices);
-				gameMesh.SetIndices(mesh.GetUnsignedIndices());
-
-				gameMeshes.Add(gameMesh);
+				gameMesh.SetIndices(primitive.GetIndices().ToArray());
+				gameMeshes[primitive.LogicalIndex] = gameMesh;
 			});
 
-			// Create model.
+			// Create ModelParts from GLTF "meshes"
+			ModelPart[] gameParts = new ModelPart[model.LogicalMeshes.Count];
+			foreach (var mesh in model.LogicalMeshes)
+			{
+				// I've only ever observed a GLTF file having one of these, but I assume there could be more.
+				Debug.Assert(model.LogicalMeshes.Count <= 1, "Not supported for the time being, because I don't have any examples of this in the wild.");
+
+				// Create Modelpart.
+				ModelPart part = new ModelPart(gameMeshes);
+				gameParts[mesh.LogicalIndex] = part;
+			}
+
 			return new Model()
 			{
-				Parts = new ModelPart[]
-				{
-					new ModelPart(gameMeshes.ToArray())
-				}
+				Parts = gameParts,
 			};
 		}
 	}

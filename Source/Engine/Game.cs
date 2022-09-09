@@ -32,20 +32,27 @@ namespace Engine
 			// Kick off model loading. We're not awaiting this right now because
 			// opening the window takes long enough to hide the load time.
 			var loadTask = Asset.GetAsync<Model>("USER:Objects/Heavy.glb");
+			var loadTask2 = Asset.GetAsync<Model>("USER:Objects/Sponza.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
 
 		public static void OnProjectCreated()
 		{
+			// Spawn actors
 			new CameraActor().Spawn();
 			new PointLightActor().Spawn();
-			
-			// Helmet
 			var modelObject = new ModelActor().Spawn<ModelActor>();
+
 			modelObject.Position = new Vector3(0, -0.4f, 1);
 			modelObject.Rotation = new Vector3(0, 180, 0);
 			modelObject.Model = Asset.GetAsync<Model>("USER:Objects/Heavy.glb").Result;
+
+			var modelObject2 = new ModelActor().Spawn<ModelActor>();
+
+			modelObject2.Position = new Vector3(0, -0.4f, 1);
+			modelObject2.Rotation = new Vector3(0, 0, 0);
+			modelObject2.Model = Asset.GetAsync<Model>("USER:Objects/Sponza.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

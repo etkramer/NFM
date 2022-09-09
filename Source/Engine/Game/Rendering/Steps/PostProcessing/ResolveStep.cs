@@ -25,6 +25,7 @@ namespace Engine.Rendering
 			List.DispatchThreads(Viewport.ColorTarget.Width, 32, Viewport.ColorTarget.Height, 32);
 
 			// Copy output to backbuffer.
+			List.BarrierUAV(Viewport.ColorTarget);
 			List.ResolveTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
 
 			// Clear viewport targets.

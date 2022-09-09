@@ -25,7 +25,7 @@ namespace Engine.World
 				if (parent != value && value != this)
 				{
 					// Remove from old parent.
-					Scene?.Remove(this);
+					Scene?.Despawn(this);
 					parent?.children.Remove(this);
 
 					// Add to new parent.
@@ -33,7 +33,7 @@ namespace Engine.World
 					parent?.children.Add(this);	
 					if (parent == null)
 					{
-						Scene?.Add(this);
+						Scene?.Spawn(this);
 					}
 				}
 			}
@@ -73,7 +73,7 @@ namespace Engine.World
 		public virtual void Dispose()
 		{
 			// Remove self from scene tree.
-			Scene?.Remove(this);
+			Scene?.Despawn(this);
 			Parent = null;
 			TransformHandle?.Dispose();
 
@@ -118,7 +118,7 @@ namespace Engine.World
 
 			if (parent == null)
 			{
-				Scene.Add(this);
+				Scene.Spawn(this);
 			}
 
 			return this as TThis;

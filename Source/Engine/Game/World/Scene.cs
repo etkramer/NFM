@@ -6,26 +6,23 @@ namespace Engine.World
 {
 	public partial class Scene : IDisposable
 	{
-		private static List<Scene> all { get; } = new();
-		public static ReadOnlyCollection<Scene> All { get; }
+		public static List<Scene> All { get; } = new();
 
 		[Notify, Save] public static Scene Main { get; set; } = new();
 
-		[Save] private ObservableCollection<Actor> actors { get; set; } = new();
 		[Notify] public ReadOnlyObservableCollection<Actor> Actors { get; }
-
-		static Scene()
-		{
-			All = new ReadOnlyCollection<Scene>(all);
-		}
+		[Save] private ObservableCollection<Actor> actors { get; set; } = new();
 
 		public Scene()
 		{
 			Actors = new(actors);
-			all.Add(this);
+			All.Add(this);
 		}
 
-		public void Add(Actor actor)
+		/// <summary>
+		/// Adds an Actor to the scene.
+		/// </summary>
+		public void Spawn(Actor actor)
 		{
 			if (!actors.Contains(actor))
 			{
@@ -33,7 +30,10 @@ namespace Engine.World
 			}
 		}
 
-		public void Remove(Actor actor)
+		/// <summary>
+		/// Removes an Actor from the scene, but does *not* destroy it. Dispose() must still be called manually.
+		/// </summary>
+		public void Despawn(Actor actor)
 		{
 			actors.Remove(actor);
 		}
@@ -45,7 +45,7 @@ namespace Engine.World
 				actors[i].Dispose();
 			}
 
-			all.Remove(this);
+			All.Remove(this);
 		}
 	}
 }

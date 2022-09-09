@@ -85,6 +85,8 @@ namespace Engine.Rendering
 			{
 				List.DispatchGroups(Scene.InstanceCount);
 			}
+
+			List.BarrierUAV(commandBuffer);
 		}
 	}
 }
