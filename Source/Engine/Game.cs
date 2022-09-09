@@ -31,7 +31,7 @@ namespace Engine
 
 			// Kick off model loading. We're not awaiting this right now because
 			// opening the window takes long enough to hide the load time.
-			var loadHelmet = Asset.GetAsync<Model>("USER:Objects/FlightHelmet.glb");
+			var loadTask = Asset.GetAsync<Model>("USER:Objects/Heavy.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -42,10 +42,10 @@ namespace Engine
 			new PointLightActor().Spawn();
 			
 			// Helmet
-			var helmObject = new ModelActor("Flight Helmet").Spawn<ModelActor>();
-			helmObject.Position = new Vector3(0, -0.4f, 1);
-			helmObject.Rotation = new Vector3(0, 180, 0);
-			helmObject.Model = Asset.GetAsync<Model>("USER:Objects/FlightHelmet.glb").Result;
+			var modelObject = new ModelActor().Spawn<ModelActor>();
+			modelObject.Position = new Vector3(0, -0.4f, 1);
+			modelObject.Rotation = new Vector3(0, 180, 0);
+			modelObject.Model = Asset.GetAsync<Model>("USER:Objects/Heavy.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

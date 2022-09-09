@@ -782,7 +782,7 @@ namespace  Engine.Mathematics
 		}
 
 		/// <summary>
-		/// Builds a rotation matrix from a euler.
+		/// Builds a rotation matrix from a euler rotation.
 		/// </summary>
 		/// <returns>A matrix instance.</returns>
 		public static Matrix4 CreateRotation(Vector3 angles)
@@ -790,7 +790,7 @@ namespace  Engine.Mathematics
 			Matrix4 rotationX = CreateRotationX(MathHelper.DegreesToRadians(angles.X));
 			Matrix4 rotationY = CreateRotationY(MathHelper.DegreesToRadians(angles.Y));
 			Matrix4 rotationZ = CreateRotationZ(MathHelper.DegreesToRadians(angles.Z));
-			return rotationX * rotationY * rotationZ;
+			return rotationZ * rotationX * rotationY; // Apply up component last. Z/X/Y convention matches Unity.
 		}
 
 		/// <summary>

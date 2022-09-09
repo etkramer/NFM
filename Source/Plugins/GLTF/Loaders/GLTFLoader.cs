@@ -19,7 +19,7 @@ namespace Basic.Loaders
 		public string Path;
 
 		[ThreadStatic]
-		private static AssimpContext importContext = new();
+		private static AssimpContext aiContext = new();
 
 		public GLTFLoader(string path)
 		{
@@ -29,25 +29,25 @@ namespace Basic.Loaders
 		public override async Task<Model> Load()
 		{
 			// Create import context if needed.
-			if (importContext == null)
+			if (aiContext == null)
 			{
-				importContext = new AssimpContext();
+				aiContext = new AssimpContext();
 
-				importContext.SetConfig(new AppScaleConfig(1));
-				importContext.SetConfig(new FavorSpeedConfig(true));
+				aiContext.SetConfig(new AppScaleConfig(1));
+				aiContext.SetConfig(new FavorSpeedConfig(true));
 			}
 
 			// Load GLTF file from thread-local context.
 			PostProcessSteps steps = PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.EmbedTextures | PostProcessSteps.FlipUVs;
-			AI.Scene importScene = importContext.ImportFile(Path, steps);
+			AI.Scene scene = aiContext.ImportFile(Path, steps);
 
 			// Load embedded textures.
-			Texture2D[] textures = new Texture2D[importScene.TextureCount];
-			Parallel.For(0, importScene.TextureCount, (i) =>
+			Texture2D[] textures = new Texture2D[scene.TextureCount];
+			Parallel.For(0, scene.TextureCount, (i) =>
 			{
-				using (StbiImage image = Stbi.LoadFromMemory(importScene.Textures[i].CompressedData, 4))
+				using (StbiImage image = Stbi.LoadFromMemory(scene.Textures[i].CompressedData, 4))
 				{
-					Texture2D texture = new Texture2D(image.Width, image.Height);
+					Texture2D gameTexture = new Texture2D(image.Width, image.Height);
 
 					Span<byte> imageData = null;
 					unsafe
@@ -58,81 +58,81 @@ namespace Basic.Loaders
 						}
 					}
 					
-					texture.LoadData(imageData, TextureCompression.None);
-					texture.GenerateMips();
-					textures[i] = texture;
+					gameTexture.LoadData(imageData, TextureCompression.None);
+					gameTexture.GenerateMips();
+					textures[i] = gameTexture;
 				}
 			});
 
 			// Create embedded materials.
-			Material[] materials = new Material[importScene.MaterialCount];
-			for (int i = 0; i < importScene.MaterialCount; i++)
+			Material[] gameMaterials = new Material[scene.MaterialCount];
+			for (int i = 0; i < scene.MaterialCount; i++)
 			{
 				Shader shader = await Asset.GetAsync<Shader>("USER:Shaders/PBR.hlsl");
-				Material material = new Material(shader);
+				Material gameMaterial = new Material(shader);
 
-				AI.Material importMaterial = importScene.Materials[i];
+				AI.Material material = scene.Materials[i];
 
-				importMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var color);
-				importMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);
-				importMaterial.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
+				material.GetMaterialTexture(TextureType.Diffuse, 0, out var color);
+				material.GetMaterialTexture(TextureType.Normals, 0, out var normal);
+				material.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
 
 				if (color.FilePath != null)
 				{
 					int textureIndex = int.Parse(color.FilePath.Split('*')[1]);
-					material.SetTexture("BaseColor", textures[textureIndex]);
+					gameMaterial.SetTexture("BaseColor", textures[textureIndex]);
 				}
 
 				if (normal.FilePath != null)
 				{
 					int textureIndex = int.Parse(normal.FilePath.Split('*')[1]);
-					material.SetTexture("Normal", textures[textureIndex]);
+					gameMaterial.SetTexture("Normal", textures[textureIndex]);
 				}
 
 				if (orm.FilePath != null)
 				{
 					int textureIndex = int.Parse(orm.FilePath.Split('*')[1]);
-					material.SetTexture("ORM", textures[textureIndex]);
+					gameMaterial.SetTexture("ORM", textures[textureIndex]);
 				}
 
-				materials[i] = material;
+				gameMaterials[i] = gameMaterial;
 			}
 
 			// Create submeshes.
-			ConcurrentBag<Mesh> meshes = new();
-			Parallel.ForEach(importScene.Meshes, (importMesh, state) =>
+			ConcurrentBag<Mesh> gameMeshes = new();
+			Parallel.ForEach(scene.Meshes, (mesh, state) =>
 			{
-				Debug.Assert(importMesh.PrimitiveType == PrimitiveType.Triangle, "Engine does not support non-triangle geometry.");
+				Debug.Assert(mesh.PrimitiveType == PrimitiveType.Triangle, "Engine does not support non-triangle geometry.");
 
 				// Format vertices.
-				Vertex[] vertices = new Vertex[importMesh.VertexCount];
-				for (int i = 0; i < importMesh.VertexCount; i++)
+				Vertex[] vertices = new Vertex[mesh.VertexCount];
+				for (int i = 0; i < mesh.VertexCount; i++)
 				{
 					vertices[i] = new Vertex()
 					{
-						Position = new Vector3(importMesh.Vertices[i].X, importMesh.Vertices[i].Y, importMesh.Vertices[i].Z),
-						Normal = new Vector3(importMesh.Normals[i].X, importMesh.Normals[i].Y, importMesh.Normals[i].Z),
-						UV0 = new Vector2(importMesh.TextureCoordinateChannels[0][i].X, importMesh.TextureCoordinateChannels[0][i].Y)
+						Position = new Vector3(mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z),
+						Normal = new Vector3(mesh.Normals[i].X, mesh.Normals[i].Y, mesh.Normals[i].Z),
+						UV0 = new Vector2(mesh.TextureCoordinateChannels[0][i].X, mesh.TextureCoordinateChannels[0][i].Y)
 					};
 				}
 
 				// Create submesh.
-				Mesh submesh = new Mesh();
-				submesh.SetMaterial(materials[importMesh.MaterialIndex]);
-				submesh.SetVertices(vertices);
-				submesh.SetIndices(importMesh.GetUnsignedIndices());
+				Mesh gameMesh = new Mesh();
+				gameMesh.SetMaterial(gameMaterials[mesh.MaterialIndex]);
+				gameMesh.SetVertices(vertices);
+				gameMesh.SetIndices(mesh.GetUnsignedIndices());
 
-				meshes.Add(submesh);
+				gameMeshes.Add(gameMesh);
 			});
 
 			// Create model.
-			Model model = new Model();
-			model.Parts = new[] { new ModelPart()
+			return new Model()
 			{
-				Meshes = meshes.ToArray()
-			}};
-
-			return model;
+				Parts = new ModelPart[]
+				{
+					new ModelPart(gameMeshes.ToArray())
+				}
+			};
 		}
 	}
 }
