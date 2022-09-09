@@ -14,9 +14,6 @@ namespace Engine.GPU
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
 
-		private ID3D12Fence waitFence;
-		private ulong waitValue = 0;
-
 		private static ShaderProgram MipGenProgram = new ShaderProgram()
 			.UseIncludes(typeof(Embed).Assembly)
 			.SetComputeShader(Embed.GetString("HLSL/Utils/MipGenCS.hlsl"), "MipGenCS")
@@ -40,8 +37,6 @@ namespace Engine.GPU
 			allocator = new CommandAllocator(CommandListType.Direct);
 			list = GPUContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, allocator.commandAllocators[GPUContext.FrameIndex]);
 			list.Close();
-
-			waitFence = GPUContext.Device.CreateFence(0);
 
 			Reset();
 		}
@@ -768,18 +763,11 @@ namespace Engine.GPU
 		/// <summary>
 		/// Executes all commands.
 		/// </summary>
-		/// <param name="wait">Perform a GPU-side wait (ensure all commands are complete before continuing?)</param>
-		public void Execute(bool wait = false)
+		public void Execute()
 		{
 			// Build and execute command list.
 			Build();
 			GPUContext.GraphicsQueue.ExecuteCommandList(list);
-
-			if (wait)
-			{
-				GPUContext.GraphicsQueue.Signal(waitFence, ++waitValue);
-				GPUContext.GraphicsQueue.Wait(waitFence, waitValue);
-			}
 		}
 
 		/// <summary>

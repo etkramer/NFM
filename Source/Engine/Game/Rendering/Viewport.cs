@@ -51,7 +51,6 @@ namespace Engine.Rendering
 		public Viewport(ViewportHost host)
 		{
 			Host = host;
-			All.Add(this);
 
 			// Create RTs and RT-sized buffers.
 			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);
@@ -60,6 +59,8 @@ namespace Engine.Rendering
 			// Register callbacks
 			Game.OnTick += OnTick;
 			host.Swapchain.OnResize += Resize;
+
+			All.Add(this);
 		}
 
 		private Vector3 flyVelocity = Vector3.Zero;

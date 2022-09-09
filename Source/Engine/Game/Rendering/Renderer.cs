@@ -94,38 +94,26 @@ namespace Engine.Rendering
 			}
 
 			// Execute default command list and wait for it on the GPU.
-			DefaultCommandList.Execute(true);
+			DefaultCommandList.Execute();
 
-			// Loop through scenes (again).
-			foreach (Scene scene in Scene.All)
+			// Build and execute per-viewport commands. Consider doing this in parallel.
+			foreach (var viewport in Viewport.All)
 			{
-				RenderStep.Scene = scene;
+				// Switch to this viewport's command list.
+				RenderStep.List = viewport.CommandList;
+				RenderStep.Viewport = viewport;
 
-				// Build and execute per-viewport commands on viewport command lists.
-				foreach (var viewport in Viewport.All)
+				foreach (RenderStep step in viewportStage)
 				{
-					// Skip viewports that belong to other scenes.
-					if (viewport.Scene != scene)
-					{
-						continue;
-					}
-
-					// Switch to this viewport's command list.
-					RenderStep.List = viewport.CommandList;
-					RenderStep.Viewport = viewport;
-
-					foreach (RenderStep step in viewportStage)
-					{
-						step.Run();
-					}
-
-					// Make sure the viewport's backbuffer is in the right state for presentation.
-					RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
-					RenderStep.List.PopEvent();
-
-					// Make sure this viewport's commands are executing while we submit the next.
-					viewport.CommandList.Execute();
+					step.Run();
 				}
+
+				// Make sure the viewport's backbuffer is in the right state for presentation.
+				RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
+				RenderStep.List.PopEvent();
+
+				// Make sure this viewport's commands are executing while we submit the next.
+				viewport.CommandList.Execute();
 			}
 
 			// Submit default command list and wait for completion.
