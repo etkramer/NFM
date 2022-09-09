@@ -6,12 +6,6 @@ using Engine.Rendering;
 
 namespace Engine.World
 {
-	public struct GPUTransform
-	{
-		public Matrix4 ObjectToWorld;
-		public Matrix4 WorldToObject;
-	}
-
 	[Icon('\uE3C2')]
 	public class Actor : ISelectable, IDisposable
 	{
@@ -51,7 +45,6 @@ namespace Engine.World
 
 		// Transform buffer
 		public bool IsTransformDirty = true;
-		public static GraphicsBuffer<GPUTransform> TransformBuffer = new(ModelActor.MaxInstanceCount);
 		public BufferAllocation<GPUTransform> TransformHandle;
 
 		public Actor(string name = null)
@@ -72,7 +65,6 @@ namespace Engine.World
 			Parent = parent;
 
 			// Transform buffer
-			TransformHandle = TransformBuffer.Allocate(1);
 			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
 			(this as INotify).Subscribe(nameof(Rotation), () => IsTransformDirty = true);
 			(this as INotify).Subscribe(nameof(Scale), () => IsTransformDirty = true);
@@ -83,7 +75,7 @@ namespace Engine.World
 			// Remove self from scene tree.
 			Scene?.Remove(this);
 			Parent = null;
-			TransformHandle.Dispose();
+			TransformHandle?.Dispose();
 
 			// Dispose children.
 			for (int i = Children.Count - 1; i >= 0; i--)
@@ -135,6 +127,18 @@ namespace Engine.World
 		public void UpdateTransform()
 		{
 			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
+
+			if (TransformHandle == null)
+			{
+				if (Scene != null)
+				{
+					TransformHandle = Scene.TransformBuffer.Allocate(1);
+				}
+				else
+				{
+					return;
+				}
+			}
 
 			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
 			{

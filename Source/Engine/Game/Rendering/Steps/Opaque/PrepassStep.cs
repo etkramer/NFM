@@ -38,7 +38,7 @@ namespace Engine.Rendering
 				.AddDispatchMeshArg()
 				.Compile();
 
-			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * ModelActor.MaxInstanceCount, DepthCommandSignature.Stride, hasCounter: true);
+			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * Scene.MaxInstanceCount, DepthCommandSignature.Stride, hasCounter: true);
 		}
 
 		public override void Run()
@@ -60,7 +60,7 @@ namespace Engine.Rendering
 
 			// Set SRV inputs.
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
+			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
 
 			// Set UAV outputs.
 			List.SetProgramUAV(0, 0, CommandBuffer);
@@ -69,9 +69,9 @@ namespace Engine.Rendering
 			List.SetProgramConstants(0, -1);
 
 			// Dispatch compute shader.
-			if (ModelActor.InstanceCount > 0)
+			if (Scene.InstanceCount > 0)
 			{
-				List.DispatchGroups(ModelActor.InstanceCount);
+				List.DispatchGroups(Scene.InstanceCount);
 			}
 		}
 
@@ -88,14 +88,14 @@ namespace Engine.Rendering
 			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
 			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(4, 1, Actor.TransformBuffer);
-			List.SetProgramSRV(5, 1, ModelActor.InstanceBuffer);
+			List.SetProgramSRV(4, 1, Scene.TransformBuffer);
+			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
 
 			// Bind program CBVs.
 			List.SetProgramCBV(0, 1, Viewport.ViewCB);
 
 			// Dispatch draw commands.
-			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, ModelActor.MaxInstanceCount);
+			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Scene.MaxInstanceCount);
 		}
 	}
 }

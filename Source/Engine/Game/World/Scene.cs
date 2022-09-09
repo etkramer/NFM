@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Engine.World
 {
-	public class Scene : IDisposable
+	public partial class Scene : IDisposable
 	{
 		private static List<Scene> all { get; } = new();
 		public static ReadOnlyCollection<Scene> All { get; }

@@ -5,27 +5,15 @@ using Engine.Resources;
 
 namespace Engine.World
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct InstanceData
-	{
-		public uint MeshID;
-		public uint MaterialID;
-		public uint TransformID;
-	}
-
 	[Icon('\uE9FE')]
 	public partial class ModelActor : Actor
 	{
-		public const int MaxInstanceCount = 100;
-		public static int InstanceCount = 0;	
-		public static GraphicsBuffer<InstanceData> InstanceBuffer = new(MaxInstanceCount);
-
 		[Inspect] public Model Model { get; set; } = null;
 		[Inspect] public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;
-		public BufferAllocation<InstanceData>[] InstanceHandles;
+		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
 		// Material instances
 		public MaterialInstance[] MaterialInstances { get; set; }
@@ -42,7 +30,11 @@ namespace Engine.World
 			{
 				MaterialInstances[i].Dispose();
 				InstanceHandles[i].Dispose();
-				InstanceCount--;
+
+				if (Scene != null)
+				{
+					Scene.InstanceCount--;
+				}
 			}
 
 			base.Dispose();
@@ -51,13 +43,17 @@ namespace Engine.World
 		public void UpdateInstances()
 		{
 			// Get rid of existing instances.
-			if (Model == null || Model?.Parts == null || !IsVisible)
+			if (Model == null || Model?.Parts == null || !IsVisible || Scene == null)
 			{
 				for (int i = 0; i < InstanceHandles?.Length; i++)
 				{
 					MaterialInstances[i].Dispose();
 					InstanceHandles[i].Dispose();
-					InstanceCount--;
+
+					if (Scene != null)
+					{
+						Scene.InstanceCount--;
+					}
 				}
 
 				InstanceHandles = null;
@@ -80,11 +76,11 @@ namespace Engine.World
 			{
 				// Allocate a handful of new ones.
 				MaterialInstances = new MaterialInstance[instanceCount];
-				InstanceHandles = new BufferAllocation<InstanceData>[instanceCount];
+				InstanceHandles = new BufferAllocation<GPUInstance>[instanceCount];
 				for (int i = 0; i < instanceCount; i++)
 				{
-					InstanceHandles[i] = InstanceBuffer.Allocate(1);
-					InstanceCount++;
+					InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1);
+					Scene.InstanceCount++;
 				}
 			}
 
@@ -98,7 +94,7 @@ namespace Engine.World
 					MaterialInstances[instanceID] = new MaterialInstance(mesh.Material);
 
 					// Make instance data.
-					InstanceData instanceData = new()
+					GPUInstance instanceData = new()
 					{
 						MeshID = (uint)mesh.MeshHandle.Start,
 						TransformID = (uint)TransformHandle.Start,

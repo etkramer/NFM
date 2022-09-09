@@ -14,7 +14,7 @@ namespace Engine.Rendering
 			}
 
 			// Make sure the instance buffer is fully compacted.
-			List.CompactBuffer(ModelActor.InstanceBuffer);
+			List.CompactBuffer(Scene.InstanceBuffer);
 
 			// Update view data.
 			foreach (Viewport viewport in Viewport.All)

@@ -32,7 +32,6 @@ namespace Engine.Plugins
 					{
 						// Load plugin assembly.
 						Assembly assembly = Assembly.LoadFrom(expectedAssemblyPath);
-						ReflectionHelper.RegisterAssembly(assembly);
 
 						foreach (Type type in assembly.GetTypes())
 						{
@@ -48,7 +47,7 @@ namespace Engine.Plugins
 			}
 
 			// Init loaded plugins.
-			Parallel.ForEachAsync(Plugins, async (o, e) => o.OnStart()).Wait();
+			Parallel.ForEach(Plugins, (o, e) => o.OnStart());
 		}
 	}
 }
