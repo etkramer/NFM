@@ -1,4 +1,4 @@
-﻿#include "HLSL/Include/Geometry.h"
+﻿#include "Content/Shaders/Include/Geometry.h"
 
 struct IndirectCommand
 {

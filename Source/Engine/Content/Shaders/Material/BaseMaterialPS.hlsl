@@ -1,6 +1,6 @@
-﻿#include "HLSL/Include/Common.h"
-#include "HLSL/Material/BaseMaterialPS.h"
-#include "HLSL/BaseMS.h"
+﻿#include "Content/Shaders/Include/Common.h"
+#include "Content/Shaders/Material/BaseMaterialPS.h"
+#include "Content/Shaders/BaseMS.h"
 
 struct SurfaceState
 {

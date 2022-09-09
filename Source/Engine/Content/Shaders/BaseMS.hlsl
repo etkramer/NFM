@@ -1,4 +1,4 @@
-﻿#include "HLSL/BaseMS.h"
+﻿#include "Content/Shaders/BaseMS.h"
 
 cbuffer CommandConstants : register(b0)
 {

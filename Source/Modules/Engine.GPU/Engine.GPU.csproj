@@ -10,13 +10,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Content\Include\Samplers.h" />
+    <None Remove="MipGenCS.hlsl" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Content\Include\Samplers.h" />
+    <EmbeddedResource Include="Content\MipGenCS.hlsl" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Vortice.Direct3D12" Version="2.1.26-beta" />
     <PackageReference Include="Vortice.Dxc" Version="2.1.26-beta" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-    <ProjectReference Include="..\Engine.Content\Engine.Content.csproj" />
     <ProjectReference Include="..\Engine.Roslyn\Engine.Roslyn.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,4 @@
-﻿// Consult https://google.github.io/filament/images/material_chart.jpg
-struct Surface
+﻿struct Surface
 {
 	// Geoemtry
 	float3 Normal;

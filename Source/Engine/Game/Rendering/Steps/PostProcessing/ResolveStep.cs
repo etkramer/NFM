@@ -1,5 +1,4 @@
 ﻿using System;
-using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
@@ -13,8 +12,8 @@ namespace Engine.Rendering
 		public override void Init()
 		{
 			gammaProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/PostProcess/GammaCorrectCS.hlsl"), "GammaCorrectCS")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/PostProcess/GammaCorrectCS.hlsl", typeof(Game).Assembly), "GammaCorrectCS")
 				.Compile().Result;
 		}
 

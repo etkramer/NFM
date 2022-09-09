@@ -4,6 +4,7 @@ using Engine.Common;
 using Engine.Resources;
 using Engine.Plugins;
 using Engine.Mathematics;
+using System.Reflection;
 
 namespace Basic
 {
@@ -31,23 +32,15 @@ namespace Basic
 						Asset<Model> modelAsset = new Asset<Model>(shortPath, basicPrefix, new GLTFLoader(fullPath));
 						Asset.Submit(modelAsset);
 					}
-
-					if (extension == ".hlsl")
-					{
-						Shader shader = LoadPBRShader(fullPath);
-						Asset.Submit(new Asset<Shader>(shortPath, basicPrefix, shader));
-					}
 				}
 			}
+
+			LoadPBRShader(basicPrefix);
 		}
 
-		private Shader LoadPBRShader(string path)
+		private void LoadPBRShader(AssetPrefix prefix)
 		{
-			string source = null;
-			using (StreamReader reader = new StreamReader(path))
-			{
-				source = reader.ReadToEnd();
-			}
+			string source = Embed.GetString("Shaders/PBR.hlsl", typeof(BasicPlugin).Assembly);
 
 			Shader shader = new Shader(source);
 			shader.SetBlendMode(BlendMode.Opaque);
@@ -55,7 +48,7 @@ namespace Basic
 			shader.AddTexture("Normal", Texture2D.Normal);
 			shader.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
-			return shader;
+			Asset.Submit(new Asset<Shader>("Shaders/PBR.hlsl", prefix, shader));
 		}
 	}
 }

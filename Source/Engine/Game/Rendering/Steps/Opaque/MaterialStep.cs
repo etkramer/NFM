@@ -1,5 +1,4 @@
 ﻿using System;
-using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
@@ -16,8 +15,8 @@ namespace Engine.Rendering
 		{
 			// Compile indirect compute program.
 			cullProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/Prepass/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 

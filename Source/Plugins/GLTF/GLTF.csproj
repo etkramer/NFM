@@ -21,6 +21,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Shaders\PBR.hlsl" />
 	  <None Remove="stbi.dll" />
 	</ItemGroup>
 
@@ -28,6 +29,10 @@
 	  <Content Include="stbi.dll">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Shaders\PBR.hlsl" />
 	</ItemGroup>
 
 	<ItemGroup>

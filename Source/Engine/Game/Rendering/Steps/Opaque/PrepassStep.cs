@@ -1,5 +1,4 @@
 ﻿using System;
-using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
@@ -18,16 +17,16 @@ namespace Engine.Rendering
 		{
 			// Compile indirect compute program.
 			cullProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Prepass/CullCS.hlsl"), "CullCS")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/Prepass/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
 			// Compile depth prepass program.
 			depthProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
-				.SetPixelShader(Embed.GetString("HLSL/Prepass/DepthPS.hlsl"))
+				.UseIncludes(typeof(Game).Assembly)
+				.SetMeshShader(Embed.GetString("Content/Shaders/BaseMS.hlsl", typeof(Game).Assembly))
+				.SetPixelShader(Embed.GetString("Content/Shaders/Prepass/DepthPS.hlsl", typeof(Game).Assembly))
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetCullMode(CullMode.CCW)
 				.AsRootConstant(0, 1)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using Engine.Content;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
@@ -15,8 +14,8 @@ namespace Engine.GPU
 		internal ShaderProgram CurrentProgram { get; set; } = null;
 
 		private static ShaderProgram MipGenProgram = new ShaderProgram()
-			.UseIncludes(typeof(Embed).Assembly)
-			.SetComputeShader(Embed.GetString("HLSL/Utils/MipGenCS.hlsl"), "MipGenCS")
+			.UseIncludes(typeof(CommandList).Assembly)
+			.SetComputeShader(Embed.GetString("Content/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
 			.AsRootConstant(0, 2)
 			.Compile().Result;
 

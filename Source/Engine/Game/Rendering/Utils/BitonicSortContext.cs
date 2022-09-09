@@ -1,5 +1,4 @@
 ﻿using System;
-using Engine.Content;
 using Engine.GPU;
 
 namespace Engine.Rendering
@@ -14,29 +13,29 @@ namespace Engine.Rendering
 		static BitonicSortContext()
 		{
 			indirectProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Utils/Sort/BitonicIndirectCS.hlsl"), "main")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/BitonicSort/BitonicIndirectCS.hlsl", typeof(Game).Assembly), "main")
 				.AsRootConstant(0, 2)
 				.AsRootConstant(1, 2)
 				.Compile().Result;
 
 			innerSortProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Utils/Sort/BitonicInnerSortCS.hlsl"), "main")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/BitonicSort/BitonicInnerSortCS.hlsl", typeof(Game).Assembly), "main")
 				.AsRootConstant(0, 2)
 				.AsRootConstant(1, 2)
 				.Compile().Result;
 
 			outerSortProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Utils/Sort/BitonicOuterSortCS.hlsl"), "main")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/BitonicSort/BitonicOuterSortCS.hlsl", typeof(Game).Assembly), "main")
 				.AsRootConstant(0, 2)
 				.AsRootConstant(1, 2)
 				.Compile().Result;
 
 			preSortProgram = new ShaderProgram()
-				.UseIncludes(typeof(Embed).Assembly)
-				.SetComputeShader(Embed.GetString("HLSL/Utils/Sort/BitonicPreSortCS.hlsl"), "main")
+				.UseIncludes(typeof(Game).Assembly)
+				.SetComputeShader(Embed.GetString("Content/Shaders/BitonicSort/BitonicPreSortCS.hlsl", typeof(Game).Assembly), "main")
 				.AsRootConstant(0, 2)
 				.AsRootConstant(1, 2)
 				.Compile().Result;

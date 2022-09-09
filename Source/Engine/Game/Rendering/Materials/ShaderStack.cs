@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
-using Engine.Content;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
@@ -112,13 +112,13 @@ namespace Engine.Rendering
 				}
 
 				// Build program from source code.
-				string source = Embed.GetString("HLSL/Material/BaseMaterialPS.hlsl");
+				string source = Embed.GetString("Content/Shaders/Material/BaseMaterialPS.hlsl", typeof(Game).Assembly);
 				source = source.Replace("#insert SURFACE", surfaceSource).Replace("#insert SETUP", setupSource);
 
 				// Compile program.
 				ShaderProgram program = new ShaderProgram()
-					.UseIncludes(typeof(Embed).Assembly)
-					.SetMeshShader(Embed.GetString("HLSL/BaseMS.hlsl"))
+					.UseIncludes(typeof(Game).Assembly)
+					.SetMeshShader(Embed.GetString("Content/Shaders/BaseMS.hlsl", typeof(Game).Assembly))
 					.SetPixelShader(source, "MaterialPS")
 					.SetDepthMode(DepthMode.Equal, true, false)
 					.SetCullMode(CullMode.CCW)

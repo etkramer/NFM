@@ -1,4 +1,4 @@
-﻿#include "HLSL/Include/Common.h"
+﻿#include "Content/Shaders/Include/Common.h"
 
 RWTexture2D<float4> Image : register(u0);
 

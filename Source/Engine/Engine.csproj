@@ -16,6 +16,20 @@
 	  <NoWarn>1701;1702;1998</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
+		<None Remove="Content\Shaders\BaseMS.h" />
+		<None Remove="Content\Shaders\BaseMS.hlsl" />
+		<None Remove="Content\Shaders\Include\Common.h" />
+		<None Remove="Content\Shaders\Include\Geometry.h" />
+		<None Remove="Content\Shaders\Material\BaseMaterialPS.h" />
+		<None Remove="Content\Shaders\Material\BaseMaterialPS.hlsl" />
+		<None Remove="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
+		<None Remove="Content\Shaders\Prepass\CullCS.hlsl" />
+		<None Remove="Content\Shaders\Prepass\DepthPS.hlsl" />
+		<None Remove="Content\Shaders\BitonicSort\BitonicCommon.h" />
+		<None Remove="Content\Shaders\BitonicSort\BitonicIndirectCS.hlsl" />
+		<None Remove="Content\Shaders\BitonicSort\BitonicInnerSortCS.hlsl" />
+		<None Remove="Content\Shaders\BitonicSort\BitonicOuterSortCS.hlsl" />
+		<None Remove="Content\Shaders\BitonicSort\BitonicPreSortCS.hlsl" />
 		<None Remove="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
 		<None Remove="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<None Remove="Frontend\Assets\Icons\icon.ico" />
@@ -24,10 +38,23 @@
 		<AvaloniaResource Include="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\icon.ico" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\iconsmall.ico" />
+		<EmbeddedResource Include="Content\Shaders\BaseMS.h" />
+		<EmbeddedResource Include="Content\Shaders\BaseMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Include\Common.h" />
+		<EmbeddedResource Include="Content\Shaders\Include\Geometry.h" />
+		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.h" />
+		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Prepass\CullCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Prepass\DepthPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\BitonicSort\BitonicCommon.h" />
+		<EmbeddedResource Include="Content\Shaders\BitonicSort\BitonicIndirectCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\BitonicSort\BitonicInnerSortCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\BitonicSort\BitonicOuterSortCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\BitonicSort\BitonicPreSortCS.hlsl" />
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Modules\Engine.Content\Engine.Content.csproj" />
 		<ProjectReference Include="..\Modules\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Modules\Engine.GPU\Engine.GPU.csproj" />
 		<ProjectReference Include="..\Modules\Engine.Roslyn\Engine.Roslyn.csproj" OutputItemType="Analyzer" />
