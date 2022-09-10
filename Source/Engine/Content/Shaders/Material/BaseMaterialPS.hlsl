@@ -34,7 +34,5 @@ float4 MaterialPS(VertAttribute vert, PrimAttribute prim) : SV_TARGET0
 	// Calculate normal vector from combined vert/surface normals.
 	float3 normal = vert.Normal.xyz / 2 + 0.5;
 
-	//return float4(surface.Roughness, surface.Roughness, surface.Roughness, 1);
 	return float4(surface.Albedo.xyz, 1);
-	//return float4(LinearToSRGB(normal), 1);
 }

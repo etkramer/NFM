@@ -40,15 +40,25 @@ namespace Basic
 
 		private void LoadShaders(AssetPrefix prefix)
 		{
-			string source = Embed.GetString("Shaders/Opaque.hlsl", typeof(BasicPlugin).Assembly);
+			// Create Opaque shader
+			Shader opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl", typeof(BasicPlugin).Assembly));
+			opaque.SetBlendMode(BlendMode.Opaque);
+			opaque.AddTexture("BaseColor", Texture2D.Purple);
+			opaque.AddTexture("Normal", Texture2D.Normal);
+			opaque.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
-			Shader shader = new Shader(source);
-			shader.SetBlendMode(BlendMode.Opaque);
-			shader.AddTexture("BaseColor", Texture2D.Purple);
-			shader.AddTexture("Normal", Texture2D.Normal);
-			shader.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+			//...and submit.
+			Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", prefix, opaque));
 
-			Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", prefix, shader));
+			// Create Transparent shader
+			Shader transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl", typeof(BasicPlugin).Assembly));
+			transparent.SetBlendMode(BlendMode.Transparent);
+			transparent.AddTexture("BaseColor", Texture2D.Purple);
+			transparent.AddTexture("Normal", Texture2D.Normal);
+			transparent.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+
+			//...and submit.
+			Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", prefix, transparent));
 		}
 	}
 }

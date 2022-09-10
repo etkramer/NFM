@@ -76,7 +76,9 @@ namespace Engine.Rendering
 				RenderStep.Viewport = null;
 				RenderStep.Scene = null;
 
+				RenderStep.List.PushEvent($"{step.GetType().Name} (global)");
 				step.Run();
+				RenderStep.List.PopEvent();
 			}
 
 			// Loop through scenes.
@@ -89,7 +91,10 @@ namespace Engine.Rendering
 				foreach (RenderStep step in sceneStage)
 				{
 					RenderStep.Viewport = null;
+
+					RenderStep.List.PushEvent($"{step.GetType().Name} (scene)");
 					step.Run();
+					RenderStep.List.PopEvent();
 				}
 			}
 
@@ -105,12 +110,13 @@ namespace Engine.Rendering
 
 				foreach (RenderStep step in viewportStage)
 				{
+					RenderStep.List.PushEvent($"{step.GetType().Name} (viewport)");
 					step.Run();
+					RenderStep.List.PopEvent();
 				}
 
 				// Make sure the viewport's backbuffer is in the right state for presentation.
 				RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
-				RenderStep.List.PopEvent();
 
 				// Make sure this viewport's commands are executing while we submit the next.
 				viewport.CommandList.Execute();
