@@ -45,6 +45,9 @@ namespace Engine.World
 				actors[i].Dispose();
 			}
 
+			InstanceBuffer.Dispose();
+			TransformBuffer.Dispose();
+
 			All.Remove(this);
 		}
 	}

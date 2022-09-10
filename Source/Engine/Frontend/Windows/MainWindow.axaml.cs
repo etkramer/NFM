@@ -51,7 +51,7 @@ namespace Engine.Frontend.Controls
 			}
 			else
 			{
-				Project.Create();
+				Project.Reset();
 			}
 
 			// Begin game loop.
@@ -94,12 +94,12 @@ namespace Engine.Frontend.Controls
 
 		public void NewPressed()
 		{
-			Project.Create();
+			Project.Reset();
 		}
 
 		public async void OpenPressed()
 		{
-			string openPath = await Dialog.ShowOpenDialog(this, new FileFilter("Project file", "project"));
+			string openPath = await Dialog.ShowOpenDialog(this, new FileFilter("Project", "json"));
 
 			if (openPath != null)
 			{
@@ -120,7 +120,7 @@ namespace Engine.Frontend.Controls
 
 		public async void SaveAsPressed()
 		{
-			string savePath = await Dialog.ShowSaveDialog(this, new FileFilter("Project file", "project"));
+			string savePath = await Dialog.ShowSaveDialog(this, new FileFilter("Project", "json"));
 
 			if (savePath != null)
 			{

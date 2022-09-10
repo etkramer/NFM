@@ -11,7 +11,7 @@ namespace Engine
 
 		public static event Action OnProjectCreated = delegate {};
 
-		public static void Create()
+		public static void Reset()
 		{
 			Scene.Main.Dispose();
 			Scene.Main = new Scene();
@@ -21,6 +21,7 @@ namespace Engine
 		public static void Load(string path)
 		{
 			Path = path;
+			Reset();
 		}
 
 		public static void Save(string path)

@@ -70,13 +70,13 @@ namespace Engine.Frontend
 
 		public void CreatePressed()
 		{
-			Project.Create();
+			Project.Reset();
 			Close();
 		}
 
 		public async void LoadPressed()
 		{
-			string openPath = await ShowOpenDialog(this, new FileFilter("Project file", "project"));
+			string openPath = await ShowOpenDialog(this, new FileFilter("Project", "json"));
 
 			if (openPath != null)
 			{
