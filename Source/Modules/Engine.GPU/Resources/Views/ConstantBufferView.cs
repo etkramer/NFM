@@ -15,7 +15,7 @@ namespace Engine.GPU
 			ConstantBufferViewDescription desc = new()
 			{
 				BufferLocation = resource.GPUVirtualAddress,
-				SizeInBytes = (int)MathHelper.Align(capacity * stride, 256)
+				SizeInBytes = (int)MathHelper.Align(capacity * stride, GraphicsBuffer.ConstantAlignment)
 			};
 
 			GPUContext.Device.CreateConstantBufferView(desc, Handle);

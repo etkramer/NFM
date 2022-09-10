@@ -92,9 +92,14 @@ namespace Basic.Loaders
 			Parallel.ForEach(model.LogicalMeshes[0].Primitives, (primitive) =>
 			{
 				// Grab vertex accessors from GLTF.
-				var positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
-				var normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
-				var uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
+				var posAccessor = primitive.GetVertexAccessor("POSITION");
+				var normAccessor = primitive.GetVertexAccessor("NORMAL");
+				var uvAccessor = primitive.GetVertexAccessor("TEXCOORD_0");
+
+				// Create arrays from accessors.
+				var positions = posAccessor.AsVector3Array();
+				var normals = normAccessor.AsVector3Array();
+				var uvs = uvAccessor.AsVector2Array();
 
 				// Read vertex data from accessor streams.
 				Vertex[] vertices = new Vertex[positions.Count];
@@ -104,7 +109,7 @@ namespace Basic.Loaders
 					{
 						Position = new Vector3(positions[i].X, positions[i].Y, positions[i].Z),
 						Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z),
-						UV0 = new Vector2(uvs[i].X, uvs[i].Y),
+						UV0 = new Vector2(uvs[i].X, uvs[i].Y)
 					};
 				}
 
@@ -130,7 +135,7 @@ namespace Basic.Loaders
 
 			return new Model()
 			{
-				Parts = gameParts,
+				Parts = gameParts
 			};
 		}
 	}

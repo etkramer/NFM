@@ -62,9 +62,8 @@ namespace Engine.Resources
 		{
 			indices = value;
 
-			if (vertices != null && !areVerticesUploaded)
+			if (!areVerticesUploaded && vertices != null)
 			{
-				UploadVertices();
 				UploadIndices(); // Also builds meshlets, thus requiring vertex data.
 			}
 		}
@@ -73,8 +72,10 @@ namespace Engine.Resources
 		{
 			vertices = value;
 
+			// (Try to) upload vertex data.
 			UploadVertices();
 
+			// Are indices still waiting to be uploaded?
 			if (!areIndicesUploaded && indices != null)
 			{
 				UploadIndices();
@@ -110,14 +111,16 @@ namespace Engine.Resources
 			// Mark indices as uploaded.
 			areIndicesUploaded = true;
 
-			if (!areVerticesUploaded)
+			// Are vertices still waiting to be uploaded?
+			if (!areVerticesUploaded && vertices != null)
 			{
 				UploadVertices();
 			}
 			
+			// Are both vertices *and* indices uploaded?
 			if (areVerticesUploaded)
 			{
-				TryUploadMesh();
+				UploadMesh();
 			}
 		}
 
@@ -141,14 +144,14 @@ namespace Engine.Resources
 			// Mark vertices as uploaded.
 			areVerticesUploaded = true;
 
-			// See if we can upload the final mesh data yet.
+			// Are both vertices *and* indices uploaded?
 			if (areIndicesUploaded)
 			{
-				TryUploadMesh();
+				UploadMesh();
 			}
 		}
 
-		private void TryUploadMesh()
+		private void UploadMesh()
 		{
 			// Not ready to do the final upload yet.
 			if (VertHandle == null || MeshletHandle == null || PrimHandle == null)
@@ -158,7 +161,7 @@ namespace Engine.Resources
 
 			MeshHandle?.Dispose();
 			MeshHandle = MeshBuffer.Allocate(1);
-			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
+			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
 			{
 				MeshletCount = (uint)MeshletHandle.Count,
 				MeshletOffset = (uint)MeshletHandle.Start,

@@ -3,6 +3,7 @@ using Engine.Editor;
 using Engine.Frontend;
 using Engine.GPU;
 using Engine.World;
+using Vortice.Direct3D12;
 using Vortice.DXGI;
 
 namespace Engine.Rendering

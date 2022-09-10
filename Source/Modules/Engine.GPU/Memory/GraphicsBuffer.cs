@@ -13,11 +13,11 @@ namespace Engine.GPU
 
 		internal ID3D12Resource Resource;
 
-		public const int ConstantAlignment = 256;
-		public const int CounterAlignment = 4096;
+		public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
+		public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;
 		public int Capacity;
 		public int Stride;
-		public int Alignment = 1;
+		public int SizeAlignment = 1;
 
 		public bool HasCounter { get; private set; }
 		public bool IsRaw { get; private set; }
@@ -47,8 +47,7 @@ namespace Engine.GPU
 		{
 			if (cbv == null)
 			{
-				Debug.Assert(Capacity * Stride < 65536, "Buffers larger than 64kb cannot be used as program constants");
-				Debug.Assert((Capacity * Stride % 256 == 0) || (Alignment % 256 == 0), "Buffers must be aligned to 256b to be used as program constants");
+				Debug.Assert((Capacity * Stride % ConstantAlignment == 0) || (SizeAlignment % ConstantAlignment == 0), "Buffers must be aligned to 256b to be used as program constants");
 				cbv = new ConstantBufferView(Resource, Stride, Capacity);
 			}
 
@@ -61,10 +60,10 @@ namespace Engine.GPU
 			set => Resource.Name = value;
 		}
 
-		public GraphicsBuffer(int sizeBytes, int stride, int alignment = 1, bool hasCounter = false, bool isRaw = false)
+		public GraphicsBuffer(int sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
 		{
 			Capacity = sizeBytes / stride;
-			Alignment = alignment;
+			SizeAlignment = sizeAlignment;
 			Stride = stride;
 			HasCounter = hasCounter;
 			IsRaw = isRaw;
@@ -79,7 +78,7 @@ namespace Engine.GPU
 			}
 
 			// Ensure user-defined alignment.
-			width = MathHelper.Align(width, alignment);
+			width = MathHelper.Align(width, sizeAlignment);
 
 			// Describe buffer.
 			ResourceDescription bufferDescription = new()

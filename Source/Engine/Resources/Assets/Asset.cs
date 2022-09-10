@@ -41,6 +41,8 @@ namespace Engine.Resources
 		private readonly AssetLoader<T> loader;
 		private T cache;
 
+		public bool IsLoaded => cache != null;
+
 		public Asset(string path, AssetPrefix prefix, AssetLoader<T> loader)
 		{
 			Path = prefix.MakeFullPath(path);
@@ -51,14 +53,8 @@ namespace Engine.Resources
 		{
 			Path = prefix.MakeFullPath(path);
 			cache = cachedValue;
+			cache.Source = this;
 			loader = null;
-
-			if (!cache.IsLoaded)
-			{
-				cache.OnLoad();
-				cache.Source = this;
-				cache.IsLoaded = true;
-			}
 		}
 
 		public Task<T> Get()
@@ -71,12 +67,7 @@ namespace Engine.Resources
 					loadingTask = Task.Run(async () =>
 					{
 						cache = await loader.Load();
-						if ((!cache?.IsLoaded) ?? false)
-						{
-							cache.OnLoad();
-							cache.Source = this;
-							cache.IsLoaded = true;
-						}
+						cache.Source = this;
 
 						return cache;
 					});
