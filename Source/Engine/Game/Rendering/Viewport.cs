@@ -123,21 +123,24 @@ namespace Engine.Rendering
 			Camera.Position += flyVelocity * (float)deltaTime;
 		}
 
+		public Matrix4 ProjectionMatrix { get; private set; } = Matrix4.Identity;
+		public Matrix4 ViewMatrix { get; private set; } = Matrix4.Identity;
+
 		public void UpdateView()
 		{
 			// Calculate view/projection matrices.
-			Matrix4 view = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
-			Matrix4 projection = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
+			ViewMatrix = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
+			ProjectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
 			// Orient the camera in the opposite direction (facing +Z).
-			view = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * view;
+			ViewMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * ViewMatrix;
 
 			Renderer.DefaultCommandList.UploadBuffer(ViewCB, new ViewConstants()
 			{
-				WorldToView = view,
-				ViewToWorld = view.Inverse(),
-				ViewToClip = projection,
-				ClipToView = projection.Inverse()
+				WorldToView = ViewMatrix,
+				ViewToWorld = ViewMatrix.Inverse(),
+				ViewToClip = ProjectionMatrix,
+				ClipToView = ProjectionMatrix.Inverse()
 			});
 		}
 

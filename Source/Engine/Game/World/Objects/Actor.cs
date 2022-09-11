@@ -10,10 +10,10 @@ namespace Engine.World
 	public class Actor : ISelectable, IDisposable
 	{
 		// Properties (inspectable)
-		[Save, Inspect] public string Name { get; set; }
-		[Save, Inspect] public Vector3 Position { get; set; } = Vector3.Zero;
-		[Save, Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
-		[Save, Inspect] public Vector3 Scale { get; set; } = Vector3.One;
+		[Inspect] public string Name { get; set; }
+		[Inspect] public Vector3 Position { get; set; } = Vector3.Zero;
+		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
+		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 		
 		public Scene Scene { get; private set; }
 		public ReadOnlyObservableCollection<Actor> Children { get; }
@@ -72,6 +72,9 @@ namespace Engine.World
 
 		public virtual void Dispose()
 		{
+			// Make sure we're not still selected.
+			Selection.Deselect(this);
+
 			// Remove self from scene tree.
 			Scene?.Despawn(this);
 			Parent = null;
@@ -82,9 +85,6 @@ namespace Engine.World
 			{
 				Children[i].Dispose();
 			}
-
-			// Make sure we're not still selected.
-			Selection.Deselect(this);
 		}
 
 		/// <summary>

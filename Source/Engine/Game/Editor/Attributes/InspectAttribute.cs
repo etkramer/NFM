@@ -6,9 +6,12 @@ using AspectInjector.Broker;
 
 namespace Engine
 {
+	/// <summary>
+	/// Marks an object as both saved and visible in the inspector.
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Constructor)]
 	[Injection(typeof(NotifyAspect))]
-	public class InspectAttribute : Attribute
+	public class InspectAttribute : SaveAttribute
 	{
 		public string Tooltip { get; set; }
 

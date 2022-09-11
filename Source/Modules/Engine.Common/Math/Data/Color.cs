@@ -82,9 +82,23 @@ namespace Engine.Mathematics
 			return System.Drawing.Color.FromArgb(a, r, g, b);
 		}
 
-		public static implicit operator Color(uint col)
+		public static explicit operator Color(uint col)
 		{
 			return FromHex(col);
+		}
+
+		public static explicit operator uint(Color col)
+		{
+			unsafe
+			{
+				byte* bytes = stackalloc byte[4];
+				bytes[0] = (byte)(col.R * 255);
+				bytes[1] = (byte)(col.G * 255);
+				bytes[2] = (byte)(col.B * 255);
+				bytes[3] = (byte)(col.A * 255);
+
+				return *(uint*)bytes;
+			}
 		}
 
 		#endregion
@@ -201,5 +215,6 @@ namespace Engine.Mathematics
 		public static readonly Color Invisible = new Color(0, 0, 0, 0);
 		public static readonly Color Black = new Color(0, 0, 0, 1);
 		public static readonly Color White = new Color(1, 1, 1, 1);
+		public static readonly Color Purple = new Color(1, 0, 1, 1);
 	}
 }

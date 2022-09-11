@@ -10,6 +10,7 @@ using Mesh = Engine.Resources.Mesh;
 using StbiSharp;
 using SharpGLTF.Schema2;
 using Asset = Engine.Resources.Asset;
+using SharpGLTF.Validation;
 
 namespace Basic.Loaders
 {
@@ -25,30 +26,22 @@ namespace Basic.Loaders
 		public override async Task<Model> Load()
 		{
 			// Load GLTF model from file.
-			ModelRoot model = ModelRoot.Load(Path);
+			ModelRoot model = ModelRoot.Load(Path, new ReadSettings()
+			{
+				Validation = ValidationMode.Skip
+			});
 
 			// Load textures from GLTF
 			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
-			Parallel.For(0, model.LogicalTextures.Count, (i) =>
+			Parallel.ForEach(model.LogicalTextures, (texture) =>
 			{
-				var texture = model.LogicalTextures[i];
-
 				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
 					Texture2D gameTexture = new Texture2D(image.Width, image.Height);
-
-					Span<byte> imageData = null;
-					unsafe
-					{
-						fixed (byte* dataPtr = image.Data)
-						{
-							imageData = new Span<byte>(dataPtr, image.Data.Length * sizeof(byte));
-						}
-					}
 					
-					gameTexture.LoadData(imageData, TextureCompression.None);
+					gameTexture.LoadData(ToReadWriteSpan(image.Data), TextureCompression.None);
 					gameTexture.GenerateMips();
-					gameTextures[i] = gameTexture;
+					gameTextures[texture.LogicalIndex] = gameTexture;
 				}
 			});
 
@@ -87,6 +80,9 @@ namespace Basic.Loaders
 				gameMaterials[i] = gameMaterial;
 			}
 
+			// I've only ever observed a GLTF file having one of these, but I assume there could be more.
+			Debug.Assert(model.LogicalMeshes.Count <= 1, "Not supported for the time being, because I don't have any examples of this in the wild.");
+
 			// Load meshes from GLTF.
 			Mesh[] gameMeshes = new Mesh[model.LogicalMeshes[0].Primitives.Count];
 			Parallel.ForEach(model.LogicalMeshes[0].Primitives, (primitive) =>
@@ -121,22 +117,18 @@ namespace Basic.Loaders
 				gameMeshes[primitive.LogicalIndex] = gameMesh;
 			});
 
-			// Create ModelParts from GLTF "meshes"
-			ModelPart[] gameParts = new ModelPart[model.LogicalMeshes.Count];
-			foreach (var mesh in model.LogicalMeshes)
-			{
-				// I've only ever observed a GLTF file having one of these, but I assume there could be more.
-				Debug.Assert(model.LogicalMeshes.Count <= 1, "Not supported for the time being, because I don't have any examples of this in the wild.");
+			return new Model(gameMeshes);
+		}
 
-				// Create Modelpart.
-				ModelPart part = new ModelPart(gameMeshes);
-				gameParts[mesh.LogicalIndex] = part;
+		private Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
+		{
+			unsafe
+			{
+				fixed (T* dataPtr = source)
+				{
+					return new Span<T>(dataPtr, source.Length);
+				}
 			}
-
-			return new Model()
-			{
-				Parts = gameParts
-			};
 		}
 	}
 }

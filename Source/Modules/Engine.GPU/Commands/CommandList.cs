@@ -71,6 +71,14 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
+		public void DispatchMeshThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
+		{
+			int groupsX = MathHelper.IntCeiling(threadCountX / (float)groupSizeX);
+			int groupsY = MathHelper.IntCeiling(threadCountY / (float)groupSizeY);
+			int groupsZ = MathHelper.IntCeiling(threadCountZ / (float)groupSizeZ);
+			DispatchMeshGroups(groupsX, groupsY, groupsZ);
+		}
+
 		public void DispatchGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>

@@ -12,6 +12,22 @@ namespace Engine.Resources
 	public partial class Model : Resource
 	{
 		public ModelPart[] Parts { get; set; }
+
+		public Model(params Mesh[] meshes)
+		{
+			Parts = new[]
+			{
+				new ModelPart()
+				{
+					Meshes = meshes
+				}
+			};
+		}
+
+		public Model(params ModelPart[] parts)
+		{
+			Parts = parts;
+		}
 	}
 
 	/// <summary>
