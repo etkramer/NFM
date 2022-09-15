@@ -80,42 +80,52 @@ namespace Basic.Loaders
 				gameMaterials[i] = gameMaterial;
 			}
 
-			// I've only ever observed a GLTF file having one of these, but I assume there could be more.
-			Debug.Assert(model.LogicalMeshes.Count <= 1, "Not supported for the time being, because I don't have any examples of this in the wild.");
-
-			// Load meshes from GLTF.
-			Mesh[] gameMeshes = new Mesh[model.LogicalMeshes[0].Primitives.Count];
-			Parallel.ForEach(model.LogicalMeshes[0].Primitives, (primitive) =>
+			// Loop through GLTF "meshes" (equivalent to ModelParts)
+			ModelPart[] gameMeshes = new ModelPart[model.LogicalMeshes.Count];
+			foreach (var mesh in model.LogicalMeshes)
 			{
-				// Grab vertex accessors from GLTF.
-				var posAccessor = primitive.GetVertexAccessor("POSITION");
-				var normAccessor = primitive.GetVertexAccessor("NORMAL");
-				var uvAccessor = primitive.GetVertexAccessor("TEXCOORD_0");
-
-				// Create arrays from accessors.
-				var positions = posAccessor.AsVector3Array();
-				var normals = normAccessor.AsVector3Array();
-				var uvs = uvAccessor.AsVector2Array();
-
-				// Read vertex data from accessor streams.
-				Vertex[] vertices = new Vertex[positions.Count];
-				for (int i = 0; i < positions.Count; i++)
+				// Loop through GLTF "primitives" (equivalent to Meshes)
+				Mesh[] gamePrims = new Mesh[mesh.Primitives.Count];
+				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
-					vertices[i] = new Vertex()
-					{
-						Position = new Vector3(positions[i].X, positions[i].Y, positions[i].Z),
-						Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z),
-						UV0 = new Vector2(uvs[i].X, uvs[i].Y)
-					};
-				}
+					// Find node and read transform.
+					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
+					var worldMatrix = (Matrix4)node.GetWorldMatrix(null, 0);
+					worldMatrix.Transpose();
 
-				// Create mesh.
-				Mesh gameMesh = new Mesh();
-				gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
-				gameMesh.SetVertices(vertices);
-				gameMesh.SetIndices(primitive.GetIndices().ToArray());
-				gameMeshes[primitive.LogicalIndex] = gameMesh;
-			});
+					// Grab vertex accessors from GLTF.
+					var posAccessor = primitive.GetVertexAccessor("POSITION");
+					var normAccessor = primitive.GetVertexAccessor("NORMAL");
+					var uvAccessor = primitive.GetVertexAccessor("TEXCOORD_0");
+
+					// Create arrays from accessors.
+					var positions = posAccessor.AsVector3Array();
+					var normals = normAccessor.AsVector3Array();
+					var uvs = uvAccessor.AsVector2Array();
+
+					// Read vertex data from accessor streams.
+					Vertex[] vertices = new Vertex[positions.Count];
+					for (int i = 0; i < positions.Count; i++)
+					{
+						vertices[i] = new Vertex()
+						{
+							Position = (new Vector4(positions[i].X, positions[i].Y, positions[i].Z, 1) * worldMatrix).Xyz,
+							Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z),
+							UV0 = new Vector2(uvs[i].X, uvs[i].Y)
+						};
+					}
+
+					// Create mesh and add to collection.
+					Mesh gameMesh = new Mesh();
+					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
+					gameMesh.SetVertices(vertices);
+					gameMesh.SetIndices(primitive.GetIndices().ToArray());
+					gamePrims[primitive.LogicalIndex] = gameMesh;
+				});
+
+				// Create ModelParts from GLTF "meshes"
+				gameMeshes[mesh.LogicalIndex] = new ModelPart(gamePrims);
+			}
 
 			return new Model(gameMeshes);
 		}

@@ -29,8 +29,7 @@ namespace Engine
 			// Load all plugins.
 			PluginSystem.LoadAll();
 
-			// Kick off model loading. We're not awaiting this right now because
-			// opening the window takes long enough to hide the load time.
+			// Kick off model loading early.
 			var loadTask = Asset.GetAsync<Model>("USER:Objects/Heavy.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;

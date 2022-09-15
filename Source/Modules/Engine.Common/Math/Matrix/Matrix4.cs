@@ -1926,6 +1926,16 @@ namespace Engine.Mathematics
 			result.Row3 = mat.Column3;
 		}
 
+		// System.Numerics conversions
+		[Pure]
+		public static explicit operator Matrix4(System.Numerics.Matrix4x4 right)
+		{
+			unsafe
+			{
+				return *(Matrix4*)(&right);
+			}
+		}
+
 		/// <summary>
 		/// Matrix multiplication.
 		/// </summary>

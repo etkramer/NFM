@@ -81,7 +81,7 @@ namespace Engine.GPU
 				throw new InvalidOperationException("Resource is in wrong state for present!");
 			}
 
-			swapchain.Present(PresentInterval, GPUContext.SupportsTearing ? PresentFlags.AllowTearing : PresentFlags.None);
+			swapchain.Present(PresentInterval, (PresentInterval == 0 && GPUContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None);
 		}
 
 		public void Resize(Vector2i size)
@@ -104,7 +104,7 @@ namespace Engine.GPU
 			}
 
 			// Resize swapchain.
-			swapchain.ResizeBuffers(GPUContext.RenderLatency, size.X, size.Y, Format.Unknown, SwapChainFlags.AllowTearing);
+			swapchain.ResizeBuffers(GPUContext.RenderLatency, size.X, size.Y, Format.Unknown, GPUContext.SupportsTearing ? SwapChainFlags.AllowTearing : SwapChainFlags.None);
 
 			// Recreate render targets.
 			CreateRTs();
