@@ -62,6 +62,7 @@ namespace Engine.Rendering
 		public static void Init()
 		{
 			AddStep(new SceneUpdateStep(), RenderStage.Scene);
+			AddStep(new SkinningStep(), RenderStage.Viewport);
 			AddStep(new PrepassStep(), RenderStage.Viewport);
 			AddStep(new MaterialStep(), RenderStage.Viewport);
 			AddStep(new ResolveStep(), RenderStage.Viewport);

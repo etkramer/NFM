@@ -45,33 +45,23 @@ namespace Engine.Frontend
 			SplashScreen splash = new SplashScreen();
 			desktopLifetime.MainWindow = splash;
 
-			Task startupTask = Task.Run(Game.Init);
-			startupTask.ContinueWith((t) =>
+			// Setup engine.
+			Task startupTask = FrontendHelpers.ContinueHandled(Task.Run(Game.Init)).ContinueWith(t =>
+			{
+				// Make sure setup went okay.
+				if (!t.IsFaulted)
 				{
-					if (t.IsFaulted)
+					Dispatcher.UIThread.Post(() =>
 					{
-						// Capture stack trace.
-						ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(t.Exception.InnerException);
+						// Now that setup's complete, open the main window.
+						desktopLifetime.MainWindow = new MainWindow();
+						desktopLifetime.MainWindow.Show();
 
-						// Create exception dialog.
-						Dispatcher.UIThread.Post(() => 
-							new Popup(
-									info.SourceException.GetType().Name,
-									$"An unhandled exception has occured. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
-									$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
-									$"{info.SourceException.StackTrace}")
-								.Button("Break", () => info.Throw())
-								.Button("Abort", () => Environment.Exit(-1)).Open()
-						);
-					}
-					else
-					{
-						Dispatcher.UIThread.Post(() =>
-						{
-							desktopLifetime.MainWindow = new MainWindow(); desktopLifetime.MainWindow.Show(); splash.Close();
-						});
-					}
-				});
+						// Close the splash screen, because we're done with that too.
+						splash.Close();
+					});
+				}
+			});
 		}
 
 		public void Shutdown()

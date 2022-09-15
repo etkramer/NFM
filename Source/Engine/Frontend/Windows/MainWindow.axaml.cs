@@ -35,12 +35,12 @@ namespace Engine.Frontend.Controls
 			dockspace.Dock(group3, group2, DockPosition.Left, 0.86f);
 
 			// Create group (timeline).
-			/*TabGroup group4 = new TabGroup();
+			TabGroup group4 = new TabGroup();
 			ToolPanel.Spawn<TimelinePanel>(group4);
 			dockspace.Dock(group4, group3, DockPosition.Bottom, 0.30f);
 
 			// Create group (viewport 2).
-			TabGroup group5 = new TabGroup();
+			/*TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
 			dockspace.Dock(group5, group3, DockPosition.Right, 0.4f);*/
 
@@ -51,45 +51,11 @@ namespace Engine.Frontend.Controls
 			}
 			else
 			{
-				Project.Reset();
+				FrontendHelpers.InvokeHandled(() => Project.Reset());
 			}
 
 			// Begin game loop.
-			DispatcherTimer.Run(() =>
-			{
-				try
-				{
-					Task.Run(() =>
-					{
-						Game.Update();
-					}).Wait();
-					
-					return true;
-				}
-				catch (Exception e)
-				{
-					// Use the inner exception, if it exists.
-					if (e.InnerException != null)
-					{
-						e = e.InnerException;
-					}
-
-					// Capture stack trace.
-					ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(e);
-
-					// Create exception dialog.
-					new Popup(
-							info.SourceException.GetType().Name,
-							$"An unhandled exception has occured. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
-							$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
-							$"{info.SourceException.StackTrace}")
-						.Button("Break", () => info.Throw())
-						.Button("Abort", () => Environment.Exit(-1)).Open();
-
-					return false;
-				}
-			},
-			TimeSpan.Zero, DispatcherPriority.Render);
+			DispatcherTimer.Run(() => { FrontendHelpers.InvokeHandled(Game.Update); return true; }, TimeSpan.Zero, DispatcherPriority.Render);
 		}
 
 		public void NewPressed()
