@@ -1,0 +1,24 @@
+<engine:ToolPanel 
+		xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:engine="using:Engine.Frontend"
+		xmlns:editor="using:Engine.Editor"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		Title="Scene"
+		x:Class="Engine.Frontend.ScenePanel">
+
+	<Grid Background="{StaticResource ControlBackground}">
+		<TreeView x:Name="sceneTree" Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding SceneActors}">
+			<TreeView.ItemTemplate>
+				<TreeDataTemplate>
+					<TextBlock Text="{Binding Name}">
+						
+					</TextBlock>
+				</TreeDataTemplate>
+			</TreeView.ItemTemplate>
+		</TreeView>
+	</Grid>
+	
+</engine:ToolPanel>
