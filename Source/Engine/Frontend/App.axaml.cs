@@ -46,7 +46,8 @@ namespace Engine.Frontend
 			desktopLifetime.MainWindow = splash;
 
 			// Setup engine.
-			Task startupTask = FrontendHelpers.ContinueHandled(Task.Run(Game.Init)).ContinueWith(t =>
+			Task startupTask = Task.Run(Game.Init);
+			startupTask = startupTask.ContinueWith(t =>
 			{
 				// Make sure setup went okay.
 				if (!t.IsFaulted)
@@ -60,6 +61,10 @@ namespace Engine.Frontend
 						// Close the splash screen, because we're done with that too.
 						splash.Close();
 					});
+				}
+				else
+				{
+					FrontendHelpers.InvokeHandled(() => t.Wait());
 				}
 			});
 		}
