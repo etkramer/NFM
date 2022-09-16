@@ -38,20 +38,20 @@ namespace Engine.Resources
 	public sealed class Asset<T> : Asset where T : Resource
 	{
 		private Task<T> loadingTask;
-		private readonly AssetLoader<T> loader;
+		private readonly ResourceLoader<T> loader;
 		private T cache;
 
 		public bool IsLoaded => cache != null;
 
-		public Asset(string path, AssetPrefix prefix, AssetLoader<T> loader)
+		public Asset(string path, MountPoint mount, ResourceLoader<T> loader)
 		{
-			Path = prefix.MakeFullPath(path);
+			Path = mount.MakeFullPath(path);
 			this.loader = loader;
 		}
 
-		public Asset(string path, AssetPrefix prefix, T cachedValue)
+		public Asset(string path, MountPoint mount, T cachedValue)
 		{
-			Path = prefix.MakeFullPath(path);
+			Path = mount.MakeFullPath(path);
 			cache = cachedValue;
 			cache.Source = this;
 			loader = null;

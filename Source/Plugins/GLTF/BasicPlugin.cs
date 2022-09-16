@@ -17,7 +17,7 @@ namespace Basic
 				"../Content/"
 			};
 
-			AssetPrefix basicPrefix = AssetPrefix.Create("User Content", "USER");
+			MountPoint mount = MountPoint.Create("User Content", "USER");
 
 			foreach (string searchPath in searchPaths)
 			{
@@ -29,16 +29,16 @@ namespace Basic
 
 					if (extension == ".glb")
 					{
-						Asset<Model> modelAsset = new Asset<Model>(shortPath, basicPrefix, new GLTFLoader(fullPath));
+						Asset<Model> modelAsset = new Asset<Model>(shortPath, mount, new GLTFLoader(fullPath));
 						Asset.Submit(modelAsset);
 					}
 				}
 			}
 
-			LoadShaders(basicPrefix);
+			LoadShaders(mount);
 		}
 
-		private void LoadShaders(AssetPrefix prefix)
+		private void LoadShaders(MountPoint mount)
 		{
 			// Create Opaque shader
 			Shader opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl", typeof(BasicPlugin).Assembly));
@@ -48,7 +48,7 @@ namespace Basic
 			opaque.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 			//...and submit.
-			Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", prefix, opaque));
+			Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, opaque));
 
 			// Create Transparent shader
 			Shader transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl", typeof(BasicPlugin).Assembly));
@@ -58,7 +58,7 @@ namespace Basic
 			transparent.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 			//...and submit.
-			Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", prefix, transparent));
+			Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", mount, transparent));
 		}
 	}
 }

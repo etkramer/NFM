@@ -14,7 +14,7 @@ using SharpGLTF.Validation;
 
 namespace Basic.Loaders
 {
-	public class GLTFLoader : AssetLoader<Model>
+	public class GLTFLoader : ResourceLoader<Model>
 	{
 		public string Path;
 

@@ -2,9 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.SymbolStore;
+using System.Collections.Specialized;
 using System.Linq;
-using System.Security;
 
 namespace Engine.Common
 {
@@ -20,14 +19,26 @@ namespace Engine.Common
 		}
 	}
 
-	public class TreeBuilder<T> : IEnumerable<T>
+	public class TreeBuilder<T> : IEnumerable<T>, INotifyCollectionChanged
 	{
-		private TreeNode<T> root = new(default);
+		private TreeNode<T> rootNode = new(default);
 		private TreeNode<T> currentNode;
+
+		public event NotifyCollectionChangedEventHandler CollectionChanged
+		{
+			add
+			{
+				(rootNode.Children as INotifyCollectionChanged).CollectionChanged += value;
+			}
+			remove
+			{
+				(rootNode.Children as INotifyCollectionChanged).CollectionChanged -= value;
+			}
+		}
 
 		public TreeBuilder()
 		{
-			currentNode = root;
+			currentNode = rootNode;
 		}
 
 		public bool AddNode(T value, bool select = false)
@@ -50,12 +61,12 @@ namespace Engine.Common
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (root.Children as IEnumerable<T>).GetEnumerator();
+			return (rootNode.Children as IEnumerable<T>).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return (root.Children as IEnumerable).GetEnumerator();
+			return (rootNode.Children as IEnumerable).GetEnumerator();
 		}
 
 		public bool SelectNode(T value)
@@ -89,7 +100,7 @@ namespace Engine.Common
 					return false;
 				}
 
-				if (selectNodeRecursive(value, root, out TreeNode<T> selectedNode))
+				if (selectNodeRecursive(value, rootNode, out TreeNode<T> selectedNode))
 				{
 					currentNode = selectedNode;
 					return true;
@@ -114,7 +125,7 @@ namespace Engine.Common
 
 		public void SelectRoot()
 		{
-			currentNode = root;
+			currentNode = rootNode;
 		}
 	}
 }
