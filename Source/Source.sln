@@ -20,11 +20,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Win32", "Libraries
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{A9BB24BC-C7EC-42E9-BE13-C12CEBD681C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLTF", "Plugins\GLTF\GLTF.csproj", "{E0515DA7-A487-4B8F-9674-854AF8AB7855}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic", "Plugins\Basic\Basic.csproj", "{E0515DA7-A487-4B8F-9674-854AF8AB7855}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{527506C8-7576-4747-B5F8-A2FD6673C28B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshOptimize", "Libraries\MeshOptimizer.NET\MeshOptimizer.NET.vcxproj", "{DA327D92-A146-4002-8762-7C0BFE57279F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshOptimize", "Libraries\MeshOptimize\MeshOptimize.vcxproj", "{DA327D92-A146-4002-8762-7C0BFE57279F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

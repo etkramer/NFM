@@ -58,7 +58,7 @@
 		<ProjectReference Include="..\Modules\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Modules\Engine.GPU\Engine.GPU.csproj" />
 		<ProjectReference Include="..\Modules\Engine.Roslyn\Engine.Roslyn.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="..\Libraries\MeshOptimizer.NET\MeshOptimizer.NET.vcxproj" />
+		<ProjectReference Include="..\Libraries\MeshOptimize\MeshOptimize.vcxproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Libraries\Avalonia.Win32\Avalonia.Win32.csproj" />
