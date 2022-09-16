@@ -12,7 +12,6 @@ using Engine.Plugins;
 using Engine.Resources;
 using Engine.Rendering;
 using Engine.World;
-using System.Threading;
 
 namespace Engine
 {
@@ -22,15 +21,14 @@ namespace Engine
 
 		public static async Task Init()
 		{
-			// Init basic systems.
-			GPUContext.Init();
+			// Boot up renderer
 			Renderer.Init();
 
 			// Load all plugins.
-			PluginSystem.LoadAll();
+			await PluginSystem.LoadAll();
 
 			// Kick off model loading early.
-			var loadTask = Asset.Load<Model>("USER:Objects/Heavy.glb");
+			_ = Asset.Load<Model>("USER:Objects/Heavy.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -40,8 +38,9 @@ namespace Engine
 			// Spawn actors
 			new CameraActor().Spawn();
 			new PointLightActor().Spawn();
-			var modelObject = new ModelActor().Spawn<ModelActor>();
 
+			// Create example model
+			var modelObject = new ModelActor().Spawn<ModelActor>();
 			modelObject.Position = new Vector3(0, -0.4f, 1);
 			modelObject.Rotation = new Vector3(0, 180, 0);
 			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;

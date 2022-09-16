@@ -61,6 +61,8 @@ namespace Engine.Rendering
 
 		public static void Init()
 		{
+			GPUContext.Init();
+
 			AddStep(new SceneUpdateStep(), RenderStage.Scene);
 			AddStep(new SkinningStep(), RenderStage.Viewport);
 			AddStep(new PrepassStep(), RenderStage.Viewport);

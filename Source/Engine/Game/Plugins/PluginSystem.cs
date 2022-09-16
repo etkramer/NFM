@@ -7,7 +7,7 @@ namespace Engine.Plugins
 	{
 		public static readonly List<Plugin> Plugins = new();
 
-		public static void LoadAll()
+		public static async Task LoadAll()
 		{
 			string[] searchPaths = new[]
 			{
@@ -25,13 +25,14 @@ namespace Engine.Plugins
 
 				foreach (string fullPath in Directory.GetDirectories(searchPath, "*", SearchOption.TopDirectoryOnly))
 				{
-					string expectedAssemblyName = Path.GetFileName(fullPath);
-					string expectedAssemblyPath = $"{fullPath}/{expectedAssemblyName}.dll";
+					string expectedName = Path.GetFileName(fullPath);
+					string expectedPath = $"{fullPath}/{expectedName}.dll";
 
-					if (File.Exists(expectedAssemblyPath))
+					// Check if the plugin .dll exists
+					if (File.Exists(expectedPath))
 					{
 						// Load plugin assembly.
-						Assembly assembly = Assembly.LoadFrom(expectedAssemblyPath);
+						Assembly assembly = Assembly.LoadFrom(expectedPath);
 
 						foreach (Type type in assembly.GetTypes())
 						{
@@ -47,7 +48,7 @@ namespace Engine.Plugins
 			}
 
 			// Init loaded plugins.
-			Parallel.ForEach(Plugins, (o, e) => o.OnStart());
+			await Parallel.ForEachAsync(Plugins, async (o, ct) => o.OnStart());
 		}
 	}
 }

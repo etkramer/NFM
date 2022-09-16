@@ -15,6 +15,7 @@ namespace Engine
 		{
 			Scene.Main.Dispose();
 			Scene.Main = new Scene();
+
 			OnProjectCreated.Invoke();
 		}
 

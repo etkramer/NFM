@@ -33,7 +33,7 @@ namespace Basic.Loaders
 
 			// Load textures from GLTF
 			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
-			Parallel.ForEach(model.LogicalTextures, (texture) =>
+			await Parallel.ForEachAsync(model.LogicalTextures, async (texture, ct) =>
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
@@ -86,7 +86,7 @@ namespace Basic.Loaders
 			{
 				// Loop through GLTF "primitives" (equivalent to Meshes)
 				Mesh[] gamePrims = new Mesh[mesh.Primitives.Count];
-				Parallel.ForEach(mesh.Primitives, (primitive) =>
+				await Parallel.ForEachAsync(mesh.Primitives, async (primitive, ct) =>
 				{
 					// Find node and read transform.
 					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
