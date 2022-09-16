@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Input;
 using Engine.Editor;
 using Engine.Frontend;
 using Engine.GPU;
@@ -74,7 +75,7 @@ namespace Engine.Rendering
 			const float sprintMult = 2.5f;
 
 			// Process input only if right click is down.
-			if (Input.RightMouseButton == KeyState.Down && Input.InputSource == Host)
+			if (Input.IsDown(MouseButton.Right) && Input.InputSource == Host)
 			{
 				// Mouse look
 				Vector3 cameraRotation = Camera.Rotation;
@@ -85,19 +86,19 @@ namespace Engine.Rendering
 
 				// Movement
 				Vector3 accelVector = Vector3.Zero;
-				if (Input.W == KeyState.Down)
+				if (Input.IsDown(Key.W))
 				{
 					accelVector.Z -= 1;
 				}
-				if (Input.A == KeyState.Down)
+				if (Input.IsDown(Key.A))
 				{
 					accelVector.X -= 1;
 				}
-				if (Input.S == KeyState.Down)
+				if (Input.IsDown(Key.S))
 				{
 					accelVector.Z += 1;
 				}
-				if (Input.D == KeyState.Down)
+				if (Input.IsDown(Key.D))
 				{
 					accelVector.X += 1;
 				}
@@ -105,17 +106,17 @@ namespace Engine.Rendering
 				// Transform WASD accelerations by camera direction.
 				accelVector = Vector3.TransformVector(accelVector, Matrix4.CreateRotation(Camera.Rotation));
 
-				if (Input.Space == KeyState.Down)
+				if (Input.IsDown(Key.Space))
 				{
 					accelVector.Y += 1;
 				}
-				if (Input.C == KeyState.Down)
+				if (Input.IsDown(Key.C))
 				{
 					accelVector.Y -= 1;
 				}
 
 				// Apply acceleration to velocity.
-				flyVelocity += (accelVector * acceleration * (Input.Shift == KeyState.Down ? sprintMult : 1)) * (float)deltaTime;
+				flyVelocity += (accelVector * acceleration * (Input.IsDown(Key.LeftShift) ? sprintMult : 1)) * (float)deltaTime;
 			}
 
 			// Flycam physics.

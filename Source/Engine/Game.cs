@@ -30,7 +30,7 @@ namespace Engine
 			PluginSystem.LoadAll();
 
 			// Kick off model loading early.
-			var loadTask = Asset.GetAsync<Model>("USER:Objects/Heavy.glb");
+			var loadTask = Asset.Load<Model>("USER:Objects/Heavy.glb");
 
 			Project.OnProjectCreated += OnProjectCreated;
 		}
@@ -44,7 +44,7 @@ namespace Engine
 
 			modelObject.Position = new Vector3(0, -0.4f, 1);
 			modelObject.Rotation = new Vector3(0, 180, 0);
-			modelObject.Model = Asset.GetAsync<Model>("USER:Objects/Heavy.glb").Result;
+			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

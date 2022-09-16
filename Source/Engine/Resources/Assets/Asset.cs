@@ -21,7 +21,7 @@ namespace Engine.Resources
 		/// <summary>
 		/// Asynchronously retrieves the asset at the given path
 		/// </summary>
-		public static Task<T> GetAsync<T>(string path) where T : Resource
+		public static Task<T> Load<T>(string path) where T : Resource
 		{
 			if (Assets.TryGetValue(path, out Asset foundAsset))
 			{

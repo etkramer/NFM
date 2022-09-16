@@ -53,17 +53,11 @@ namespace Engine.Frontend
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			Input.UpdateKey(e.Key, true);
-
-			e.Handled = true;
-			base.OnKeyDown(e);
 		}
 
 		protected override void OnKeyUp(KeyEventArgs e)
 		{
 			Input.UpdateKey(e.Key, false);
-
-			e.Handled = true;
-			base.OnKeyDown(e);
 		}
 	}
 
