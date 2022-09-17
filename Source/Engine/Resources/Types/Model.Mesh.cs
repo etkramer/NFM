@@ -43,45 +43,49 @@ namespace Engine.Resources
 			Material = value;
 		}
 
-		public void Commit()
+		/// <summary>
+		/// Commits all changes to mesh data - must be called at least once before use.
+		/// </summary>
+		public unsafe void Commit()
 		{
-			unsafe
+			// Free existing allocations.
+			VertHandle?.Dispose();
+			PrimHandle?.Dispose();
+			MeshHandle?.Dispose();
+			MeshletHandle?.Dispose();
+
+			fixed (uint* indicesPtr = Indices)
+			fixed (Vertex* vertsPtr = Vertices)
 			{
-				fixed (uint* indicesPtr = Indices)
+				// Build meshlet data.
+				MeshOperations.BuildMeshlets(indicesPtr, Indices.Length, vertsPtr, Vertices.Length, sizeof(Vertex), out var meshletPrims, out var meshletVerts, out var meshlets);
+
+				// Remap vertices to match meshlet output.
+				Vertex[] verts = new Vertex[meshletVerts.Length];
+				for (int i = 0; i < meshletVerts.Length; i++)
 				{
-					fixed (Vertex* vertsPtr = Vertices)
-					{
-						// Build meshlet data.
-						MeshOperations.BuildMeshlets(indicesPtr, Indices.Length, vertsPtr, Vertices.Length, sizeof(Vertex), out var prims, out var verts, out var meshlets);
-
-						// Remap vertices to match meshlet output.
-						Vertex[] remappedVerts = new Vertex[verts.Length];
-						for (int i = 0; i < verts.Length; i++)
-						{
-							remappedVerts[i] = Vertices[verts[i]];
-						}
-
-						// Upload vertex data to GPU.
-						VertHandle = VertBuffer.Allocate(remappedVerts.Length);
-						Renderer.DefaultCommandList.UploadBuffer(VertHandle, remappedVerts);
-
-						// Upload meshlet/index data to GPU.
-						PrimHandle = PrimBuffer.Allocate(prims.Length);
-						Renderer.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
-						MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
-						Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
-
-						// Upload mesh info to GPU.
-						MeshHandle = MeshBuffer.Allocate(1);
-						Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
-						{
-							MeshletCount = (uint)MeshletHandle.Count,
-							MeshletOffset = (uint)MeshletHandle.Start,
-							PrimOffset = (uint)PrimHandle.Start,
-							VertOffset = (uint)VertHandle.Start,
-						});
-					}
+					verts[i] = Vertices[meshletVerts[i]];
 				}
+
+				// Upload vertex data to GPU.
+				VertHandle = VertBuffer.Allocate(verts.Length);
+				Renderer.DefaultCommandList.UploadBuffer(VertHandle, verts);
+
+				// Upload meshlet/index data to GPU.
+				PrimHandle = PrimBuffer.Allocate(meshletPrims.Length);
+				Renderer.DefaultCommandList.UploadBuffer(PrimHandle, meshletPrims.Select(o => (uint)o).ToArray());
+				MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
+				Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
+
+				// Upload mesh info to GPU.
+				MeshHandle = MeshBuffer.Allocate(1);
+				Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
+				{
+					MeshletCount = (uint)MeshletHandle.Count,
+					MeshletOffset = (uint)MeshletHandle.Start,
+					PrimOffset = (uint)PrimHandle.Start,
+					VertOffset = (uint)VertHandle.Start,
+				});
 			}
 
 			// Mark mesh as committed.

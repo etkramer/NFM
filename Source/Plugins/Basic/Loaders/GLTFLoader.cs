@@ -132,14 +132,11 @@ namespace Basic.Loaders
 			return new Model(gameMeshes);
 		}
 
-		private Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
+		private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
 		{
-			unsafe
+			fixed (T* dataPtr = source)
 			{
-				fixed (T* dataPtr = source)
-				{
-					return new Span<T>(dataPtr, source.Length);
-				}
+				return new Span<T>(dataPtr, source.Length);
 			}
 		}
 	}

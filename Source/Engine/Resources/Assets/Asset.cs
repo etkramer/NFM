@@ -7,7 +7,6 @@ namespace Engine.Resources
 	public abstract class Asset
 	{
 		public string Path { get; set; }
-
 		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
