@@ -154,7 +154,7 @@ namespace Engine.Frontend
 					bucketName = bucketName.Remove(bucketName.Length - 6);
 
 				// Build the property grid.
-				var propertyInputs = bucket.Select(p => new PropertyInput(Selection.Selected.ToArray(), p));
+				var propertyInputs = bucket.Select(p => new PropertyInspector(Selection.Selected.ToArray(), p));
 				propertyGrid.Add(
 					new Expander()
 						.IsExpanded(true)

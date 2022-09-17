@@ -14,14 +14,14 @@ using ISelectable = Engine.Editor.ISelectable;
 
 namespace Engine.Frontend
 {
-	public sealed class PropertyInput : UserControl
+	public sealed class PropertyInspector : UserControl
 	{
 		[Notify] public PropertyInfo Property { get; set; }
 		[Notify] public IEnumerable<object> Subjects { get; set; }
 
 		[Notify] public Control FieldContent { get; set; }
 
-		public PropertyInput(IEnumerable<object> subjects, PropertyInfo property)
+		public PropertyInspector(IEnumerable<object> subjects, PropertyInfo property)
 		{
 			Subjects = subjects;
 			Property = property;
@@ -53,31 +53,31 @@ namespace Engine.Frontend
 			if (Property.PropertyType == typeof(bool))
 			{
 				// Boolean input field.
-				FieldContent = new BoolInput(Property, subjects);
+				FieldContent = new BoolInspector(Property, subjects);
 			}
 			else if (Property.PropertyType == typeof(string))
 			{
 				// String input field.
-				FieldContent = new StringInput(Property, subjects);
+				FieldContent = new StringInspector(Property, subjects);
 			}
 			else if (Property.PropertyType == typeof(sbyte) || Property.PropertyType == typeof(short) || Property.PropertyType == typeof(int) || Property.PropertyType == typeof(long)
 				|| Property.PropertyType == typeof(byte) || Property.PropertyType == typeof(ushort) || Property.PropertyType == typeof(uint) || Property.PropertyType == typeof(ulong)
 				|| Property.PropertyType == typeof(float) || Property.PropertyType == typeof(double))
 			{
 				// Numeric input field.
-				FieldContent = new NumInput(Property, subjects);
+				FieldContent = new NumInspector(Property, subjects);
 			}
 			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
 			{
 				// Resource reference field.
-				FieldContent = new ResourceInput(Property, subjects);
+				FieldContent = new ResourceInspector(Property, subjects);
 			}
 			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
 				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
 				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i) || Property.PropertyType == typeof(Vector4d))
 			{
 				// Vector input field.
-				FieldContent = new VectorInput(Property, subjects);
+				FieldContent = new VectorInspector(Property, subjects);
 			}
 			else if (Property.PropertyType.IsPrimitive)
 			{

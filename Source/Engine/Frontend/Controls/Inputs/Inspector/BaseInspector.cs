@@ -11,17 +11,15 @@ using Avalonia.Input.Platform;
 
 namespace Engine.Frontend
 {
-	public class BaseInput : UserControl, INotify
+	public class BaseInspector : UserControl, INotify
 	{
-		public string PropertyName => Property.Name.PascalToDisplay();
-
 		protected PropertyInfo Property { get; private set; }
 		protected IEnumerable<object> Subjects { get; private set; }
 
 		protected event Action OnSelectedPropertyChanged = delegate {};
 		protected bool HasMultipleValues => Subjects.HasVariation(o => Property.GetValue(o));
 
-		public BaseInput(PropertyInfo property, IEnumerable<object> subjects)
+		public BaseInspector(PropertyInfo property, IEnumerable<object> subjects)
 		{
 			Property = property;
 			Subjects = subjects;

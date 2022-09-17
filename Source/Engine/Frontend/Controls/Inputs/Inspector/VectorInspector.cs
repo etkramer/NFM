@@ -13,7 +13,7 @@ using Avalonia.Interactivity;
 
 namespace Engine.Frontend
 {
-	public class VectorInput : BaseInput
+	public class VectorInspector : BaseInspector
 	{
 		[Notify] private string ValueX
 		{
@@ -53,7 +53,7 @@ namespace Engine.Frontend
 
 		private PropertyInfo vecIndexer;
 
-		public VectorInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
+		public VectorInspector(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueX));
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueY));

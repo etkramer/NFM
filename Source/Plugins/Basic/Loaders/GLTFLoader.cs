@@ -73,7 +73,7 @@ namespace Basic.Loaders
 					}
 					else if (channel.Key == "MetallicRoughness" && channel.Texture != null)
 					{
-						gameMaterial.SetTexture("MetallicRoughness", gameTextures[channel.Texture.LogicalIndex]);
+						gameMaterial.SetTexture("ORM", gameTextures[channel.Texture.LogicalIndex]);
 					}
 				}
 

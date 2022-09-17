@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Reflection;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
+using Avalonia;
 
 namespace Engine.Frontend
 {
-	public class BoolInput : BaseInput
+	public class BoolInspector : BaseInspector
 	{
 		[Notify] private bool? Value
 		{
@@ -22,14 +21,13 @@ namespace Engine.Frontend
 			}
 		}
 
-		public BoolInput(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
+		public BoolInspector(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 
-			CheckBox checkBox = new CheckBox();
-			checkBox.Bind(ToggleButton.IsCheckedProperty, nameof(Value), this);
-
-			Content = checkBox;
+			// Create and assign bool input.
+			Content = new BoolInput();
+			(Content as BoolInput).Bind(BoolInput.ValueProperty, nameof(Value), this);
 		}
 	}
 }

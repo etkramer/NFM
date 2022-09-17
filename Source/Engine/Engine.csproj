@@ -71,6 +71,12 @@
 	  <Compile Update="Frontend\Assets\EditorTheme.axaml.cs">
 	    <DependentUpon>EditorTheme.axaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Frontend\Controls\Inputs\BoolInput.axaml.cs">
+	    <DependentUpon>BoolInput.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Frontend\Controls\Inputs\ResourceInput.axaml.cs">
+	    <DependentUpon>ResourceInput.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
