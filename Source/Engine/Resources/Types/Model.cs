@@ -2,7 +2,6 @@
 using System.Linq;
 using Engine.GPU;
 using Engine.Rendering;
-using MeshOptimizer;
 
 namespace Engine.Resources
 {
@@ -12,6 +11,8 @@ namespace Engine.Resources
 	public partial class Model : Resource
 	{
 		public ModelPart[] Parts { get; set; }
+
+		public bool IsCommitted => Parts?.Any(o => o.Meshes.Any(o2 => o2.IsCommitted)) ?? false;
 
 		public Model(params Mesh[] meshes)
 		{
@@ -28,12 +29,22 @@ namespace Engine.Resources
 		{
 			Parts = parts;
 		}
+
+		public override void Dispose()
+		{
+			foreach (var part in Parts)
+			{
+				part.Dispose();
+			}
+
+			base.Dispose();
+		}
 	}
 
 	/// <summary>
 	/// A group of one or multiple meshes. Can be toggled on/off within the editor, comparable to a bodygroup in SFM.
 	/// </summary>
-	public partial class ModelPart
+	public partial class ModelPart : IDisposable
 	{
 		public Mesh[] Meshes { get; set; }
 
@@ -41,160 +52,13 @@ namespace Engine.Resources
 		{
 			Meshes = meshes;
 		}
-	}
 
-	/// <summary>
-	/// A part of a model that contains geometry - each model must have at least one of these per unique material.
-	/// </summary>
-	public partial class Mesh
-	{
-		public Material Material { get; set; }
-
-		public uint[] Indices { get => indices; set => SetIndices(value); }
-		public Vertex[] Vertices { get => vertices; set => SetVertices(value); }
-
-		private uint[] indices;
-		private Vertex[] vertices;
-
-		public void Clear()
+		public void Dispose()
 		{
-			indices = null;
-			vertices = null;
-
-			areVerticesUploaded = false;
-			areIndicesUploaded = false;
-
-			PrimHandle?.Dispose();
-			VertHandle?.Dispose();
-			MeshletHandle?.Dispose();
-			MeshHandle?.Dispose();
-		}
-
-		private uint[] vertMapping = null;
-		private bool areIndicesUploaded = false;
-		private bool areVerticesUploaded = false;
-
-		public void SetIndices(uint[] value)
-		{
-			indices = value;
-
-			if (!areVerticesUploaded && vertices != null)
+			foreach (var mesh in Meshes)
 			{
-				UploadIndices(); // Also builds meshlets, thus requiring vertex data.
+				mesh.Dispose();
 			}
-		}
-
-		public void SetVertices(Vertex[] value)
-		{
-			vertices = value;
-
-			// (Try to) upload vertex data.
-			UploadVertices();
-
-			// Are indices still waiting to be uploaded?
-			if (!areIndicesUploaded && indices != null)
-			{
-				UploadIndices();
-			}
-		}
-
-		public void SetMaterial(Material value)
-		{
-			Material = value;
-		}
-
-		private void UploadIndices()
-		{
-			unsafe
-			{
-				fixed (uint* indicesPtr = indices)
-				{
-					fixed (Vertex* vertsPtr = vertices)
-					{
-						// Build meshlet data.
-						MeshOperations.BuildMeshlets(indicesPtr, indices.Length, vertsPtr, vertices.Length, sizeof(Vertex), out var prims, out var verts, out var meshlets);
-						vertMapping = verts;
-
-						// Upload meshlet/index data to GPU.
-						PrimHandle = PrimBuffer.Allocate(prims.Length);
-						Renderer.DefaultCommandList.UploadBuffer(PrimHandle, prims.Select(o => (uint)o).ToArray());
-						MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
-						Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
-					}
-				}
-			}
-
-			// Mark indices as uploaded.
-			areIndicesUploaded = true;
-
-			// Are vertices still waiting to be uploaded?
-			if (!areVerticesUploaded && vertices != null)
-			{
-				UploadVertices();
-			}
-			
-			// Are both vertices *and* indices uploaded?
-			if (areVerticesUploaded)
-			{
-				UploadMesh();
-			}
-		}
-
-		private void UploadVertices()
-		{
-			// We haven't generated meshlets yet, so we can't remap these vertices.
-			// Should try to call this again in UploadIndices().
-			if (!areIndicesUploaded)
-			{
-				return;
-			}
-
-			// Remap vertices to fit meshlets.
-			Vertex[] remapped = RemapVerts();
-
-			// Upload remapped verts to the vertex buffer.
-			VertHandle?.Dispose();
-			VertHandle = VertBuffer.Allocate(remapped.Length);
-			Renderer.DefaultCommandList.UploadBuffer(VertHandle, remapped);
-
-			// Mark vertices as uploaded.
-			areVerticesUploaded = true;
-
-			// Are both vertices *and* indices uploaded?
-			if (areIndicesUploaded)
-			{
-				UploadMesh();
-			}
-		}
-
-		private void UploadMesh()
-		{
-			// Not ready to do the final upload yet.
-			if (VertHandle == null || MeshletHandle == null || PrimHandle == null)
-			{
-				return;
-			}
-
-			MeshHandle?.Dispose();
-			MeshHandle = MeshBuffer.Allocate(1);
-			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
-			{
-				MeshletCount = (uint)MeshletHandle.Count,
-				MeshletOffset = (uint)MeshletHandle.Start,
-				PrimOffset = (uint)PrimHandle.Start,
-				VertOffset = (uint)VertHandle.Start,
-			});
-		}
-
-		private Vertex[] RemapVerts()
-		{
-			Vertex[] vertData = new Vertex[vertMapping.Length];
-			for (int i = 0; i < vertMapping.Length; i++)
-			{
-				vertData[i] = vertices[vertMapping[i]];
-			}
-
-			return vertData;
 		}
 	}
 }

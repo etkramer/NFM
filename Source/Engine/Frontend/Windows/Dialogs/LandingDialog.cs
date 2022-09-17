@@ -10,7 +10,7 @@ namespace Engine.Frontend
 {
 	public partial class LandingDialog : Dialog
 	{
-		[Save] public static bool ShowOnStartup { get; private set; } = false;
+		[Save] public static bool ShowOnStartup { get; private set; } = true;
 
 		public LandingDialog()
 		{

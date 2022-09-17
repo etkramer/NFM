@@ -30,7 +30,7 @@ namespace Engine.Frontend
 			Margin = new(0, 4);
 			HorizontalAlignment = HorizontalAlignment.Stretch;
 			Content = new Grid()
-				.Columns("0.8*, *")
+				.Columns("0.5*, *")
 				.Children(
 					// Name
 					new TextBlock()

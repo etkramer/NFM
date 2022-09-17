@@ -19,30 +19,30 @@ namespace Engine.Frontend.Controls
 
 		protected override void OnOpened(EventArgs args)
 		{
-			// Create group.
+			// Create group (viewport 1).
 			TabGroup group1 = new TabGroup();
-			ToolPanel.Spawn<ScenePanel>(group1);
+			ToolPanel.Spawn<ViewportPanel>(group1);
 			dockspace.Dock(group1, null);
 
-			// Create group.
+			// Create group (scene panel).
 			TabGroup group2 = new TabGroup();
-			ToolPanel.Spawn<InspectorPanel>(group2);
-			dockspace.Dock(group2, group1, DockPosition.Right, 0.88f);
+			ToolPanel.Spawn<ScenePanel>(group2);
+			dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
 
-			// Create group (viewport 1).
+			// Create group (inspector panel).
 			TabGroup group3 = new TabGroup();
-			ToolPanel.Spawn<ViewportPanel>(group3);
-			dockspace.Dock(group3, group2, DockPosition.Left, 0.86f);
+			ToolPanel.Spawn<InspectorPanel>(group3);
+			dockspace.Dock(group3, group1, DockPosition.Right, 0.14f);
 
 			// Create group (timeline).
 			/*TabGroup group4 = new TabGroup();
 			ToolPanel.Spawn<TimelinePanel>(group4);
-			dockspace.Dock(group4, group3, DockPosition.Bottom, 0.30f);
+			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
 
 			// Create group (viewport 2).
 			TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
-			dockspace.Dock(group5, group3, DockPosition.Right, 0.4f);*/
+			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);*/
 
 			// Show landing dialog.
 			if (LandingDialog.ShowOnStartup)

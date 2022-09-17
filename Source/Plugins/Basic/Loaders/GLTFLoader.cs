@@ -120,6 +120,8 @@ namespace Basic.Loaders
 					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
 					gameMesh.SetVertices(vertices);
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
+					gameMesh.Commit();
+
 					gamePrims[primitive.LogicalIndex] = gameMesh;
 				});
 
