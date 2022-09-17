@@ -75,7 +75,7 @@ namespace Engine.Frontend
 
 			Content = new ContentControl()
 				.Radius(2)
-				.Background(this.GetResourceBrush("ControlBackground"))
+				.Background(this.GetResourceBrush("ControlBackgroundColor"))
 				.With(o => o.Padding = new(1))
 				.Content(
 					new Grid()

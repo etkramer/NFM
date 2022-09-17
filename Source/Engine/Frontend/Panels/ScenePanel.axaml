@@ -9,7 +9,7 @@
 		Title="Scene"
 		x:Class="Engine.Frontend.ScenePanel">
 
-	<Grid Background="{StaticResource ControlBackground}">
+	<Grid Background="{StaticResource ControlBackgroundColor}">
 		<TreeView x:Name="sceneTree" Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding SceneActors}">
 			<TreeView.ItemTemplate>
 				<TreeDataTemplate>

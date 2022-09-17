@@ -22,7 +22,7 @@ namespace Engine.Frontend
 			Title = "Timeline";
 			Content = new Grid()
 				.Rows("32, 50, *")
-				.Background(this.GetResourceBrush("ToolBackground"));
+				.Background(this.GetResourceBrush("ToolBackgroundColor"));
 		}
 	}
 }

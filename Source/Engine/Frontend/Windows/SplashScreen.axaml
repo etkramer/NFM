@@ -17,7 +17,7 @@
 			<TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Title}" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" IsHitTestVisible="False"/>
 		</Grid>
 		
-		<Grid Grid.Row="1" Background="{StaticResource ToolBackground}" Focusable="True">
+		<Grid Grid.Row="1" Background="{StaticResource ToolBackgroundColor}" Focusable="True">
 			<!--<ProgressBar VerticalAlignment="Center" Value="10" Minimum="0" Maximum="20"/>-->
 		</Grid>
 	</Grid>

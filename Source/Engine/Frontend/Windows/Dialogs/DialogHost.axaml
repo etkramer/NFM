@@ -17,7 +17,7 @@
 			<controls:WindowButtons Grid.Column="2" HorizontalAlignment="Right" Classes="dialog"/>
 		</Grid>
 		
-		<Grid Grid.Row="1" Background="{StaticResource ToolBackground}" Focusable="True">
+		<Grid Grid.Row="1" Background="{StaticResource ToolBackgroundColor}" Focusable="True">
 			<ContentPresenter Content="{Binding Dialog}"/>
 		</Grid>
 	</Grid>

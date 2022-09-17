@@ -68,6 +68,11 @@
 		<PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Update="Frontend\Assets\EditorTheme.axaml.cs">
+	    <DependentUpon>EditorTheme.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

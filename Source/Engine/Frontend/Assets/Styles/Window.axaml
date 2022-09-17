@@ -5,7 +5,7 @@
 	</Style>
 	
 	<Style Selector="Window">
-		<Setter Property="Background" Value="{StaticResource WindowBackground}"/>  
+		<Setter Property="Background" Value="{DynamicResource WindowBackgroundColor}"/>  
 		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
 		<Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>  
 		<Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>

@@ -81,17 +81,16 @@ namespace Basic.Loaders
 			}
 
 			// Loop through GLTF "meshes" (equivalent to ModelParts)
-			ModelPart[] gameMeshes = new ModelPart[model.LogicalMeshes.Count];
+			ModelPart[] gameParts = new ModelPart[model.LogicalMeshes.Count];
 			foreach (var mesh in model.LogicalMeshes)
 			{
 				// Loop through GLTF "primitives" (equivalent to Meshes)
-				Mesh[] gamePrims = new Mesh[mesh.Primitives.Count];
+				Mesh[] gameMeshes = new Mesh[mesh.Primitives.Count];
 				await Parallel.ForEachAsync(mesh.Primitives, async (primitive, ct) =>
 				{
 					// Find node and read transform.
 					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
-					var worldMatrix = (Matrix4)node.GetWorldMatrix(null, 0);
-					worldMatrix.Transpose();
+					var worldMatrix = ((Matrix4)node.GetWorldMatrix(null, 0)).Transpose();
 
 					// Grab vertex accessors from GLTF.
 					var posAccessor = primitive.GetVertexAccessor("POSITION");
@@ -122,14 +121,14 @@ namespace Basic.Loaders
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
 					gameMesh.Commit();
 
-					gamePrims[primitive.LogicalIndex] = gameMesh;
+					gameMeshes[primitive.LogicalIndex] = gameMesh;
 				});
 
 				// Create ModelParts from GLTF "meshes"
-				gameMeshes[mesh.LogicalIndex] = new ModelPart(gamePrims);
+				gameParts[mesh.LogicalIndex] = new ModelPart(gameMeshes);
 			}
 
-			return new Model(gameMeshes);
+			return new Model(gameParts);
 		}
 
 		private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged

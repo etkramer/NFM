@@ -8,7 +8,7 @@
   <Style Selector="controls|Toolbar">
     <Setter Property="Height" Value="38"/>
 	<Setter Property="Padding" Value="10, 4, 0, 4"/>
-	<Setter Property="Foreground" Value="{StaticResource ToolBackground}"/>
+	<Setter Property="Foreground" Value="{StaticResource ToolBackgroundColor}"/>
     <Setter Property="Template">
       <ControlTemplate>
 		<Panel Height="{TemplateBinding Height}">

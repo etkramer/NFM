@@ -87,7 +87,7 @@ namespace Engine.Frontend
 					new Grid()
 						.Rows("*, 1, 60")
 						.Row(1)
-						.Background(win.GetResourceBrush("ToolBackground"))
+						.Background(win.GetResourceBrush("ToolBackgroundColor"))
 						.Focusable(true)
 						.Children(
 							new ContentControl()
@@ -100,14 +100,14 @@ namespace Engine.Frontend
 								),
 							new Rectangle()
 								.Row(1)
-								.Background(win.GetResourceBrush("ToolForeground")),				
+								.Background(win.GetResourceBrush("ControlBackgroundColor")),				
 							new StackPanel()
 								.Row(2)
 								.Margin(30)
 								.Spacing(10)
 								.HorizontalAlignment(HorizontalAlignment.Center)
 								.VerticalAlignment(VerticalAlignment.Center)
-								.Background(win.GetResourceBrush("ToolBackground"))
+								.Background(win.GetResourceBrush("ToolBackgroundColor"))
 								.Orientation(Orientation.Horizontal)
 								.Children(buttons.ToArray())
 						)

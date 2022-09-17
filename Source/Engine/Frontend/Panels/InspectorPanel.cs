@@ -67,7 +67,7 @@ namespace Engine.Frontend
 						),
 					// Object description
 					new Grid()
-						.Background(this.GetResourceBrush("ToolForeground"))
+						.Background(this.GetResourceBrush("ControlBackgroundColor"))
 						.Row(1)
 						.Children(
 							new StackPanel()

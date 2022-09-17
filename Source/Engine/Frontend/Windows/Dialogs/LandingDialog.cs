@@ -44,7 +44,7 @@ namespace Engine.Frontend
 						),
 					new Rectangle()
 						.Row(1)
-						.Background(this.GetResourceBrush("WindowBackground")),
+						.Background(this.GetResourceBrush("WindowBackgroundColor")),
 					new StackPanel()
 						.Row(2)
 						.Spacing(10)

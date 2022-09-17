@@ -5,7 +5,7 @@
 	<!--Base state-->
 	<Style Selector="controls|Tab">
 		<Setter Property="Foreground" Value="{StaticResource ThemeForegroundBrush}"/>
-		<Setter Property="Background" Value="{StaticResource ToolBackground}"/>
+		<Setter Property="Background" Value="{StaticResource ToolBackgroundColor}"/>
 		<Setter Property="Height" Value="22"/>
 		<Setter Property="Focusable" Value="True"/>
 		<Setter Property="Padding" Value="22, 0, 22, 0"/>

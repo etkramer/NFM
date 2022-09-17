@@ -2,12 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Engine.Frontend.App">
     <Application.Styles>
-		<StyleInclude Source="avares://Engine/Frontend/Assets/DefaultTheme.axaml"/>
+		<!--Avalonia Default Theme-->
+		<StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
+		<StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml"/>
+		
+		<StyleInclude Source="avares://Engine/Frontend/Assets/EditorTheme.axaml"/>
 		
 		<StyleInclude Source="avares://Engine/Frontend/Controls/WindowButtons.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/OptionField.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Toolbar.axaml"/>
-		
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/Tab.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/TabGroup.axaml"/>
     </Application.Styles>

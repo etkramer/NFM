@@ -46,7 +46,7 @@
 
 	<Style Selector="Button.dialog2">
 		<Setter Property="CornerRadius" Value="3"/>
-		<Setter Property="Background" Value="{StaticResource Accent}"/>
+		<Setter Property="Background" Value="{StaticResource ThemeAccentColor}"/>
 		<Setter Property="BorderBrush" Value="#4883F1"/>
 	</Style>
 
