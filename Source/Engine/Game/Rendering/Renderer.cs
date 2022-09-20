@@ -61,7 +61,8 @@ namespace Engine.Rendering
 
 		public static void Init()
 		{
-			GPUContext.Init();
+			GPUContext.Init(2);
+			DefaultCommandList.Name = "Default List";
 
 			AddStep(new SceneUpdateStep(), RenderStage.Scene);
 			AddStep(new SkinningStep(), RenderStage.Viewport);
@@ -88,13 +89,12 @@ namespace Engine.Rendering
 			foreach (Scene scene in Scene.All)
 			{
 				RenderStep.List = DefaultCommandList;
+				RenderStep.Viewport = null;
 				RenderStep.Scene = scene;
 
 				// Execute per-scene render steps.
 				foreach (RenderStep step in sceneStage)
 				{
-					RenderStep.Viewport = null;
-
 					RenderStep.List.PushEvent($"{step.GetType().Name} (scene)");
 					step.Run();
 					RenderStep.List.PopEvent();
@@ -110,6 +110,7 @@ namespace Engine.Rendering
 				// Switch to this viewport's command list.
 				RenderStep.List = viewport.CommandList;
 				RenderStep.Viewport = viewport;
+				RenderStep.Scene = RenderStep.Viewport.Scene;
 
 				foreach (RenderStep step in viewportStage)
 				{
@@ -125,20 +126,16 @@ namespace Engine.Rendering
 				viewport.CommandList.Execute();
 			}
 
-			// Submit default command list and wait for completion.
+			// Reset global state.
+			RenderStep.List = null;
+			RenderStep.Viewport = null;
+			RenderStep.Scene = null;
+
+			// Present swapchains.
+			Viewport.All.ForEach(o => o.Host.Swapchain.Present());
+
+			// Wait for completion.
 			Graphics.WaitFrame();
-
-			// Present all windows.
-			foreach (var viewport in Viewport.All)
-			{
-				viewport.Host.Swapchain.Present();
-
-				// Reopen viewport command list.
-				viewport.CommandList.Reset();
-			}
-
-			// Reset update command list.
-			DefaultCommandList.Reset();
 		}
 
 		public static void Cleanup()

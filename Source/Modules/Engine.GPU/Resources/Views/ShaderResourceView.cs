@@ -48,7 +48,7 @@ namespace Engine.GPU
 				},
 			};
 
-			GPUContext.Device.CreateShaderResourceView(target.Resource, desc, Handle);
+			GPUContext.Device.CreateShaderResourceView(target.D3DResource, desc, Handle);
 		}
 
 		public void Dispose()

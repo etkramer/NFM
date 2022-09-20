@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Engine": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}

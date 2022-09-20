@@ -32,10 +32,7 @@ namespace Engine.Common
 	[Injection(typeof(NotifyAspect))]
 	public class NotifyAttribute : Attribute
 	{
-		public string[] Dependents { get; set; }
-
 		public NotifyAttribute() {}
-		public NotifyAttribute(params string[] dependents) : this() => Dependents = dependents;
 	}
 
 	[Mixin(typeof(INotify))]

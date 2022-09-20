@@ -20,10 +20,10 @@ namespace Engine.GPU
 
 		private static Stopwatch frameTimer = new();
 
-		public static void WaitFrame()
+		public static bool WaitFrame()
 		{
 			// Wait for completion.
-			GPUContext.WaitFrame();
+			bool result = GPUContext.WaitFrame();
 
 			// Update frame timer.
 			frameTimer.Stop();
@@ -32,6 +32,8 @@ namespace Engine.GPU
 
 			// Let systems know it's the start of a new frame.
 			OnFrameStart.Invoke();
+
+			return result;
 		}
 
 		public static void Flush()

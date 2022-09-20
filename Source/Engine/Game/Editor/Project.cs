@@ -6,8 +6,8 @@ namespace Engine
 {
 	public static class Project
 	{
-		[Notify] public static string Path { get; set; }
-		[Notify("Path")] public static string Name => Path == null ? "Untitled" : System.IO.Path.GetFileNameWithoutExtension(Path);
+		public static string Path { get; set; }
+		public static string Name => Path == null ? "Untitled" : System.IO.Path.GetFileNameWithoutExtension(Path);
 
 		public static event Action OnProjectCreated = delegate {};
 

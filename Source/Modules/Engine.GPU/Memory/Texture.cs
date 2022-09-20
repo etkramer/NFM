@@ -14,7 +14,7 @@ namespace Engine.GPU
 		private RenderTargetView rtv;
 		private DepthStencilView dsv;
 
-		internal ID3D12Resource Resource;
+		internal override ID3D12Resource D3DResource { get; private protected set; }
 
 		public readonly Format Format = Format.R8G8B8A8_UNorm;
 		public readonly Format DSFormat = default;
@@ -30,8 +30,8 @@ namespace Engine.GPU
 
 		public string Name
 		{
-			get => Resource.Name;
-			set => Resource.Name = value;
+			get => D3DResource.Name;
+			set => D3DResource.Name = value;
 		}
 
 		/// <summary>
@@ -73,13 +73,14 @@ namespace Engine.GPU
 			}
 
 			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out var resource);
+			D3DResource = resource;
 			State = ResourceStates.CopyDest;
 
 			uavs = new UnorderedAccessView[mipmapCount];
 			srvs = new ShaderResourceView[mipmapCount + 1]; // Extra index for "all mips"
 
-			Resource.Name = "Standard texture";
+			D3DResource.Name = "Standard texture";
 		}
 
 		/// <summary>
@@ -87,14 +88,14 @@ namespace Engine.GPU
 		/// </summary>
 		internal Texture(ID3D12Resource resource, int width, int height)
 		{
-			Resource = resource;
+			D3DResource = resource;
 			Width = width;
 			Height = height;
 			Format = GPUContext.RTFormat;
 			MipmapCount = 1;
 			State = ResourceStates.CopyDest;
 
-			Resource.Name = "Resource texture";
+			D3DResource.Name = "Resource texture";
 		}
 
 		/// <summary>
@@ -106,7 +107,7 @@ namespace Engine.GPU
 			Height = height;
 
 			// Release existing D3D resource.
-			Resource.Release();
+			D3DResource.Release();
 			rtv = null;
 			dsv = null;
 			for (int i = 0; i < MipmapCount; i++)
@@ -119,7 +120,8 @@ namespace Engine.GPU
 			}
 
 			// Create new resource with new size.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out var resource);
+			D3DResource = resource;
 			State = ResourceStates.CopyDest;
 		}
 
@@ -171,7 +173,8 @@ namespace Engine.GPU
 
 		public void Dispose()
 		{
-			Resource.Release();
+			D3DResource.Release();
+			IsAlive = false;
 		}
 
 		private ResourceDescription GetDescription()
@@ -189,11 +192,6 @@ namespace Engine.GPU
 				Flags = Format.IsDepthStencil() || Format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget
 					| (Samples == 1 ? ResourceFlags.AllowUnorderedAccess : ResourceFlags.None),
 			};
-		}
-
-		internal override ID3D12Resource GetBaseResource()
-		{
-			return Resource;
 		}
 	}
 }

@@ -21,9 +21,18 @@ namespace Engine.GPU
 		private IDXGISwapChain4 swapchain;
 		private Texture[] backbuffers;
 
+		private SwapChainFlags flags;
+
 		public Swapchain(IntPtr hwnd, int presentInterval = 0)
 		{
 			PresentInterval = presentInterval;
+
+			flags = SwapChainFlags.None;
+			flags |= SwapChainFlags.FrameLatencyWaitableObject;
+			if (GPUContext.SupportsTearing)
+			{
+				flags |= SwapChainFlags.AllowTearing;
+			}
 
 			// Describe swapchain.
 			SwapChainDescription1 swapchainDesc = new()
@@ -35,7 +44,7 @@ namespace Engine.GPU
 				BufferUsage = Usage.RenderTargetOutput,
 				SwapEffect = SwapEffect.FlipDiscard,
 				SampleDescription = new SampleDescription(1, 0),
-				Flags = GPUContext.SupportsTearing ? SwapChainFlags.AllowTearing : SwapChainFlags.None,
+				Flags = flags,
 			};
 
 			// Create swapchain.
@@ -81,7 +90,7 @@ namespace Engine.GPU
 				throw new InvalidOperationException("Resource is in wrong state for present!");
 			}
 
-			swapchain.Present(PresentInterval, (PresentInterval == 0 && GPUContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None);
+			Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && GPUContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
 		}
 
 		public void Resize(Vector2i size)
@@ -104,7 +113,7 @@ namespace Engine.GPU
 			}
 
 			// Resize swapchain.
-			swapchain.ResizeBuffers(GPUContext.RenderLatency, size.X, size.Y, Format.Unknown, GPUContext.SupportsTearing ? SwapChainFlags.AllowTearing : SwapChainFlags.None);
+			swapchain.ResizeBuffers(GPUContext.RenderLatency, size.X, size.Y, Format.Unknown, flags);
 
 			// Recreate render targets.
 			CreateRTs();

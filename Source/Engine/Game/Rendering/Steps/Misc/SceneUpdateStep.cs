@@ -8,7 +8,7 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Update actor instances.
-			foreach (Actor actor in Scene.Main.Actors)
+			foreach (Actor actor in Scene.Actors)
 			{
 				RecurseInstances(actor);
 			}

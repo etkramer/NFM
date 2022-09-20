@@ -9,16 +9,17 @@ namespace Engine.Frontend
 		/// <summary>
 		/// Wraps a task to support the fancy exception handling UI. Should only use when run from UI thread.
 		/// </summary>
-		public static void InvokeHandled(Action action)
+		public static bool InvokeHandled(Action action)
 		{
 			try
 			{
 				action?.Invoke();
+				return true;
 			}
 			catch (Exception e)
 			{
 				// Capture stack trace.
-				ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(e.InnerException);
+				ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(GetInnermost(e));
 
 				// Create exception dialog.
 				Dispatcher.UIThread.Post(() =>
@@ -31,7 +32,21 @@ namespace Engine.Frontend
 						.Button("Break", () => info.Throw())
 						.Button("Abort", () => Environment.Exit(-1)).Open();
 				});
+
+				return false;
 			};
+		}
+
+		private static Exception GetInnermost(Exception ex)
+		{
+			if (ex.InnerException == null || ex.InnerException == ex)
+			{
+				return ex;
+			}
+			else
+			{
+				return GetInnermost(ex.InnerException);
+			}
 		}
 	}
 }

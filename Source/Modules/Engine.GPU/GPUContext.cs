@@ -52,9 +52,10 @@ namespace Engine.GPU
 			RenderLatency = MathHelper.Max(renderLatency, 2);
 
 			// Enable debug layer in debug builds.
-			if (Debug.IsDebugBuild && D3D12.D3D12GetDebugInterface(out ID3D12Debug3 debug).Success)
+			if (Debug.IsDebugBuild && D3D12.D3D12GetDebugInterface(out ID3D12Debug5 debug).Success)
 			{
 				debug.EnableDebugLayer();
+				debug.SetEnableAutoName(true);
 				debug.Dispose();
 			}
 
@@ -122,22 +123,27 @@ namespace Engine.GPU
 		internal static void WaitIdle()
 		{
 			ulong fenceValue = flushFence.CompletedValue;
-			GraphicsQueue.Signal(flushFence, fenceValue + 1);
-			flushFence.SetEventOnCompletion(fenceValue + 1, frameFenceEvent);
+
+			GraphicsQueue.Signal(flushFence, (fenceValue + 1) % 2);
+			flushFence.SetEventOnCompletion((fenceValue + 1) % 2, frameFenceEvent);
 			frameFenceEvent.WaitOne();
 		}
 
-		internal static void WaitFrame()
+		internal static bool WaitFrame()
 		{
 			GraphicsQueue.Signal(frameFence, ++FrameCount);
+			ulong GPUFrameCount = frameFence.CompletedValue;
 
-			// Is the CPU more than RenderLatency frames ahead of the GPU?
-			if (FrameCount - frameFence.CompletedValue >= (ulong)RenderLatency)
+			// If we are more than RenderLatency frames ahead, wait for the GPU to catch up.
+			if ((FrameCount - GPUFrameCount) >= (ulong)RenderLatency)
 			{
-				// Wait for the GPU to catch up.
-				frameFence.SetEventOnCompletion(FrameCount, frameFenceEvent);
+				frameFence.SetEventOnCompletion(GPUFrameCount + 1, frameFenceEvent);
 				frameFenceEvent.WaitOne();
+
+				return true;
 			}
+
+			return false;
 		}
 
 		public static IntPtr GetDevicePointer()

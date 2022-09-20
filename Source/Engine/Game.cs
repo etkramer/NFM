@@ -53,8 +53,14 @@ namespace Engine
 		{
 			OnTick.Invoke(Graphics.FrameTime);
 
+			// Invoke dispose queue.
+			Queue.Invoke(0);
+
 			// Render the frame.
 			Renderer.Render();
+
+			// Report frametime.
+			Debug.Log(Graphics.FrameTime * 1000);
 		}
 
 		public static void Cleanup()

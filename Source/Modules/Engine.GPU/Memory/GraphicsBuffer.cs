@@ -11,7 +11,7 @@ namespace Engine.GPU
 		private UnorderedAccessView uav;
 		private ConstantBufferView cbv;
 
-		internal ID3D12Resource Resource;
+		internal override ID3D12Resource D3DResource { get; private protected set; }
 
 		public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
 		public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;
@@ -27,7 +27,7 @@ namespace Engine.GPU
 		{
 			if (srv == null)
 			{
-				srv = new ShaderResourceView(Resource, Stride, Capacity, IsRaw && Stride == 1);
+				srv = new ShaderResourceView(D3DResource, Stride, Capacity, IsRaw && Stride == 1);
 			}
 
 			return srv;
@@ -37,7 +37,7 @@ namespace Engine.GPU
 		{
 			if (uav == null)
 			{
-				uav = new UnorderedAccessView(Resource, Stride, Capacity, HasCounter, CounterOffset);
+				uav = new UnorderedAccessView(D3DResource, Stride, Capacity, HasCounter, CounterOffset);
 			}
 
 			return uav;
@@ -48,7 +48,7 @@ namespace Engine.GPU
 			if (cbv == null)
 			{
 				Debug.Assert((Capacity * Stride % ConstantAlignment == 0) || (SizeAlignment % ConstantAlignment == 0), "Buffers must be aligned to 256b to be used as program constants");
-				cbv = new ConstantBufferView(Resource, Stride, Capacity);
+				cbv = new ConstantBufferView(D3DResource, Stride, Capacity);
 			}
 
 			return cbv;
@@ -56,8 +56,8 @@ namespace Engine.GPU
 
 		public string Name
 		{
-			get => Resource.Name;
-			set => Resource.Name = value;
+			get => D3DResource.Name;
+			set => D3DResource.Name = value;
 		}
 
 		public GraphicsBuffer(int sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
@@ -95,7 +95,8 @@ namespace Engine.GPU
 			};
 
 			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.CopyDest, out Resource);
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.CopyDest, out ID3D12Resource resource);
+			D3DResource = resource;
 			State = ResourceStates.CopyDest;
 
 			// Set debug name.
@@ -109,12 +110,8 @@ namespace Engine.GPU
 
 		public void Dispose()
 		{
-			Resource.Dispose();
-		}
-
-		internal override ID3D12Resource GetBaseResource()
-		{
-			return Resource;
+			D3DResource.Release();
+			IsAlive = false;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Vortice.Direct3D12;
+using Vortice.DXGI;
 
 namespace Engine.GPU
 {
@@ -12,6 +13,14 @@ namespace Engine.GPU
 		internal ID3D12GraphicsCommandList6 list;
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
+
+		public bool IsOpen { get; private set; } = false;
+
+		public string Name
+		{
+			get => list.Name;
+			set => list.Name = value;
+		}
 
 		private static ShaderProgram MipGenProgram = new ShaderProgram()
 			.UseIncludes(typeof(CommandList).Assembly)
@@ -36,8 +45,6 @@ namespace Engine.GPU
 			allocator = new CommandAllocator(CommandListType.Direct);
 			list = GPUContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, allocator.commandAllocators[GPUContext.FrameIndex]);
 			list.Close();
-
-			Reset();
 		}
 
 		public void Dispose()
@@ -104,7 +111,7 @@ namespace Engine.GPU
 				ResourceBarrier[] barriers = new ResourceBarrier[buffers.Length];
 				for (int i = 0; i < buffers.Length; i++)
 				{
-					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].Resource));
+					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
 				}
 
 				list.ResourceBarrier(barriers);
@@ -120,7 +127,7 @@ namespace Engine.GPU
 				ResourceBarrier[] barriers = new ResourceBarrier[textures.Length];
 				for (int i = 0; i < textures.Length; i++)
 				{
-					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].Resource));
+					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));
 				}
 
 				list.ResourceBarrier(barriers);
@@ -134,7 +141,7 @@ namespace Engine.GPU
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
+				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
 			};
 
 			CommandInput[] inputs = new[]
@@ -150,7 +157,7 @@ namespace Engine.GPU
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.Resource, commandOffset, countBuffer, (ulong)countOffset);
+				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, countBuffer, (ulong)countOffset);
 			};
 
 			CommandInput[] inputs = new[]
@@ -415,6 +422,8 @@ namespace Engine.GPU
 
 		public unsafe void UploadBuffer(GraphicsBuffer buffer, void* data, int dataSize, long offset = 0)
 		{
+			Debug.Assert(buffer.IsAlive);
+
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
@@ -428,7 +437,7 @@ namespace Engine.GPU
 				// Copy from upload to dest buffer.
 				CustomCommand((o) =>
 				{
-					o.CopyBufferRegion(buffer.Resource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
+					o.CopyBufferRegion(buffer.D3DResource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
 				}, new CommandInput(buffer, ResourceStates.CopyDest));
 			}
 		}
@@ -443,6 +452,8 @@ namespace Engine.GPU
 
 		public unsafe void UploadTexture(Texture texture, void* data, int dataSize, int mipLevel = 0)
 		{
+			Debug.Assert(texture.IsAlive);
+
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
@@ -503,7 +514,7 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.CopyTextureRegion(new TextureCopyLocation(dest.Resource), 0, 0, 0, new TextureCopyLocation(source.Resource));
+				list.CopyTextureRegion(new TextureCopyLocation(dest.D3DResource), 0, 0, 0, new TextureCopyLocation(source.D3DResource));
 			};
 
 			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
@@ -532,7 +543,7 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.CopyResource(dest.GetBaseResource(), source.GetBaseResource());
+				list.CopyResource(dest.D3DResource, source.D3DResource);
 			};
 			
 			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
@@ -691,6 +702,16 @@ namespace Engine.GPU
 		{
 			lock (commands)
 			{
+				// Reset D3D list.
+				allocator.Reset();
+				list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
+
+				// Setup common state.
+				list.SetDescriptorHeaps(1, new[]
+				{
+					ShaderResourceView.Heap.handle,
+				});
+
 				List<PendingTransition> transitions = new();
 
 				// Build.
@@ -722,6 +743,8 @@ namespace Engine.GPU
 							{
 								continue;
 							}
+
+							Debug.Assert(input.Resource.IsAlive, "Resource used by command was disposed before the command list was executed");
 
 							if (input.Resource.State != input.State)
 							{
@@ -756,7 +779,7 @@ namespace Engine.GPU
 				
 					if (transitions.Count > 0)
 					{
-						list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.GetBaseResource(), o.BeforeState, o.AfterState))).ToArray());
+						list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.D3DResource, o.BeforeState, o.AfterState))).ToArray());
 					}
 
 					commands[i].BuildAction?.Invoke(list);
@@ -765,6 +788,10 @@ namespace Engine.GPU
 
 			// Close command list.
 			list.Close();
+
+			// Reset virtual list.
+			commands.Clear();
+			CurrentProgram = null;
 		}
 
 		/// <summary>
@@ -775,30 +802,6 @@ namespace Engine.GPU
 			// Build and execute command list.
 			Build();
 			GPUContext.GraphicsQueue.ExecuteCommandList(list);
-		}
-
-		/// <summary>
-		/// Resets command list and prepares it to be (re)built.
-		/// </summary>
-		public void Reset()
-		{
-			lock (commands)
-			{
-				// Reset virtual list.
-				commands.Clear();
-
-				CurrentProgram = null;
-
-				// Reset D3D list.
-				allocator.Reset();
-				list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
-
-				// Setup common state.
-				list.SetDescriptorHeaps(1, new[]
-				{
-					ShaderResourceView.Heap.handle,
-				});
-			}
 		}
 
 		public IntPtr GetPointer()

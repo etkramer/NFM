@@ -55,7 +55,7 @@ namespace Engine.Frontend.Controls
 			}
 
 			// Begin game loop.
-			DispatcherTimer.Run(() => { FrontendHelpers.InvokeHandled(Game.Update); return true; }, TimeSpan.Zero, DispatcherPriority.Render);
+			DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Game.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
 		}
 
 		public void NewPressed()

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Engine.GPU;
+using Engine.Rendering;
 
 namespace Engine.World
 {
@@ -15,8 +18,11 @@ namespace Engine.World
 
 		public Scene()
 		{
-			Actors = new(actors);
 			All.Add(this);
+			Actors = new(actors);
+
+			InstanceBuffer.Name = "Instance Buffer";
+			TransformBuffer.Name = "Transform Buffer";
 		}
 
 		/// <summary>
@@ -45,8 +51,11 @@ namespace Engine.World
 				actors[i].Dispose();
 			}
 
-			InstanceBuffer.Dispose();
-			TransformBuffer.Dispose();
+			Queue.Add(() =>
+			{
+				InstanceBuffer.Dispose();
+				TransformBuffer.Dispose();
+			}, 0);
 
 			All.Remove(this);
 		}

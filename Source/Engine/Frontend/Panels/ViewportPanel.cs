@@ -76,7 +76,7 @@ namespace Engine.Frontend
 			// Opened event.
 			nativeControl.OnOpen += () =>
 			{
-				Swapchain = new Swapchain(nativeControl.Hwnd);
+				Swapchain = new Swapchain(nativeControl.Hwnd, 1);
 				viewport = new Viewport(this);
 			};
 
