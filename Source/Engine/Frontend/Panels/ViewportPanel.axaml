@@ -1,0 +1,21 @@
+<engine:ToolPanel 
+		xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:engine="using:Engine.Frontend"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		Title="Viewport"
+		x:Class="Engine.Frontend.ViewportPanel">
+
+	<Grid RowDefinitions="*, 26">
+		<!--Viewport Content-->
+		<engine:ViewportHost Grid.Row="0"/>
+		
+		<StackPanel Grid.Row="1" Margin="10, 0" Spacing="10" HorizontalAlignment="Right" Orientation="Horizontal">
+			<TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Text="{Binding memory}"/>
+			<TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Text="{Binding frameTime}"/>
+		</StackPanel>
+	</Grid>
+	
+</engine:ToolPanel>

@@ -25,6 +25,8 @@
     <Setter Property="SelectionForegroundBrush" Value="{DynamicResource HighlightForegroundBrush}"/>
     <Setter Property="Padding" Value="4"/>
     <Setter Property="ContextFlyout" Value="{StaticResource DefaultTextBoxContextFlyout}" />
+	<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+	<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="border"
@@ -77,7 +79,7 @@
                                     RevealPassword="{TemplateBinding RevealPassword}"
                                     SelectionBrush="{TemplateBinding SelectionBrush}"
                                     SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
-                                    CaretBrush="{TemplateBinding CaretBrush}" />
+                                    CaretBrush="{TemplateBinding CaretBrush}"/>
                   </Panel>
                 </ScrollViewer>
                 <ContentPresenter Grid.Column="2" Grid.ColumnSpan="1" Content="{TemplateBinding InnerRightContent}"/>             

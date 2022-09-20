@@ -58,9 +58,6 @@ namespace Engine
 
 			// Render the frame.
 			Renderer.Render();
-
-			// Report frametime.
-			Debug.Log(Graphics.FrameTime * 1000);
 		}
 
 		public static void Cleanup()

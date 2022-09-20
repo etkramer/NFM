@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Platform;
@@ -159,17 +160,17 @@ namespace Avalonia.Win32
 			}
         }
 
-		private List<(double, Stopwatch, Action)> timers = new();
+		private List<(double Interval, Stopwatch Watch, Action Callback)> timers = new();
 		public void TimerTick()
 		{
 			for (int i = timers.Count - 1; i >= 0; i--)
 			{
 				var timer = timers[i];
 
-				if (timer.Item2.Elapsed.TotalSeconds > timer.Item1 || timer.Item1 == 0d)
+				if (timer.Watch.Elapsed.TotalSeconds > timer.Item1 || timer.Interval == 0d)
 				{
-					timer.Item3.Invoke();
-					timer.Item2.Restart();
+					timer.Callback.Invoke();
+					timer.Watch.Restart();
 				}
 			}
 		}

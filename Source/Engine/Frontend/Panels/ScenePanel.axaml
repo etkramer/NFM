@@ -9,16 +9,35 @@
 		Title="Scene"
 		x:Class="Engine.Frontend.ScenePanel">
 
-	<Grid Background="{StaticResource ControlBackgroundColor}">
-		<TreeView x:Name="sceneTree" Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding SceneActors}">
-			<TreeView.ItemTemplate>
-				<TreeDataTemplate>
-					<TextBlock Text="{Binding Name}">
-						
-					</TextBlock>
-				</TreeDataTemplate>
-			</TreeView.ItemTemplate>
-		</TreeView>
+	<Grid RowDefinitions="30, *">
+		<!--Toolbar-->
+		<Grid Grid.Row="0" ColumnDefinitions="auto, *" Margin="4">
+			<Button Grid.Column="0" Classes="window" ToolTip.Tip="Create" Margin="0, 0, 4, 0" Click="OnAddButtonClicked">
+				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
+				<Button.Flyout>
+					<MenuFlyout Placement="Bottom">
+						<MenuItem Header="Create Model"/>
+						<MenuItem Header="Create Light"/>
+						<MenuItem Header="Create Camera"/>
+					</MenuFlyout>
+				</Button.Flyout>
+			</Button>
+			
+			<TextBox Grid.Column="1" Watermark="Filter.."/>
+		</Grid>
+
+		<!--Scene Tree-->
+		<Grid Grid.Row="1" Background="{StaticResource ControlBackgroundColor}">
+			<TreeView x:Name="sceneTree" Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding SceneActors}">
+				<TreeView.ItemTemplate>
+					<TreeDataTemplate>
+						<TextBlock Text="{Binding Name}" Background="Transparent">
+
+						</TextBlock>
+					</TreeDataTemplate>
+				</TreeView.ItemTemplate>
+			</TreeView>
+		</Grid>
 	</Grid>
 	
 </engine:ToolPanel>
