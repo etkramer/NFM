@@ -11,19 +11,19 @@
 
 	<Grid RowDefinitions="30, *">
 		<!--Toolbar-->
-		<Grid Grid.Row="0" ColumnDefinitions="auto, *" Margin="4">
-			<Button Grid.Column="0" Classes="window" ToolTip.Tip="Create" Margin="0, 0, 4, 0" Click="OnAddButtonClicked">
+		<Grid Grid.Row="0" ColumnDefinitions="*, auto" Margin="4">
+			<Button Grid.Column="1" Classes="window" ToolTip.Tip="Create" Margin="4, 0, 0, 0" Click="OnAddPressed">
 				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
 				<Button.Flyout>
 					<MenuFlyout Placement="Bottom">
-						<MenuItem Header="Create Model"/>
-						<MenuItem Header="Create Light"/>
-						<MenuItem Header="Create Camera"/>
+						<MenuItem Header="Create Model" Command="{Binding OnCreatePressed}" CommandParameter="Model"/>
+						<MenuItem Header="Create Camera" Command="{Binding OnCreatePressed}" CommandParameter="Camera"/>
+						<MenuItem Header="Create Light (Point)" Command="{Binding OnCreatePressed}" CommandParameter="PointLight"/>
 					</MenuFlyout>
 				</Button.Flyout>
 			</Button>
 			
-			<TextBox Grid.Column="1" Watermark="Filter.."/>
+			<TextBox Grid.Column="0" Watermark="Filter.."/>
 		</Grid>
 
 		<!--Scene Tree-->
@@ -32,7 +32,11 @@
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate>
 						<TextBlock Text="{Binding Name}" Background="Transparent">
-
+							<TextBlock.ContextFlyout>
+								<MenuFlyout>
+									<MenuItem Header="Remove" Click="OnRemovePressed"/>
+								</MenuFlyout>
+							</TextBlock.ContextFlyout>
 						</TextBlock>
 					</TreeDataTemplate>
 				</TreeView.ItemTemplate>

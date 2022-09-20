@@ -25,9 +25,34 @@ namespace Engine.Frontend
 			sceneTree.Bind(TreeView.SelectedItemsProperty, new Binding("selected", BindingMode.Default) { Source = typeof(Selection) });
 		}
 
-		private void OnAddButtonClicked(object sender, RoutedEventArgs args)
+		private void OnAddPressed(object sender, RoutedEventArgs args)
 		{
 			FlyoutBase.ShowAttachedFlyout(sender as Control);
+		}
+
+		private void OnRemovePressed(object sender, RoutedEventArgs args)
+		{
+			var actors = Selection.Selected.OfType<Actor>();
+			foreach (var actor in actors.ToArray())
+			{
+				actor.Dispose();
+			}
+		}
+
+		private void OnCreatePressed(string type)
+		{
+			if (type == "Model")
+			{
+				new ModelActor().Spawn();
+			}
+			else if (type == "Camera")
+			{
+				new CameraActor().Spawn();
+			}
+			else if (type == "PointLight")
+			{
+				new PointLightActor().Spawn();
+			}
 		}
 	}
 }

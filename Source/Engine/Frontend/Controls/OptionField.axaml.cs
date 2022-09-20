@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Engine.Aspects;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	[DeclarativeProperty(SetterName = "Label", PropertyName = "Label", BindingPropertyName = "LabelProperty", PropertyType = typeof(string), TargetType = typeof(OptionField))]
 	[DeclarativeProperty(SetterName = "Description", PropertyName = "Description", BindingPropertyName = "DescriptionProperty", PropertyType = typeof(string), TargetType = typeof(OptionField))]

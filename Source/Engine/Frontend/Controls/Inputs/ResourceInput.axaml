@@ -3,6 +3,10 @@
         xmlns:controls="using:Engine.Frontend">
 
   <Style Selector="controls|ResourceInput">
+	<Style.Resources>
+		<controls:ResourceValueConverter x:Key="ResourceValueConverter"/>
+	</Style.Resources>
+	  
     <!-- Set Defaults -->
     <Setter Property="Template">
       <ControlTemplate>
@@ -11,7 +15,7 @@
 				<Panel Background="#19E6E62E" Width="16" Height="16">
 					<TextBlock Text="&#xE3DC;" FontSize="13" FontFamily="{StaticResource IconsFont}" Foreground="#E6E62E" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 				</Panel>
-				<TextBlock Grid.Column="1" Padding="4, 0" VerticalAlignment="Center" Text="{TemplateBinding ValueText}" Foreground="{StaticResource ThemeForegroundMidBrush}" TextTrimming="CharacterEllipsis"/>
+				<TextBlock Grid.Column="1" Padding="4, 0" VerticalAlignment="Center" Text="{TemplateBinding Value, Converter={StaticResource ResourceValueConverter}}" Foreground="{StaticResource ThemeForegroundMidBrush}" TextTrimming="CharacterEllipsis"/>
 			</Grid>
 		</Border>
       </ControlTemplate>
