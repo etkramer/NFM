@@ -3,6 +3,8 @@ using System.Runtime.ExceptionServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using Engine.Editor;
+using Engine.World;
 
 namespace Engine.Frontend.Controls
 {
@@ -101,5 +103,6 @@ namespace Engine.Frontend.Controls
 
 		public void UndoPressed() => Command.Undo();
 		public void RedoPressed() => Command.Redo();
+		public void DeletePressed() => Selection.Selected.OfType<Actor>().ToArray().ForEach(o => o.Dispose());
 	}
 }
