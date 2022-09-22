@@ -48,6 +48,7 @@ namespace Engine.Frontend
 			textBox = e.NameScope.Find<TextBox>("PART_TextBox");
 			textBox.KeyDown += OnKeyDown;
 			textBox.LostFocus += OnLostFocus;
+			textBox.IsUndoEnabled = false;
 
 			// Ignore alphabetical inputs.
 			textBox.AddHandler(TextInputEvent, (o, e) =>

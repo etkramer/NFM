@@ -11,6 +11,7 @@ using Avalonia.LogicalTree;
 using Engine.Resources;
 using Engine.Editor;
 using ISelectable = Engine.Editor.ISelectable;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Engine.Frontend
 {
@@ -44,7 +45,6 @@ namespace Engine.Frontend
 					// Field
 					new ContentControl()
 						.Column(1)
-						.Height(20)
 						.Margin(0, 0, 10, 0)		
 						.VerticalAlignment(VerticalAlignment.Center)
 						.Content(nameof(FieldContent), BindingMode.Default)
@@ -67,17 +67,17 @@ namespace Engine.Frontend
 				// Numeric input field.
 				FieldContent = new NumInspector(Property, subjects);
 			}
-			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
-			{
-				// Resource reference field.
-				FieldContent = new ResourceInspector(Property, subjects);
-			}
 			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
 				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
 				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i) || Property.PropertyType == typeof(Vector4d))
 			{
 				// Vector input field.
 				FieldContent = new VectorInspector(Property, subjects);
+			}
+			else if (Property.PropertyType.IsAssignableTo(typeof(Resource)))
+			{
+				// Resource reference field.
+				FieldContent = new ResourceInspector(Property, subjects);
 			}
 			else if (Property.PropertyType.IsPrimitive)
 			{

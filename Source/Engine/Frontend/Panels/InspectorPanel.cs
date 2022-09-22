@@ -142,27 +142,35 @@ namespace Engine.Frontend
 				.Where(o => o.Name.Contains(currentFilter, StringComparison.OrdinalIgnoreCase) || o.DeclaringType.Name.Contains(currentFilter, StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(currentFilter))
 				.Bucket(o => o.DeclaringType);
 
-			// Create the property grid.
-			List<Control> propertyGrid = new();
+			// Loop over types.
+			List<Control> expanders = new();
 			foreach (var bucket in buckets.Reverse())
 			{
+				// Get the type that properties in this bucket belong to.
 				Type bucketType = bucket.First().DeclaringType;
 
-				// Get the bucket's display name.
+				// Get that type's display name.
 				string bucketName = bucketType.Name.PascalToDisplay();
 				if (bucketName.EndsWith(" Actor"))
+				{
 					bucketName = bucketName.Remove(bucketName.Length - 6);
+				}
 
-				// Build the property grid.
-				var propertyInputs = bucket.Select(p => new PropertyInspector(Selection.Selected.ToArray(), p));
-				propertyGrid.Add(
+				// Loop over properties.
+				List<Control> inspectors = new();
+				foreach (var property in bucket)
+				{
+					inspectors.Add(new PropertyInspector(Selection.Selected.ToArray(), property));
+				}
+
+				// Create expander
+				expanders.Add(
 					new Expander()
 						.IsExpanded(true)
 						.Header(bucketName)
 						.With(o => o.FontWeight = FontWeight.SemiBold)
-						.Content(
-							new StackPanel()
-								.Children(propertyInputs.ToArray())
+						.Content(new StackPanel()
+							.Children(inspectors.ToArray())
 						)
 				);
 			}
@@ -170,7 +178,7 @@ namespace Engine.Frontend
 			// Submit the property grid.
 			InspectorContent = new StackPanel()
 				.Orientation(Orientation.Vertical)
-				.Children(propertyGrid.ToArray());
+				.Children(expanders.ToArray());
 		}
 	}
 }

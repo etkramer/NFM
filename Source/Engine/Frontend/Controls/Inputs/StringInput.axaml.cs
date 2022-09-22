@@ -35,6 +35,7 @@ namespace Engine.Frontend
 			var textBox = e.NameScope.Find<TextBox>("PART_TextBox");
 			textBox.KeyDown += OnKeyDown;
 			textBox.LostFocus += OnLostFocus;
+			textBox.IsUndoEnabled = false;
 
 			// Make sure proxy responds to changes in source.
 			ValueProperty.Changed.Subscribe(o => RaisePropertyChanged(ValueProxyProperty, default, Value));

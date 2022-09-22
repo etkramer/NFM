@@ -1,5 +1,6 @@
 ﻿using System;
 using Engine.GPU;
+using Engine.GPU.Native;
 using Engine.Rendering;
 using Engine.Resources;
 
@@ -11,7 +12,8 @@ namespace Engine.World
 		[Inspect] public Model Model { get; set; } = null;
 		[Inspect] public bool IsVisible { get; set; } = true;
 
-		[Inspect] public List<Shader> Layers { get; set; } = new(0);
+		[Inspect] public Material[] Materials { get; set; } = null;
+		[Inspect] public List<Shader> Layers { get; set; } = new();
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;
@@ -22,7 +24,12 @@ namespace Engine.World
 		
 		public ModelActor(string name = null) : base(name)
 		{
-			(this as INotify).Subscribe(nameof(Model), () => IsInstanceDirty = true);
+			(this as INotify).Subscribe(nameof(Model), () =>
+			{
+				IsInstanceDirty = true;
+				Materials = Model.Parts.SelectMany(o => o.Meshes).Select(o => o.Material).ToArray();
+			});
+
 			(this as INotify).Subscribe(nameof(IsVisible), () => IsInstanceDirty = true);
 		}
 
