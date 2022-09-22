@@ -12,8 +12,18 @@ namespace Engine.Frontend
 {
 	public class NumInput : TemplatedControl
 	{
+		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon), defaultValue: "\uE3C9");
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
+
+		[Notify] public string Icon
+		{
+			get => GetValue(IconProperty);
+			set
+			{
+				SetValue(IconProperty, value);
+			}
+		}
 
 		[Notify] public object Value
 		{
@@ -28,7 +38,7 @@ namespace Engine.Frontend
 		private string value;
 		[Notify] private string ValueProxy
 		{
-			get => Value.ToString();
+			get => Value?.ToString();
 			set => this.value = value;
 		}
 
@@ -106,7 +116,7 @@ namespace Engine.Frontend
 			}
 			else
 			{
-				if (ulong.TryParse(text, out ulong uintValue))
+				if (IsUnsigned(numType) && ulong.TryParse(text, out ulong uintValue))
 				{
 					num = Convert.ChangeType(uintValue, numType);
 					return true;

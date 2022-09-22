@@ -40,7 +40,6 @@ namespace Engine
 			modelObject.Position = new Vector3(0, -0.4f, 1);
 			modelObject.Rotation = new Vector3(0, 180, 0);
 			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
-			modelObject.Name = null;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

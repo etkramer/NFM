@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using Avalonia;
 using Avalonia.Data;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -15,39 +16,59 @@ namespace Engine.Frontend
 {
 	public class VectorInspector : BaseInspector
 	{
-		[Notify] private string ValueX
+		[Notify] private object ValueX
 		{
+			set
+			{
+				var vector = GetFirstValue<object>();
+				vecIndexer.SetValue(vector, value, new object[] {0});
+				SetValue(vector);
+			}
 			get
 			{
-				object vec = GetFirstValue<object>();
-				return vecIndexer.GetValue(vec, new object[] { 0 }).ToString();
+				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {0});
 			}
 		}
 
-		[Notify] private string ValueY
+		[Notify] private object ValueY
 		{
+			set
+			{
+				var vector = GetFirstValue<object>();
+				vecIndexer.SetValue(vector, value, new object[] {1});
+				SetValue(vector);
+			}
 			get
 			{
-				object vec = GetFirstValue<object>();
-				return vecIndexer.GetValue(vec, new object[] { 1 }).ToString();
+				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {1});
 			}
 		}
 
-		[Notify] private string ValueZ
+		[Notify] private object ValueZ
 		{
+			set
+			{
+				var vector = GetFirstValue<object>();
+				vecIndexer.SetValue(vector, value, new object[] {2});
+				SetValue(vector);
+			}
 			get
 			{
-				object vec = GetFirstValue<object>();
-				return vecIndexer.GetValue(vec, new object[] { 2 }).ToString();
+				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {2});
 			}
 		}
 
-		[Notify] private string ValueW
+		[Notify] private object ValueW
 		{
+			set
+			{
+				var vector = GetFirstValue<object>();
+				vecIndexer.SetValue(vector, value, new object[] {3});
+				SetValue(vector);
+			}
 			get
 			{
-				object vec = GetFirstValue<object>();
-				return vecIndexer.GetValue(vec, new object[] { 3 }).ToString();
+				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {3});
 			}
 		}
 
@@ -55,105 +76,42 @@ namespace Engine.Frontend
 
 		public VectorInspector(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
 		{
+			// Subscribe to property changed notifications.
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueX));
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueY));
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueZ));
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueW));
 
-			int numComponents = GetComponents(property.PropertyType);
-			List<Control> componentInputs = new();
-
-			// Grab the this[] indexer property.
+			// Count components and grab this[] indexer property.
+			int numComponents = GetNumComponents(property.PropertyType);
 			vecIndexer = property.PropertyType.GetProperty("Item");
 
+			// Loop through vector components...
+			List<Control> inputs = new();
 			for (int i = 0; i < numComponents; i++)
 			{
-				int iCaptured = i;
-
-				Control icon = new Panel()
-					.Background("#19E6E62E")
-					.Width(16)
-					.Height(16)
-					.Children(new TextBlock()
-						.Text(GetIconChar(i).ToString())
-						.Size(12)
-						.Font(this.GetResource<FontFamily>("IconsFont"))
-						.Foreground("#E6E62E")
-						.VerticalAlignment(VerticalAlignment.Center)
-						.HorizontalAlignment(HorizontalAlignment.Center)
-					);
-
-				string componentProp = null;
-				switch (i)
+				// Create component input.
+				NumInput input = new NumInput();
+				input.With(o => o.Icon = GetIconChar(i));
+				input.Margin(new Thickness(i == 0 ? 0 : 4, 0, (i == numComponents - 1 ? 0 : 4), 0));
+				input.Bind(NumInput.ValueProperty, i switch
 				{
-					case 0:
-						componentProp = nameof(ValueX);
-						break;
-					case 1:
-						componentProp = nameof(ValueY);
-						break;
-					case 2:
-						componentProp = nameof(ValueZ);
-						break;
-					case 3:
-						componentProp = nameof(ValueW);
-						break;
-				}
-
-				// Create input box.
-				TextBox numEntry = new TextBox();
-				numEntry.Padding = new(4, 0);
-				numEntry.VerticalContentAlignment = VerticalAlignment.Center;
-				numEntry.Bind(TextBox.TextProperty, componentProp, this);
-				numEntry.Foreground = this.GetResourceBrush("ThemeForegroundMidBrush");
-				numEntry.LostFocus += (o, e) => (this as INotify).Raise(componentProp);
-
-				// Ignore alphabetical inputs.
-				numEntry.AddHandler(TextInputEvent, (o, e) =>
-				{
-					if (!e.Text.All(c => !char.IsLetter(c)))
-					{
-						e.Handled = true;
-					}
-				},
-				RoutingStrategies.Tunnel);
-
-				// Respond to enter key.
-				numEntry.KeyDown += (o, e) =>
-				{
-					if (e.Key == Key.Enter)
-					{
-						// Set input to new value.
-						object vec = GetFirstValue<object>();
-						if (TryParseNum(numEntry.Text, typeof(float), out object num))
-						{
-							vecIndexer.SetValue(vec, num, new object[] { iCaptured });
-							SetValue(vec);
-						}
-
-						// Switch focus.
-						Focus();
-					}
-				};
-
-				componentInputs.Add(new ContentControl()
-					.Margin(i == 0 ? 0 : 4, 0, (i == numComponents - 1 ? 0 : 4), 0)
-					.Radius(2)
-					.Background(this.GetResourceBrush("ControlBackgroundColor"))
-					.With(o => o.Padding = new(1))
-					.Content(
-						new Grid()
-							.Columns("auto, *")
-							.Children(icon.Column(0), numEntry.Column(1))
-					));
+					0 => nameof(ValueX),
+					1 => nameof(ValueY),
+					2 => nameof(ValueZ),
+					3 => nameof(ValueW),
+					_ => null
+				}, this);
+				
+				inputs.Add(input);
 			}
 
 			Content = new UniformGrid()
 				.With(o => o.Columns = numComponents)
-				.Children(componentInputs.ToArray());
+				.Children(inputs.ToArray());
 		}
 
-		private int GetComponents(Type type)
+		private int GetNumComponents(Type type)
 		{
 			if (type == typeof(Vector2) || type == typeof(Vector2d) || type == typeof(Vector2i))
 			{
@@ -168,21 +126,16 @@ namespace Engine.Frontend
 				return 4;
 			}
 
-			return -1;
+			return 0;
 		}
 
-		private char GetIconChar(int component)
+		private string GetIconChar(int component) => component switch
 		{
-			if (component == 0)
-				return 'X';
-			else if (component == 1)
-				return 'Y';
-			else if (component == 2)
-				return 'Z';
-			else if (component == 3)
-				return 'W';
-
-			return default;
-		}
+			0 => "X",
+			1 => "Y",
+			2 => "Z",
+			3 => "W",
+			_ => null
+		};
 	}
 }
