@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Avalonia.Controls.Primitives;
 using Engine.GPU;
 using Engine.Resources;
 using Engine.World;
@@ -44,69 +45,31 @@ namespace Engine.Rendering
 				int paramOffset = 4;
 				foreach (var param in Parameters)
 				{
-					int paramSize = 0;
-
 					// Override sizes where needed.
-					switch (param.Value)
+					int paramSize = param.Value switch
 					{
-						// Descriptor handles
-						case Texture2D:
-							paramSize = sizeof(uint);
-							break;
-						// Enforce minimum 4b alignment
-						case bool:
-						case byte:
-						case sbyte:
-							paramSize = Marshal.SizeOf(typeof(int));
-							break;
-						default:
-							paramSize = Marshal.SizeOf(param.Type);
-							break;
-					}
+						Texture2D => sizeof(uint),
+						bool or byte or sbyte => Marshal.SizeOf(typeof(int)),
+						_ => Marshal.SizeOf(param.Type)
+					};
 
-					// Write actual loader statements.
-					switch (param.Value)
+					// Add HLSL code for loading parameters
+					setupSource += param.Value switch
 					{
-						case Texture2D:
-							setupSource += $"{param.Name} = ResourceDescriptorHeap[MaterialParams.Load(materialID + {paramOffset})];\n";
-							break;
-						case bool:
-							setupSource += $"{param.Name} = (bool)MaterialParams.Load(materialID + {paramOffset});\n";
-							break;
-						case sbyte:
-						case int:
-							setupSource += $"{param.Name} = asint(MaterialParams.Load(materialID + {paramOffset}));\n";
-							break;
-						case byte:
-						case uint:
-						case char:
-							setupSource += $"{param.Name} = asuint(MaterialParams.Load(materialID + {paramOffset}));\n";
-							break;
-						case float:
-							setupSource += $"{param.Name} = asfloat(MaterialParams.Load(materialID + {paramOffset}));\n";
-							break;
-						case Color:
-						case Vector4:
-							setupSource += $"{param.Name} = asfloat(MaterialParams.Load4(materialID + {paramOffset}));\n";
-							break;
-						case Vector3:
-							setupSource += $"{param.Name} = asfloat(MaterialParams.Load3(materialID + {paramOffset}));\n";
-							break;
-						case Vector2:
-							setupSource += $"{param.Name} = asfloat(MaterialParams.Load2(materialID + {paramOffset}));\n";
-							break;
-						case Vector4i:
-							setupSource += $"{param.Name} = asint(MaterialParams.Load4(materialID + {paramOffset});\n";
-							break;
-						case Vector3i:
-							setupSource += $"{param.Name} = asint(MaterialParams.Load3(materialID + {paramOffset}));\n";
-							break;
-						case Vector2i:
-							setupSource += $"{param.Name} = asint(MaterialParams.Load2(materialID + {paramOffset}));\n";
-							break;
-						default:
-							throw new NotSupportedException($"{param.Type.Name} is not a supported shader parameter type");
-					}
+						Texture2D => $"{param.Name} = ResourceDescriptorHeap[MaterialParams.Load(materialID + {paramOffset})];\n",
+						bool => $"{param.Name} = (bool)MaterialParams.Load(materialID + {paramOffset});\n",
+						int or sbyte => $"{param.Name} = asint(MaterialParams.Load(materialID + {paramOffset}));\n",
+						uint or byte => $"{param.Name} = asuint(MaterialParams.Load(materialID + {paramOffset}));\n",
+						float => $"{param.Name} = asfloat(MaterialParams.Load(materialID + {paramOffset}));\n",
+						Vector4 or Color => $"{param.Name} = asfloat(MaterialParams.Load4(materialID + {paramOffset}));\n",
+						Vector3 => $"{param.Name} = asfloat(MaterialParams.Load3(materialID + {paramOffset}));\n",
+						Vector2 => $"{param.Name} = asfloat(MaterialParams.Load2(materialID + {paramOffset}));\n",
+						Vector4i => $"{param.Name} = asint(MaterialParams.Load4(materialID + {paramOffset}));\n",
+						Vector3i => $"{param.Name} = asint(MaterialParams.Load3(materialID + {paramOffset}));\n",
+						Vector2i => $"{param.Name} = asint(MaterialParams.Load2(materialID + {paramOffset}));\n",
+
+						_ => throw new NotSupportedException($"{param.Type.Name} is not a supported shader parameter type")
+					};
 
 					paramOffset += paramSize;
 				}

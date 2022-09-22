@@ -3,7 +3,6 @@
         xmlns:controls="using:Engine.Frontend">
 
   <Style Selector="controls|BoolInput">
-    <!-- Set Defaults -->
     <Setter Property="Template">
       <ControlTemplate>
 		<CheckBox IsChecked="{TemplateBinding Value, Mode=TwoWay}"/>
