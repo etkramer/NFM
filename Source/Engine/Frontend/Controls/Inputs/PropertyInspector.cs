@@ -12,6 +12,7 @@ using Engine.Resources;
 using Engine.Editor;
 using ISelectable = Engine.Editor.ISelectable;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections;
 
 namespace Engine.Frontend
 {

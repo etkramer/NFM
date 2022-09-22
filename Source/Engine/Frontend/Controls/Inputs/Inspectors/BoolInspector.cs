@@ -6,7 +6,7 @@ namespace Engine.Frontend
 {
 	public class BoolInspector : BaseInspector
 	{
-		[Notify] private bool? Value
+		[Notify] private bool Value
 		{
 			get
 			{
@@ -14,10 +14,7 @@ namespace Engine.Frontend
 			}
 			set
 			{
-				if (value.HasValue)
-				{
-					SetValue(value.Value);
-				}
+				SetValue(value);
 			}
 		}
 
