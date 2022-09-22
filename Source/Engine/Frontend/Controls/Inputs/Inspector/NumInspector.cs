@@ -16,7 +16,7 @@ namespace Engine.Frontend
 	{
 		[Notify] private object Value
 		{
-			get => HasMultipleValues ? null : GetFirstValue<object>();
+			get => GetFirstValue<object>();
 			set => SetValue(value);
 		}
 
@@ -26,7 +26,6 @@ namespace Engine.Frontend
 
 			// Create and assign string input.
 			Content = new NumInput();
-			(Content as NumInput).NumType = GetFirstValue<object>().GetType();
 			(Content as NumInput).Bind(NumInput.ValueProperty, nameof(Value), this);
 		}
 	}

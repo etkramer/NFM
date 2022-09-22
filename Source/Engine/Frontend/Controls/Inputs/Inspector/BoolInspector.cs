@@ -10,7 +10,7 @@ namespace Engine.Frontend
 		{
 			get
 			{
-				return HasMultipleValues ? null : GetFirstValue<bool>();
+				return GetFirstValue<bool>();
 			}
 			set
 			{

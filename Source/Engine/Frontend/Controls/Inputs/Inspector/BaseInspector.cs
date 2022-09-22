@@ -17,7 +17,6 @@ namespace Engine.Frontend
 		protected IEnumerable<object> Subjects { get; private set; }
 
 		protected event Action OnSelectedPropertyChanged = delegate {};
-		protected bool HasMultipleValues => Subjects.HasVariation(o => Property.GetValue(o));
 
 		public BaseInspector(PropertyInfo property, IEnumerable<object> subjects)
 		{

@@ -20,7 +20,7 @@ namespace Engine.Frontend
 			get
 			{
 				object vec = GetFirstValue<object>();
-				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 0 }).ToString();
+				return vecIndexer.GetValue(vec, new object[] { 0 }).ToString();
 			}
 		}
 
@@ -29,7 +29,7 @@ namespace Engine.Frontend
 			get
 			{
 				object vec = GetFirstValue<object>();
-				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 1 }).ToString();
+				return vecIndexer.GetValue(vec, new object[] { 1 }).ToString();
 			}
 		}
 
@@ -38,7 +38,7 @@ namespace Engine.Frontend
 			get
 			{
 				object vec = GetFirstValue<object>();
-				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 2 }).ToString();
+				return vecIndexer.GetValue(vec, new object[] { 2 }).ToString();
 			}
 		}
 
@@ -47,7 +47,7 @@ namespace Engine.Frontend
 			get
 			{
 				object vec = GetFirstValue<object>();
-				return HasMultipleValues ? "--" : vecIndexer.GetValue(vec, new object[] { 3 }).ToString();
+				return vecIndexer.GetValue(vec, new object[] { 3 }).ToString();
 			}
 		}
 

@@ -10,6 +10,8 @@ namespace Engine.World
 	{
 		[Inspect] public Model Model { get; set; } = null;
 		[Inspect] public bool IsVisible { get; set; } = true;
+
+		[Inspect] public List<Shader> Layers { get; set; } = new(0);
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;

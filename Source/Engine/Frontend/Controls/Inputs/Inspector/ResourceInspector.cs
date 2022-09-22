@@ -13,7 +13,7 @@ namespace Engine.Frontend
 	{
 		private Resource Value
 		{
-			get => HasMultipleValues ? null : GetFirstValue<Resource>();
+			get => GetFirstValue<Resource>();
 			set => SetValue(value);
 		}
 

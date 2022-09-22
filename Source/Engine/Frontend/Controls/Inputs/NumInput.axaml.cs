@@ -15,9 +15,6 @@ namespace Engine.Frontend
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
-		// Need to specify the input type manually in case Value is null (multiple values).
-		public Type NumType { get; set; }
-
 		[Notify] public object Value
 		{
 			get => GetValue(ValueProperty);
@@ -31,7 +28,7 @@ namespace Engine.Frontend
 		private string value;
 		[Notify] private string ValueProxy
 		{
-			get => Value?.ToString() ?? "--";
+			get => Value.ToString();
 			set => this.value = value;
 		}
 
@@ -68,21 +65,16 @@ namespace Engine.Frontend
 
 		private void OnLostFocus(object sender, RoutedEventArgs args)
 		{
-			Type numType = NumType ?? Value?.GetType();
-
-			if (numType != null)
+			// Set input to new value.
+			if (TryParseNum(value, Value.GetType(), out object num))
 			{
-				// Set input to new value.
-				if (TryParseNum(value, numType, out object num))
-				{
-					Value = num;
-				}
-				else
-				{
-					// Reset value.
-					SetValue(ValueProxyProperty, Value.ToString());
-					textBox.Text = value;
-				}
+				Value = num;
+			}
+			else
+			{
+				// Reset value.
+				SetValue(ValueProxyProperty, Value.ToString());
+				textBox.Text = value;
 			}
 		}
 

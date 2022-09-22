@@ -28,7 +28,7 @@ namespace Engine.Frontend
 		{
 			if (value == null)
 			{
-				return "--";
+				return null;
 			}
 			else if (value is Resource resource)
 			{

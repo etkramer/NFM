@@ -14,14 +14,11 @@ namespace Engine.Frontend
 		{
 			get
 			{
-				return HasMultipleValues ? "--" : GetFirstValue<string>();
+				return GetFirstValue<string>();
 			}
 			set
 			{
-				if (value != "--" || !HasMultipleValues)
-				{
-					SetValue(value);
-				}
+				SetValue(value);
 			}
 		}
 
