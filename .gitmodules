@@ -1,0 +1,4 @@
+[submodule "source/libraries/Avalonia"]
+	path = source/libraries/Avalonia
+	url = https://github.com/BitCrusader/Engine.Avalonia
+	branch = release/0.10.17
