@@ -61,7 +61,8 @@
 		<ProjectReference Include="..\Libraries\MeshOptimize\MeshOptimize.vcxproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Libraries\Avalonia.Win32\Avalonia.Win32.csproj" />
+		<!--<ProjectReference Include="..\Libraries\Avalonia.Win32\Avalonia.Win32.csproj" />-->
+		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />
 		<PackageReference Include="Avalonia" Version="0.10.17" />
 		<PackageReference Include="Avalonia.Direct2D1" Version="0.10.17" />
 		<PackageReference Include="Avalonia.Skia" Version="0.10.17" />

@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using WinApi.User32;
-using WndProc = Avalonia.Win32.Interop.UnmanagedMethods.WndProc;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using POINT = NetCoreEx.Geometry.Point;
