@@ -12,7 +12,7 @@
       <ControlTemplate>
 		<Border CornerRadius="2" Background="{StaticResource ControlBackgroundColor}" Padding="1">
 			<Grid ColumnDefinitions="auto, *">
-				<Panel Background="#19E6E62E" Width="18" VerticalAlignment="Stretch">
+				<Panel Background="#19E6E62E" Width="18" MinHeight="18" VerticalAlignment="Stretch">
 					<TextBlock Text="&#xE3DC;" FontSize="13" FontFamily="{StaticResource IconsFont}" Foreground="#E6E62E" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
 				</Panel>
 				<TextBlock Grid.Column="1" Padding="4, 0" VerticalAlignment="Center" Text="{TemplateBinding Value, Converter={StaticResource ResourceValueConverter}}" Foreground="{StaticResource ThemeForegroundMidBrush}" TextTrimming="CharacterEllipsis"/>

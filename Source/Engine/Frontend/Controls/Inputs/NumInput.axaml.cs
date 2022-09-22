@@ -12,7 +12,7 @@ namespace Engine.Frontend
 {
 	public class NumInput : TemplatedControl
 	{
-		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon), defaultValue: "\uE3C9");
+		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon), defaultValue: "\uF1B9");
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
@@ -76,6 +76,11 @@ namespace Engine.Frontend
 
 		private void OnLostFocus(object sender, RoutedEventArgs args)
 		{
+			if (Value == null)
+			{
+				return;
+			}
+
 			// Set input to new value.
 			if (TryParseNum(value, Value.GetType(), out object num))
 			{
