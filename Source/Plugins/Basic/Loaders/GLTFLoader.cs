@@ -1,16 +1,15 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Engine;
 using Engine.Resources;
 using Engine.Mathematics;
+using Asset = Engine.Resources.Asset;
 using ModelPart = Engine.Resources.ModelPart;
 using Material = Engine.Resources.Material;
-using System.Collections.Concurrent;
-using Engine.Common;
 using Mesh = Engine.Resources.Mesh;
-using StbiSharp;
 using SharpGLTF.Schema2;
-using Asset = Engine.Resources.Asset;
 using SharpGLTF.Validation;
+using StbiSharp;
 
 namespace Basic.Loaders
 {
@@ -33,7 +32,7 @@ namespace Basic.Loaders
 
 			// Load textures from GLTF
 			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
-			await Parallel.ForEachAsync(model.LogicalTextures, async (texture, ct) =>
+			Parallel.ForEach(model.LogicalTextures, (texture, ct) =>
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
@@ -86,25 +85,20 @@ namespace Basic.Loaders
 			{
 				// Loop through GLTF "primitives" (equivalent to Meshes)
 				Mesh[] gameMeshes = new Mesh[mesh.Primitives.Count];
-				await Parallel.ForEachAsync(mesh.Primitives, async (primitive, ct) =>
+				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
 					// Find node and read transform.
 					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
 					var worldMatrix = ((Matrix4)node.GetWorldMatrix(null, 0)).Transpose();
 
-					// Grab vertex accessors from GLTF.
-					var posAccessor = primitive.GetVertexAccessor("POSITION");
-					var normAccessor = primitive.GetVertexAccessor("NORMAL");
-					var uvAccessor = primitive.GetVertexAccessor("TEXCOORD_0");
-
-					// Create arrays from accessors.
-					var positions = posAccessor.AsVector3Array();
-					var normals = normAccessor.AsVector3Array();
-					var uvs = uvAccessor.AsVector2Array();
+					// Grab vertex spans from GLTF.
+					var positions = primitive.GetVertexAccessor("POSITION").AsSpan<Vector3>();
+					var normals = primitive.GetVertexAccessor("NORMAL").AsSpan<Vector3>();
+					var uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsSpan<Vector2>();
 
 					// Read vertex data from accessor streams.
-					Vertex[] vertices = new Vertex[positions.Count];
-					for (int i = 0; i < positions.Count; i++)
+					Vertex[] vertices = new Vertex[positions.Length];
+					for (int i = 0; i < positions.Length; i++)
 					{
 						vertices[i] = new Vertex()
 						{
@@ -137,6 +131,14 @@ namespace Basic.Loaders
 			{
 				return new Span<T>(dataPtr, source.Length);
 			}
+		}
+	}
+
+	public static class GLTFHelpers
+	{
+		public static unsafe Span<T> AsSpan<T>(this Accessor accessor) where T : unmanaged
+		{
+			return MemoryMarshal.Cast<byte, T>(accessor.SourceBufferView.Content.AsSpan());
 		}
 	}
 }
