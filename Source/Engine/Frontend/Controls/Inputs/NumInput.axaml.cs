@@ -7,14 +7,18 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Media;
 
 namespace Engine.Frontend
 {
 	public class NumInput : TemplatedControl
 	{
-		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon), defaultValue: "\uF1B9");
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
+
+		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
+		public static StyledProperty<Brush> IconForegroundProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconForeground));
+		public static StyledProperty<Brush> IconBackgroundProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconBackground));
 
 		[Notify] public string Icon
 		{
@@ -31,6 +35,24 @@ namespace Engine.Frontend
 			set
 			{
 				SetValue(ValueProperty, value);
+			}
+		}
+
+		[Notify] public Brush IconForeground
+		{
+			get => GetValue(IconForegroundProperty);
+			set
+			{
+				SetValue(IconForegroundProperty, value);
+			}
+		}
+
+		[Notify] public Brush IconBackground
+		{
+			get => GetValue(IconBackgroundProperty);
+			set
+			{
+				SetValue(IconBackgroundProperty, value);
 			}
 		}
 

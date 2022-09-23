@@ -138,7 +138,7 @@ namespace Basic.Loaders
 	{
 		public static unsafe Span<T> AsSpan<T>(this Accessor accessor) where T : unmanaged
 		{
-			return MemoryMarshal.Cast<byte, T>(accessor.SourceBufferView.Content.AsSpan());
+			return MemoryMarshal.Cast<byte, T>(accessor.SourceBufferView.Content);
 		}
 	}
 }
