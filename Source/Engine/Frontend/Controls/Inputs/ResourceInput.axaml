@@ -7,7 +7,6 @@
 		<controls:ResourceValueConverter x:Key="ResourceValueConverter"/>
 	</Style.Resources>
 	  
-    <!-- Set Defaults -->
     <Setter Property="Template">
       <ControlTemplate>
 		<Border CornerRadius="4" Background="{StaticResource ControlBackgroundColor}" Padding="1">

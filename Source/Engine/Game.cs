@@ -35,6 +35,9 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
+			// Create example camera
+			new CameraActor().Spawn();
+
 			// Create example model
 			var modelObject = new ModelActor().Spawn<ModelActor>();
 			modelObject.Position = new Vector3(0, -0.4f, 1);

@@ -93,6 +93,7 @@ namespace Engine.Frontend
 				// Create component input.
 				NumInput input = new NumInput();
 				input.With(o => o.Icon = GetIconChar(i));
+				input.With(o => o.IconColor = GetIconForeground(i));
 				input.Margin(new Thickness(i == 0 ? 0 : 4, 0, (i == numComponents - 1 ? 0 : 4), 0));
 				input.Bind(NumInput.ValueProperty, i switch
 				{
@@ -137,5 +138,21 @@ namespace Engine.Frontend
 			3 => "W",
 			_ => null
 		};
+
+		private SolidColorBrush GetIconForeground(int component) => component switch
+		{
+			0 => SolidColorBrush.Parse("#E26E6E"),
+			1 => SolidColorBrush.Parse("#A8CC60"),
+			2 => SolidColorBrush.Parse("#84B5E6"),
+			3 => SolidColorBrush.Parse("#6E6EE2"),
+			_ => null
+		};
+
+		private SolidColorBrush GetIconBackground(int component)
+		{
+			var brush = GetIconForeground(component);
+			brush.Opacity = 0.1;
+			return brush;
+		}
 	}
 }

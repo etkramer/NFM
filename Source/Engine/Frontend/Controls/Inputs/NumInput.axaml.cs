@@ -17,8 +17,7 @@ namespace Engine.Frontend
 		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
 		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
-		public static StyledProperty<Brush> IconForegroundProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconForeground));
-		public static StyledProperty<Brush> IconBackgroundProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconBackground));
+		public static StyledProperty<Brush> IconColorProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconColor));
 
 		[Notify] public string Icon
 		{
@@ -38,21 +37,12 @@ namespace Engine.Frontend
 			}
 		}
 
-		[Notify] public Brush IconForeground
+		[Notify] public Brush IconColor
 		{
-			get => GetValue(IconForegroundProperty);
+			get => GetValue(IconColorProperty);
 			set
 			{
-				SetValue(IconForegroundProperty, value);
-			}
-		}
-
-		[Notify] public Brush IconBackground
-		{
-			get => GetValue(IconBackgroundProperty);
-			set
-			{
-				SetValue(IconBackgroundProperty, value);
+				SetValue(IconColorProperty, value);
 			}
 		}
 
