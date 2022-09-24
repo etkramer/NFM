@@ -14,7 +14,6 @@ namespace Engine.Frontend
 	public class NumInput : TemplatedControl
 	{
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
-		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<NumInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
 		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
 		public static StyledProperty<Brush> IconColorProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconColor));
@@ -48,7 +47,7 @@ namespace Engine.Frontend
 
 		// Stores string changes before they've been applied.
 		private string value;
-		[Notify] private string ValueProxy
+		[Notify] private string valueProxy
 		{
 			get => Value?.ToString();
 			set => this.value = value;
@@ -73,7 +72,7 @@ namespace Engine.Frontend
 			RoutingStrategies.Tunnel);
 
 			// Make sure proxy responds to changes in source.
-			ValueProperty.Changed.Subscribe(o => RaisePropertyChanged(ValueProxyProperty, default, Value.ToString()));
+			ValueProperty.Changed.Subscribe(o => (this as INotify).Raise(nameof(valueProxy)));
 
 			base.OnApplyTemplate(e);
 		}
@@ -101,7 +100,7 @@ namespace Engine.Frontend
 			else
 			{
 				// Reset value.
-				SetValue(ValueProxyProperty, Value.ToString());
+				valueProxy = Value.ToString();
 				textBox.Text = value;
 			}
 		}

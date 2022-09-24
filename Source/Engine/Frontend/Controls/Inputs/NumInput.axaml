@@ -4,7 +4,7 @@
 
   <Style Selector="controls|NumInput">
 	<Setter Property="Icon" Value="&#xF1B9;"/>
-	<Setter Property="IconColor" Value="#E6E62E"/>
+	<Setter Property="IconColor" Value="#A1C35D"/>
 	  
     <Setter Property="Template">
       <ControlTemplate>
@@ -13,7 +13,7 @@
 				<Border Background="{TemplateBinding IconColor}" Width="20" MinHeight="20" VerticalAlignment="Stretch" CornerRadius="3, 0, 0, 3" Opacity="0.1">
 					<TextBlock Text="{TemplateBinding Icon}" FontSize="14" FontFamily="{StaticResource IconsFont}" Foreground="{TemplateBinding IconColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="10"/>
 				</Border>
-				<TextBox x:Name="PART_TextBox" Grid.Column="1" Padding="4, 0" VerticalContentAlignment="Center" Text="{TemplateBinding ValueProxy, Mode=TwoWay}" Foreground="{StaticResource ThemeForegroundMidBrush}"/>
+				<TextBox x:Name="PART_TextBox" Grid.Column="1" Padding="4, 0" VerticalContentAlignment="Center" Text="{Binding valueProxy, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Foreground="{StaticResource ThemeForegroundMidBrush}"/>
 			</Grid>
 		</Border>
       </ControlTemplate>
