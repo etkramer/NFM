@@ -8,10 +8,10 @@ using Avalonia.LogicalTree;
 
 namespace Engine.Frontend
 {
-	public class StringInput : TemplatedControl
+	public class TextInput : TemplatedControl
 	{
-		public static StyledProperty<string> ValueProperty = AvaloniaProperty.Register<StringInput, string>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
-		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<StringInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
+		public static StyledProperty<string> ValueProperty = AvaloniaProperty.Register<TextInput, string>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
+		public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<TextInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
 		[Notify] public string Value
 		{

@@ -47,18 +47,14 @@ namespace Engine.World
 		public bool IsTransformDirty = true;
 		public BufferAllocation<GPUTransform> TransformHandle;
 
-		public Actor(string name = null)
+		public Actor()
 		{
 			Children = new(children);
 
-			if (name == null)
+			string name = GetType().Name.PascalToDisplay();
+			if (name.EndsWith(" Actor"))
 			{
-				name = GetType().Name.PascalToDisplay();
-
-				if (name.EndsWith(" Actor"))
-				{
-					name = name.Remove(name.Length - 6);
-				}
+				name = name.Remove(name.Length - 6);
 			}
 
 			Name = name;

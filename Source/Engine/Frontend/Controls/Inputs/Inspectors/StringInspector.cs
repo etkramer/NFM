@@ -27,8 +27,8 @@ namespace Engine.Frontend
 			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(Value));
 
 			// Create and assign string input.
-			Content = new StringInput();
-			(Content as StringInput).Bind(StringInput.ValueProperty, nameof(Value), this);
+			Content = new TextInput();
+			(Content as TextInput).Bind(Frontend.TextInput.ValueProperty, nameof(Value), this);
 		}
 	}
 }

@@ -40,8 +40,8 @@ namespace Engine
 
 			// Create example model
 			var modelObject = new ModelActor().Spawn<ModelActor>();
-			modelObject.Position = new Vector3(0, -0.4f, 1);
-			modelObject.Rotation = new Vector3(0, 180, 0);
+			modelObject.Position = new Vector3(0);
+			modelObject.Rotation = new Vector3(0);
 			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
 
 			// If we need a GC, now's a good time.

@@ -78,6 +78,9 @@
 	  <Compile Update="Frontend\Controls\Inputs\ResourceInput.axaml.cs">
 	    <DependentUpon>ResourceInput.axaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Frontend\Controls\Inputs\TextInput.axaml.cs">
+	    <DependentUpon>TextInput.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />

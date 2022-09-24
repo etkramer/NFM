@@ -12,7 +12,7 @@ namespace Engine.World
 
 		public float FOV => MathHelper.RadiansToDegrees(2 * (float)Math.Atan(SensorSize / 2f / FocalLength));
 
-		public CameraActor(string name = null) : base(name)
+		public CameraActor()
 		{
 
 		}

@@ -11,14 +11,13 @@
 		
 		<!--Custom Controls (Misc)-->
 		<StyleInclude Source="avares://Engine/Frontend/Controls/WindowButtons.axaml"/>
-		<StyleInclude Source="avares://Engine/Frontend/Controls/OptionField.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Toolbar.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/Tab.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/TabGroup.axaml"/>
 
 		<!--Custom Controls (Inputs)-->
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Inputs/BoolInput.axaml"/>
-		<StyleInclude Source="avares://Engine/Frontend/Controls/Inputs/StringInput.axaml"/>
+		<StyleInclude Source="avares://Engine/Frontend/Controls/Inputs/TextInput.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Inputs/NumInput.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Inputs/ResourceInput.axaml"/>
     </Application.Styles>

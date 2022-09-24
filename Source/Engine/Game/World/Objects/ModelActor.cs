@@ -22,7 +22,7 @@ namespace Engine.World
 		// Material instances
 		public MaterialInstance[] MaterialInstances { get; set; }
 		
-		public ModelActor(string name = null) : base(name)
+		public ModelActor()
 		{
 			(this as INotify).Subscribe(nameof(Model), () =>
 			{
