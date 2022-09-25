@@ -1023,17 +1023,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Converts OpenTK.Vector2 to OpenTK.Vector2d.
-        /// </summary>
-        /// <param name="vec">The Vector2 to convert.</param>
-        /// <returns>The resulting Vector2d.</returns>
-        [Pure]
-        public static implicit operator Vector2d(Vector2 vec)
-        {
-            return new Vector2d(vec.X, vec.Y);
-        }
-
-        /// <summary>
         /// Converts OpenTK.Vector2 to OpenTK.Vector2i.
         /// </summary>
         /// <param name="vec">The Vector2 to convert.</param>

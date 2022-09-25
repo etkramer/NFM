@@ -68,9 +68,9 @@ namespace Engine.Frontend
 				// Numeric input field.
 				FieldContent = new NumInspector(Property, subjects);
 			}
-			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i) || Property.PropertyType == typeof(Vector2d)
-				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i) || Property.PropertyType == typeof(Vector3d)
-				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i) || Property.PropertyType == typeof(Vector4d))
+			else if (Property.PropertyType == typeof(Vector2) || Property.PropertyType == typeof(Vector2i)
+				|| Property.PropertyType == typeof(Vector3) || Property.PropertyType == typeof(Vector3i)
+				|| Property.PropertyType == typeof(Vector4) || Property.PropertyType == typeof(Vector4i))
 			{
 				// Vector input field.
 				FieldContent = new VectorInspector(Property, subjects);

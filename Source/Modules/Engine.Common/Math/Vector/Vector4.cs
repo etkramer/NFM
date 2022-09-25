@@ -2021,17 +2021,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Converts OpenTK.Vector4 to OpenTK.Vector4d.
-        /// </summary>
-        /// <param name="vec">The Vector4 to convert.</param>
-        /// <returns>The resulting Vector4d.</returns>
-        [Pure]
-        public static implicit operator Vector4d(Vector4 vec)
-        {
-            return new Vector4d(vec.X, vec.Y, vec.Z, vec.W);
-        }
-
-        /// <summary>
         /// Converts OpenTK.Vector4 to OpenTK.Vector4i.
         /// </summary>
         /// <param name="vec">The Vector4 to convert.</param>

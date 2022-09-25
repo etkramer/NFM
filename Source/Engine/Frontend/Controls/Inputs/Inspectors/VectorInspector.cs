@@ -114,15 +114,15 @@ namespace Engine.Frontend
 
 		private int GetNumComponents(Type type)
 		{
-			if (type == typeof(Vector2) || type == typeof(Vector2d) || type == typeof(Vector2i))
+			if (type == typeof(Vector2) || type == typeof(Vector2i))
 			{
 				return 2;
 			}
-			else if (type == typeof(Vector3) || type == typeof(Vector3d) || type == typeof(Vector3i))
+			else if (type == typeof(Vector3) || type == typeof(Vector3i))
 			{
 				return 3;
 			}
-			else if (type == typeof(Vector4) || type == typeof(Vector4d) || type == typeof(Vector4i))
+			else if (type == typeof(Vector4) || type == typeof(Vector4i))
 			{
 				return 4;
 			}

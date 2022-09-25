@@ -1535,17 +1535,6 @@ namespace Engine.Mathematics
             return new Vector4(vec.X, vec.Y, vec.Z, 0);
         }
 
-		/// <summary>
-		/// Converts OpenTK.Vector3 to OpenTK.Vector3d.
-		/// </summary>
-		/// <param name="vec">The Vector3 to convert.</param>
-		/// <returns>The resulting Vector3d.</returns>
-		[Pure]
-        public static implicit operator Vector3d(Vector3 vec)
-        {
-            return new Vector3d(vec.X, vec.Y, vec.Z);
-        }
-
         /// <summary>
         /// Converts OpenTK.Vector3 to OpenTK.Vector3i.
         /// </summary>
