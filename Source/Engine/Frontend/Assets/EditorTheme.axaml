@@ -1,6 +1,5 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:sys="clr-namespace:System;assembly=netstandard"
         x:Class="Engine.Frontend.DefaultTheme">
 
 	<Style>
@@ -38,7 +37,7 @@
 			<SolidColorBrush x:Key="ThemeAccentBrush3" Color="{DynamicResource ThemeAccentColor}"/>
 			<SolidColorBrush x:Key="ThemeAccentBrush4" Color="{DynamicResource ThemeAccentColor}"/>
 
-			<sys:Double x:Key="FontSizeLarge">13</sys:Double>
+			<x:Double x:Key="FontSizeLarge">13</x:Double>
 		</Style.Resources>
 	</Style>
 
