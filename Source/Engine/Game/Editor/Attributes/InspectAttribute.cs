@@ -13,13 +13,9 @@ namespace Engine
 	[Injection(typeof(NotifyAspect))]
 	public class InspectAttribute : SaveAttribute
 	{
-		public string Tooltip { get; set; }
-
-		public InspectAttribute() {}
-
-		public InspectAttribute(string tooltip)
+		public InspectAttribute()
 		{
-			Tooltip = tooltip;
+
 		}
 	}
 }

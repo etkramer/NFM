@@ -23,14 +23,22 @@ namespace Engine.Rendering
 			{
 				case RenderStage.Global:
 					Debug.Assert(!globalStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
+					step.List = DefaultCommandList;
+					step.Viewport = null;
+					step.Scene = null;
+
 					globalStage.Add(step);
 					break;
 				case RenderStage.Scene:
 					Debug.Assert(!sceneStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
+					step.List = DefaultCommandList;
+					step.Viewport = null;
+
 					sceneStage.Add(step);
 					break;
 				case RenderStage.Viewport:
 					Debug.Assert(!viewportStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
+
 					viewportStage.Add(step);
 					break;
 			}
@@ -76,28 +84,22 @@ namespace Engine.Rendering
 			// Execute global render steps.
 			foreach (RenderStep step in globalStage)
 			{
-				RenderStep.List = DefaultCommandList;
-				RenderStep.Viewport = null;
-				RenderStep.Scene = null;
-
-				RenderStep.List.PushEvent($"{step.GetType().Name} (global)");
+				step.List.PushEvent($"{step.GetType().Name} (global)");
 				step.Run();
-				RenderStep.List.PopEvent();
+				step.List.PopEvent();
 			}
 
 			// Loop through scenes.
 			foreach (Scene scene in Scene.All)
 			{
-				RenderStep.List = DefaultCommandList;
-				RenderStep.Viewport = null;
-				RenderStep.Scene = scene;
-
 				// Execute per-scene render steps.
 				foreach (RenderStep step in sceneStage)
 				{
-					RenderStep.List.PushEvent($"{step.GetType().Name} (scene)");
+					step.Scene = scene;
+
+					step.List.PushEvent($"{step.GetType().Name} (scene)");
 					step.Run();
-					RenderStep.List.PopEvent();
+					step.List.PopEvent();
 				}
 			}
 
@@ -107,29 +109,23 @@ namespace Engine.Rendering
 			// Build and execute per-viewport commands. Consider doing this in parallel.
 			foreach (var viewport in Viewport.All)
 			{
-				// Switch to this viewport's command list.
-				RenderStep.List = viewport.CommandList;
-				RenderStep.Viewport = viewport;
-				RenderStep.Scene = RenderStep.Viewport.Scene;
-
 				foreach (RenderStep step in viewportStage)
 				{
-					RenderStep.List.PushEvent($"{step.GetType().Name} (viewport)");
+					step.List = viewport.CommandList;
+					step.Viewport = viewport;
+					step.Scene = step.Viewport.Scene;
+
+					step.List.PushEvent($"{step.GetType().Name} (viewport)");
 					step.Run();
-					RenderStep.List.PopEvent();
+					step.List.PopEvent();
 				}
 
 				// Make sure the viewport's backbuffer is in the right state for presentation.
-				RenderStep.List.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
+				viewport.CommandList.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
 
 				// Make sure this viewport's commands are executing while we submit the next.
 				viewport.CommandList.Execute();
 			}
-
-			// Reset global state.
-			RenderStep.List = null;
-			RenderStep.Viewport = null;
-			RenderStep.Scene = null;
 
 			// Present swapchains.
 			Viewport.All.ForEach(o => o.Host.Swapchain.Present());

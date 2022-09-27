@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 
-namespace Engine.Frontend
+namespace Engine
 {
 	public enum ButtonState
 	{

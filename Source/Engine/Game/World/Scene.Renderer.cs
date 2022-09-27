@@ -9,7 +9,7 @@ namespace Engine.World
 	{
 		public const int MaxInstanceCount = 100;
 
-		public int InstanceCount = 0;
+		public int InstanceCount { get; set; } = 0;
 		public GraphicsBuffer<GPUInstance> InstanceBuffer = new(MaxInstanceCount);
 		public GraphicsBuffer<GPUTransform> TransformBuffer = new(MaxInstanceCount);
 	}

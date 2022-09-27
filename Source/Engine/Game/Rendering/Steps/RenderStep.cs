@@ -17,9 +17,9 @@ namespace Engine.Rendering
 
 	public abstract class RenderStep
 	{
-		public static Viewport Viewport;
-		public static Scene Scene;
-		public static CommandList List;
+		public Viewport Viewport { get; set; }
+		public Scene Scene { get; set; }
+		public CommandList List { get; set; }
 
 		public virtual void Init() {}
 		public abstract void Run();
