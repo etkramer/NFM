@@ -1,6 +1,3 @@
-# Ignore submodules
-Source/Libraries/Avalonia
-
 # Ignore build/bin directories
 /Build/
 /Source/.vs/
