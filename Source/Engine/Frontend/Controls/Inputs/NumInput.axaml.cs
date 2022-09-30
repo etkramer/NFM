@@ -93,7 +93,7 @@ namespace Engine.Frontend
 			}
 
 			// Set input to new value.
-			if (TryParseNum(value, Value.GetType(), out object num))
+			if (TryParseNum(value ?? Value.ToString(), Value.GetType(), out object num))
 			{
 				Value = num;
 			}
