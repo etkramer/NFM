@@ -12,7 +12,7 @@ namespace Engine.Rendering
 	{
 		Global,
 		Scene,
-		Viewport,
+		Camera,
 	}
 
 	public abstract class RenderStep

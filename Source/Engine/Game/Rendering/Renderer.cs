@@ -15,7 +15,7 @@ namespace Engine.Rendering
 
 		private static List<RenderStep> globalStage= new();
 		private static List<RenderStep> sceneStage= new();
-		private static List<RenderStep> viewportStage= new();
+		private static List<RenderStep> cameraStage= new();
 
 		public static void AddStep(RenderStep step, RenderStage stage)
 		{
@@ -36,10 +36,10 @@ namespace Engine.Rendering
 
 					sceneStage.Add(step);
 					break;
-				case RenderStage.Viewport:
-					Debug.Assert(!viewportStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
+				case RenderStage.Camera:
+					Debug.Assert(!cameraStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
 
-					viewportStage.Add(step);
+					cameraStage.Add(step);
 					break;
 			}
 
@@ -48,7 +48,7 @@ namespace Engine.Rendering
 
 		public static T GetStep<T>() where T : RenderStep
 		{
-			foreach (var step in viewportStage)
+			foreach (var step in cameraStage)
 			{
 				if (step is T)
 					return step as T;
@@ -73,10 +73,10 @@ namespace Engine.Rendering
 			DefaultCommandList.Name = "Default List";
 
 			AddStep(new SceneUpdateStep(), RenderStage.Scene);
-			AddStep(new SkinningStep(), RenderStage.Viewport);
-			AddStep(new PrepassStep(), RenderStage.Viewport);
-			AddStep(new MaterialStep(), RenderStage.Viewport);
-			AddStep(new ResolveStep(), RenderStage.Viewport);
+			AddStep(new SkinningStep(), RenderStage.Camera);
+			AddStep(new PrepassStep(), RenderStage.Camera);
+			AddStep(new MaterialStep(), RenderStage.Camera);
+			AddStep(new ResolveStep(), RenderStage.Camera);
 		}
 
 		public static void Render()
@@ -109,13 +109,13 @@ namespace Engine.Rendering
 			// Build and execute per-viewport commands. Consider doing this in parallel.
 			foreach (var viewport in Viewport.All)
 			{
-				foreach (RenderStep step in viewportStage)
+				foreach (RenderStep step in cameraStage)
 				{
 					step.List = viewport.CommandList;
 					step.Viewport = viewport;
 					step.Scene = step.Viewport.Scene;
 
-					step.List.PushEvent($"{step.GetType().Name} (viewport)");
+					step.List.PushEvent($"{step.GetType().Name} (camera)");
 					step.Run();
 					step.List.PopEvent();
 				}
