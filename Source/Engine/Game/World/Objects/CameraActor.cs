@@ -18,5 +18,11 @@ namespace Engine.World
 		{
 
 		}
+
+		public override void OnDrawGizmos(GizmosContext context)
+		{
+			//context.DrawLine(new Vector3(0), new Vector3(0, 0, 4));
+			context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), new Color(1));
+		}
 	}
 }

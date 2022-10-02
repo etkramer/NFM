@@ -17,6 +17,9 @@
 	<ItemGroup>
 		<None Remove="Content\Shaders\BaseMS.h" />
 		<None Remove="Content\Shaders\BaseMS.hlsl" />
+		<None Remove="Content\Shaders\Gizmos\Gizmos.h" />
+		<None Remove="Content\Shaders\Gizmos\GizmosPS.hlsl" />
+		<None Remove="Content\Shaders\Gizmos\PolylineMS.hlsl" />
 		<None Remove="Content\Shaders\Include\Common.h" />
 		<None Remove="Content\Shaders\Include\Geometry.h" />
 		<None Remove="Content\Shaders\Material\BaseMaterialPS.h" />
@@ -39,6 +42,9 @@
 		<AvaloniaResource Include="Frontend\Assets\Icons\iconsmall.ico" />
 		<EmbeddedResource Include="Content\Shaders\BaseMS.h" />
 		<EmbeddedResource Include="Content\Shaders\BaseMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\PolylineMS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Include\Common.h" />
 		<EmbeddedResource Include="Content\Shaders\Include\Geometry.h" />
 		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.h" />

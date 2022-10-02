@@ -142,5 +142,7 @@ namespace Engine.World
 				WorldToObject = transform.Inverse()
 			});
 		}
+
+		public virtual void OnDrawGizmos(GizmosContext context) {}
 	}
 }

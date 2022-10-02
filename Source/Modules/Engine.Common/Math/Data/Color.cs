@@ -182,6 +182,11 @@ namespace Engine.Mathematics
             return new Vector4(vec.R, vec.G, vec.B, vec.A);
         }
 
+        public static explicit operator Vector3(Color vec)
+        {
+            return new Vector3(vec.R, vec.G, vec.B);
+        }
+
         public override string ToString()
         {
             return string.Format("({0}{4} {1}{4} {2}{4} {3})", R, G, B, A, MathHelper.ListSeparator);

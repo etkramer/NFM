@@ -6,6 +6,8 @@ struct _ViewConstants
 
 	float4x4 ViewToClip;
 	float4x4 ClipToView;
+
+	float2 ViewportSize;
 };
 ConstantBuffer<_ViewConstants> ViewConstants : register(b0, space1);
 

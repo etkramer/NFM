@@ -32,6 +32,12 @@ namespace Engine.GPU
         Always = ComparisonFunction.Always
 	}
 
+	public enum TopologyType
+	{
+		Triangle = PrimitiveTopologyType.Triangle,
+		Line = PrimitiveTopologyType.Line
+	}
+
 	public sealed class ShaderProgram : IDisposable
 	{
 		public bool IsGraphics { get; private set; } = false;
@@ -64,6 +70,7 @@ namespace Engine.GPU
 		private bool depthWrite = false;
 		private Format[] rtFormats = { GPUContext.RTFormat };
 		private int rtSamples = 1;
+		private TopologyType topologyType = TopologyType.Triangle;
 
 		// Custom handler for #including files from arbitrary file systems
 		private CustomIncludeHandler shaderIncludeHandler = null;
@@ -113,6 +120,12 @@ namespace Engine.GPU
 			depthMode = mode;
 			depthRead = read;
 			depthWrite = write;
+			return this;
+		}
+
+		public ShaderProgram SetTopologyType(TopologyType type)
+		{
+			topologyType = type;
 			return this;
 		}
 
@@ -324,7 +337,7 @@ namespace Engine.GPU
 						MeshShader = compiledMesh,
 						PixelShader = compiledPixel,
 						SampleMask = uint.MaxValue,
-						PrimitiveTopology = PrimitiveTopologyType.Triangle,
+						PrimitiveTopology = (PrimitiveTopologyType)topologyType,
 						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
 						RenderTargetFormats = rtFormats,
 						DepthStencilFormat = GPUContext.DSFormat,

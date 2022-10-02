@@ -73,9 +73,10 @@ namespace Engine.Rendering
 			DefaultCommandList.Name = "Default List";
 
 			AddStep(new SceneUpdateStep(), RenderStage.Scene);
-			AddStep(new SkinningStep(), RenderStage.Camera);
+			AddStep(new SkinningStep(), RenderStage.Scene);
 			AddStep(new PrepassStep(), RenderStage.Camera);
 			AddStep(new MaterialStep(), RenderStage.Camera);
+			AddStep(new GizmosStep(), RenderStage.Camera);
 			AddStep(new ResolveStep(), RenderStage.Camera);
 		}
 
