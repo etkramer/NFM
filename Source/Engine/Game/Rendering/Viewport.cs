@@ -28,13 +28,15 @@ namespace Engine.Rendering
 	{
 		public static List<Viewport> All { get; } = new();
 
+		public int ID { get; private set; }
+
 		// Basic properties
 		public ViewportHost Host { get; }
 		public Vector2i Size => Host.Swapchain.RT.Size;
 
 		// Work camera settings
-		private CameraActor workCamera = new();
-		public CameraActor Camera => workCamera;
+		private CameraNode workCamera = new CameraNode().Spawn<CameraNode>();
+		public CameraNode Camera => workCamera;
 		public Scene Scene => Scene.Main;
 
 		#region Rendering
@@ -55,6 +57,8 @@ namespace Engine.Rendering
 		public Viewport(ViewportHost host)
 		{
 			Host = host;
+
+			ID = All.Count;
 			CommandList.Name = "Viewport List";
 
 			// Create RTs and RT-sized buffers.
@@ -64,6 +68,12 @@ namespace Engine.Rendering
 			// Register callbacks
 			Game.OnTick += OnTick;
 			host.Swapchain.OnResize += Resize;
+
+			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () =>
+			{
+				//workCamera?.Dispose();
+				//workCamera = new CameraActor();
+			});
 
 			All.Add(this);
 		}
@@ -134,7 +144,7 @@ namespace Engine.Rendering
 			var projectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / Size.Y, 0.01f);
 
 			// Upload to constant buffer.
-			Renderer.DefaultCommandList.UploadBuffer(ViewCB, new ViewConstants()
+			CommandList.UploadBuffer(ViewCB, new ViewConstants()
 			{
 				WorldToView = viewMatrix,
 				ViewToWorld = viewMatrix.Inverse(),

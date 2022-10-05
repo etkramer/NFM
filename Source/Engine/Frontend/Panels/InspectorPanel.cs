@@ -151,9 +151,9 @@ namespace Engine.Frontend
 
 				// Get that type's display name.
 				string bucketName = bucketType.Name.PascalToDisplay();
-				if (bucketName.EndsWith(" Actor"))
+				if (bucketName.EndsWith(" Node"))
 				{
-					bucketName = bucketName.Remove(bucketName.Length - 6);
+					bucketName = bucketName.Remove(bucketName.Length - " Node".Length);
 				}
 
 				// Loop over properties.

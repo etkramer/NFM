@@ -8,30 +8,24 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Update actor instances.
-			foreach (Actor actor in Scene.Actors)
+			foreach (Node actor in Scene.Nodes)
 			{
 				RecurseInstances(actor);
 			}
 
 			// Make sure the instance buffer is fully compacted.
 			List.CompactBuffer(Scene.InstanceBuffer);
-
-			// Update view data.
-			foreach (Viewport viewport in Viewport.All)
-			{
-				viewport.UpdateView();
-			}
 		}
 
 		// Loops through actors and (re)uploads instance data where requested.
-		private void RecurseInstances(Actor root)
+		private void RecurseInstances(Node root)
 		{
 			if (root.IsTransformDirty)
 			{
 				root.UpdateTransform();
 			}
 
-			if (root is ModelActor modelActor)
+			if (root is ModelNode modelActor)
 			{
 				if (modelActor.IsInstanceDirty)
 				{
@@ -41,7 +35,7 @@ namespace Engine.Rendering
 
 			if (root.Children.Count > 0)
 			{
-				foreach (Actor child in root.Children)
+				foreach (Node child in root.Children)
 				{
 					RecurseInstances(child);
 				}

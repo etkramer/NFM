@@ -39,12 +39,12 @@ namespace Engine.Frontend.Controls
 			// Create group (timeline).
 			/*TabGroup group4 = new TabGroup();
 			ToolPanel.Spawn<TimelinePanel>(group4);
-			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
+			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);*/
 
 			// Create group (viewport 2).
 			TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
-			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);*/
+			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);
 
 			// Show landing dialog.
 			if (LandingDialog.ShowOnStartup)
@@ -103,6 +103,6 @@ namespace Engine.Frontend.Controls
 
 		public void UndoPressed() => Command.Undo();
 		public void RedoPressed() => Command.Redo();
-		public void DeletePressed() => Selection.Selected.OfType<Actor>().ToArray().ForEach(o => o.Dispose());
+		public void DeletePressed() => Selection.Selected.OfType<Node>().ToArray().ForEach(o => o.Dispose());
 	}
 }

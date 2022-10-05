@@ -7,7 +7,7 @@ using Engine.Rendering;
 namespace Engine.World
 {
 	[Icon('\uE3C2')]
-	public class Actor : ISelectable, IDisposable
+	public class Node : ISelectable, IDisposable
 	{
 		// Properties (inspectable)
 		[Inspect] public string Name { get; set; }
@@ -16,8 +16,8 @@ namespace Engine.World
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 		
 		public Scene Scene { get; private set; }
-		public ReadOnlyObservableCollection<Actor> Children { get; }
-		[Save, Notify] public Actor Parent
+		public ReadOnlyObservableCollection<Node> Children { get; }
+		[Save, Notify] public Node Parent
 		{
 			get => parent;
 			set
@@ -40,21 +40,21 @@ namespace Engine.World
 		}
 		
 		// Backing fields
-		private Actor parent;
-		private readonly ObservableCollection<Actor> children = new();
+		private Node parent;
+		private readonly ObservableCollection<Node> children = new();
 
 		// Transform buffer
 		public bool IsTransformDirty = true;
 		public BufferAllocation<GPUTransform> TransformHandle;
 
-		public Actor()
+		public Node()
 		{
 			Children = new(children);
 
 			string name = GetType().Name.PascalToDisplay();
-			if (name.EndsWith(" Actor"))
+			if (name.EndsWith(" Node"))
 			{
-				name = name.Remove(name.Length - 6);
+				name = name.Remove(name.Length - " Node".Length);
 			}
 
 			Name = name;
@@ -86,8 +86,8 @@ namespace Engine.World
 		/// <summary>
 		/// Spawns the actor into the scene with the given parent
 		/// </summary>
-		public Actor Spawn(Actor parent) => Spawn<Actor>(parent);
-		public TThis Spawn<TThis>(Actor parent) where TThis : Actor
+		public Node Spawn(Node parent) => Spawn<Node>(parent);
+		public TThis Spawn<TThis>(Node parent) where TThis : Node
 		{
 			if (parent != null)
 			{
@@ -100,8 +100,8 @@ namespace Engine.World
 		/// <summary>
 		/// Spawns the actor into the given scene
 		/// </summary>
-		public Actor Spawn(Scene scene = null) => Spawn<Actor>(scene);
-		public TThis Spawn<TThis>(Scene scene = null) where TThis : Actor
+		public Node Spawn(Scene scene = null) => Spawn<Node>(scene);
+		public TThis Spawn<TThis>(Scene scene = null) where TThis : Node
 		{
 			if (scene == null)
 			{

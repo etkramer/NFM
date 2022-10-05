@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Engine.GPU;
-using Engine.Rendering;
 
 namespace Engine.World
 {
@@ -13,42 +8,42 @@ namespace Engine.World
 
 		[Notify, Save] public static Scene Main { get; set; } = new();
 
-		[Notify] public ReadOnlyObservableCollection<Actor> Actors { get; }
-		[Save] private ObservableCollection<Actor> actors { get; set; } = new();
+		[Notify] public ReadOnlyObservableCollection<Node> Nodes { get; }
+		[Save] private ObservableCollection<Node> npdes { get; set; } = new();
 
 		public Scene()
 		{
 			All.Add(this);
-			Actors = new(actors);
+			Nodes = new(npdes);
 
 			InstanceBuffer.Name = "Instance Buffer";
 			TransformBuffer.Name = "Transform Buffer";
 		}
 
 		/// <summary>
-		/// Adds an Actor to the scene.
+		/// Adds a Node to the scene.
 		/// </summary>
-		public void Spawn(Actor actor)
+		public void Spawn(Node node)
 		{
-			if (!actors.Contains(actor))
+			if (!npdes.Contains(node))
 			{
-				actors.Add(actor);
+				npdes.Add(node);
 			}
 		}
 
 		/// <summary>
-		/// Removes an Actor from the scene, but does *not* destroy it. Dispose() must still be called manually.
+		/// Removes a Node from the scene, but does *not* destroy it. Dispose() must still be called manually.
 		/// </summary>
-		public void Despawn(Actor actor)
+		public void Despawn(Node node)
 		{
-			actors.Remove(actor);
+			npdes.Remove(node);
 		}
 
 		public void Dispose()
 		{
-			for (int i = actors.Count - 1; i >= 0; i--)
+			for (int i = npdes.Count - 1; i >= 0; i--)
 			{
-				actors[i].Dispose();
+				npdes[i].Dispose();
 			}
 
 			Queue.Add(() =>

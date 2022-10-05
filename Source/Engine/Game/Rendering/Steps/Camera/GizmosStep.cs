@@ -15,7 +15,7 @@ namespace Engine.Rendering
 			List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
 
 			// Draw gizmos for each actor.
-			foreach (var actor in Scene.Actors)
+			foreach (var actor in Scene.Nodes)
 			{
 				actor.OnDrawGizmos(context);
 			}
@@ -27,7 +27,7 @@ namespace Engine.Rendering
 		private CommandList renderList;
 		private Viewport renderViewport;
 
-		public CameraActor Camera => renderViewport.Camera;
+		public CameraNode Camera => renderViewport.Camera;
 
 		private static ShaderProgram polylineProgram = null;
 
@@ -53,7 +53,7 @@ namespace Engine.Rendering
 		{
 			if (color == default)
 			{
-				color = Color.FromHex(0xFF9F2C);
+				color = Color.White;
 			}
 			
 			// Use the right shader program.

@@ -3,7 +3,7 @@
 namespace Engine.World
 {
 	[Icon('\uEA24')]
-	public class PointLightActor : Actor
+	public class PointLightNode : Node
 	{
 		/// <summary>
 		/// The light's intensity in lumens

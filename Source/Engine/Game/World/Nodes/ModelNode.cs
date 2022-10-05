@@ -7,7 +7,7 @@ using Engine.Resources;
 namespace Engine.World
 {
 	[Icon('\uE9FE')]
-	public partial class ModelActor : Actor
+	public partial class ModelNode : Node
 	{
 		[Inspect] public Model Model { get; set; } = null;
 		[Inspect] public bool IsVisible { get; set; } = true;
@@ -22,7 +22,7 @@ namespace Engine.World
 		// Material instances
 		public MaterialInstance[] MaterialInstances { get; set; }
 		
-		public ModelActor()
+		public ModelNode()
 		{
 			(this as INotify).Subscribe(nameof(Model), () =>
 			{

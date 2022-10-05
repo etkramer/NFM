@@ -704,7 +704,10 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, null);
 		}
 
-		private void Build()
+		/// <summary>
+		/// Executes all commands.
+		/// </summary>
+		public void Execute()
 		{
 			lock (commands)
 			{
@@ -798,15 +801,8 @@ namespace Engine.GPU
 			// Reset virtual list.
 			commands.Clear();
 			CurrentProgram = null;
-		}
 
-		/// <summary>
-		/// Executes all commands.
-		/// </summary>
-		public void Execute()
-		{
-			// Build and execute command list.
-			Build();
+			// Execute D3D command list.
 			GPUContext.GraphicsQueue.ExecuteCommandList(list);
 		}
 

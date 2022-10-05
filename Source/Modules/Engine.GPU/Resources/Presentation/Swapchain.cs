@@ -83,6 +83,9 @@ namespace Engine.GPU
             }
 		}
 
+		/// <summary>
+		/// Adds a present operation to the command queue
+		/// </summary>
 		public void Present()
 		{
 			if (RT.State != ResourceStates.Present)

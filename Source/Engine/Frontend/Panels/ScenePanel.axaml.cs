@@ -12,7 +12,7 @@ namespace Engine.Frontend
 {
 	public partial class ScenePanel : ToolPanel
 	{
-		[Notify] public ReadOnlyObservableCollection<Actor> SceneActors => Scene.Main?.Actors;
+		[Notify] public ReadOnlyObservableCollection<Node> Nodes => Scene.Main?.Nodes;
 
 		public ScenePanel()
 		{
@@ -20,7 +20,7 @@ namespace Engine.Frontend
 			InitializeComponent();
 
 			// Subscribe to property changed notifications in case the scene changes (i.e. new project).
-			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () => (this as INotify).Raise(nameof(SceneActors)));
+			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () => (this as INotify).Raise(nameof(Nodes)));
 
 			// Bind TreeView to editor selection. TODO: Figure out how to move this to XAML.
 			sceneTree.Bind(TreeView.SelectedItemsProperty, new Binding("selected", BindingMode.Default) { Source = typeof(Selection) });
@@ -33,10 +33,10 @@ namespace Engine.Frontend
 
 		private void OnRemovePressed(object sender, RoutedEventArgs args)
 		{
-			var actors = Selection.Selected.OfType<Actor>();
-			foreach (var actor in actors.ToArray())
+			var nodes = Selection.Selected.OfType<Node>();
+			foreach (var node in nodes.ToArray())
 			{
-				actor.Dispose();
+				node.Dispose();
 			}
 		}
 
@@ -44,15 +44,15 @@ namespace Engine.Frontend
 		{
 			if (type == "Model")
 			{
-				new ModelActor().Spawn();
+				new ModelNode().Spawn();
 			}
 			else if (type == "Camera")
 			{
-				new CameraActor().Spawn();
+				new CameraNode().Spawn();
 			}
 			else if (type == "PointLight")
 			{
-				new PointLightActor().Spawn();
+				new PointLightNode().Spawn();
 			}
 		}
 	}

@@ -36,11 +36,11 @@ namespace Engine
 		public static void OnProjectCreated()
 		{
 			// Create example camera
-			new CameraActor().Spawn();
+			//new CameraActor().Spawn();
 
 			// Create example model
-			var modelObject = new ModelActor().Spawn<ModelActor>();
-			modelObject.Position = new Vector3(0);
+			var modelObject = new ModelNode().Spawn<ModelNode>();
+			modelObject.Position = new Vector3(0, 0, 4);
 			modelObject.Rotation = new Vector3(0);
 			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
 

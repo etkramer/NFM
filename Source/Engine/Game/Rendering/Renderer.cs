@@ -110,10 +110,12 @@ namespace Engine.Rendering
 			// Build and execute per-viewport commands. Consider doing this in parallel.
 			foreach (var viewport in Viewport.All)
 			{
+				viewport.UpdateView();
+
 				foreach (RenderStep step in cameraStage)
 				{
-					step.List = viewport.CommandList;
 					step.Viewport = viewport;
+					step.List = viewport.CommandList;
 					step.Scene = step.Viewport.Scene;
 
 					step.List.PushEvent($"{step.GetType().Name} (camera)");
@@ -124,12 +126,15 @@ namespace Engine.Rendering
 				// Make sure the viewport's backbuffer is in the right state for presentation.
 				viewport.CommandList.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
 
-				// Make sure this viewport's commands are executing while we submit the next.
+				// Let these commands be executed while we're recording the next viewport.
 				viewport.CommandList.Execute();
 			}
 
 			// Present swapchains.
-			Viewport.All.ForEach(o => o.Host.Swapchain.Present());
+			foreach (var viewport in Viewport.All)
+			{
+				viewport.Host.Swapchain.Present();
+			}
 
 			// Wait for completion.
 			Graphics.WaitFrame();
