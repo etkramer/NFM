@@ -97,16 +97,16 @@ namespace Engine.Frontend.Controls
 			}
 		}
 
-		private bool closeConfirmed = false;
+		private bool isQuitConfirmed = false;
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			e.Cancel = !closeConfirmed;
+			/*e.Cancel = !isQuitConfirmed;
 
 			new Popup("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
-				.Button("Quit", (o) => { closeConfirmed = true; Close(); })
+				.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
 				.Button("Cancel", (o) => o.Close())
-				.Open();
+				.Open();*/
 
 			base.OnClosing(e);
 		}
