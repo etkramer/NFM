@@ -17,7 +17,7 @@ namespace Engine.Frontend.Controls
 		public static readonly StyledProperty<Tab> SelectedTabProperty = AvaloniaProperty.Register<TabGroup, Tab>(nameof(SelectedTab));
 
 		public DockRelationship Relationship;
-		public Area CalculatedSize;
+		public Box2D CalculatedSize;
 		public Dockspace Dockspace;
 
 		private int selectedIndex = -1;

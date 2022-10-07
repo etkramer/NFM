@@ -72,7 +72,7 @@ namespace Engine.Frontend.Controls
 			return FinalSize;
 		}
 
-		private void ArrangeRecursive(TabGroup parent, Area parentSize)
+		private void ArrangeRecursive(TabGroup parent, Box2D parentSize)
 		{
 			// Loop through potential groups.
 			foreach (TabGroup child in Children)
@@ -80,7 +80,7 @@ namespace Engine.Frontend.Controls
 				// This group is a child of the parent.
 				if (child.Relationship.Parent == parent)
 				{
-					Area childSize = parentSize;
+					Box2D childSize = parentSize;
 
 					if (parent != null)
 					{
@@ -175,14 +175,14 @@ namespace Engine.Frontend.Controls
 
 	public static class RectExtensions
 	{
-		public static Rect ToRect(this Area input)
+		public static Rect ToRect(this Box2D input)
 		{
 			return new Rect(new Point(input.Left, input.Top), new Point(input.Right, input.Bottom));
 		}
 
-		public static Area ToArea(this Size input)
+		public static Box2D ToArea(this Size input)
 		{
-			return new Area(0, (float)input.Width, 0, (float)input.Height);
+			return new Box2D(0, (float)input.Width, 0, (float)input.Height);
 		}
 	}
 }
