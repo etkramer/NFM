@@ -35,14 +35,11 @@ namespace Engine
 
 		public static void OnProjectCreated()
 		{
-			// Create example camera
-			//new CameraActor().Spawn();
-
 			// Create example model
-			var modelObject = new ModelNode().Spawn<ModelNode>();
-			modelObject.Position = new Vector3(0, 0, 4);
-			modelObject.Rotation = new Vector3(0);
-			modelObject.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
+			var model = new ModelNode().Spawn<ModelNode>();
+			model.Position = new Vector3(0, 0, 4);
+			model.Rotation = new Vector3(0);
+			model.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

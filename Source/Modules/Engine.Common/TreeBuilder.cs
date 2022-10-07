@@ -19,7 +19,7 @@ namespace Engine.Common
 		}
 	}
 
-	public class TreeBuilder<T> : IEnumerable<T>, INotifyCollectionChanged
+	public class TreeBuilder<T> : IEnumerable<TreeNode<T>>, INotifyCollectionChanged
 	{
 		private TreeNode<T> rootNode = new(default);
 		private TreeNode<T> currentNode;
@@ -59,9 +59,9 @@ namespace Engine.Common
 			return false;
 		}
 
-		public IEnumerator<T> GetEnumerator()
+		public IEnumerator<TreeNode<T>> GetEnumerator()
 		{
-			return (rootNode.Children as IEnumerable<T>).GetEnumerator();
+			return (rootNode.Children as IEnumerable<TreeNode<T>>).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -126,6 +126,21 @@ namespace Engine.Common
 		public void SelectRoot()
 		{
 			currentNode = rootNode;
+		}
+
+		public void Clear()
+		{
+			ClearRecurse(rootNode);
+		}
+
+		private void ClearRecurse(TreeNode<T> node)
+		{
+			foreach (var child in node.Children)
+			{
+				ClearRecurse(child);
+			}
+
+			node.Children.Clear();
 		}
 	}
 }

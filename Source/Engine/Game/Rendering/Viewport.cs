@@ -35,9 +35,9 @@ namespace Engine.Rendering
 		public Vector2i Size => Host.Swapchain.RT.Size;
 
 		// Work camera settings
-		private CameraNode workCamera = new CameraNode().Spawn<CameraNode>();
+		private CameraNode workCamera = null;
 		public CameraNode Camera => workCamera;
-		public Scene Scene => Scene.Main;
+		public Scene Scene => workCamera.Scene;
 
 		#region Rendering
 
@@ -60,6 +60,10 @@ namespace Engine.Rendering
 
 			ID = All.Count;
 			CommandList.Name = "Viewport List";
+
+			// Create work camera.
+			workCamera = new CameraNode().Spawn<CameraNode>();
+			workCamera.Name = "Work Camera";
 
 			// Create RTs and RT-sized buffers.
 			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);

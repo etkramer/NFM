@@ -14,34 +14,23 @@ namespace Engine.World
 		[Inspect] public Vector3 Position { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
-		
-		public Scene Scene { get; private set; }
-		public ReadOnlyObservableCollection<Node> Children { get; }
-		[Save, Notify] public Node Parent
+
+		private Scene scene;
+		public Scene Scene
 		{
-			get => parent;
+			get => scene;
 			set
 			{
-				if (parent != value && value != this)
+				if (scene != value)
 				{
-					// Remove from old parent.
-					Scene?.Despawn(this);
-					parent?.children.Remove(this);
-
-					// Add to new parent.
-					parent = value;
-					parent?.children.Add(this);	
-					if (parent == null)
-					{
-						Scene?.Spawn(this);
-					}
+					scene?.Despawn(this);
+					scene = value;
+					scene?.Spawn(this);
 				}
 			}
 		}
 		
-		// Backing fields
-		private Node parent;
-		private readonly ObservableCollection<Node> children = new();
+		[Save, Notify] public Node Parent { get; set; }
 
 		// Transform buffer
 		public bool IsTransformDirty = true;
@@ -49,8 +38,6 @@ namespace Engine.World
 
 		public Node()
 		{
-			Children = new(children);
-
 			string name = GetType().Name.PascalToDisplay();
 			if (name.EndsWith(" Node"))
 			{
@@ -58,7 +45,6 @@ namespace Engine.World
 			}
 
 			Name = name;
-			Parent = parent;
 
 			// Transform buffer
 			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
@@ -77,9 +63,20 @@ namespace Engine.World
 			TransformHandle?.Dispose();
 
 			// Dispose children.
-			for (int i = Children.Count - 1; i >= 0; i--)
+			foreach (var child in GetChildren())
 			{
-				Children[i].Dispose();
+				child.Dispose();
+			}
+		}
+
+		public IEnumerable<Node> GetChildren()
+		{
+			for (int i = Scene.Nodes.Count - 1; i >= 0; i--)
+			{
+				if (Scene.Nodes[i].Parent == this)
+				{
+					yield return Scene.Nodes[i];
+				}
 			}
 		}
 
@@ -110,11 +107,6 @@ namespace Engine.World
 			else
 			{
 				Scene = scene;
-			}
-
-			if (parent == null)
-			{
-				Scene.Spawn(this);
 			}
 
 			return this as TThis;

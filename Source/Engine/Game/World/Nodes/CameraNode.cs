@@ -24,8 +24,7 @@ namespace Engine.World
 			if (context.Camera != this)
 			{
 				context.DrawLine(Position, Position + (new Vector3(0, 0, 1)));
-			}
-			
+			}		
 			
 			//context.DrawLine(new Vector3(0), new Vector3(0, 0, 1));
 		}

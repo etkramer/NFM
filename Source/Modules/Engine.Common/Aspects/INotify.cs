@@ -48,5 +48,15 @@ namespace Engine.Common
 		{
 			subject.CollectionChanged += (o, e) => callback();
 		}
+
+		public static void Subscribe(this INotifyCollectionChanged subject, NotifyCollectionChangedEventHandler handler)
+		{
+			subject.CollectionChanged += handler;
+		}
+
+		public static void Unsubscribe(this INotifyCollectionChanged subject, NotifyCollectionChangedEventHandler handler)
+		{
+			subject.CollectionChanged -= handler;
+		}
 	}
 }

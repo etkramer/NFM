@@ -7,39 +7,25 @@ namespace Engine.Rendering
 	{
 		public override void Run()
 		{
-			// Update actor instances.
-			foreach (Node actor in Scene.Nodes)
+			// Loop through nodes and (re)upload instance data where requested.
+			foreach (Node node in Scene.Nodes)
 			{
-				RecurseInstances(actor);
+				if (node.IsTransformDirty)
+				{
+					node.UpdateTransform();
+				}
+
+				if (node is ModelNode model)
+				{
+					if (model.IsInstanceDirty)
+					{
+						model.UpdateInstances();
+					}
+				}
 			}
 
 			// Make sure the instance buffer is fully compacted.
 			List.CompactBuffer(Scene.InstanceBuffer);
-		}
-
-		// Loops through actors and (re)uploads instance data where requested.
-		private void RecurseInstances(Node root)
-		{
-			if (root.IsTransformDirty)
-			{
-				root.UpdateTransform();
-			}
-
-			if (root is ModelNode modelActor)
-			{
-				if (modelActor.IsInstanceDirty)
-				{
-					modelActor.UpdateInstances();
-				}
-			}
-
-			if (root.Children.Count > 0)
-			{
-				foreach (Node child in root.Children)
-				{
-					RecurseInstances(child);
-				}
-			}
 		}
 	}
 }

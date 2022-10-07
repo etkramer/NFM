@@ -33,7 +33,8 @@ namespace Engine.Frontend
 
 		private void OnRemovePressed(object sender, RoutedEventArgs args)
 		{
-			var nodes = Selection.Selected.OfType<Node>();
+			var nodes = sceneTree.SelectedItems.Cast<Node>();
+
 			foreach (var node in nodes.ToArray())
 			{
 				node.Dispose();

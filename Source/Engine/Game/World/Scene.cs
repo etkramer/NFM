@@ -8,13 +8,15 @@ namespace Engine.World
 
 		[Notify, Save] public static Scene Main { get; set; } = new();
 
+		public event Action OnDispose = delegate{};
+
 		[Notify] public ReadOnlyObservableCollection<Node> Nodes { get; }
-		[Save] private ObservableCollection<Node> npdes { get; set; } = new();
+		[Save] private ObservableCollection<Node> nodes { get; set; } = new();
 
 		public Scene()
 		{
 			All.Add(this);
-			Nodes = new(npdes);
+			Nodes = new(nodes);
 
 			InstanceBuffer.Name = "Instance Buffer";
 			TransformBuffer.Name = "Transform Buffer";
@@ -25,9 +27,9 @@ namespace Engine.World
 		/// </summary>
 		public void Spawn(Node node)
 		{
-			if (!npdes.Contains(node))
+			if (!nodes.Contains(node))
 			{
-				npdes.Add(node);
+				nodes.Add(node);
 			}
 		}
 
@@ -36,14 +38,16 @@ namespace Engine.World
 		/// </summary>
 		public void Despawn(Node node)
 		{
-			npdes.Remove(node);
+			nodes.Remove(node);
 		}
 
 		public void Dispose()
 		{
-			for (int i = npdes.Count - 1; i >= 0; i--)
+			OnDispose.Invoke();
+
+			for (int i = nodes.Count - 1; i >= 0; i--)
 			{
-				npdes[i].Dispose();
+				nodes[i].Dispose();
 			}
 
 			Queue.Add(() =>
