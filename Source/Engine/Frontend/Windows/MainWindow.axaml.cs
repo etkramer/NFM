@@ -11,6 +11,8 @@ namespace Engine.Frontend.Controls
 {
 	internal partial class MainWindow : Window
 	{
+		public const bool UseQuitDialog = false;
+
 		public static MainWindow Instance { get; private set; }
 
 		public MainWindow()
@@ -101,12 +103,15 @@ namespace Engine.Frontend.Controls
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			/*e.Cancel = !isQuitConfirmed;
+			if (UseQuitDialog)
+			{
+				e.Cancel = !isQuitConfirmed;
 
-			new Popup("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
-				.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
-				.Button("Cancel", (o) => o.Close())
-				.Open();*/
+				new Popup("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
+					.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
+					.Button("Cancel", (o) => o.Close())
+					.Open();
+			}
 
 			base.OnClosing(e);
 		}
