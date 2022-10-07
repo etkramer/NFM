@@ -188,12 +188,12 @@ namespace Engine.GPU
 			AddCommand(buildDelegate, inputs);
 		}
 
-		public void SetProgramConstants(int slot, int space, int startElement, params int[] constants)
+		public void SetProgramConstants(BindPoint point, int start, params int[] constants)
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
 				ShaderProgram program = CurrentProgram;
-				if (!program.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+				if (!program.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 				{
 					return;
 				}
@@ -204,7 +204,7 @@ namespace Engine.GPU
 					{
 						fixed (int* constantsPtr = constants)
 						{
-							list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, startElement);
+							list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 						}
 					}
 				}
@@ -214,7 +214,7 @@ namespace Engine.GPU
 					{
 						fixed (int* constantsPtr = constants)
 						{
-							list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, startElement);
+							list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 						}
 					}
 				}
@@ -656,7 +656,7 @@ namespace Engine.GPU
 						unsafe
 						{
 							Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
-							SetProgramConstants(0, 0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
+							SetProgramConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
 						}
 
 						int capturedMip = i;

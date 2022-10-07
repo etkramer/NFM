@@ -61,10 +61,10 @@ namespace Engine.Rendering
 
 			// Bind program constants (keeping in mind cbuffer packing requirements).
 			renderList.SetProgramCBV(0, 1, renderViewport.ViewCB);
-			renderList.SetProgramConstants(0, 0, 0, AsInt(p0));
-			renderList.SetProgramConstants(0, 0, 4, AsInt(p1));
-			renderList.SetProgramConstants(0, 0, 8, AsInt((Vector3)color));
-			renderList.SetProgramConstants(0, 0, 12, width);
+			renderList.SetProgramConstants(0, 0, AsInt(p0));
+			renderList.SetProgramConstants(0, 4, AsInt(p1));
+			renderList.SetProgramConstants(0, 8, AsInt((Vector3)color));
+			renderList.SetProgramConstants(0, 12, width);
 
 			// Dispatch draw command.
 			renderList.DispatchMeshGroups(1);

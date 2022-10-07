@@ -66,7 +66,7 @@ namespace Engine.Rendering
 			List.SetProgramUAV(0, 0, CommandBuffer);
 
 			// Build for all shaders
-			List.SetProgramConstants(0, 0, 0, -1);
+			List.SetProgramConstants(0, 0, -1);
 
 			// Dispatch compute shader.
 			if (Scene.InstanceCount > 0)

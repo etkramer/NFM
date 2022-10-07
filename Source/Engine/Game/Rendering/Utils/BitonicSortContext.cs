@@ -68,8 +68,8 @@ namespace Engine.Rendering
 
 			// Build indirect args.
 			list.SetProgram(indirectProgram);
-			list.SetProgramConstants(0, 0, 0, maxIterations);
-			list.SetProgramConstants(1, 0, 0, counterOffset, unchecked((int)(sortAscending ? 0xffffffff : 0)));
+			list.SetProgramConstants(0, 0, maxIterations);
+			list.SetProgramConstants(1, 0, counterOffset, unchecked((int)(sortAscending ? 0xffffffff : 0)));
 			list.SetProgramSRV(0, 0, counter);
 			list.SetProgramUAV(0, 0, dispatchArgsBuffer);
 			list.DispatchGroups(1);
@@ -90,7 +90,7 @@ namespace Engine.Rendering
 
 				for (int j = k / 2; j >= 2048; j /= 2)
 				{
-					list.SetProgramConstants(0, 0, 0, k, j);
+					list.SetProgramConstants(0, 0, k, j);
 					list.DispatchIndirect(dispatchArgsBuffer, indirectArgsOffset);
 					list.BarrierUAV(TableBuffer);
 					indirectArgsOffset += 12;

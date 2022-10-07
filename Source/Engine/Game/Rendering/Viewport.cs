@@ -97,7 +97,7 @@ namespace Engine.Rendering
 				// Mouse look
 				Vector3 cameraRotation = Camera.Rotation;
 				cameraRotation.Y += Input.MouseDelta.X * lookSens;
-				cameraRotation.X += Input.MouseDelta.Y * lookSens;
+				cameraRotation.X -= Input.MouseDelta.Y * lookSens;
 				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
 				Camera.Rotation = cameraRotation;
 
@@ -105,19 +105,19 @@ namespace Engine.Rendering
 				Vector3 accelVector = Vector3.Zero;
 				if (Input.IsDown(Key.W))
 				{
+					accelVector.Z += 1;
+				}
+				if (Input.IsDown(Key.S))
+				{
 					accelVector.Z -= 1;
 				}
 				if (Input.IsDown(Key.A))
 				{
-					accelVector.X -= 1;
-				}
-				if (Input.IsDown(Key.S))
-				{
-					accelVector.Z += 1;
+					accelVector.X += 1;
 				}
 				if (Input.IsDown(Key.D))
 				{
-					accelVector.X += 1;
+					accelVector.X -= 1;
 				}
 
 				// Transform WASD accelerations by camera direction.
@@ -144,8 +144,12 @@ namespace Engine.Rendering
 		public void UpdateView()
 		{
 			// Calculate view/projection matrices.
-			var viewMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
-			var projectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / Size.Y, 0.01f);
+			var viewMatrix = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
+			var projectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
+
+			// Orient the camera in the opposite direction (facing +Z).
+			projectionMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * projectionMatrix;
+			//viewMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * viewMatrix;
 
 			// Upload to constant buffer.
 			CommandList.UploadBuffer(ViewCB, new ViewConstants()
