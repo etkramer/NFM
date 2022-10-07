@@ -29,11 +29,6 @@ namespace Engine.Frontend
 			this.message = message;
 		}
 
-		public Popup Button(string name, Action onClick)
-		{
-			return Button(name, (o) => onClick.Invoke());
-		}
-
 		public Popup Button(string name, Action<Popup> onClick)
 		{
 			buttons.Add(
@@ -113,7 +108,11 @@ namespace Engine.Frontend
 						)
 				);
 
+			// Show the dialog window
 			win.ShowDialog((Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime).MainWindow);
+
+			// Auto-select first button
+			buttons.FirstOrDefault()?.Focus();
 		}
 
 		public void Close()

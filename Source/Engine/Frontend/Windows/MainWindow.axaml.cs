@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.ExceptionServices;
 using Avalonia;
 using Avalonia.Controls;
@@ -96,11 +97,21 @@ namespace Engine.Frontend.Controls
 			}
 		}
 
-		public void QuitPressed()
+		private bool closeConfirmed = false;
+
+		protected override void OnClosing(CancelEventArgs e)
 		{
-			Close();
+			e.Cancel = !closeConfirmed;
+
+			new Popup("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
+				.Button("Quit", (o) => { closeConfirmed = true; Close(); })
+				.Button("Cancel", (o) => o.Close())
+				.Open();
+
+			base.OnClosing(e);
 		}
 
+		public void QuitPressed() => Close();
 		public void UndoPressed() => Command.Undo();
 		public void RedoPressed() => Command.Redo();
 		public void DeletePressed() => Selection.Selected.OfType<Node>().ToArray().ForEach(o => o.Dispose());
