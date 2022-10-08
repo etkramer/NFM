@@ -35,9 +35,9 @@ namespace Engine.Rendering
 		{
 			polylineProgram = new ShaderProgram()
 				.UseIncludes(typeof(Game).Assembly)
-				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/PolylineMS.hlsl", typeof(Game).Assembly), "PolylineMS")
+				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/LineMS.hlsl", typeof(Game).Assembly), "LineMS")
 				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Game).Assembly), "GizmosPS")
-				.AsRootConstant(0, 4 + 4 + 4 + 1, 0)
+				.AsRootConstant(0, 4 + 4 + 4, 0)
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetTopologyType(TopologyType.Line)
 				.Compile().Result;
@@ -49,7 +49,7 @@ namespace Engine.Rendering
 			renderViewport = viewport;
 		}
 
-		public void DrawLine(Vector3 p0, Vector3 p1, Color color = default, int width = 1)
+		public void DrawLine(Vector3 p0, Vector3 p1, Color color = default)
 		{
 			if (color == default)
 			{
@@ -64,7 +64,6 @@ namespace Engine.Rendering
 			renderList.SetProgramConstants(0, 0, AsInt(p0));
 			renderList.SetProgramConstants(0, 4, AsInt(p1));
 			renderList.SetProgramConstants(0, 8, AsInt((Vector3)color));
-			renderList.SetProgramConstants(0, 12, width);
 
 			// Dispatch draw command.
 			renderList.DispatchMeshGroups(1);

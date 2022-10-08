@@ -19,7 +19,7 @@
 		<None Remove="Content\Shaders\BaseMS.hlsl" />
 		<None Remove="Content\Shaders\Gizmos\Gizmos.h" />
 		<None Remove="Content\Shaders\Gizmos\GizmosPS.hlsl" />
-		<None Remove="Content\Shaders\Gizmos\PolylineMS.hlsl" />
+		<None Remove="Content\Shaders\Gizmos\LineMS.hlsl" />
 		<None Remove="Content\Shaders\Include\Common.h" />
 		<None Remove="Content\Shaders\Include\Geometry.h" />
 		<None Remove="Content\Shaders\Material\BaseMaterialPS.h" />
@@ -44,7 +44,7 @@
 		<EmbeddedResource Include="Content\Shaders\BaseMS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Gizmos\PolylineMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\LineMS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Include\Common.h" />
 		<EmbeddedResource Include="Content\Shaders\Include\Geometry.h" />
 		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.h" />
@@ -85,6 +85,9 @@
 	  </Compile>
 	  <Compile Update="Frontend\Controls\Inputs\TextInput.axaml.cs">
 	    <DependentUpon>TextInput.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Frontend\Panels\LibraryPanel.axaml.cs">
+	    <DependentUpon>LibraryPanel.axaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 	<ItemGroup>

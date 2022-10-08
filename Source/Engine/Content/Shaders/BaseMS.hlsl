@@ -7,7 +7,7 @@ cbuffer CommandConstants : register(b0)
 
 [NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
-void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out primitives PrimAttribute prims[124], out indices uint3 indices[124], out vertices VertAttribute verts[64])
+void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices VertAttribute outVerts[64], out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
@@ -37,17 +37,16 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 		normal = mul(normal.xyz, (float3x3)transform.WorldToObject);
 
 		// Write output vertex.
-		verts[groupThreadID].Position = position;
-		verts[groupThreadID].Normal = float4(normal, 1);
-		verts[groupThreadID].UV0 = vertex.UV0;
-
+		outVerts[groupThreadID].Position = position;
+		outVerts[groupThreadID].Normal = float4(normal, 1);
+		outVerts[groupThreadID].UV0 = vertex.UV0;
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{
 		// Write output triangle.
-		indices[groupThreadID] = GetPrimitive(mesh, meshlet, groupThreadID);
-		prims[groupThreadID].PrimitiveID = groupThreadID;
-		prims[groupThreadID].InstanceID = InstanceID;
-		prims[groupThreadID].MeshletID = groupID;
+		outIndices[groupThreadID] = GetPrimitive(mesh, meshlet, groupThreadID);
+		outPrims[groupThreadID].PrimitiveID = groupThreadID;
+		outPrims[groupThreadID].InstanceID = InstanceID;
+		outPrims[groupThreadID].MeshletID = groupID;
 	}
 }

@@ -4,13 +4,14 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:engine="using:Engine.Frontend"
-		xmlns:editor="using:Engine.Editor"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-		Title="Timeline"
-		x:Class="Engine.Frontend.TimelinePanel">
+		Title="Asset Library"
+		x:Class="Engine.Frontend.LibraryPanel">
 
-	<Grid>
-		
+	<Grid ColumnDefinitions="0.16*, 8, *">
+		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}"/>
+		<GridSplitter Grid.Column="1" Background="{StaticResource WindowBackgroundColor}"/>
+		<Panel Grid.Column="1"/>
 	</Grid>
 	
 </engine:ToolPanel>
