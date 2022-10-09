@@ -83,22 +83,20 @@ namespace Engine.World
 		/// <summary>
 		/// Spawns the actor into the scene with the given parent
 		/// </summary>
-		public Node Spawn(Node parent) => Spawn<Node>(parent);
-		public TThis Spawn<TThis>(Node parent) where TThis : Node
+		public Node Spawn(Node parent)
 		{
 			if (parent != null)
 			{
 				Parent = parent;
 			}
 			
-			return this as TThis;
+			return this;
 		}
 
 		/// <summary>
 		/// Spawns the actor into the given scene
 		/// </summary>
-		public Node Spawn(Scene scene = null) => Spawn<Node>(scene);
-		public TThis Spawn<TThis>(Scene scene = null) where TThis : Node
+		public Node Spawn(Scene scene = null)
 		{
 			if (scene == null)
 			{
@@ -109,7 +107,7 @@ namespace Engine.World
 				Scene = scene;
 			}
 
-			return this as TThis;
+			return this;
 		}
 
 		public void UpdateTransform()

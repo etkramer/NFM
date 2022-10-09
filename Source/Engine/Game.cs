@@ -36,8 +36,8 @@ namespace Engine
 		public static void OnProjectCreated()
 		{
 			// Create example model
-			var model = new ModelNode().Spawn<ModelNode>();
-			model.Position = new Vector3(0, 0, 4);
+			var model = new ModelNode().Spawn() as ModelNode;
+			model.Position = new Vector3(0, 0, 0);
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.Load<Model>("USER:Objects/Heavy.glb").Result;
 

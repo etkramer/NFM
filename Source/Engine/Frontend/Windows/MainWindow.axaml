@@ -43,7 +43,7 @@
 		</Grid>
 		
 		<!--Toolbar-->
-		<controls:Toolbar Grid.Row="1"/>
+		<!--<controls:Toolbar Grid.Row="1"/>-->
 		
 		<!--Main dockspace-->
 		<controls:Dockspace Grid.Row="2" x:Name="dockspace"/>

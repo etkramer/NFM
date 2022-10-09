@@ -91,6 +91,9 @@ namespace Basic.Loaders
 					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
 					var worldMatrix = ((Matrix4)node.GetWorldMatrix(null, 0)).Transpose();
 
+					// Transform to Z-up.
+					worldMatrix = Matrix4.CreateRotation(new(90, 0, 0)) * worldMatrix;
+
 					// Grab vertex spans from GLTF.
 					var positions = primitive.GetVertexAccessor("POSITION").AsSpan<Vector3>();
 					var normals = primitive.GetVertexAccessor("NORMAL").AsSpan<Vector3>();
@@ -103,7 +106,7 @@ namespace Basic.Loaders
 						vertices[i] = new Vertex()
 						{
 							Position = (new Vector4(positions[i].X, positions[i].Y, positions[i].Z, 1) * worldMatrix).Xyz,
-							Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z),
+							Normal = (new Vector4(normals[i].X, normals[i].Y, normals[i].Z, 1) * worldMatrix).Xyz,
 							UV0 = new Vector2(uvs[i].X, uvs[i].Y)
 						};
 					}

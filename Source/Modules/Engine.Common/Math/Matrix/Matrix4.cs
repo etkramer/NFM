@@ -790,7 +790,7 @@ namespace Engine.Mathematics
 			Matrix4 rotationX = CreateRotationX(MathHelper.DegreesToRadians(angles.X));
 			Matrix4 rotationY = CreateRotationY(MathHelper.DegreesToRadians(angles.Y));
 			Matrix4 rotationZ = CreateRotationZ(MathHelper.DegreesToRadians(angles.Z));
-			return rotationZ * rotationX * rotationY; // Apply up component last. Z/X/Y convention matches Unity.
+			return rotationX * rotationY * rotationZ; // Apply up component last.
 		}
 
 		/// <summary>

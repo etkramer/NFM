@@ -62,7 +62,7 @@ namespace Engine.Rendering
 			CommandList.Name = "Viewport List";
 
 			// Create work camera.
-			workCamera = new CameraNode().Spawn<CameraNode>();
+			workCamera = new CameraNode().Spawn() as CameraNode;
 			workCamera.Name = "Work Camera";
 
 			// Create RTs and RT-sized buffers.
@@ -96,7 +96,7 @@ namespace Engine.Rendering
 			{
 				// Mouse look
 				Vector3 cameraRotation = Camera.Rotation;
-				cameraRotation.Y += Input.MouseDelta.X * lookSens;
+				cameraRotation.Z += Input.MouseDelta.X * lookSens;
 				cameraRotation.X -= Input.MouseDelta.Y * lookSens;
 				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
 				Camera.Rotation = cameraRotation;
@@ -105,11 +105,11 @@ namespace Engine.Rendering
 				Vector3 accelVector = Vector3.Zero;
 				if (Input.IsDown(Key.W))
 				{
-					accelVector.Z += 1;
+					accelVector.Y -= 1;
 				}
 				if (Input.IsDown(Key.S))
 				{
-					accelVector.Z -= 1;
+					accelVector.Y += 1;
 				}
 				if (Input.IsDown(Key.A))
 				{
@@ -125,11 +125,11 @@ namespace Engine.Rendering
 
 				if (Input.IsDown(Key.Space))
 				{
-					accelVector.Y += 1;
+					accelVector.Z += 1;
 				}
 				if (Input.IsDown(Key.C))
 				{
-					accelVector.Y -= 1;
+					accelVector.Z -= 1;
 				}
 
 				// Apply acceleration to velocity.
@@ -147,9 +147,8 @@ namespace Engine.Rendering
 			var viewMatrix = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
 			var projectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
-			// Orient the camera in the opposite direction (facing +Z).
-			projectionMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * projectionMatrix;
-			//viewMatrix = Matrix4.CreateRotation(new Vector3(0, 180, 0)) * viewMatrix;
+			// Apply Z-up projection.
+			projectionMatrix = Matrix4.CreateRotation(new(-90, 180, 0)) * projectionMatrix;
 
 			// Upload to constant buffer.
 			CommandList.UploadBuffer(ViewCB, new ViewConstants()

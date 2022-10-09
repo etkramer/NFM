@@ -19,6 +19,10 @@ namespace Engine.Rendering
 			{
 				actor.OnDrawGizmos(context);
 			}
+			
+			context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
+			context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
+			context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 		}
 	}
 

@@ -34,7 +34,7 @@ void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID,
 
 		// Apply transformation to vertex normal.
 		float3 normal = vertex.Normal;
-		normal = mul(normal.xyz, (float3x3)transform.WorldToObject);
+		normal = normalize(mul(normal.xyz, (float3x3)transform.WorldToObject));
 
 		// Write output vertex.
 		outVerts[groupThreadID].Position = position;
