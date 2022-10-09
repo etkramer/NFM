@@ -10,6 +10,7 @@ using Mesh = Engine.Resources.Mesh;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 using StbiSharp;
+using Engine.Common;
 
 namespace Basic.Loaders
 {
@@ -89,10 +90,10 @@ namespace Basic.Loaders
 				{
 					// Find node and read transform.
 					var node = model.LogicalNodes.First(o => o.Mesh == mesh);
-					var worldMatrix = ((Matrix4)node.WorldMatrix).Transpose();
+					var worldMatrix = (Matrix4)node.WorldMatrix;
 
 					// Transform to Z-up.
-					worldMatrix = Matrix4.CreateRotation(new(90, 0, 0)) * worldMatrix;
+					worldMatrix *= Matrix4.CreateRotation(new(90, 0, 0));
 
 					// Grab vertex spans from GLTF.
 					var positions = primitive.GetVertexAccessor("POSITION").AsSpan<Vector3>();
