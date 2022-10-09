@@ -88,8 +88,8 @@ namespace Basic.Loaders
 				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
 					// Find node and read transform.
-					var node = model.LogicalNodes.FirstOrDefault(o => o.Mesh == mesh);
-					var worldMatrix = ((Matrix4)node.GetWorldMatrix(null, 0)).Transpose();
+					var node = model.LogicalNodes.First(o => o.Mesh == mesh);
+					var worldMatrix = ((Matrix4)node.WorldMatrix).Transpose();
 
 					// Transform to Z-up.
 					worldMatrix = Matrix4.CreateRotation(new(90, 0, 0)) * worldMatrix;
@@ -141,7 +141,9 @@ namespace Basic.Loaders
 	{
 		public static unsafe Span<T> AsSpan<T>(this Accessor accessor) where T : unmanaged
 		{
-			return MemoryMarshal.Cast<byte, T>(accessor.SourceBufferView.Content);
+			var slice = accessor.SourceBufferView.Content.Slice(accessor.ByteOffset, accessor.ByteLength);
+
+			return MemoryMarshal.Cast<byte, T>(slice);
 		}
 	}
 }
