@@ -6,6 +6,8 @@ namespace Engine.Resources
 {
 	public abstract class Asset
 	{
+		public static event Action<Asset> OnAssetAdded = delegate {};
+
 		public string Path { get; set; }
 		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 
@@ -14,7 +16,13 @@ namespace Engine.Resources
 		/// </summary>
 		public static bool Submit<T>(Asset<T> asset) where T : Resource
 		{
-			return Assets.TryAdd(asset.Path, asset);
+			if (Assets.TryAdd(asset.Path, asset))
+			{
+				OnAssetAdded.Invoke(asset);
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>

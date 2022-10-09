@@ -8,10 +8,24 @@
 		Title="Asset Library"
 		x:Class="Engine.Frontend.LibraryPanel">
 
-	<Grid ColumnDefinitions="0.16*, 8, *">
-		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}"/>
+	<Grid ColumnDefinitions="240, 8, *">
+		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}">
+			<TreeView Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding FolderTree}">
+				<TreeView.ItemTemplate>
+					<TreeDataTemplate ItemsSource="{Binding Folders}">
+						<StackPanel Orientation="Horizontal" Spacing="6">
+							<TextBlock Text="&#xE2C7;" FontFamily="{StaticResource IconsFont}" Background="Transparent" Foreground="#E6DB74" VerticalAlignment="Center" FontSize="16"/>
+							<TextBlock Text="{Binding Name}" Background="Transparent"/>
+						</StackPanel>
+					</TreeDataTemplate>
+				</TreeView.ItemTemplate>
+			</TreeView>
+		</Panel>
+		
 		<GridSplitter Grid.Column="1" Background="{StaticResource WindowBackgroundColor}"/>
 		<Panel Grid.Column="1"/>
+		
+		
 	</Grid>
 
 </engine:ToolPanel>

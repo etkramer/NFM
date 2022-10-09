@@ -27,7 +27,7 @@ namespace Engine.Resources
 		public string MakeFullPath(string path)
 		{
 			path = path.Replace('\\', '/').Trim();
-			return $"{ID}:{path}";
+			return $"{ID}:/{path}";
 		}
 	}
 }
