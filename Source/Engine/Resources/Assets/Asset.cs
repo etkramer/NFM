@@ -28,13 +28,13 @@ namespace Engine.Resources
 		/// <summary>
 		/// Asynchronously retrieves the asset at the given path
 		/// </summary>
-		public static Task<T> Load<T>(string path) where T : Resource
+		public static Task<T> LoadAsync<T>(string path) where T : Resource
 		{
 			if (Assets.TryGetValue(path, out Asset foundAsset))
 			{
 				if (foundAsset is Asset<T> asset)
 				{
-					return asset.Get();
+					return asset.GetAsync();
 				}
 			}
 
@@ -44,7 +44,9 @@ namespace Engine.Resources
 
 	public sealed class Asset<T> : Asset where T : Resource
 	{
+		private object loadingLock = new();
 		private Task<T> loadingTask;
+
 		private readonly ResourceLoader<T> loader;
 		private T cache;
 
@@ -64,28 +66,33 @@ namespace Engine.Resources
 			loader = null;
 		}
 
-		public Task<T> Get()
+		public Task<T> GetAsync()
 		{
-			if (cache == null)
+			lock (loadingLock)
 			{
-				// Don't start a new task if we're already in the process of loading it.
+				// Don't start a new task if we've already started (or finished) loading it.
 				if (loadingTask == null)
 				{
-					loadingTask = Task.Run(async () =>
+					// Resource is not loaded, so we need to load it.
+					if (cache == null)
 					{
-						cache = await loader.Load();
-						cache.Source = this;
+						loadingTask = Task.Run(async () =>
+						{
+							cache = await loader.Load();
+							cache.Source = this;
 
-						return cache;
-					});
+							return cache;
+						});
+					}
+					// Resource is already loaded, so we can just return it.
+					else
+					{
+						loadingTask = Task.FromResult(cache);
+					}
 				}
+			}
 
-				return loadingTask;
-			}
-			else
-			{
-				return Task.FromResult(cache);
-			}
+			return loadingTask;
 		}
 	}
 }

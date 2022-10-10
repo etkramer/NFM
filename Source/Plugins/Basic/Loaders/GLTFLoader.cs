@@ -57,9 +57,9 @@ namespace Basic.Loaders
 				// Determine shader and create material.
 				Shader shader = material.Alpha switch
 				{
-					AlphaMode.MASK => await Asset.Load<Shader>("USER:/Shaders/Transparent.hlsl"),
-					AlphaMode.BLEND => await Asset.Load<Shader>("USER:/Shaders/Transparent.hlsl"),
-					_ => await Asset.Load<Shader>("USER:/Shaders/Opaque.hlsl")
+					AlphaMode.MASK => await Asset.LoadAsync<Shader>("USER:/Shaders/Transparent.hlsl"),
+					AlphaMode.BLEND => await Asset.LoadAsync<Shader>("USER:/Shaders/Transparent.hlsl"),
+					_ => await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl")
 				};
 				Material gameMaterial = new Material(shader);
 
