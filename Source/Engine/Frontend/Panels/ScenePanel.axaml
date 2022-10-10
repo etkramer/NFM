@@ -23,7 +23,7 @@
 				</Button.Flyout>
 			</Button>
 			
-			<TextBox Grid.Column="0" Watermark="Filter.."/>
+			<TextBox Grid.Column="0" Watermark="Filter.." Classes="search"/>
 		</Grid>
 
 		<!--Scene Tree-->

@@ -96,6 +96,9 @@ namespace Engine.Frontend
 			if (TryParseNum(value ?? Value.ToString(), Value.GetType(), out object num))
 			{
 				Value = num;
+
+				// Make sure text field resets even if the number hasn't changed.
+				(this as INotify).Raise(nameof(valueProxy));
 			}
 			else
 			{

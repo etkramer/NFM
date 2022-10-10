@@ -63,6 +63,7 @@ namespace Engine.Frontend
 							new TextBox()
 								.Column(1)
 								.Hint("Filter..")
+								.Style("search")
 								.Text(nameof(currentFilter), BindingMode.Default)
 						),
 					// Object description
