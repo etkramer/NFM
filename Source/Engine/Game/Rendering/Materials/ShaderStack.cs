@@ -10,13 +10,15 @@ namespace Engine.Rendering
 {
 	public class ShaderStack
 	{
-		public static List<(ShaderStack, (ShaderProgram, CommandSignature))> Programs { get; } = new();
+		public static List<ShaderStack> Stacks { get; } = new();
 		private static int lastProgramID = 0;
 
 		public ShaderParameter[] Parameters;
 		public ObservableCollection<Shader> Shaders = new();
 
 		public ShaderProgram Program { get; private set; }
+		public CommandSignature Signature { get; private set; }
+
 		public int ProgramID { get; private set; } = 0;
 
 		public ShaderStack(Shader baseShader)
@@ -24,16 +26,17 @@ namespace Engine.Rendering
 			Shaders.Add(baseShader);
 			Parameters = Shaders.SelectMany(o => o.Parameters).ToArray();
 
-			Program = GetProgram();
+			FindOrCreateProgram();
 		}
 
-		private ShaderProgram GetProgram()
+		private void FindOrCreateProgram()
 		{
 			// Check if the needed program already exists.
-			if (Programs.TryFirst(o => o.Item1 != this && o.Item1.Shaders.SequenceEqual(Shaders), out var pair))
+			if (Stacks.TryFirst(o => o.Shaders.SequenceEqual(Shaders), out var stack))
 			{
-				ShaderProgram program = pair.Item2.Item1;
-				return program;
+				Program = stack.Program;
+				Signature = stack.Signature;
+				ProgramID = stack.ProgramID;
 			}
 			// Otherwise, generate a whole new one.
 			else
@@ -79,7 +82,7 @@ namespace Engine.Rendering
 				source = source.Replace("#insert SURFACE", surfaceSource).Replace("#insert SETUP", setupSource);
 
 				// Compile program.
-				ShaderProgram program = new ShaderProgram()
+				Program = new ShaderProgram()
 					.UseIncludes(typeof(Game).Assembly)
 					.SetMeshShader(Embed.GetString("Content/Shaders/BaseMS.hlsl", typeof(Game).Assembly))
 					.SetPixelShader(source, "MaterialPS")
@@ -89,14 +92,13 @@ namespace Engine.Rendering
 					.Compile().Result;
 
 				// Compile matching command signature.
-				CommandSignature signature = new CommandSignature()
-					.AddConstantArg(0, program)
+				Signature = new CommandSignature()
+					.AddConstantArg(0, Program)
 					.AddDispatchMeshArg()
 					.Compile();
 
 				ProgramID = lastProgramID++;
-				Programs.Add(new(this, new(program, signature)));
-				return program;
+				Stacks.Add(this);
 			}
 		}
 	}

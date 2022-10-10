@@ -51,6 +51,9 @@ namespace Basic.Loaders
 			{
 				var material = model.LogicalMaterials[i];
 
+				// Check if this material uses KHR_materials_transmission
+				bool useTransmission = material.FindChannel("Transmission") != null;
+
 				// Determine shader and create material.
 				Shader shader = material.Alpha switch
 				{

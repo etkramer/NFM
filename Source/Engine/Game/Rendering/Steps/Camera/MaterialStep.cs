@@ -27,11 +27,9 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Loop through materials to shade.
-			foreach (var shaderPair in ShaderStack.Programs)
+			foreach (var shader in ShaderStack.Stacks)
 			{
-				CommandSignature commandSignature = shaderPair.Item2.Item2;
-				ShaderProgram program = shaderPair.Item2.Item1;
-				int shaderID = shaderPair.Item1.ProgramID;
+				int shaderID = shader.ProgramID;
 
 				// Build indirect draw commands for this shader ID.
 				BuildDraws(shaderID);
@@ -39,7 +37,7 @@ namespace Engine.Rendering
 				List.PushEvent($"Draw shader {shaderID}");
 
 				// Switch to material program.
-				List.SetProgram(program);
+				List.SetProgram(shader.Program);
 
 				// Set and reset render targets.
 				List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
@@ -56,7 +54,7 @@ namespace Engine.Rendering
 				// Bind program CBVs.
 				List.SetProgramCBV(0, 1, Viewport.ViewCB);
 
-				List.ExecuteIndirect(commandSignature, commandBuffer, Scene.InstanceCount);
+				List.ExecuteIndirect(shader.Signature, commandBuffer, Scene.InstanceCount);
 				List.PopEvent();
 			}
 		}
