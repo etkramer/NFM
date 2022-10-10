@@ -9,6 +9,7 @@ using Engine.Aspects;
 using System.Text;
 using Vortice.Direct3D12.Shader;
 using Vortice.Direct3D;
+using System.Numerics;
 
 namespace Engine.GPU
 {
@@ -140,7 +141,7 @@ namespace Engine.GPU
 			}
 			else
 			{
-				Debug.LogError($"Compute shader failed to compile with message: \n{computeResult.GetErrors()}");
+				throw new Exception($"Compute shader failed to compile with message: \n{computeResult.GetErrors() }");
 			}
 
 			IsCompute = true;
@@ -158,7 +159,7 @@ namespace Engine.GPU
 			}
 			else
 			{
-				Debug.LogError($"Mesh shader failed to compile with message: \n{meshResult.GetErrors()}");
+				throw new Exception($"Mesh shader failed to compile with message: \n{meshResult.GetErrors() }");
 			}
 
 			IsGraphics = true;
@@ -177,7 +178,7 @@ namespace Engine.GPU
 			}
 			else
 			{
-				Debug.LogError($"Pixel shader failed to compile with message: \n{pixelResult.GetErrors()}");
+				throw new Exception($"Pixel shader failed to compile with message: \n{pixelResult.GetErrors() }");
 			}
 
 			IsGraphics = true;
