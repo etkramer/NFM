@@ -10,7 +10,7 @@
 
 	<Grid ColumnDefinitions="240, 8, *">
 		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}">
-			<TreeView Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding FolderTree}">
+			<TreeView Margin="0" Padding="0" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding FolderTree}">
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Folders}">
 						<StackPanel Orientation="Horizontal" Spacing="6">

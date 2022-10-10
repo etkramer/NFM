@@ -41,7 +41,7 @@ namespace Engine.Frontend
 						.HorizontalAlignment(HorizontalAlignment.Left)
 						.VerticalAlignment(VerticalAlignment.Center)
 						.Text(Property.Name.PascalToDisplay())
-						.Foreground(this.GetResourceBrush("ThemeForegroundMidColor"))
+						.Foreground(this.GetResourceBrush("ThemeForegroundMidBrush"))
 						.Size(11),
 					// Field
 					new ContentControl()
