@@ -50,7 +50,7 @@ namespace Engine.World
 				nodes[i].Dispose();
 			}
 
-			Queue.Add(() =>
+			DispatchQueue.Add(() =>
 			{
 				InstanceBuffer.Dispose();
 				TransformBuffer.Dispose();

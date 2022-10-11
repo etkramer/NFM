@@ -39,45 +39,19 @@ namespace Engine.Rendering
 		public CameraNode Camera => workCamera;
 		public Scene Scene => workCamera.Scene;
 
-		#region Rendering
-
-		// Command list and constants
-		public CommandList CommandList = new();
-		public GraphicsBuffer<ViewConstants> ViewCB = new(1, GraphicsBuffer.ConstantAlignment);
-
-		// Render targets
-		public Texture ColorTarget;
-		public Texture DepthBuffer;	
-
-		#endregion
-
 		/// <summary>
 		/// Constructs a viewport from a given UI host
 		/// </summary>
 		public Viewport(ViewportHost host)
 		{
 			Host = host;
-
 			ID = All.Count;
-			CommandList.Name = "Viewport List";
 
 			// Create work camera.
 			workCamera = new CameraNode().Spawn() as CameraNode;
 			workCamera.Name = "Work Camera";
 
-			// Create RTs and RT-sized buffers.
-			ColorTarget = new Texture(Size.X, Size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);
-			DepthBuffer = new Texture(Size.X, Size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float, samples: 1);
-			
-			// Register callbacks
 			Game.OnTick += OnTick;
-			host.Swapchain.OnResize += Resize;
-
-			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () =>
-			{
-				//workCamera?.Dispose();
-				//workCamera = new CameraActor();
-			});
 
 			All.Add(this);
 		}
@@ -141,40 +115,8 @@ namespace Engine.Rendering
 			Camera.Position += flyVelocity * (float)deltaTime;
 		}
 
-		public void UpdateView()
-		{
-			// Calculate view/projection matrices.
-			var viewMatrix = Matrix4.CreateTransform(Camera.Position, Camera.Rotation, Vector3.One).Inverse();
-			var projectionMatrix = Matrix4.CreatePerspectiveReversed(Camera.FOV, Size.X / (float)Size.Y, 0.01f);
-
-			// Apply Z-up projection.
-			projectionMatrix = Matrix4.CreateRotation(new(-90, 180, 0)) * projectionMatrix;
-
-			// Upload to constant buffer.
-			CommandList.UploadBuffer(ViewCB, new ViewConstants()
-			{
-				WorldToView = viewMatrix,
-				ViewToWorld = viewMatrix.Inverse(),
-				ViewToClip = projectionMatrix,
-				ClipToView = projectionMatrix.Inverse(),
-				ViewportSize = Size,
-			});
-		}
-
-		/// <summary>
-		/// Resizes the viewport and it's RTs
-		/// </summary>
-		private void Resize(Vector2i size)
-		{
-			ColorTarget.Resize(size.X, size.Y);
-			DepthBuffer.Resize(size.X, size.Y);
-		}
-
 		public void Dispose()
 		{
-			ColorTarget.Dispose();
-			DepthBuffer.Dispose();
-
 			Game.OnTick -= OnTick;
 			All.Remove(this);
 		}

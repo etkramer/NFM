@@ -9,10 +9,10 @@ namespace Engine.Rendering
 	{
 		public override void Run()
 		{
-			var context = new GizmosContext(List, Viewport);
+			var context = new GizmosContext(List, RT, Camera);
 
 			// Set render target.
-			List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
+			List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
 
 			// Draw gizmos for each actor.
 			foreach (var actor in Scene.Nodes)
@@ -29,9 +29,10 @@ namespace Engine.Rendering
 	public class GizmosContext
 	{
 		private CommandList renderList;
-		private Viewport renderViewport;
+		private RenderTarget renderTarget;
+		private CameraNode camera;
 
-		public CameraNode Camera => renderViewport.Camera;
+		public CameraNode Camera => camera;
 
 		private static ShaderProgram polylineProgram = null;
 
@@ -47,10 +48,11 @@ namespace Engine.Rendering
 				.Compile().Result;
 		}
 
-		public GizmosContext(CommandList list, Viewport viewport)
+		public GizmosContext(CommandList list, RenderTarget rt, CameraNode camera)
 		{
 			renderList = list;
-			renderViewport = viewport;
+			renderTarget = rt;
+			this.camera = camera;
 		}
 
 		public void DrawLine(Vector3 p0, Vector3 p1, Color color = default)
@@ -64,7 +66,7 @@ namespace Engine.Rendering
 			renderList.SetProgram(polylineProgram);
 
 			// Bind program constants (keeping in mind cbuffer packing requirements).
-			renderList.SetProgramCBV(0, 1, renderViewport.ViewCB);
+			renderList.SetProgramCBV(0, 1, renderTarget.ViewCB);
 			renderList.SetProgramConstants(0, 0, AsInt(p0));
 			renderList.SetProgramConstants(0, 4, AsInt(p1));
 			renderList.SetProgramConstants(0, 8, AsInt((Vector3)color));

@@ -40,7 +40,7 @@ namespace Engine.Rendering
 				List.SetProgram(shader.Program);
 
 				// Set and reset render targets.
-				List.SetRenderTarget(Viewport.ColorTarget, Viewport.DepthBuffer);
+				List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
 
 				// Bind program SRVs.
 				List.SetProgramSRV(0, 1, Mesh.VertBuffer);
@@ -52,7 +52,7 @@ namespace Engine.Rendering
 				List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 				// Bind program CBVs.
-				List.SetProgramCBV(0, 1, Viewport.ViewCB);
+				List.SetProgramCBV(0, 1, RT.ViewCB);
 
 				List.ExecuteIndirect(shader.Signature, commandBuffer, Scene.InstanceCount);
 				List.PopEvent();

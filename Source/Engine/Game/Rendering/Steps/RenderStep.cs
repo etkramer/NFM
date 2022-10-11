@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Engine.GPU;
 using Engine.World;
 
@@ -17,7 +13,8 @@ namespace Engine.Rendering
 
 	public abstract class RenderStep
 	{
-		public Viewport Viewport { get; set; }
+		public RenderTarget RT { get; set; }
+		public CameraNode Camera { get; set; }
 		public Scene Scene { get; set; }
 		public CommandList List { get; set; }
 

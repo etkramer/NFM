@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using Avalonia.Rendering;
 using Engine.Frontend;
 using Engine.GPU;
 using Engine.World;
+using SharpDX.DXGI;
 using Vortice.Direct3D12;
+using Vortice.Mathematics;
+using static Avalonia.OpenGL.GlInterface;
 
 namespace Engine.Rendering
 {
@@ -24,7 +29,7 @@ namespace Engine.Rendering
 				case RenderStage.Global:
 					Debug.Assert(!globalStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
 					step.List = DefaultCommandList;
-					step.Viewport = null;
+					step.RT = null;
 					step.Scene = null;
 
 					globalStage.Add(step);
@@ -32,7 +37,7 @@ namespace Engine.Rendering
 				case RenderStage.Scene:
 					Debug.Assert(!sceneStage.Any(o => o.GetType() == step.GetType()), "Cannot add multiple render steps of the same type.");
 					step.List = DefaultCommandList;
-					step.Viewport = null;
+					step.RT = null;
 
 					sceneStage.Add(step);
 					break;
@@ -80,9 +85,9 @@ namespace Engine.Rendering
 			AddStep(new ResolveStep(), RenderStage.Camera);
 		}
 
-		public static void Render()
+		public static void BeginFrame()
 		{
-			// Execute global render steps.
+			// Run global render steps.
 			foreach (RenderStep step in globalStage)
 			{
 				step.List.PushEvent($"{step.GetType().Name} (global)");
@@ -90,7 +95,41 @@ namespace Engine.Rendering
 				step.List.PopEvent();
 			}
 
-			// Loop through scenes.
+			// Run scene render steps.
+			foreach (Scene scene in Scene.All)
+			{
+				// Execute per-scene render steps.
+				foreach (RenderStep step in sceneStage)
+				{
+					step.Scene = scene;
+
+					step.List.PushEvent($"{step.GetType().Name} (scene)");
+					step.Run();
+					step.List.PopEvent();
+				}
+			}
+
+			// Execute default command list and wait for it on the GPU.
+			DefaultCommandList.Execute();
+		}
+
+		public static void EndFrame()
+		{
+			// Wait for completion.
+			Graphics.WaitFrame();
+		}
+
+		public static void Render()
+		{
+			// Run global render steps.
+			foreach (RenderStep step in globalStage)
+			{
+				step.List.PushEvent($"{step.GetType().Name} (global)");
+				step.Run();
+				step.List.PopEvent();
+			}
+
+			// Run scene render steps.
 			foreach (Scene scene in Scene.All)
 			{
 				// Execute per-scene render steps.
@@ -107,37 +146,46 @@ namespace Engine.Rendering
 			// Execute default command list and wait for it on the GPU.
 			DefaultCommandList.Execute();
 
-			// Build and execute per-viewport commands. Consider doing this in parallel.
+			// Render to each viewport.
 			foreach (var viewport in Viewport.All)
 			{
-				viewport.UpdateView();
-
-				foreach (RenderStep step in cameraStage)
-				{
-					step.Viewport = viewport;
-					step.List = viewport.CommandList;
-					step.Scene = step.Viewport.Scene;
-
-					step.List.PushEvent($"{step.GetType().Name} (camera)");
-					step.Run();
-					step.List.PopEvent();
-				}
-
-				// Make sure the viewport's backbuffer is in the right state for presentation.
-				viewport.CommandList.RequestState(viewport.Host.Swapchain.RT, ResourceStates.Present);
-
-				// Let these commands be executed while we're recording the next viewport.
-				viewport.CommandList.Execute();
-			}
-
-			// Present swapchains.
-			foreach (var viewport in Viewport.All)
-			{
-				viewport.Host.Swapchain.Present();
+				RenderCamera(viewport.Camera, viewport.Host.Swapchain);
 			}
 
 			// Wait for completion.
 			Graphics.WaitFrame();
+		}
+
+		public static void RenderCamera(CameraNode camera, Swapchain swapchain)
+		{
+			RenderCamera(camera, swapchain.RT, (o) => o.RequestState(swapchain.RT, ResourceStates.Present));
+			swapchain.Present();
+		}
+		
+		public static void RenderCamera(CameraNode camera, Texture texture) => RenderCamera(camera, texture, null);
+		public static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
+		{
+			var rt = RenderTarget.Get(texture.Size);
+			rt.UpdateView(camera);
+
+			foreach (RenderStep step in cameraStage)
+			{
+				step.RT = rt;
+				step.Camera = camera;
+				step.List = rt.CommandList;
+				step.Scene = camera.Scene;
+
+				step.List.PushEvent($"{step.GetType().Name} (camera)");
+				step.Run();
+				step.List.PopEvent();
+			}
+
+			rt.CommandList.ResolveTexture(rt.ColorTarget, texture);
+			rt.CommandList.ClearRenderTarget(rt.ColorTarget);
+			rt.CommandList.ClearDepth(rt.DepthBuffer);
+
+			beforeExecute?.Invoke(rt.CommandList);
+			rt.CommandList.Execute();
 		}
 
 		public static void Cleanup()

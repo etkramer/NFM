@@ -83,7 +83,7 @@ namespace Engine.Rendering
 			List.SetProgram(depthProgram);
 
 			// Set render targets.
-			List.SetRenderTarget(null, Viewport.DepthBuffer);
+			List.SetRenderTarget(null, RT.DepthBuffer);
 
 			// Bind program SRVs.
 			List.SetProgramSRV(0, 1, Mesh.VertBuffer);
@@ -94,7 +94,7 @@ namespace Engine.Rendering
 			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
 
 			// Bind program CBVs.
-			List.SetProgramCBV(0, 1, Viewport.ViewCB);
+			List.SetProgramCBV(0, 1, RT.ViewCB);
 
 			// Dispatch draw commands.
 			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Scene.MaxInstanceCount);

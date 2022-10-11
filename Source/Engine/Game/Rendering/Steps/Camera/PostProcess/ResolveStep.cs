@@ -21,16 +21,8 @@ namespace Engine.Rendering
 		{
 			// Gamma correct output.
 			List.SetProgram(gammaProgram);
-			List.SetProgramUAV(0, 0, Viewport.ColorTarget);
-			List.DispatchThreads(Viewport.ColorTarget.Width, 32, Viewport.ColorTarget.Height, 32);
-
-			// Copy output to backbuffer.
-			List.BarrierUAV(Viewport.ColorTarget);
-			List.ResolveTexture(Viewport.ColorTarget, Viewport.Host.Swapchain.RT);
-
-			// Clear viewport targets.
-			List.ClearRenderTarget(Viewport.ColorTarget);
-			List.ClearDepth(Viewport.DepthBuffer);
+			List.SetProgramUAV(0, 0, RT.ColorTarget);
+			List.DispatchThreads(RT.ColorTarget.Width, 32, RT.ColorTarget.Height, 32);
 		}
 	}
 }

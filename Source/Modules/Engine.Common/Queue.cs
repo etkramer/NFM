@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
-	public static class Queue
+	public static class DispatchQueue
 	{
 		private static ConcurrentDictionary<int, List<Action>> queues = new();
 
