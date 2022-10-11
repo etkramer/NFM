@@ -5,13 +5,14 @@
 		<Setter Property="Padding" Value="4, 0, 0, 0"/>
 		<Setter Property="VerticalContentAlignment" Value="Center"/>
 		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+		<Setter Property="SelectionBrush" Value="{StaticResource ThemeControlHighlightMidBrush}"/>
+		<Setter Property="SelectionForegroundBrush" Value="#82B9FF"/>
 	</Style>
 
 	<Style Selector="TextBox.search">
 		<Setter Property="CornerRadius" Value="2"/>
 		<Setter Property="BorderThickness" Value="1"/>
 		<Setter Property="BorderBrush" Value="{x:Null}"/>
-		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
 	</Style>
 
 	<Style Selector="TextBox.search:pointerover /template/ Border#border">

@@ -23,6 +23,8 @@ namespace Engine.Frontend
 			OnAssetAdded("USER:/models/humans/group01/male_01.mdl");
 		}
 
+		#region Folder Tree
+
 		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
 			Asset.OnAssetAdded += OnAssetAdded;
@@ -87,5 +89,7 @@ namespace Engine.Frontend
 		{
 			public MountPoint Mount { get; set; }
 		}
+
+		#endregion
 	}
 }
