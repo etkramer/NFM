@@ -7,6 +7,7 @@
 		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
 		<Setter Property="SelectionBrush" Value="{StaticResource ThemeControlHighlightMidBrush}"/>
 		<Setter Property="SelectionForegroundBrush" Value="#82B9FF"/>
+		<Setter Property="Foreground" Value="{StaticResource ThemeForegroundMidBrush}"/>
 	</Style>
 
 	<Style Selector="TextBox.search">

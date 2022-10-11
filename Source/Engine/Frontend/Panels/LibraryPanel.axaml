@@ -8,6 +8,37 @@
 		Title="Asset Library"
 		x:Class="Engine.Frontend.LibraryPanel">
 
+	<engine:ToolPanel.Styles>
+		<Style Selector="ListBoxItem">
+			<Setter Property="BorderBrush" Value="{x:Null}"/>
+			<Setter Property="Background" Value="{x:Null}"/>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border BorderThickness="2" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" CornerRadius="4" BorderDashArray="5, 1">
+						<ContentPresenter Name="PART_ContentPresenter"
+										  Background="{x:Null}"
+										  BorderBrush="{x:Null}"
+										  CornerRadius="{TemplateBinding CornerRadius}"
+										  ContentTemplate="{TemplateBinding ContentTemplate}"
+										  Content="{TemplateBinding Content}"
+										  Padding="{TemplateBinding Padding}"
+										  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+										  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+
+		<Style Selector="ListBoxItem:selected">
+			<Setter Property="BorderBrush" Value="{StaticResource ThemeAccentBrush}"/>
+			<Setter Property="Background" Value="{DynamicResource ThemeControlHighlightMidBrush}"/>
+		</Style>
+
+		<Style Selector="ListBoxItem:pointerover">
+			<Setter Property="Background" Value="{DynamicResource ThemeControlHighlightMidBrush}"/>
+		</Style>
+	</engine:ToolPanel.Styles>
+
 	<Grid ColumnDefinitions="240, 8, *">
 		<!--Folder View (Left)-->
 		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}">
@@ -26,8 +57,23 @@
 		<GridSplitter Grid.Column="1" Background="{StaticResource WindowBackgroundColor}"/>
 
 		<!--Asset View (Right)-->
-		<Grid Grid.Column="2" RowDefinitions="*">
-			
+		<Grid Grid.Column="2" RowDefinitions="27, 1, *">
+			<Grid Grid.Row="0" Margin="3, 2, 3, 3">
+				<TextBox x:Name="searchBox" Classes="search" Watermark="Search"/>
+			</Grid>
+
+			<Rectangle Grid.Row="1" Fill="{StaticResource ControlBackgroundColor}"/>
+
+			<ListBox Grid.Row="2" BorderThickness="0" Background="{x:Null}" Items="{Binding SearchResults}" Margin="4, 8">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal" Background="Transparent" Spacing="8" Height="19">
+							<TextBlock Text="&#xE2C7;" Foreground="#E6DB74" Margin="10, 0, 0, 0" FontSize="18" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+							<TextBlock Text="{Binding Name}" Foreground="{StaticResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
 		</Grid>
 	</Grid>
 

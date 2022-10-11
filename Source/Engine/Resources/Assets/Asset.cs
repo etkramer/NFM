@@ -9,6 +9,7 @@ namespace Engine.Resources
 		public static event Action<Asset> OnAssetAdded = delegate {};
 
 		public string Path { get; set; }
+		public string Name { get; protected set;}
 		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
@@ -55,12 +56,14 @@ namespace Engine.Resources
 		public Asset(string path, MountPoint mount, ResourceLoader<T> loader)
 		{
 			Path = mount.MakeFullPath(path);
+			Name = Path.Split('/').Last();
 			this.loader = loader;
 		}
 
 		public Asset(string path, MountPoint mount, T cachedValue)
 		{
 			Path = mount.MakeFullPath(path);
+			Name = Path.Split('/').Last();
 			cache = cachedValue;
 			cache.Source = this;
 			loader = null;

@@ -1,13 +1,19 @@
 using System;
-using System.Collections;
+using System.Linq;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.LogicalTree;
+using Engine.Common;
 using Engine.Resources;
+using static Engine.Frontend.LibraryPanel;
 
 namespace Engine.Frontend
 {
 	public partial class LibraryPanel : ToolPanel
 	{
 		public ObservableCollection<MountFolder> FolderTree { get; set; } = new();
+
+		public ObservableCollection<object> SearchResults { get; set; } = new();
 
 		public LibraryPanel()
 		{
@@ -21,9 +27,85 @@ namespace Engine.Frontend
 
 			// Leave this here until we get some assets with more interesting paths...
 			OnAssetAdded("USER:/models/humans/group01/male_01.mdl");
+
+			// Update results with folder selection.
+			folderTreeView.SelectionChanged += (o, e) =>
+			{
+				var newSelection = e.AddedItems == null ? null : e.AddedItems[e.AddedItems.Count - 1];
+				RefreshSearch(searchBox.Text, newSelection as Folder);
+			};
+
+			// Update results with search filter.
+			searchBox.GetObservable(TextBox.TextProperty).Subscribe((s) =>
+			{
+				RefreshSearch(s);
+			});
+		}
+
+		private void RefreshSearch(string search, Folder folderOverride = null)
+		{
+			SearchResults.Clear();
+
+			var folder = folderOverride ?? (folderTreeView.SelectedItem ??= FolderTree.FirstOrDefault()) as Folder;
+			const StringComparison comparisonMode = StringComparison.OrdinalIgnoreCase;
+
+			if (search == null || search?.Length == 0)
+			{
+				if (folder == null)
+				{
+					return;
+				}
+
+				// Add all assets in folder.
+				foreach (var asset in Asset.Assets.Where(o => o.Key.StartsWith(folder.Path, comparisonMode) && o.Key.Count(o2 => o2 == '/') == folder.Path.Count(o2 => o2 == '/')))
+				{
+					SearchResults.Add(asset.Value);
+				}
+
+				// Add all subfolders.
+				foreach (var subFolder in GetFolderFromPath(folder.Path).Folders)
+				{
+					SearchResults.Add(subFolder);
+				}
+			}
+			else
+			{
+				// Add all assets matching search query.
+				foreach (var asset in Asset.Assets.Where(o => o.Key.Contains(search, comparisonMode) && o.Key.StartsWith(folder.Path, comparisonMode)).Select(o => o.Value))
+				{
+					SearchResults.Add(asset);
+				}
+			}
 		}
 
 		#region Folder Tree
+
+		private Folder GetFolderFromPath(string path)
+		{
+			string[] pathComponents = path.Split("/", StringSplitOptions.RemoveEmptyEntries);
+			var mountFolder = FolderTree.FirstOrDefault(o => o.Name == pathComponents[0].Substring(0, pathComponents[0].Length - 1));
+
+			if (pathComponents.Length == 1)
+			{
+				return mountFolder;
+			}
+
+			return GetFolderFromPathRecurse(pathComponents, 0, mountFolder);
+		}
+
+		private Folder GetFolderFromPathRecurse(string[] pathComponents, int lastComponent, Folder lastFolder)
+		{
+			var nextFolder = lastFolder.Folders.FirstOrDefault(o => o.Name == pathComponents[lastComponent + 1]);
+
+			if (nextFolder.Name == pathComponents.Last())
+			{
+				return nextFolder;
+			}
+			else
+			{
+				return GetFolderFromPathRecurse(pathComponents, lastComponent + 1, nextFolder);
+			}
+		}
 
 		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
@@ -38,6 +120,8 @@ namespace Engine.Frontend
 		private void OnAssetAdded(Asset asset) => OnAssetAdded(asset.Path);
 		private void OnAssetAdded(string path)
 		{
+			RefreshSearch(searchBox.Text);
+
 			// Get folder names from "/"-separated path
 			string[] pathComponents = path.Split("/");
 
@@ -50,6 +134,7 @@ namespace Engine.Frontend
 			{
 				FolderTree.Add(new MountFolder()
 				{
+					Path = pathComponents[0] + "/",
 					Name = mountName,
 					Mount = mount
 				});
@@ -72,6 +157,7 @@ namespace Engine.Frontend
 			{
 				lastFolder.Folders.Add(new Folder()
 				{
+					Path = string.Join('/', pathComponents[0..(lastComponent + 2)]) + "/",
 					Name = folderName
 				});
 			}
@@ -81,6 +167,7 @@ namespace Engine.Frontend
 
 		public class Folder
 		{
+			public string Path { get; set; }
 			public string Name { get; set; }
 			public ObservableCollection<Folder> Folders { get; set; } = new();
 		}

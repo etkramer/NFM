@@ -27,7 +27,7 @@
 
 			<SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
 			<SolidColorBrush x:Key="ThemeControlMidHighBrush" Color="{DynamicResource ThemeControlMidHighColor}"/>
-			<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundColor}" Opacity="0.8"/>
+			<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundColor}" Opacity="0.85"/>
 
 			<SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="{StaticResource ThemeAccentColor}" Opacity="0.4"/>
 
