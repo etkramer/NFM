@@ -6,7 +6,7 @@ using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
-	public class MaterialStep : RenderStep
+	public class MaterialStep : CameraStep
 	{
 		private GraphicsBuffer commandBuffer;
 		private ShaderProgram cullProgram;
@@ -47,14 +47,14 @@ namespace Engine.Rendering
 				List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
 				List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
 				List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-				List.SetProgramSRV(4, 1, Scene.TransformBuffer);
-				List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
+				List.SetProgramSRV(4, 1, Camera.Scene.TransformBuffer);
+				List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
 				List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 				// Bind program CBVs.
 				List.SetProgramCBV(0, 1, RT.ViewCB);
 
-				List.ExecuteIndirect(shader.Signature, commandBuffer, Scene.InstanceCount);
+				List.ExecuteIndirect(shader.Signature, commandBuffer, Camera.Scene.InstanceCount);
 				List.PopEvent();
 			}
 		}
@@ -70,7 +70,7 @@ namespace Engine.Rendering
 			// Set SRV inputs.
 			List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
+			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Set UAV outputs.
 			List.SetProgramUAV(0, 0, commandBuffer);
@@ -79,9 +79,9 @@ namespace Engine.Rendering
 			List.SetProgramConstants(0, 0, shaderID);
 
 			// Dispatch compute shader.
-			if (Scene.InstanceCount > 0)
+			if (Camera.Scene.InstanceCount > 0)
 			{
-				List.DispatchGroups(Scene.InstanceCount);
+				List.DispatchGroups(Camera.Scene.InstanceCount);
 			}
 
 			List.BarrierUAV(commandBuffer);

@@ -5,7 +5,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class ResolveStep : RenderStep
+	public class ResolveStep : CameraStep
 	{
 		private ShaderProgram gammaProgram;
 

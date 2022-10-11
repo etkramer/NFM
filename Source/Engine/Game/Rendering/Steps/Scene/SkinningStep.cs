@@ -3,7 +3,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class SkinningStep : RenderStep
+	public class SkinningStep : SceneStep
 	{
 		public override void Run()
 		{

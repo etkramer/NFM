@@ -3,7 +3,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class SceneUpdateStep : RenderStep
+	public class SceneUpdateStep : SceneStep
 	{
 		public override void Run()
 		{

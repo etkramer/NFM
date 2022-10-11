@@ -4,21 +4,22 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public enum RenderStage
+	public abstract class RenderStep
 	{
-		Global,
-		Scene,
-		Camera,
+		public virtual void Init() {}
+		public abstract void Run();
 	}
 
-	public abstract class RenderStep
+	public abstract class SceneStep : RenderStep
+	{
+		public Scene Scene { get; set; }
+		public CommandList List => Renderer.DefaultCommandList;
+	}
+
+	public abstract class CameraStep : RenderStep
 	{
 		public RenderTarget RT { get; set; }
 		public CameraNode Camera { get; set; }
-		public Scene Scene { get; set; }
-		public CommandList List { get; set; }
-
-		public virtual void Init() {}
-		public abstract void Run();
+		public CommandList List => RT.CommandList;
 	}
 }

@@ -5,7 +5,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class GizmosStep : RenderStep
+	public class GizmosStep : CameraStep
 	{
 		public override void Run()
 		{
@@ -15,7 +15,7 @@ namespace Engine.Rendering
 			List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
 
 			// Draw gizmos for each actor.
-			foreach (var actor in Scene.Nodes)
+			foreach (var actor in Camera.Scene.Nodes)
 			{
 				actor.OnDrawGizmos(context);
 			}

@@ -5,7 +5,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class PrepassStep : RenderStep
+	public class PrepassStep : CameraStep
 	{
 		public GraphicsBuffer CommandBuffer;
 		public CommandSignature DepthCommandSignature;
@@ -60,7 +60,7 @@ namespace Engine.Rendering
 
 			// Set SRV inputs.
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
+			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Set UAV outputs.
 			List.SetProgramUAV(0, 0, CommandBuffer);
@@ -69,9 +69,9 @@ namespace Engine.Rendering
 			List.SetProgramConstants(0, 0, -1);
 
 			// Dispatch compute shader.
-			if (Scene.InstanceCount > 0)
+			if (Camera.Scene.InstanceCount > 0)
 			{
-				List.DispatchGroups(Scene.InstanceCount);
+				List.DispatchGroups(Camera.Scene.InstanceCount);
 			}
 
 			List.BarrierUAV(CommandBuffer);
@@ -90,8 +90,8 @@ namespace Engine.Rendering
 			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
 			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
 			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(4, 1, Scene.TransformBuffer);
-			List.SetProgramSRV(5, 1, Scene.InstanceBuffer);
+			List.SetProgramSRV(4, 1, Camera.Scene.TransformBuffer);
+			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Bind program CBVs.
 			List.SetProgramCBV(0, 1, RT.ViewCB);
