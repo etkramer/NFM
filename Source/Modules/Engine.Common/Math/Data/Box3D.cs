@@ -21,14 +21,14 @@ namespace Engine.Mathematics
 		/// </summary>
 		public Vector3 Center => new Vector3((Min.X + Max.X) / 2f, (Min.Y + Max.Y) / 2f, (Min.Z + Max.Z) / 2f);
 
-		public Vector3 LeftNearBottom => new Vector3(Min.X, Min.Y, Min.Z);
-		public Vector3 LeftFarBottom => new Vector3(Min.X, Max.Y, Min.Z);
-		public Vector3 RightNearBottom => new Vector3(Max.X, Min.Y, Min.Z);
-		public Vector3 RightFarBottom => new Vector3(Max.X, Max.Y, Min.Z);
-		public Vector3 LeftNearTop => new Vector3(Min.X, Min.Y, Max.Z);
-		public Vector3 LeftFarTop => new Vector3(Min.X, Max.Y, Max.Z);
-		public Vector3 RightNearTop => new Vector3(Max.X, Min.Y, Max.Z);
-		public Vector3 RightFarTop => new Vector3(Max.X, Max.Y, Max.Z);
+		public Vector3 BottomLeftNear => new Vector3(Min.X, Min.Y, Min.Z);
+		public Vector3 BottomLeftFar => new Vector3(Min.X, Max.Y, Min.Z);
+		public Vector3 BottomRightNear => new Vector3(Max.X, Min.Y, Min.Z);
+		public Vector3 BottomRightFar => new Vector3(Max.X, Max.Y, Min.Z);
+		public Vector3 TopLeftNear => new Vector3(Min.X, Min.Y, Max.Z);
+		public Vector3 TopLeftFar => new Vector3(Min.X, Max.Y, Max.Z);
+		public Vector3 TopRightNear => new Vector3(Max.X, Min.Y, Max.Z);
+		public Vector3 TopRightFar => new Vector3(Max.X, Max.Y, Max.Z);
 
 		public float Width => Max.X - Min.X;
 		public float Depth => Max.Y - Min.Y;

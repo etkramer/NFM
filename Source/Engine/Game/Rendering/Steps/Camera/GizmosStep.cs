@@ -58,22 +58,22 @@ namespace Engine.Rendering
 		public void DrawBox(Box3D box, Color color = default)
 		{
 			// Vertical lines
-			DrawLine(box.LeftNearBottom, box.LeftNearTop, color);
-			DrawLine(box.RightNearBottom, box.RightNearTop, color);
-			DrawLine(box.LeftFarBottom, box.LeftFarTop, color);
-			DrawLine(box.RightFarBottom, box.RightFarTop, color);
+			DrawLine(box.BottomLeftNear, box.TopLeftNear, color);
+			DrawLine(box.BottomRightNear, box.TopRightNear, color);
+			DrawLine(box.BottomLeftFar, box.TopLeftFar, color);
+			DrawLine(box.BottomRightFar, box.TopRightFar, color);
 
 			// Bottom lines
-			DrawLine(box.LeftNearBottom, box.LeftFarBottom, color);
-			DrawLine(box.LeftFarBottom, box.RightFarBottom, color);
-			DrawLine(box.RightFarBottom, box.RightNearBottom, color);
-			DrawLine(box.RightNearBottom, box.LeftNearBottom, color);
+			DrawLine(box.BottomLeftNear, box.BottomLeftFar, color);
+			DrawLine(box.BottomLeftFar, box.BottomRightFar, color);
+			DrawLine(box.BottomRightFar, box.BottomRightNear, color);
+			DrawLine(box.BottomRightNear, box.BottomLeftNear, color);
 
 			// Top lines
-			DrawLine(box.LeftNearTop, box.LeftFarTop, color);
-			DrawLine(box.LeftFarTop, box.RightFarTop, color);
-			DrawLine(box.RightFarTop, box.RightNearTop, color);
-			DrawLine(box.RightNearTop, box.LeftNearTop, color);
+			DrawLine(box.TopLeftNear, box.TopLeftFar, color);
+			DrawLine(box.TopLeftFar, box.TopRightFar, color);
+			DrawLine(box.TopRightFar, box.TopRightNear, color);
+			DrawLine(box.TopRightNear, box.TopLeftNear, color);
 		}
 
 		public void DrawLine(Vector3 p0, Vector3 p1, Color color = default)
