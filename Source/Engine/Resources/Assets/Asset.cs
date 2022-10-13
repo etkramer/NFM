@@ -6,11 +6,15 @@ namespace Engine.Resources
 {
 	public abstract class Asset
 	{
+		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 		public static event Action<Asset> OnAssetAdded = delegate {};
+
+		// TODO: Should try to get thumbnail from loader, and generate (or load from cache) a new one if it returns null.
+		// This is for i.e. a cloud-based asset provider might want to send along just the thumbnail without needing the asset to be (down)loaded.
+		public Texture2D Thumbnail => null;
 
 		public string Path { get; set; }
 		public string Name { get; protected set;}
-		public static readonly ConcurrentDictionary<string, Asset> Assets = new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Submits the given asset to the asset system

@@ -55,6 +55,27 @@ namespace Engine.Rendering
 			this.camera = camera;
 		}
 
+		public void DrawBox(Box3D box, Color color = default)
+		{
+			// Vertical lines
+			DrawLine(box.LeftNearBottom, box.LeftNearTop, color);
+			DrawLine(box.RightNearBottom, box.RightNearTop, color);
+			DrawLine(box.LeftFarBottom, box.LeftFarTop, color);
+			DrawLine(box.RightFarBottom, box.RightFarTop, color);
+
+			// Bottom lines
+			DrawLine(box.LeftNearBottom, box.LeftFarBottom, color);
+			DrawLine(box.LeftFarBottom, box.RightFarBottom, color);
+			DrawLine(box.RightFarBottom, box.RightNearBottom, color);
+			DrawLine(box.RightNearBottom, box.LeftNearBottom, color);
+
+			// Top lines
+			DrawLine(box.LeftNearTop, box.LeftFarTop, color);
+			DrawLine(box.LeftFarTop, box.RightFarTop, color);
+			DrawLine(box.RightFarTop, box.RightNearTop, color);
+			DrawLine(box.RightNearTop, box.LeftNearTop, color);
+		}
+
 		public void DrawLine(Vector3 p0, Vector3 p1, Color color = default)
 		{
 			if (color == default)

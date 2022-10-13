@@ -50,12 +50,12 @@ namespace Engine.Mathematics
 		public Vector2 BottomLeft => new Vector2(Left, Bottom);
 		public Vector2 BottomRight => new Vector2(Left + Width, Bottom);
 
-		public Box2D(Box2D Base, float LeftOffset, float RightOffset, float TopOffset, float BottomOffset)
+		public Box2D(Box2D @base, float leftOffset, float rightOffset, float topOffset, float bottomOffset)
 		{
-			Left = Base.Left + LeftOffset;
-			Right = Base.Right + RightOffset;
-			Top = Base.Top + TopOffset;
-			Bottom = Base.Bottom + BottomOffset;
+			Left = @base.Left + leftOffset;
+			Right = @base.Right + rightOffset;
+			Top = @base.Top + topOffset;
+			Bottom = @base.Bottom + bottomOffset;
 		}
 
 		/// <param name="position">Uses Windows-style coordinates - (0,0) is top left.</param>

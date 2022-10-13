@@ -24,6 +24,8 @@ namespace Engine.Resources
 
 		public bool IsCommitted { get; private set; } = false;
 
+		public Box3D Bounds { get; set; } = Box3D.Infinity;
+
 		public uint[] Indices { get; set; }
 		public Vertex[] Vertices { get; set; }
 		public Material Material { get; set; }
@@ -53,6 +55,11 @@ namespace Engine.Resources
 			PrimHandle?.Dispose();
 			MeshHandle?.Dispose();
 			MeshletHandle?.Dispose();
+
+			if (Bounds == Box3D.Infinity)
+			{
+				Bounds = CalculateBounds();
+			}
 
 			fixed (uint* indicesPtr = Indices)
 			fixed (Vertex* vertsPtr = Vertices)
@@ -90,6 +97,49 @@ namespace Engine.Resources
 
 			// Mark mesh as committed.
 			IsCommitted = true;
+		}
+
+		public Box3D CalculateBounds()
+		{
+			Vector3 min = Vector3.PositiveInfinity;
+			Vector3 max = Vector3.NegativeInfinity;
+
+			// Nothing fancy, just loop over every vert and
+			// compare to the current min/max values.
+			for (int i = 0; i < Vertices.Length; i++)
+			{
+				var vert = Vertices[i];
+
+				// Update minimums.
+				if (vert.Position.X < min.X)
+				{
+					min.X = vert.Position.X;
+				}
+				if (vert.Position.Y < min.Y)
+				{
+					min.Y = vert.Position.Y;
+				}
+				if (vert.Position.Z < min.Z)
+				{
+					min.Z = vert.Position.Z;
+				}
+
+				// Update maximums.
+				if (vert.Position.X > max.X)
+				{
+					max.X = vert.Position.X;
+				}
+				if (vert.Position.Y > max.Y)
+				{
+					max.Y = vert.Position.Y;
+				}
+				if (vert.Position.Z > max.Z)
+				{
+					max.Z = vert.Position.Z;
+				}
+			}
+
+			return new Box3D(min, max);
 		}
 
 		public void Dispose()
