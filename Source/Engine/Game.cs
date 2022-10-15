@@ -36,10 +36,11 @@ namespace Engine
 		public static void OnProjectCreated()
 		{
 			// Create example model
-			var model = new ModelNode().Spawn() as ModelNode;
-			model.Position = new Vector3(0, 0, 0);
+			var model = new ModelNode();
+			model.Position = new Vector3(0);
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
+			model.Spawn();
 
 			// If we need a GC, now's a good time.
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);

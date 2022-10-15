@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 namespace Engine.Plugins
@@ -8,7 +9,7 @@ namespace Engine.Plugins
 	{
 		public virtual void OnStart() {}
 
-		protected JsonDocument LoadConfig(string configName = null)
+		protected bool TryLoadConfig(out JsonDocument document, string configName = null)
 		{
 			if (configName == null)
 			{
@@ -20,27 +21,30 @@ namespace Engine.Plugins
 			string configPath = $"{runtimeDir}/Config/{configName}.json";
 
 			// Check if config actually exists.
-			if (!File.Exists(configPath))
-				return null;
-
-			using (var configStream = File.OpenRead(configPath))
+			if (File.Exists(configPath))
 			{
-				JsonDocumentOptions opts = new()
+				// Open the file in readonly mode
+				using (var configStream = File.OpenRead(configPath))
 				{
-					AllowTrailingCommas = true,
-					CommentHandling = JsonCommentHandling.Skip,
-				};
+					try
+					{
+						document = JsonDocument.Parse(configStream, new()
+						{
+							AllowTrailingCommas = true,
+							CommentHandling = JsonCommentHandling.Skip,
+						});
 
-				try
-				{
-					return JsonDocument.Parse(configStream, opts);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError(e);
-					return null;
+						return true;
+					}
+					catch (Exception e)
+					{
+						Debug.LogError(e);
+					}
 				}
 			}
+
+			document = default;
+			return false;
 		}
 	}
 }
