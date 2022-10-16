@@ -16,7 +16,7 @@ namespace Engine.Rendering
 			// Compile indirect compute program.
 			cullProgram = new ShaderProgram()
 				.UseIncludes(typeof(Game).Assembly)
-				.SetComputeShader(Embed.GetString("Content/Shaders/Prepass/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
+				.SetComputeShader(Embed.GetString("Content/Shaders/Geometry/Shared/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 

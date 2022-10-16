@@ -1,4 +1,4 @@
-﻿#include "Content/Shaders/BaseMS.h"
+﻿#include "Content/Shaders/Geometry/Shared/BaseMS.h"
 
 cbuffer CommandConstants : register(b0)
 {

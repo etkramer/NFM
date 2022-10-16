@@ -20,13 +20,10 @@
 		<None Remove="Content\Shaders\Gizmos\Gizmos.h" />
 		<None Remove="Content\Shaders\Gizmos\GizmosPS.hlsl" />
 		<None Remove="Content\Shaders\Gizmos\LineMS.hlsl" />
-		<None Remove="Content\Shaders\Include\Common.h" />
-		<None Remove="Content\Shaders\Include\Geometry.h" />
-		<None Remove="Content\Shaders\Material\BaseMaterialPS.h" />
-		<None Remove="Content\Shaders\Material\BaseMaterialPS.hlsl" />
+		<None Remove="Content\Shaders\Geometry\Material\BaseMaterialPS.h" />
+		<None Remove="Content\Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
 		<None Remove="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
-		<None Remove="Content\Shaders\Prepass\CullCS.hlsl" />
-		<None Remove="Content\Shaders\Prepass\DepthPS.hlsl" />
+		<None Remove="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
 		<None Remove="Frontend\Assets\Fonts\MaterialIcons-Regular.ttf" />
 		<None Remove="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<None Remove="Frontend\Assets\Icons\icon.ico" />
@@ -35,18 +32,18 @@
 		<AvaloniaResource Include="Frontend\Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\icon.ico" />
 		<AvaloniaResource Include="Frontend\Assets\Icons\iconsmall.ico" />
-		<EmbeddedResource Include="Content\Shaders\BaseMS.h" />
-		<EmbeddedResource Include="Content\Shaders\BaseMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\LineMS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Include\Common.h" />
-		<EmbeddedResource Include="Content\Shaders\Include\Geometry.h" />
-		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.h" />
-		<EmbeddedResource Include="Content\Shaders\Material\BaseMaterialPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Common.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Geometry.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Prepass\CullCS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Prepass\DepthPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\CullCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup>

@@ -10,6 +10,7 @@ using System.Text;
 using Vortice.Direct3D12.Shader;
 using Vortice.Direct3D;
 using System.Numerics;
+using System.Text.RegularExpressions;
 
 namespace Engine.GPU
 {
@@ -398,11 +399,31 @@ namespace Engine.GPU
 			return blob;
 		}
 
+		private string SimplifyPath(string path)
+		{
+			Regex simplifyRegex = new Regex(@"[^\\/]+(?<!\.\.)[\\/]\.\.[\\/]");
+
+			while (true)
+			{
+				string newPath = simplifyRegex.Replace(path, "" );
+				if (newPath == path)
+				{
+					break;
+				}
+				else
+				{
+					path = newPath;
+				}
+			}
+
+			return path.Replace("./", "");
+		}
+
 		public ShaderProgram UseIncludes(Assembly embedSource)
 		{
 			Func<string, string> includeResolver = (path) =>
 			{
-				path = path.Replace("./", "");
+				path = SimplifyPath(path);
 				path = $"{embedSource.GetName().Name}.{path.Replace('/', '.')}";
 
 				using (Stream stream = embedSource.GetManifestResourceStream(path))
