@@ -9,16 +9,16 @@ float3 LinearToSRGB(in float3 color)
 	return pow(color, gamma);
 }
 
-float3 SRGBToLinear(in float3 color)
-{
-	const float gamma = 2.2;
-	return pow(color, 1.0 / gamma);
-}
-
 float4 LinearToSRGB(in float4 color)
 {
 	const float gamma = 2.2;
 	return pow(color, gamma);
+}
+
+float3 SRGBToLinear(in float3 color)
+{
+	const float gamma = 2.2;
+	return pow(color, 1.0 / gamma);
 }
 
 float4 SRGBToLinear(in float4 color)

@@ -11,6 +11,7 @@ using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 using StbiSharp;
 using Engine.Common;
+using SharpGLTF.IO;
 
 namespace Basic.Loaders
 {
@@ -87,8 +88,11 @@ namespace Basic.Loaders
 			ModelPart[] gameParts = new ModelPart[model.LogicalMeshes.Count];
 			foreach (var mesh in model.LogicalMeshes)
 			{
+				// Get morph target names
+				bool hasMorphs = mesh.Extras.TryGetNode("targetNames", out var morphNames);
+
 				// Loop through GLTF "primitives" (equivalent to Meshes)
-				Mesh[] gameMeshes = new Mesh[mesh.Primitives.Count];
+				Mesh[] gamePrims = new Mesh[mesh.Primitives.Count];
 				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
 					// Find node and read transform.
@@ -122,11 +126,11 @@ namespace Basic.Loaders
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
 					gameMesh.Commit();
 
-					gameMeshes[primitive.LogicalIndex] = gameMesh;
+					gamePrims[primitive.LogicalIndex] = gameMesh;
 				});
 
 				// Create ModelParts from GLTF "meshes"
-				gameParts[mesh.LogicalIndex] = new ModelPart(gameMeshes);
+				gameParts[mesh.LogicalIndex] = new ModelPart(gamePrims);
 			}
 
 			return new Model(gameParts);
@@ -148,6 +152,20 @@ namespace Basic.Loaders
 			var slice = accessor.SourceBufferView.Content.Slice(accessor.ByteOffset, accessor.ByteLength);
 
 			return MemoryMarshal.Cast<byte, T>(slice);
+		}
+
+		public static bool TryGetNode(this JsonContent source, string name, out JsonContent result)
+		{
+			try
+			{
+				result = source.GetNode(name);
+				return true;
+			}
+			catch
+			{
+				result = default;
+				return false;
+			}
 		}
 	}
 }
