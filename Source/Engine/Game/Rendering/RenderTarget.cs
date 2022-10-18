@@ -6,6 +6,18 @@ using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
+	[StructLayout(LayoutKind.Sequential)]
+	public struct ViewConstants
+	{
+		public Matrix4 WorldToView;
+		public Matrix4 ViewToWorld;
+
+		public Matrix4 ViewToClip;
+		public Matrix4 ClipToView;
+
+		public Vector2 ViewportSize;
+	}
+
 	public class RenderTarget : IDisposable
 	{
 		#region Cache

@@ -9,18 +9,6 @@ using Vortice.DXGI;
 
 namespace Engine.Rendering
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct ViewConstants
-	{
-		public Matrix4 WorldToView;
-		public Matrix4 ViewToWorld;
-
-		public Matrix4 ViewToClip;
-		public Matrix4 ClipToView;
-
-		public Vector2 ViewportSize;
-	}
-
 	/// <summary>
 	/// Contains the game logic for a UI viewport
 	/// </summary>

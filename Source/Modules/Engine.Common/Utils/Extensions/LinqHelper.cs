@@ -46,6 +46,15 @@ namespace Engine.Common
 			}
 		}
 
+		/// <inheritdoc cref="List{T}.ForEach"/>
+		public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+		{
+			foreach (T element in source)
+			{
+				action.Invoke(element);
+			}
+		}
+
 		/// <summary>
 		/// Groups objects that share a certain value into buckets.
 		/// </summary>
@@ -91,14 +100,6 @@ namespace Engine.Common
 			}
 
 			return false;
-		}
-
-		public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
-		{
-			foreach (T value in source)
-			{
-				action.Invoke(value);
-			}
 		}
 
 		public static bool TryFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource value)

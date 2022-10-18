@@ -9,9 +9,9 @@ using POINT = NetCoreEx.Geometry.Point;
 
 namespace Engine.Frontend
 {
-	public unsafe class NativeControlHostEx : NativeControlHost
+	public unsafe class HwndControl : NativeControlHost
 	{
-		private static List<NativeControlHostEx> hosts = new();
+		private static List<HwndControl> hosts = new();
 
 		public event Action<Vector2i> OnResize = delegate{};
 		public event Action OnOpen = delegate{};

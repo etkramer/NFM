@@ -26,23 +26,13 @@ namespace Engine.Frontend
 			Graphics.OnFrameStart += () => (this as INotify).Raise(nameof(memory));
 			(frameTimeAverager as INotify).Subscribe(nameof(Averager.Result), () => (this as INotify).Raise(nameof(frameTime)));
 		}
-
-		protected override void OnKeyDown(KeyEventArgs e)
-		{
-			Input.UpdateKey(e.Key, true);
-		}
-
-		protected override void OnKeyUp(KeyEventArgs e)
-		{
-			Input.UpdateKey(e.Key, false);
-		}
 	}
 
 	public partial class ViewportHost : Panel
 	{
 		public Swapchain Swapchain { get; private set; }
 		private Viewport viewport;
-		private NativeControlHostEx nativeControl;
+		private HwndControl nativeControl;
 
 		public ViewportHost()
 		{
@@ -109,6 +99,16 @@ namespace Engine.Frontend
 		{
 			UpdatePointer(e);
 			base.OnPointerReleased(e);
+		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			Input.UpdateKey(e.Key, true);
+		}
+
+		protected override void OnKeyUp(KeyEventArgs e)
+		{
+			Input.UpdateKey(e.Key, false);
 		}
 	}
 }

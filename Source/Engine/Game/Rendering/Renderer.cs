@@ -86,7 +86,7 @@ namespace Engine.Rendering
 		}
 		
 		public static void RenderCamera(CameraNode camera, Texture texture) => RenderCamera(camera, texture, null);
-		public static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
+		private static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
 		{
 			var rt = RenderTarget.Get(texture.Size);
 			rt.UpdateView(camera);
