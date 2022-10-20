@@ -41,7 +41,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		private void OnCreatePressed(string type)
+		private void OnAddNodePressed(string type)
 		{
 			if (type == "Model")
 			{

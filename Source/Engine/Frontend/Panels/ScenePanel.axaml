@@ -12,13 +12,13 @@
 	<Grid RowDefinitions="30, *">
 		<!--Toolbar-->
 		<Grid Grid.Row="0" ColumnDefinitions="*, auto" Margin="4">
-			<Button Grid.Column="1" Classes="window" ToolTip.Tip="Create" Margin="4, 0, 0, 0" Click="OnAddPressed">
+			<Button Grid.Column="1" Classes="window" ToolTip.Tip="Add Node" Margin="4, 0, 0, 0" Click="OnAddPressed">
 				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
 				<Button.Flyout>
 					<MenuFlyout Placement="Bottom">
-						<MenuItem Header="Create Model" Command="{Binding OnCreatePressed}" CommandParameter="Model"/>
-						<MenuItem Header="Create Camera" Command="{Binding OnCreatePressed}" CommandParameter="Camera"/>
-						<MenuItem Header="Create Light (Point)" Command="{Binding OnCreatePressed}" CommandParameter="PointLight"/>
+						<MenuItem Header="Add Model" Command="{Binding OnAddNodePressed}" CommandParameter="Model"/>
+						<MenuItem Header="Add Camera" Command="{Binding OnAddNodePressed}" CommandParameter="Camera"/>
+						<MenuItem Header="Add Light (Point)" Command="{Binding OnAddNodePressed}" CommandParameter="PointLight"/>
 					</MenuFlyout>
 				</Button.Flyout>
 			</Button>

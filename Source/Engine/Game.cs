@@ -21,11 +21,9 @@ namespace Engine
 
 		public static async Task Init()
 		{
-			// Boot up renderer
+			// Boot up renderer and load plugins.
 			Renderer.Init();
-
-			// Load all plugins.
-			await PluginSystem.LoadAll();
+			PluginSystem.Init();
 
 			// Kick off model loading early.
 			_ = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
@@ -41,9 +39,6 @@ namespace Engine
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
 			model.Spawn();
-
-			// If we need a GC, now's a good time.
-			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
 		}
 
 		public static void Update()

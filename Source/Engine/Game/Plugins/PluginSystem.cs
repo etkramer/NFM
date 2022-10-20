@@ -7,7 +7,7 @@ namespace Engine.Plugins
 	{
 		public static readonly List<Plugin> Plugins = new();
 
-		public static async Task LoadAll()
+		public static void Init()
 		{
 			string[] searchPaths = new[]
 			{
@@ -34,21 +34,19 @@ namespace Engine.Plugins
 						// Load plugin assembly.
 						Assembly assembly = Assembly.LoadFrom(expectedPath);
 
-						foreach (Type type in assembly.GetTypes())
+						// Find the plugin type...
+						var pluginType = assembly.GetTypes().FirstOrDefault(o => o.IsAssignableTo(typeof(Plugin)));
+						if (pluginType != null)
 						{
-							if (type.IsAssignableTo(typeof(Plugin)))
-							{
-								Plugin pluginInstance = (Plugin)Activator.CreateInstance(type);
-								Plugins.Add(pluginInstance);
-								break;
-							}
+							var pluginInstance = (Plugin)Activator.CreateInstance(pluginType);
+							Plugins.Add(pluginInstance);
 						}
 					}
 				}
 			}
 
-			// Init loaded plugins.
-			await Parallel.ForEachAsync(Plugins, async (o, ct) => o.OnStart());
+			// Start up loaded plugins.
+			Parallel.ForEach(Plugins, (o) => o.OnStart());
 		}
 	}
 }

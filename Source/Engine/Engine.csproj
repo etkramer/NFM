@@ -61,23 +61,6 @@
 		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Update="Frontend\Assets\EditorTheme.axaml.cs">
-	    <DependentUpon>EditorTheme.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Frontend\Controls\Inputs\BoolInput.axaml.cs">
-	    <DependentUpon>BoolInput.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Frontend\Controls\Inputs\ResourceInput.axaml.cs">
-	    <DependentUpon>ResourceInput.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Frontend\Controls\Inputs\TextInput.axaml.cs">
-	    <DependentUpon>TextInput.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Frontend\Panels\LibraryPanel.axaml.cs">
-	    <DependentUpon>LibraryPanel.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

@@ -12,12 +12,12 @@ namespace Basic
 	{
 		public override void OnStart()
 		{
+			MountPoint mount = MountPoint.Create("User Content", "USER");
+
 			string[] searchPaths = new[]
 			{
 				"../Content/"
 			};
-
-			MountPoint mount = MountPoint.Create("User Content", "USER");
 
 			foreach (string searchPath in searchPaths)
 			{

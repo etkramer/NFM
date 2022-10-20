@@ -29,8 +29,6 @@ namespace Engine.World
 				}
 			}
 		}
-		
-		[Save, Notify] public Node Parent { get; set; }
 
 		// Transform buffer
 		public bool IsTransformDirty = true;
@@ -59,38 +57,7 @@ namespace Engine.World
 
 			// Remove self from scene tree.
 			Scene?.Despawn(this);
-			Parent = null;
 			TransformHandle?.Dispose();
-
-			// Dispose children.
-			foreach (var child in GetChildren())
-			{
-				child.Dispose();
-			}
-		}
-
-		public IEnumerable<Node> GetChildren()
-		{
-			for (int i = Scene.Nodes.Count - 1; i >= 0; i--)
-			{
-				if (Scene.Nodes[i].Parent == this)
-				{
-					yield return Scene.Nodes[i];
-				}
-			}
-		}
-
-		/// <summary>
-		/// Spawns the actor into the scene with the given parent
-		/// </summary>
-		public Node Spawn(Node parent)
-		{
-			if (parent != null)
-			{
-				Parent = parent;
-			}
-			
-			return this;
 		}
 
 		/// <summary>
@@ -98,15 +65,7 @@ namespace Engine.World
 		/// </summary>
 		public Node Spawn(Scene scene = null)
 		{
-			if (scene == null)
-			{
-				Scene = Scene.Main;
-			}
-			else
-			{
-				Scene = scene;
-			}
-
+			Scene = scene ?? Scene.Main;
 			return this;
 		}
 
