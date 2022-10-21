@@ -5,7 +5,7 @@ using Avalonia.Controls.Primitives;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public class Toolbar : TemplatedControl
 	{

@@ -3,8 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        x:Class="Engine.Frontend.Controls.MainWindow"
-		xmlns:controls="using:Engine.Frontend.Controls"
+        x:Class="Engine.Frontend.MainWindow"
+		x:Name="SelfWin"
+		xmlns:controls="using:Engine.Frontend"
 		WindowState="Maximized"
 		Icon="avares://Engine/Content/Frontend/Icons/iconsmall.ico"
         Title="Engine">
@@ -18,12 +19,12 @@
 				<Menu VerticalAlignment="Stretch">
 					<MenuItem Header="File" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
 						<MenuItem Header="New" Command="{Binding NewPressed}" InputGesture="Ctrl+N" HotKey="Ctrl+N"/>
-						<MenuItem Header="Open" Command="{Binding OpenPressed}" InputGesture="Ctrl+O" HotKey="Ctrl+O"/>
+						<MenuItem Header="Open" Command="{Binding OpenPressed}" InputGesture="Ctrl+O" HotKey="Ctrl+O" CommandParameter="{Binding ElementName=SelfWin}"/>
 						<Separator/>
-						<MenuItem Header="Save" Command="{Binding SavePressed}" InputGesture="Ctrl+S" HotKey="Ctrl+S"/>
+						<MenuItem Header="Save" Command="{Binding SavePressed}" InputGesture="Ctrl+S" HotKey="Ctrl+S" CommandParameter="{Binding ElementName=SelfWin}"/>
 						<MenuItem Header="Save As" Command="{Binding SaveAsPressed}"/>
 						<Separator/>
-						<MenuItem Header="Quit" Command="{Binding QuitPressed}"/>
+						<MenuItem Header="Quit" Command="{Binding QuitPressed}" CommandParameter="{Binding ElementName=SelfWin}"/>
 					</MenuItem>
 					<MenuItem Header="Edit" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
 						<MenuItem Header="Undo" Command="{Binding UndoPressed}" InputGesture="Ctrl+Z" HotKey="Ctrl+Z"/>
@@ -41,9 +42,6 @@
 			<!--Window buttons-->
 			<controls:WindowButtons Grid.Column="1" HorizontalAlignment="Right"/>
 		</Grid>
-		
-		<!--Toolbar-->
-		<!--<controls:Toolbar Grid.Row="1"/>-->
 		
 		<!--Main dockspace-->
 		<controls:Dockspace Grid.Row="2" x:Name="dockspace"/>

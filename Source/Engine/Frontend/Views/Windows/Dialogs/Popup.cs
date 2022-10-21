@@ -6,7 +6,6 @@ using Avalonia.Media;
 using Avalonia.Layout;
 using Avalonia.Visuals.Media.Imaging;
 using Avalonia.Data;
-using Engine.Frontend.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Platform;
 using Avalonia.Controls.Shapes;
@@ -65,7 +64,7 @@ namespace Engine.Frontend
 								.Width(24)
 								.Margin(10, 2, 0, 0)
 								.With(o => o.SetValue(RenderOptions.BitmapInterpolationModeProperty, BitmapInterpolationMode.HighQuality))
-								.With(o => o.Source = win.GetResourceBitmap("avares://Engine/Frontend/Assets/Icons/iconsmall.ico")),
+								.With(o => o.Source = win.GetResourceBitmap("avares://Engine/Content/Frontend/Icons/iconsmall.ico")),
 							new TextBlock()
 								.Column(1)
 								.VerticalAlignment(VerticalAlignment.Center)

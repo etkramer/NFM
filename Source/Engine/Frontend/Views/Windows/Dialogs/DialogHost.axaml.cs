@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public partial class DialogHost : Window
 	{

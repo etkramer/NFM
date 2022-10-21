@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
 using Avalonia.LogicalTree;
-using Engine.Frontend.Controls;
 
 namespace Engine.Frontend
 {

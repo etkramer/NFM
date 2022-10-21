@@ -7,8 +7,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.ReactiveUI;
 using Avalonia.Threading;
-using Engine.Frontend.Controls;
 
 namespace Engine.Frontend
 {
@@ -26,7 +26,7 @@ namespace Engine.Frontend
 				UseWgl = true,
 			};
 
-			AppBuilder.Configure<App>().UseWin32().With(opts).UseSkia().StartWithClassicDesktopLifetime(new string[0]);
+			AppBuilder.Configure<App>().UseWin32().With(opts).UseSkia().UseReactiveUI().StartWithClassicDesktopLifetime(new string[0]);
 			Game.Cleanup();
 		}
 

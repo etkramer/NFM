@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Engine.Frontend.Controls;
 
 namespace Engine.Frontend
 {

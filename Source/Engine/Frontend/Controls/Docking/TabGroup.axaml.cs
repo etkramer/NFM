@@ -9,7 +9,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Metadata;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public class TabGroup : TemplatedControl
 	{

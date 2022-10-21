@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public enum DockPosition
 	{

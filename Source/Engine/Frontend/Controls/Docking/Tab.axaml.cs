@@ -5,7 +5,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Metadata;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	[PseudoClasses(":active")]
 	public class Tab : TemplatedControl

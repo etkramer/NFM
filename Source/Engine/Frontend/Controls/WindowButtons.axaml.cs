@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public class WindowButtons : TemplatedControl
 	{

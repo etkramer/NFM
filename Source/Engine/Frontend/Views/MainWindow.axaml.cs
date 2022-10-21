@@ -1,28 +1,34 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.ExceptionServices;
-using Avalonia;
-using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using Avalonia.Threading;
-using Engine.Editor;
-using Engine.World;
+using ReactiveUI;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
-	internal partial class MainWindow : Window
+	public partial class MainWindow : ReactiveWindow<MainWindowModel>
 	{
-		public const bool UseQuitDialog = false;
-
-		public static MainWindow Instance { get; private set; }
+		public const bool UseQuitDialog = true;
 
 		public MainWindow()
 		{
-			Instance = this;
+			ViewModel = new MainWindowModel();
+
+			this.WhenActivated(d =>
+			{
+				
+			});
+
 			InitializeComponent();
-			DataContext = this;
 		}
 
-		protected override void OnOpened(EventArgs args)
+		protected override void OnOpened(EventArgs e)
+		{
+			RestorePanels();
+			base.OnOpened(e);
+		}
+
+		public void RestorePanels()
 		{
 			// Create group (viewport 1).
 			TabGroup group1 = new TabGroup();
@@ -63,44 +69,7 @@ namespace Engine.Frontend.Controls
 			DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Game.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
 		}
 
-		public void NewPressed()
-		{
-			Project.Reset();
-		}
-
-		public async void OpenPressed()
-		{
-			string openPath = await Dialog.ShowOpenDialog(this, new FileFilter("Project", "json"));
-
-			if (openPath != null)
-			{
-				Project.Load(openPath);
-			}
-		}
-
-		public void SavePressed()
-		{
-			if (Project.Path == null)
-			{
-				SaveAsPressed();
-				return;
-			}
-
-			Project.Save(null);
-		}
-
-		public async void SaveAsPressed()
-		{
-			string savePath = await Dialog.ShowSaveDialog(this, new FileFilter("Project", "json"));
-
-			if (savePath != null)
-			{
-				Project.Save(savePath);
-			}
-		}
-
 		private bool isQuitConfirmed = false;
-
 		protected override void OnClosing(CancelEventArgs e)
 		{
 			if (UseQuitDialog)
@@ -115,10 +84,5 @@ namespace Engine.Frontend.Controls
 
 			base.OnClosing(e);
 		}
-
-		public void QuitPressed() => Close();
-		public void UndoPressed() => Command.Undo();
-		public void RedoPressed() => Command.Redo();
-		public void DeletePressed() => Selection.Selected.OfType<Node>().ToArray().ForEach(o => o.Dispose());
 	}
 }

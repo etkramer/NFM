@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Media;
 
-namespace Engine.Frontend.Controls
+namespace Engine.Frontend
 {
 	public partial class SplashScreen : Window
 	{
