@@ -6,7 +6,7 @@
         x:Class="Engine.Frontend.Controls.MainWindow"
 		xmlns:controls="using:Engine.Frontend.Controls"
 		WindowState="Maximized"
-		Icon="avares://Engine/Frontend/Assets/Icons/iconsmall.ico"
+		Icon="avares://Engine/Content/Frontend/Icons/iconsmall.ico"
         Title="Engine">
 	
 	<Grid RowDefinitions="auto, auto, *">
@@ -14,7 +14,7 @@
 		<Grid Grid.Row="0" ColumnDefinitions="auto, *">
 			<!--Menu bar-->
 			<StackPanel Grid.Column="0" Orientation="Horizontal">
-				<Image Source="avares://Engine/Frontend/Assets/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 5, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<Image Source="avares://Engine/Content/Frontend/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 5, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
 				<Menu VerticalAlignment="Stretch">
 					<MenuItem Header="File" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
 						<MenuItem Header="New" Command="{Binding NewPressed}" InputGesture="Ctrl+N" HotKey="Ctrl+N"/>

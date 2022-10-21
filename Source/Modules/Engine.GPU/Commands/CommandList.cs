@@ -452,7 +452,7 @@ namespace Engine.GPU
 		{
 			fixed (byte* dataPtr = data)
 			{
-				UploadTexture(texture, dataPtr, data.Length * sizeof(byte));
+				UploadTexture(texture, dataPtr, data.Length * sizeof(byte), mipLevel);
 			}
 		}
 

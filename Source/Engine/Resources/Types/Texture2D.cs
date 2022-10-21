@@ -27,37 +27,24 @@ namespace Engine.Resources
 
 		public int Width { get; }
 		public int Height { get; }
-		public bool IsLinear { get; set; } = true;
+		public bool IsLinear { get; } = true;
 
-		public Texture2D(int width, int height)
+		public Texture2D(int width, int height, bool isLinear = true, byte mipCount = 4)
 		{
 			Width = width;
 			Height = height;
+
+			IsLinear = isLinear;
+			Resource = new Texture(Width, Height, mipCount, isLinear ? Format.R8G8B8A8_UNorm : Format.R8G8B8A8_UNorm_SRgb);
 		}
 
 		/// <summary>
 		/// Loads raw image data into the texture
 		/// </summary>
-		public void LoadData(Span<byte> data, TextureCompression sourceCompression = TextureCompression.None)
+		public void LoadData(Span<byte> data, int mipLevel = 0)
 		{
-			// Select D3D texture format from compression mode.
-			Format format = sourceCompression switch
-			{
-				TextureCompression.None when IsLinear => Format.R8G8B8A8_UNorm,
-				TextureCompression.None => Format.R8G8B8A8_UNorm_SRgb,
-				TextureCompression.BC1 when IsLinear => Format.BC1_UNorm,
-				TextureCompression.BC1 => Format.BC1_UNorm_SRgb,
-				TextureCompression.BC2 when IsLinear => Format.BC2_UNorm,
-				TextureCompression.BC2 => Format.BC2_UNorm_SRgb,
-				TextureCompression.BC3 when IsLinear => Format.BC3_UNorm,
-				TextureCompression.BC3 => Format.BC3_UNorm_SRgb,
-				TextureCompression.BC5 => Format.BC5_UNorm,
-				_ => Format.Unknown
-			};
-
 			// Create resource and upload texture data.
-			Resource = new Texture(Width, Height, 4, format);
-			Renderer.DefaultCommandList.UploadTexture(Resource, data);
+			Renderer.DefaultCommandList.UploadTexture(Resource, data, mipLevel);
 		}
 
 		/// <summary>
@@ -87,7 +74,7 @@ namespace Engine.Resources
 				data[i + 3] = (byte)(color.A * 255);
 			};
 
-			Texture2D texture = new Texture2D(1, 1);
+			Texture2D texture = new Texture2D(1, 1, true, 1);
 			texture.LoadData(data);
 			return texture;
 		}

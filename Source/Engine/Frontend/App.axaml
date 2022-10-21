@@ -7,7 +7,7 @@
 		<StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml"/>
 		
 		<!--Modified Default Theme-->
-		<StyleInclude Source="avares://Engine/Frontend/Assets/EditorTheme.axaml"/>
+		<StyleInclude Source="avares://Engine/Content/Frontend/EditorTheme.axaml"/>
 		
 		<!--Custom Controls (Misc)-->
 		<StyleInclude Source="avares://Engine/Frontend/Controls/WindowButtons.axaml"/>

@@ -8,12 +8,12 @@
         x:Class="Engine.Frontend.Controls.SplashScreen"
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
-		Icon="avares://Engine/Frontend/Assets/Icons/iconsmall.ico"
+		Icon="avares://Engine/Content/Frontend/Icons/iconsmall.ico"
         Title="Loading">
 	
 	<Grid RowDefinitions="auto, *">
 		<Grid Grid.Row="0" ColumnDefinitions="auto, *, auto" Height="38">
-			<Image Grid.Column="0" Source="avares://Engine/Frontend/Assets/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 0, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+			<Image Grid.Column="0" Source="avares://Engine/Content/Frontend/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 0, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
 			<TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Title}" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" IsHitTestVisible="False"/>
 		</Grid>
 		

@@ -4,8 +4,8 @@
 
 	<Style>
 		<Style.Resources>
-			<FontFamily x:Key="IconsFont">avares://Engine/Frontend/Assets/Fonts/MaterialIcons-Regular.ttf#Material Icons</FontFamily>
-			<FontFamily x:Key="IconsFont2">avares://Engine/Frontend/Assets/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
+			<FontFamily x:Key="IconsFont">avares://Engine/Content/Frontend/Fonts/MaterialIcons-Regular.ttf#Material Icons</FontFamily>
+			<FontFamily x:Key="IconsFont2">avares://Engine/Content/Frontend/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
 
 			<Color x:Key="WindowBackgroundColor">#1A191A</Color>
 			<Color x:Key="ToolBackgroundColor">#38393C</Color>
@@ -42,10 +42,10 @@
 		</Style.Resources>
 	</Style>
 
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Button.axaml"/>
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/CheckBox.axaml"/>
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/MenuItem.axaml"/>
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/TextBox.axaml"/>
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Expander.axaml"/>
-	<StyleInclude Source="avares://Engine/Frontend/Assets/Styles/Window.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/Button.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/CheckBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/MenuItem.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/TextBox.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/Expander.axaml"/>
+	<StyleInclude Source="avares://Engine/Content/Frontend/Styles/Window.axaml"/>
 </Styles>
