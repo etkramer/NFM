@@ -53,7 +53,7 @@ namespace Engine.Rendering
 			AddStep(new ResolveStep());
 		}
 
-		public static void BeginFrame()
+		public static void RenderFrame()
 		{
 			// Run scene render steps.
 			foreach (Scene scene in Scene.All)
@@ -71,10 +71,13 @@ namespace Engine.Rendering
 
 			// Execute default command list and wait for it on the GPU.
 			DefaultCommandList.Execute();
-		}
 
-		public static void EndFrame()
-		{
+			// Render to each viewport.
+			foreach (var viewport in Viewport.All)
+			{
+				RenderCamera(viewport.Camera, viewport.Host.Swapchain);
+			}
+
 			// Wait for completion.
 			Graphics.WaitFrame();
 		}

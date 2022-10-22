@@ -44,20 +44,11 @@ namespace Engine
 		public static void Update()
 		{
 			// Begin the new frame.
-			Renderer.BeginFrame();
 			OnTick.Invoke(Graphics.FrameTime);
 
 			// Invoke dispose queue.
 			DispatchQueue.Invoke(0);
-
-			// Render to each viewport.
-			foreach (var viewport in Viewport.All)
-			{
-				Renderer.RenderCamera(viewport.Camera, viewport.Host.Swapchain);
-			}
-
-			// End the frame.
-			Renderer.EndFrame();
+			Renderer.RenderFrame();
 		}
 
 		public static void Cleanup()
