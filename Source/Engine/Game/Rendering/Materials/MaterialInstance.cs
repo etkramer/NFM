@@ -31,7 +31,7 @@ namespace Engine.Rendering
 			List<byte> materialData = new();
 
 			// Add shader ID to material data.
-			materialData.AddRange(StructureToByteArray(typeof(int), ShaderStack.ProgramID));
+			materialData.AddRange(StructureToByteArray(typeof(int), ShaderStack.CurrentPermutation.ShaderID));
 
 			// Loop through all shader parameters
 			foreach (var param in ShaderStack.Parameters)

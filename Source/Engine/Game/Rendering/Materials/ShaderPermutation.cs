@@ -10,20 +10,20 @@ namespace Engine.Rendering
 		private static int lastProgramID = 0;
 
 		public int ShaderID { get; private set; } = 0;
-
 		public Shader[] Shaders { get; private set; }
+
 		public ShaderProgram Program { get; private set; }
 		public CommandSignature Signature { get; private set; }
 
-		public ShaderPermutation(Shader[] shaders, ShaderParameter[] parameters)
+		public ShaderPermutation(Shader[] shaders)
 		{
 			Shaders = shaders;
 			string baseSource = shaders[0].ShaderSource;
 			string setupSource = "";
 
-			// Write setup code for each parameter.
+			// Loop over shader parameters and add setup code for each.
 			int paramOffset = 4;
-			foreach (var param in parameters)
+			foreach (var param in shaders.SelectMany(o => o.Parameters).Distinct())
 			{
 				// Override sizes where needed.
 				int paramSize = param.Value switch
@@ -64,11 +64,10 @@ namespace Engine.Rendering
 				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
 				.SetPixelShader(programSource, "MaterialPS")
 				.SetDepthMode(DepthMode.Equal, true, false)
-				.SetCullMode(CullMode.CCW)
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
-			// Compile matching command signature.
+			// Compile matching indirect command signature.
 			Signature = new CommandSignature()
 				.AddConstantArg(0, Program)
 				.AddDispatchMeshArg()

@@ -27,7 +27,7 @@ namespace Engine.Rendering
 			// Otherwise, compile a whole one.
 			else
 			{
-				CurrentPermutation = new ShaderPermutation(Shaders.ToArray(), Parameters);
+				CurrentPermutation = new ShaderPermutation(Shaders.ToArray());
 			}
 		}
 	}

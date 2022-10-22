@@ -8,7 +8,7 @@ namespace Engine.Frontend
 {
 	public partial class MainWindow : ReactiveWindow<MainWindowModel>
 	{
-		public const bool UseQuitDialog = true;
+		public const bool UseQuitDialog = false;
 
 		public MainWindow()
 		{
