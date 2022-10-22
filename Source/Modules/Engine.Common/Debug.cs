@@ -27,7 +27,8 @@ namespace Engine.Common
 			Console.WriteLine(message);
 		}
 
-		public static void Log(object message)
+		public static void Log(object message) => LogInfo(message);
+		public static void LogInfo(object message)
 		{
 			LogBase($"INFO: {message}");
 		}

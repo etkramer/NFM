@@ -21,7 +21,7 @@ namespace Engine.Rendering
 				.Compile().Result;
 
 			const int commandStride = 16;
-			commandBuffer = new GraphicsBuffer(commandStride * Scene.MaxInstanceCount, commandStride, hasCounter: true);
+			commandBuffer = new GraphicsBuffer(commandStride * Scene.MaxInstances, commandStride, hasCounter: true);
 		}
 
 		public override void Run()

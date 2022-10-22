@@ -38,7 +38,7 @@ namespace Engine.Rendering
 				.AddDispatchMeshArg()
 				.Compile();
 
-			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * Scene.MaxInstanceCount, DepthCommandSignature.Stride, hasCounter: true);
+			CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * Scene.MaxInstances, DepthCommandSignature.Stride, hasCounter: true);
 		}
 
 		public override void Run()
@@ -97,7 +97,7 @@ namespace Engine.Rendering
 			List.SetProgramCBV(0, 1, RT.ViewCB);
 
 			// Dispatch draw commands.
-			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Scene.MaxInstanceCount);
+			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Scene.MaxInstances);
 		}
 	}
 }

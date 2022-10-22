@@ -84,19 +84,15 @@ namespace Basic.Loaders
 				gameMaterials[i] = gameMaterial;
 			}
 
-			// Loop through GLTF "meshes" (equivalent to ModelParts)
-			ModelPart[] gameParts = new ModelPart[model.LogicalMeshes.Count];
-			foreach (var mesh in model.LogicalMeshes)
+			var parts = new List<ModelPart>(model.LogicalMeshes.Count);
+			foreach (var node in model.LogicalNodes.Where(o => o.Mesh != null))
 			{
-				// Get morph target names
-				bool hasMorphs = mesh.Extras.TryGetNode("targetNames", out var morphNames);
+				var mesh = node.Mesh;
 
-				// Loop through GLTF "primitives" (equivalent to Meshes)
-				Mesh[] gamePrims = new Mesh[mesh.Primitives.Count];
+				Mesh[] meshes = new Mesh[mesh.Primitives.Count];
 				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
 					// Find node and read transform.
-					var node = model.LogicalNodes.First(o => o.Mesh == mesh);
 					var worldMatrix = (Matrix4)node.WorldMatrix;
 
 					// Transform to Z-up.
@@ -126,14 +122,13 @@ namespace Basic.Loaders
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
 					gameMesh.Commit();
 
-					gamePrims[primitive.LogicalIndex] = gameMesh;
+					meshes[primitive.LogicalIndex] = gameMesh;
 				});
 
-				// Create ModelParts from GLTF "meshes"
-				gameParts[mesh.LogicalIndex] = new ModelPart(gamePrims);
+				parts.Add(new ModelPart(meshes));
 			}
 
-			return new Model(gameParts);
+			return new Model(parts.ToArray());
 		}
 
 		private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged

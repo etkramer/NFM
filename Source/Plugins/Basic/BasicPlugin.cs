@@ -27,7 +27,7 @@ namespace Basic
 					string extension = Path.GetExtension(fullPath);
 					string shortPath = Path.GetRelativePath(searchPath, fullPath);
 
-					if (extension == ".glb")
+					if (extension == ".glb" || extension == ".gltf")
 					{
 						Asset<Model> modelAsset = new Asset<Model>(shortPath, mount, new GLTFLoader(fullPath));
 						Asset.Submit(modelAsset);
