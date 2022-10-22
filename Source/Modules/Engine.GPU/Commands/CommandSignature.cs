@@ -4,7 +4,7 @@ using Vortice.Direct3D12;
 
 namespace Engine.GPU
 {
-	public sealed class CommandSignature
+	public sealed class CommandSignature : IDisposable
 	{
 		public int Stride { get; private set; } = 0;
 
@@ -78,6 +78,11 @@ namespace Engine.GPU
 			GPUContext.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
 			
 			return this;
+		}
+
+		public void Dispose()
+		{
+			Handle.Dispose();
 		}
 	}
 }

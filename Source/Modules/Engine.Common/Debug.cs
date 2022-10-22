@@ -47,11 +47,6 @@ namespace Engine.Common
 			LogBase($"ERROR: {ex.GetType().Name}: {ex.Message}");
 		}
 
-		public static void Throw(string message)
-		{
-			throw new Exception(message);
-		}
-
 		public static void Assert(bool condition, string message = null)
 		{
 			if (!condition)
