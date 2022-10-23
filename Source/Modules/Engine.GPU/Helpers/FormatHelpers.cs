@@ -10,5 +10,15 @@ namespace Engine.GPU
 		{
 			return !format.IsTypeless() && !format.IsDepthStencil() && !format.IsCompressed();
 		}
+
+		public static bool SupportsRTV(this Format format)
+		{
+			return !format.IsTypeless() && !format.IsDepthStencil() && !format.IsCompressed();
+		}
+
+		public static bool SupportsDSV(this Format format)
+		{
+			return (format.IsTypeless() || format.IsDepthStencil()) && !format.IsCompressed();
+		}
 	}
 }

@@ -38,9 +38,17 @@ namespace Basic.Loaders
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
-					Texture2D gameTexture = new Texture2D(image.Width, image.Height, TextureFormat.RGBA);
-					
-					gameTexture.SetPixelData(ToReadWriteSpan(image.Data), 0, true);
+					/*Texture2D gameTexture = new Texture2D(image.Width, image.Height, TextureFormat.RGBA);
+					gameTexture.SetPixelData(ToReadWriteSpan(image.Data), 0, true);*/
+
+					var compressedData = Texture2D.Compress(image.Data, image.Width, image.Height, TextureFormat.RGBA, TextureFormat.BC2);
+
+					Texture2D gameTexture = new Texture2D(image.Width, image.Height, TextureFormat.BC2, (byte)compressedData.Length);
+					for (int i = 0; i < compressedData.Length; i++)
+					{
+						gameTexture.SetPixelData(compressedData[i], i);
+					}
+
 					gameTextures[texture.LogicalIndex] = gameTexture;
 				}
 			});

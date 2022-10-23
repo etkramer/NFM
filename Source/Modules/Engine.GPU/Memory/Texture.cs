@@ -9,6 +9,8 @@ namespace Engine.GPU
 		public bool IsRT => rtv != null;
 		public bool IsDS => dsv != null;
 
+		internal ResourceDescription Description { get; set; }
+
 		private UnorderedAccessView[] uavs;
 		private ShaderResourceView[] srvs;
 		private RenderTargetView rtv;
@@ -26,7 +28,7 @@ namespace Engine.GPU
 		public byte MipmapCount { get; private set; }
 		public byte Samples;
 
-		internal ClearValue ClearValue { get; private set; }
+		internal ClearValue? ClearValue { get; private set; }
 
 		public string Name
 		{
@@ -39,26 +41,36 @@ namespace Engine.GPU
 		/// </summary>
 		public Texture(int width, int height, byte mipmapCount = 1, Format format = Format.R8G8B8A8_UNorm, Color clearColor = default, Format dsFormat = default, Format srFormat = default, byte samples = 1)
 		{
-			// Clamp mipmap count to avoid overly small sizes.
-			int maxMipmaps = Math.Max(1, (int)Math.Floor(width / Math.Pow(2, mipmapCount)));
-
-			// Mipmap generation requires a UAV-supported format.
-			if (!format.SupportsUAV())
-			{
-				maxMipmaps = 1;
-			}
-
 			Format = format;
 			Width = width;
 			Height = height;
-			MipmapCount = (byte)Math.Min(mipmapCount, maxMipmaps);
+			MipmapCount = (byte)Math.Min(mipmapCount, Math.Floor(Math.Log2(Math.Max(width, height))) + 1);
 			Samples = samples;
 
 			DSFormat = dsFormat;
 			SRFormat = srFormat;
 
+			ResourceFlags flags = ResourceFlags.None;
+
+			// Check if this format supports use as an RT.
+			if (Format.SupportsRTV())
+			{
+				flags |= ResourceFlags.AllowRenderTarget;
+			}
+			// Otherwise, format may be eligible to use as DS.
+			else if (Format.SupportsDSV())
+			{
+				flags |= ResourceFlags.AllowDepthStencil;
+			}
+
+			// Check for UAV support.
+			if (Samples <= 1 && Format.SupportsUAV())
+			{
+				flags |= ResourceFlags.AllowUnorderedAccess;
+			}
+
 			// Calculate clear value for depth/stencil.
-			if (format.IsDepthStencil() || format.IsTypeless())
+			if ((flags & ResourceFlags.AllowDepthStencil) != 0)
 			{
 				ClearValue = new ClearValue(dsFormat == default ? format : dsFormat, new DepthStencilValue()
 				{
@@ -67,13 +79,28 @@ namespace Engine.GPU
 				});
 			}
 			// Calculate clear value for RT.
-			else
+			else if ((flags & ResourceFlags.AllowRenderTarget) != 0)
 			{
 				ClearValue = new ClearValue(format, new Vortice.Mathematics.Color(clearColor.R, clearColor.G, clearColor.B, clearColor.A));
 			}
 
-			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out var resource);
+			// Calculate resource description
+			Description = new ResourceDescription()
+			{
+				Dimension = ResourceDimension.Texture2D,
+				Alignment = 0,
+				Width = (ulong)Width,
+				Height = Height,
+				DepthOrArraySize = 1,
+				MipLevels = MipmapCount,
+				Format = Format,
+				SampleDescription = new SampleDescription(Samples, 0),
+				Flags = flags,
+			};
+
+			// Create D3D resource.
+			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
+
 			D3DResource = resource;
 			State = ResourceStates.CopyDest;
 
@@ -96,33 +123,6 @@ namespace Engine.GPU
 			State = ResourceStates.CopyDest;
 
 			D3DResource.Name = "Resource texture";
-		}
-
-		/// <summary>
-		/// Resizes and resets the texture.
-		/// </summary>
-		public void Resize(int width, int height)
-		{
-			Width = width;
-			Height = height;
-
-			// Release existing D3D resource.
-			D3DResource.Release();
-			rtv = null;
-			dsv = null;
-			for (int i = 0; i < MipmapCount; i++)
-			{
-				uavs[i] = null;
-			}
-			for (int i = 0; i < MipmapCount + 1; i++)
-			{
-				srvs[i] = null;
-			}
-
-			// Create new resource with new size.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, GetDescription(), ResourceStates.CopyDest, ClearValue, out var resource);
-			D3DResource = resource;
-			State = ResourceStates.CopyDest;
 		}
 
 		public UnorderedAccessView GetUAV(int mipLevel = 0)
@@ -175,23 +175,6 @@ namespace Engine.GPU
 		{
 			D3DResource.Release();
 			IsAlive = false;
-		}
-
-		private ResourceDescription GetDescription()
-		{
-			return new()
-			{
-				Dimension = ResourceDimension.Texture2D,
-				Alignment = 0,
-				Width = (ulong)Width,
-				Height = Height,
-				DepthOrArraySize = 1,
-				MipLevels = MipmapCount,
-				Format = Format,
-				SampleDescription = new SampleDescription(Samples, 0),
-				Flags = Format.IsDepthStencil() || Format.IsTypeless() ? ResourceFlags.AllowDepthStencil : ResourceFlags.AllowRenderTarget
-					| (Samples == 1 ? ResourceFlags.AllowUnorderedAccess : ResourceFlags.None),
-			};
 		}
 	}
 }

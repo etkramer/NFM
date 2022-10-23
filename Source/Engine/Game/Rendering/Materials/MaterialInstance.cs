@@ -52,7 +52,7 @@ namespace Engine.Rendering
 				}
 				else if (param.Type == typeof(Texture2D))
 				{
-					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).Resource.GetSRV().GetDescriptorIndex()));
+					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).D3DResource.GetSRV().GetDescriptorIndex()));
 				}
 				else
 				{

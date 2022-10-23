@@ -54,6 +54,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.17" />
+		<PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
 		<PackageReference Include="WinApi" Version="4.0.0" />
 		<PackageReference Include="Avalonia" Version="0.10.17" />
 		<PackageReference Include="Avalonia.Direct2D1" Version="0.10.17" />

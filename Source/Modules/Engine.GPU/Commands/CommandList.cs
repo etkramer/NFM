@@ -408,7 +408,7 @@ namespace Engine.GPU
 			UploadBuffer(handle.Buffer, data, handle.Start);
 		}
 
-		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, Span<T> data) where T : unmanaged
+		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, ReadOnlySpan<T> data) where T : unmanaged
 		{
 			UploadBuffer(handle.Buffer, data, handle.Start);
 		}
@@ -418,7 +418,7 @@ namespace Engine.GPU
 			UploadBuffer(buffer, &data, sizeof(T), start * sizeof(T));
 		}
 
-		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, Span<T> data, long start = 0) where T : unmanaged
+		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, long start = 0) where T : unmanaged
 		{
 			fixed (T* dataPtr = data)
 			{
@@ -437,7 +437,7 @@ namespace Engine.GPU
 				long destOffset = offset;
 
 				// Copy data to upload buffer.
-				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
+				Unsafe.CopyBlock((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
 				UploadHelper.UploadOffset += dataSize;
 
 				// Copy from upload to dest buffer.
@@ -448,7 +448,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadTexture(Texture texture, Span<byte> data, int mipLevel = 0)
+		public unsafe void UploadTexture(Texture texture, ReadOnlySpan<byte> data, int mipLevel = 0)
 		{
 			fixed (byte* dataPtr = data)
 			{
@@ -466,7 +466,7 @@ namespace Engine.GPU
 				int uploadOffset = UploadHelper.UploadOffset;
 
 				// Realign upload offset for 512b alignment requirement.
-				UploadHelper.UploadOffset = uploadOffset = (int)MathHelper.Align(UploadHelper.UploadOffset, 512);
+				UploadHelper.UploadOffset = uploadOffset = (int)MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
 
 				// Copy data to upload buffer.
 				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
@@ -475,16 +475,14 @@ namespace Engine.GPU
 				// Copy from upload to dest buffer.
 				CustomCommand((o) =>
 				{
-					int formatPixelSize = 4; // Size of one pixel in bytes
-					int rowPitch = (int)MathHelper.Align(texture.Width, 256) * formatPixelSize;
+					// Calculate subresource info.
+					var footprints = new PlacedSubresourceFootPrint[1];
+					GPUContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, new int[1], new ulong[1], out _);
 
-					TextureCopyLocation uploadLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], new PlacedSubresourceFootPrint()
-					{
-						Offset = (ulong)uploadOffset,
-						Footprint = new SubresourceFootPrint(texture.Format, texture.Width, texture.Height, 1, rowPitch)
-					});
+					TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
+					TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
+					o.CopyTextureRegion(destLocation, 0, 0, 0, sourceLocation);
 
-					o.CopyTextureRegion(new TextureCopyLocation(texture, mipLevel), 0, 0, 0, uploadLocation);
 				}, new CommandInput(texture, ResourceStates.CopyDest));
 			}
 		}
@@ -607,7 +605,7 @@ namespace Engine.GPU
 
 				if (color == default(Color))
 				{
-					value = target.ClearValue;
+					value = target.ClearValue.Value;
 				}
 				else
 				{
@@ -624,7 +622,7 @@ namespace Engine.GPU
 		{
 			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
 			{
-				list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.DepthStencil.Depth, target.ClearValue.DepthStencil.Stencil);
+				list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.Value.DepthStencil.Depth, target.ClearValue.Value.DepthStencil.Stencil);
 			};
 
 			CommandInput[] inputs = new[]

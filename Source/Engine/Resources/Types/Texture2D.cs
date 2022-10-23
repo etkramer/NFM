@@ -1,14 +1,42 @@
 ﻿using System;
+using BCnEncoder.Encoder;
+using BCnEncoder.Shared;
 using Engine.GPU;
 using Engine.Rendering;
-using Vortice.DXGI;
+using Microsoft.Toolkit.HighPerformance;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using DXGIFormat = Vortice.DXGI.Format;
 
 namespace Engine.Resources
 {
-	public enum TextureFormat : uint
+	public static class TextureFormatExtensions
 	{
-		RGB,
+		public static bool IsCompressed(this TextureFormat format)
+		{
+			return format switch
+			{
+				TextureFormat.BC1 => true,
+				TextureFormat.BC2 => true,
+				TextureFormat.BC3 => true,
+				TextureFormat.BC5 => true,
+				_ => false
+			};
+		}
+
+		public static bool IsHDR(this TextureFormat format)
+		{
+			return format switch
+			{
+				TextureFormat.RGBA_Float16 => true,
+				TextureFormat.RGBA_Float32 => true,
+				_ => false
+			};
+		}
+	}
+
+	public enum TextureFormat
+	{
+		RGB = 0,
 		RGBA,
 
 		// Floating-point HDR
@@ -29,10 +57,11 @@ namespace Engine.Resources
 
 	public sealed class Texture2D : Resource
 	{
-		internal Texture Resource = null;
+		public Texture D3DResource { get; private set; }
 
 		public int Width { get; }
 		public int Height { get; }
+		public byte MipCount => D3DResource.MipmapCount;
 		public TextureFormat Format { get; }
 
 		/// <summary>
@@ -58,7 +87,7 @@ namespace Engine.Resources
 				_ => throw new ArgumentOutOfRangeException()
 			};
 
-			Resource = new Texture(Width, Height, mipCount, resourceFormat);
+			D3DResource = new Texture(Width, Height, mipCount, resourceFormat);
 		}
 
 		/// <summary>
@@ -67,7 +96,7 @@ namespace Engine.Resources
 		/// <param name="data">Raw image data in this texture's format.</param>
 		/// <param name="mipLevel">The mipmap level that's being set to.</param>
 		/// <param name="generateMips">Automatically generate the other mipmaps? Only RGB/RGBA formats are supported.</param>
-		public void SetPixelData(Span<byte> data, int mipLevel = 0, bool generateMips = false)
+		public void SetPixelData(ReadOnlySpan<byte> data, int mipLevel = 0, bool generateMips = false)
 		{
 			// D3D12 doesn't actually support RGB (24bpp), so we have to convert it to RGBA.
 			if (Format == TextureFormat.RGB)
@@ -87,18 +116,51 @@ namespace Engine.Resources
 			}
 
 			// Create resource and upload texture data.
-			Renderer.DefaultCommandList.UploadTexture(Resource, data, mipLevel);
+			Renderer.DefaultCommandList.UploadTexture(D3DResource, data, mipLevel);
 
 			// Generate mipmaps if requested.
 			if (generateMips && Format == TextureFormat.RGBA || Format == TextureFormat.RGB)
 			{
-				Renderer.DefaultCommandList.GenerateMips(Resource);
+				Renderer.DefaultCommandList.GenerateMips(D3DResource);
 			}
 		}
 
 		public override void Dispose()
 		{
-			Resource.Dispose();
+			D3DResource.Dispose();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="input">The uncompressed input data.</param>
+		/// <param name="width">The width of the input data.</param>
+		/// <param name="height">The height of the input data.</param>
+		/// <param name="source">The uncompressed format of the input data.</param>
+		/// <param name="dest">The compressed format that should be converted to.</param>
+		/// <returns>An array of byte arrays containing the data for each mip level.</returns>
+		public static byte[][] Compress(ReadOnlySpan<byte> input, int width, int height, TextureFormat source, TextureFormat dest)
+		{
+			Debug.Assert(!source.IsCompressed() && !source.IsHDR(), "Source must not be a compressed or HDR format!");
+			Debug.Assert(dest.IsCompressed(), "Dest must be a compressed format!");
+
+			BcEncoder encoder = new BcEncoder();
+			encoder.OutputOptions.Quality = CompressionQuality.Fast;
+			encoder.OutputOptions.GenerateMipMaps = true;
+			encoder.OutputOptions.Format = dest switch
+			{
+				TextureFormat.BC1 => CompressionFormat.Bc1,
+				TextureFormat.BC2 => CompressionFormat.Bc2,
+				TextureFormat.BC3 => CompressionFormat.Bc3,
+				TextureFormat.BC5 => CompressionFormat.Bc5,
+				_ => throw new NotSupportedException()
+			};
+			
+			return encoder.EncodeToRawBytes(input, width, height, source switch
+			{
+				TextureFormat.RGBA => PixelFormat.Rgba32,
+				_ => throw new ArgumentOutOfRangeException(nameof(source))
+			});
 		}
 
 		/// <summary>
