@@ -39,7 +39,7 @@ uint2 BitUnpack(uint packed, int lowBits)
 	return uint2(low, high);
 }
 
-float3 IndexToColor(uint i)
+float3 ColorFromIndex(uint i)
 {
 	if (i % 6 == 0)
 	{

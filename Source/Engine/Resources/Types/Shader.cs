@@ -5,7 +5,8 @@ namespace Engine.Resources
 	public enum BlendMode
 	{
 		Opaque,
-		Transparent
+		Masked,
+		Transparent,
 	}
 
 	public struct ShaderParameter

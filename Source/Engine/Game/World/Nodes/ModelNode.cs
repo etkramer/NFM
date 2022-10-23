@@ -52,45 +52,35 @@ namespace Engine.World
 		public void UpdateInstances()
 		{
 			// Get rid of existing instances.
+			for (int i = 0; i < InstanceHandles?.Length; i++)
+			{
+				MaterialInstances[i].Dispose();
+				InstanceHandles[i].Dispose();
+
+				if (Scene != null)
+				{
+					Scene.InstanceCount--;
+				}
+			}
+
+			// If we don't have a fresh model to switch to, we're done here.
 			if (Model == null || Model?.Parts == null || !Model.IsCommitted || !IsVisible || Scene == null)
 			{
-				for (int i = 0; i < InstanceHandles?.Length; i++)
-				{
-					MaterialInstances[i].Dispose();
-					InstanceHandles[i].Dispose();
-
-					if (Scene != null)
-					{
-						Scene.InstanceCount--;
-					}
-				}
-
 				InstanceHandles = null;
 				MaterialInstances = null;
 				return;
 			}
 
 			// Count instances.
-			uint instanceCount = 0;
-			foreach (ModelPart part in Model.Parts)
-			{
-				foreach (Mesh mesh in part.Meshes)
-				{
-					instanceCount++;
-				}
-			}
+			int instanceCount = Model.Parts.Sum(o => o.Meshes.Length);
 
 			// (Re)build the array of instance handles.
-			if (InstanceHandles == null || InstanceHandles.Length != instanceCount)
+			MaterialInstances = new MaterialInstance[instanceCount];
+			InstanceHandles = new BufferAllocation<GPUInstance>[instanceCount];
+			for (int i = 0; i < instanceCount; i++)
 			{
-				// Allocate a handful of new ones.
-				MaterialInstances = new MaterialInstance[instanceCount];
-				InstanceHandles = new BufferAllocation<GPUInstance>[instanceCount];
-				for (int i = 0; i < instanceCount; i++)
-				{
-					InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1);
-					Scene.InstanceCount++;
-				}
+				InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1);
+				Scene.InstanceCount++;
 			}
 
 			// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
