@@ -38,10 +38,9 @@ namespace Basic.Loaders
 			{
 				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
 				{
-					Texture2D gameTexture = new Texture2D(image.Width, image.Height);
+					Texture2D gameTexture = new Texture2D(image.Width, image.Height, TextureFormat.RGBA);
 					
-					gameTexture.LoadData(ToReadWriteSpan(image.Data), 0);
-					gameTexture.GenerateMips();
+					gameTexture.SetPixelData(ToReadWriteSpan(image.Data), 0, true);
 					gameTextures[texture.LogicalIndex] = gameTexture;
 				}
 			});
