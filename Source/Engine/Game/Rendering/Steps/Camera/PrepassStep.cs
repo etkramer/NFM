@@ -97,7 +97,7 @@ namespace Engine.Rendering
 			List.SetProgramCBV(0, 1, RT.ViewCB);
 
 			// Dispatch draw commands.
-			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Scene.MaxInstances);
+			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Camera.Scene.InstanceCount);
 		}
 	}
 }

@@ -52,6 +52,7 @@ namespace Engine.Rendering
 		public static void RenderFrame()
 		{
 			// Run scene render steps.
+			DefaultCommandList.BeginEvent("Update scenes");
 			foreach (Scene scene in Scene.All)
 			{
 				// Execute per-scene render steps.
@@ -66,6 +67,7 @@ namespace Engine.Rendering
 			}
 
 			// Execute default command list and wait for it on the GPU.
+			DefaultCommandList.EndEvent();
 			DefaultCommandList.Close();
 			DefaultCommandList.Execute();
 
@@ -93,6 +95,7 @@ namespace Engine.Rendering
 		{
 			var rt = RenderTarget.Get(texture.Size);
 			rt.CommandList.Open();
+			rt.CommandList.BeginEvent($"Render to Camera ({texture.Name})");
 			rt.UpdateView(camera);
 
 			foreach (CameraStep step in cameraStage)
@@ -100,7 +103,7 @@ namespace Engine.Rendering
 				step.RT = rt;
 				step.Camera = camera;
 
-				step.List.BeginEvent($"{step.GetType().Name} (camera)");
+				step.List.BeginEvent(step.GetType().Name);
 				step.Run();
 				step.List.EndEvent();
 			}
@@ -110,6 +113,8 @@ namespace Engine.Rendering
 			rt.CommandList.ClearDepth(rt.DepthBuffer);
 
 			beforeExecute?.Invoke(rt.CommandList);
+
+			rt.CommandList.EndEvent();
 			rt.CommandList.Close();
 			rt.CommandList.Execute();
 		}
