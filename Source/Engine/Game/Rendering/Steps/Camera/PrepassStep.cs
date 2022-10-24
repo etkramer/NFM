@@ -71,7 +71,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceCount > 0)
 			{
-				List.DispatchGroups(Camera.Scene.InstanceCount);
+				List.Dispatch(Camera.Scene.InstanceCount);
 			}
 
 			List.BarrierUAV(CommandBuffer);

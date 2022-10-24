@@ -93,7 +93,7 @@ namespace Engine.Rendering
 			renderList.SetProgramConstants(0, 8, AsInt((Vector3)color));
 
 			// Dispatch draw command.
-			renderList.DispatchMeshGroups(1);
+			renderList.DispatchMesh(1);
 		}
 
 		private unsafe int AsInt(float value)

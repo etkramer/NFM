@@ -25,7 +25,7 @@ namespace Engine.Rendering
 			}
 
 			// Make sure the instance buffer is fully compacted.
-			List.CompactBuffer(Scene.InstanceBuffer);
+			Scene.InstanceBuffer.Compact(List);
 		}
 	}
 }

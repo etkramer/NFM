@@ -8,12 +8,10 @@ namespace Engine.GPU
 {
 	public class CommandList : IDisposable
 	{
-		private readonly List<Command> commands = new();
 		private readonly CommandAllocator allocator;
 		internal ID3D12GraphicsCommandList6 list;
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
-
 		public bool IsOpen { get; private set; } = false;
 
 		public string Name
@@ -28,18 +26,6 @@ namespace Engine.GPU
 			.AsRootConstant(0, 2)
 			.Compile().Result;
 
-		struct Command
-		{
-			public Action<ID3D12GraphicsCommandList6> BuildAction;
-			public CommandInput[] Inputs;
-
-			public Command(Action<ID3D12GraphicsCommandList6> buildAction, CommandInput[] inputs)
-			{
-				BuildAction = buildAction;
-				Inputs = inputs;
-			}
-		}
-
 		public CommandList()
 		{
 			allocator = new CommandAllocator(CommandListType.Direct);
@@ -53,29 +39,9 @@ namespace Engine.GPU
 			allocator.Dispose();
 		}
 
-		public void AddCommand(Action<ID3D12GraphicsCommandList6> buildAction, params CommandInput[] inputs)
+		public void DispatchMesh(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
-			lock (commands)
-			{
-				commands.Add(new Command(buildAction, inputs));
-			}
-		}
-
-		private struct PendingTransition
-		{
-			public Resource Resource;
-			public ResourceStates BeforeState;
-			public ResourceStates AfterState;
-		}
-
-		public void DispatchMeshGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
-		{
-			Action<ID3D12GraphicsCommandList6> buildDelegate = (list) =>
-			{
-				list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
-			};
-
-			AddCommand(buildDelegate, null);
+			list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 		}
 
 		public void DispatchMeshThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
@@ -83,17 +49,13 @@ namespace Engine.GPU
 			int groupsX = MathHelper.IntCeiling(threadCountX / (float)groupSizeX);
 			int groupsY = MathHelper.IntCeiling(threadCountY / (float)groupSizeY);
 			int groupsZ = MathHelper.IntCeiling(threadCountZ / (float)groupSizeZ);
-			DispatchMeshGroups(groupsX, groupsY, groupsZ);
+
+			DispatchMesh(groupsX, groupsY, groupsZ);
 		}
 
-		public void DispatchGroups(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
+		public void Dispatch(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
-			};
-
-			AddCommand(buildDelegate, null);
+			list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 		}
 
 		public void DispatchThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
@@ -101,294 +63,191 @@ namespace Engine.GPU
 			int groupsX = MathHelper.IntCeiling(threadCountX / (float)groupSizeX);
 			int groupsY = MathHelper.IntCeiling(threadCountY / (float)groupSizeY);
 			int groupsZ = MathHelper.IntCeiling(threadCountZ / (float)groupSizeZ);
-			DispatchGroups(groupsX, groupsY, groupsZ);
+			Dispatch(groupsX, groupsY, groupsZ);
 		}
 
 		public void BarrierUAV(params GraphicsBuffer[] buffers)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			ResourceBarrier[] barriers = new ResourceBarrier[buffers.Length];
+			for (int i = 0; i < buffers.Length; i++)
 			{
-				ResourceBarrier[] barriers = new ResourceBarrier[buffers.Length];
-				for (int i = 0; i < buffers.Length; i++)
-				{
-					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
-				}
+				barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
+			}
 
-				list.ResourceBarrier(barriers);
-			};
-
-			AddCommand(buildDelegate, null);
+			list.ResourceBarrier(barriers);
 		}
 
 		public void BarrierUAV(params Texture[] textures)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			ResourceBarrier[] barriers = new ResourceBarrier[textures.Length];
+			for (int i = 0; i < textures.Length; i++)
 			{
-				ResourceBarrier[] barriers = new ResourceBarrier[textures.Length];
-				for (int i = 0; i < textures.Length; i++)
-				{
-					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));
-				}
+				barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));
+			}
 
-				list.ResourceBarrier(barriers);
-			};
-
-			AddCommand(buildDelegate, null);
+			list.ResourceBarrier(barriers);
 		}
 
 		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, int commandStart = 0)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
-			};
+			RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(commandBuffer, ResourceStates.IndirectArgument)
-			};
-
-			AddCommand(buildDelegate, inputs);
+			ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
 		}
 
 		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, GraphicsBuffer countBuffer, long countOffset, int maxCommandCount, int commandStart = 0)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-				list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, countBuffer, (ulong)countOffset);
-			};
+			RequestState(commandBuffer, ResourceStates.IndirectArgument);
+			RequestState(countBuffer, ResourceStates.IndirectArgument);
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(commandBuffer, ResourceStates.IndirectArgument),
-				new CommandInput(countBuffer, ResourceStates.IndirectArgument)
-			};
-
-			AddCommand(buildDelegate, inputs);
+			ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, countBuffer, (ulong)countOffset);
 		}
 
-		private static CommandSignature dispatchSignature = new CommandSignature()
-			.AddDispatchArg()
-			.Compile();
-
-		public void DispatchIndirect(GraphicsBuffer commandBuffer, int commandOffset = 0)
+		public unsafe void SetProgramConstants(BindPoint point, int start, params int[] constants)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			if (!CurrentProgram.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 			{
-				list.ExecuteIndirect(dispatchSignature.Handle, 1, commandBuffer, (ulong)commandOffset, null, 0);
-			};
+				return;
+			}
 
-			CommandInput[] inputs = new[]
+			if (CurrentProgram.IsGraphics)
 			{
-				new CommandInput(commandBuffer, ResourceStates.IndirectArgument)
-			};
-
-			AddCommand(buildDelegate, inputs);
-		}
-
-		public void SetProgramConstants(BindPoint point, int start, params int[] constants)
-		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+				fixed (int* constantsPtr = constants)
+				{
+					list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
+				}
+			}
+			if (CurrentProgram.IsCompute)
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.cRegisterMapping.TryGetValue(point, out int parameterIndex))
+				fixed (int* constantsPtr = constants)
 				{
-					return;
+					list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 				}
-
-				if (program.IsGraphics)
-				{
-					unsafe
-					{
-						fixed (int* constantsPtr = constants)
-						{
-							list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
-						}
-					}
-				}
-				if (program.IsCompute)
-				{
-					unsafe
-					{
-						fixed (int* constantsPtr = constants)
-						{
-							list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
-						}
-					}
-				}
-			};
-
-			AddCommand(buildDelegate, null);
+			}
 		}
 
 		public void SetProgramCBV(int slot, int space, GraphicsBuffer target)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			RequestState(target, ResourceStates.VertexAndConstantBuffer);
+
+			if (!CurrentProgram.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-				{
-					return;
-				}
+				return;
+			}
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
-				}
-			};
-
-			CommandInput[] inputs = new[]
+			if (CurrentProgram.IsGraphics)
 			{
-				new CommandInput(target, ResourceStates.VertexAndConstantBuffer)
-			};
-
-			AddCommand(buildDelegate, inputs);
+				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
+			}
+			if (CurrentProgram.IsCompute)
+			{
+				list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
+			}
 		}
 
 		public void SetProgramUAV(int slot, int space, Texture target, int mipLevel = 0)
 		{
-			Debug.Assert(target.Samples <= 1, "Cannot use a multisampled texture as a UAV");
+			Debug.Assert(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
+			RequestState(target, ResourceStates.UnorderedAccess);
 
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			if (!CurrentProgram.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-				{
-					return;
-				}
+				return;
+			}
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
-				}
-			};
-
-			CommandInput[] inputs = new[]
+			if (CurrentProgram.IsGraphics)
 			{
-				new CommandInput(target, ResourceStates.UnorderedAccess)
-			};
-
-			AddCommand(buildDelegate, inputs);
+				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
+			}
+			if (CurrentProgram.IsCompute)
+			{
+				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
+			}
 		}
 
 		public void SetProgramUAV(int slot, int space, GraphicsBuffer target)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			RequestState(target, ResourceStates.UnorderedAccess);
+
+			if (!CurrentProgram.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-				{
-					return;
-				}
+				return;
+			}
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
-				}
-			};
-
-			CommandInput[] inputs = new[]
+			if (CurrentProgram.IsGraphics)
 			{
-				new CommandInput(target, ResourceStates.UnorderedAccess)
-			};
-
-			AddCommand(buildDelegate, inputs);
+				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
+			}
+			if (CurrentProgram.IsCompute)
+			{
+				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
+			}
 		}
 
 		public void SetProgramSRV(int slot, int space, Texture target)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			RequestState(target, ResourceStates.AllShaderResource);
+
+			if (!CurrentProgram.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-				{
-					return;
-				}
+				return;
+			}
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-				}
-			};
-
-			CommandInput[] inputs = new[]
+			if (CurrentProgram.IsGraphics)
 			{
-				new CommandInput(target, ResourceStates.AllShaderResource)
-			};
-
-			AddCommand(buildDelegate, inputs);
+				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+			}
+			if (CurrentProgram.IsCompute)
+			{
+				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+			}
 		}
 
 		public void SetProgramSRV(int slot, int space, GraphicsBuffer target)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			RequestState(target, ResourceStates.AllShaderResource);
+
+			if (!CurrentProgram.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
-				ShaderProgram program = CurrentProgram;
-				if (!program.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-				{
-					return;
-				}
+				return;
+			}
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-				}
-			};
-
-			AddCommand(buildDelegate, new CommandInput(target, ResourceStates.AllShaderResource));
+			if (CurrentProgram.IsGraphics)
+			{
+				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+			}
+			if (CurrentProgram.IsCompute)
+			{
+				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+			}
 		}
 
 		public void SetProgram(ShaderProgram program)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			// Don't switch PSOs unnecessarily.
+			if (CurrentProgram == program)
 			{
-				// Don't switch PSOs unnecessarily.
-				if (CurrentProgram == program)
-				{
-					return;
-				}
+				return;
+			}
 
-				list.SetPipelineState(program.PSO);
-				CurrentProgram = program;
+			list.SetPipelineState(program.PSO);
+			CurrentProgram = program;
 
-				if (program.IsGraphics)
-				{
-					list.SetGraphicsRootSignature(program.RootSignature);
-				}
-				if (program.IsCompute)
-				{
-					list.SetComputeRootSignature(program.RootSignature);
-				}
-			};
-
-			AddCommand(buildDelegate, null);
+			if (program.IsGraphics)
+			{
+				list.SetGraphicsRootSignature(program.RootSignature);
+			}
+			if (program.IsCompute)
+			{
+				list.SetComputeRootSignature(program.RootSignature);
+			}
 		}
 
-		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate, params CommandInput[] inputs)
+		public void CustomCommand(Action<ID3D12GraphicsCommandList> buildDelegate)
 		{
-			AddCommand(buildDelegate, inputs);
+			buildDelegate.Invoke(list);
 		}
 
 		public void ResetCounter(GraphicsBuffer buffer)
@@ -441,10 +300,8 @@ namespace Engine.GPU
 				UploadHelper.UploadOffset += dataSize;
 
 				// Copy from upload to dest buffer.
-				CustomCommand((o) =>
-				{
-					o.CopyBufferRegion(buffer.D3DResource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
-				}, new CommandInput(buffer, ResourceStates.CopyDest));
+				RequestState(buffer, ResourceStates.CopyDest);
+				list.CopyBufferRegion(buffer.D3DResource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
 			}
 		}
 
@@ -472,39 +329,28 @@ namespace Engine.GPU
 				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
 				UploadHelper.UploadOffset += dataSize;
 
-				// Copy from upload to dest buffer.
-				CustomCommand((o) =>
-				{
-					// Calculate subresource info.
-					var footprints = new PlacedSubresourceFootPrint[1];
-					GPUContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, new int[1], new ulong[1], out _);
+				// Calculate subresource info.
+				var footprints = new PlacedSubresourceFootPrint[1];
+				GPUContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
 
-					TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
-					TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
-					o.CopyTextureRegion(destLocation, 0, 0, 0, sourceLocation);
-
-				}, new CommandInput(texture, ResourceStates.CopyDest));
+				TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
+				TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
+				RequestState(texture, ResourceStates.CopyDest);
+				list.CopyTextureRegion(destLocation, 0, 0, 0, sourceLocation);
 			}
-		}
-
-		public void CompactBuffer<T>(GraphicsBuffer<T> buffer) where T : unmanaged
-		{
-			buffer.Compact(this);
 		}
 
 		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, long startOffset = 0, long destOffset = 0, long numBytes = -1)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				if (numBytes == -1)
-				{
-					numBytes = Math.Min(source.Capacity * source.Stride, dest.Capacity * dest.Stride);
-				}
+			RequestState(source, ResourceStates.CopySource);
+			RequestState(dest, ResourceStates.CopyDest);
 
-				list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
-			};
-			
-			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource),new CommandInput(dest, ResourceStates.CopyDest));
+			if (numBytes == -1)
+			{
+				numBytes = Math.Min(source.Capacity * source.Stride, dest.Capacity * dest.Stride);
+			}
+
+			list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
 		}
 
 		private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
@@ -516,12 +362,10 @@ namespace Engine.GPU
 
 		public void CopyTexture(Texture source, Texture dest)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.CopyTextureRegion(new TextureCopyLocation(dest.D3DResource), 0, 0, 0, new TextureCopyLocation(source.D3DResource));
-			};
+			RequestState(source, ResourceStates.CopySource);
+			RequestState(dest, ResourceStates.CopyDest);
 
-			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
+			list.CopyTextureRegion(new TextureCopyLocation(dest.D3DResource), 0, 0, 0, new TextureCopyLocation(source.D3DResource));
 		}
 
 		public void ResolveTexture(Texture source, Texture dest)
@@ -535,278 +379,153 @@ namespace Engine.GPU
 
 			Debug.Assert(source.Samples > 1 && dest.Samples <= 1, "Cannot resolve a non-multisampled texture or to a multisampled texture");
 
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.ResolveSubresource(dest, 0, source, 0, dest.Format);
-			};
-			
-			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.ResolveSource), new CommandInput(dest, ResourceStates.ResolveDest));
+			RequestState(source, ResourceStates.ResolveSource);
+			RequestState(dest, ResourceStates.ResolveDest);
+
+			list.ResolveSubresource(dest, 0, source, 0, dest.Format);
 		}
 
 		public void CopyResource(Resource source, Resource dest)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.CopyResource(dest.D3DResource, source.D3DResource);
-			};
-			
-			AddCommand(buildDelegate, new CommandInput(source, ResourceStates.CopySource), new CommandInput(dest, ResourceStates.CopyDest));
+			RequestState(source, ResourceStates.CopySource);
+			RequestState(dest, ResourceStates.CopyDest);
+
+			list.CopyResource(dest.D3DResource, source.D3DResource);
 		}
 
 		public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				if (renderTarget == null)
-				{
-					list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.GetDSV().Handle);
-					list.RSSetViewport(0, 0, depthStencil.Width, depthStencil.Height);
-					list.RSSetScissorRect(depthStencil.Width, depthStencil.Height);
-				}
-				else
-				{
-					list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
-					list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
-					list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
-				}
-			};
+			RequestState(renderTarget, ResourceStates.RenderTarget);
+			RequestState(depthStencil, ResourceStates.DepthWrite);
 
-			AddCommand(buildDelegate, new CommandInput(renderTarget, ResourceStates.RenderTarget), 	new CommandInput(depthStencil, ResourceStates.DepthWrite));
+			if (renderTarget == null)
+			{
+				list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.GetDSV().Handle);
+				list.RSSetViewport(0, 0, depthStencil.Width, depthStencil.Height);
+				list.RSSetScissorRect(depthStencil.Width, depthStencil.Height);
+			}
+			else
+			{
+				list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
+				list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
+				list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
+			}
 		}
 
 		public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
-				list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
-				list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
-			};
+			RequestState(depthStencil, ResourceStates.DepthWrite);
+			renderTargets.ForEach(o => RequestState(o, ResourceStates.RenderTarget));
 
-			List<CommandInput> inputs = new();
-			if (depthStencil != null)
-			{
-				inputs.Add(new CommandInput(depthStencil, ResourceStates.DepthWrite));
-			}
-			
-			foreach (var target in renderTargets)
-			{
-				inputs.Add(new CommandInput(target, ResourceStates.RenderTarget));
-			}
-
-			AddCommand(buildDelegate, inputs.ToArray());
+			list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
+			list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
+			list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
 		}
 
 		public void ClearRenderTarget(Texture target, Color color = default(Color))
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
+			RequestState(target, ResourceStates.RenderTarget);
+
+			ClearValue value;
+			if (color == default(Color))
 			{
-				ClearValue value;
+				value = target.ClearValue.Value;
+			}
+			else
+			{
+				value = new ClearValue(target.Format, new Vortice.Mathematics.Color(color.R, color.G, color.B, color.A));
+			}
 
-				if (color == default(Color))
-				{
-					value = target.ClearValue.Value;
-				}
-				else
-				{
-					value = new ClearValue(target.Format, new Vortice.Mathematics.Color(color.R, color.G, color.B, color.A));
-				}
-
-				list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
-			};
-
-			AddCommand(buildDelegate, new CommandInput(target, ResourceStates.RenderTarget));
+			list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
 		}
 
 		public void ClearDepth(Texture target)
 		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.Value.DepthStencil.Depth, target.ClearValue.Value.DepthStencil.Stencil);
-			};
+			RequestState(target, ResourceStates.DepthWrite);
 
-			CommandInput[] inputs = new[]
-			{
-				new CommandInput(target, ResourceStates.DepthWrite)
-			};
-
-			AddCommand(buildDelegate, inputs);
+			list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.Value.DepthStencil.Depth, target.ClearValue.Value.DepthStencil.Stencil);
 		}
 
 		public void GenerateMips(Texture texture)
 		{
-			// This is a composite command (not run through AddCommand()), and it's important that it's executed in order.
-			lock (commands)
+			if (texture.MipmapCount <= 1)
 			{
-				if (texture.MipmapCount <= 1)
-				{
-					return;
-				}
-				else
-				{
-					SetProgram(MipGenProgram);
+				return;
+			}
+			else
+			{
+				SetProgram(MipGenProgram);
 
-					for (int i = 1; i < texture.MipmapCount; i++)
+				for (int i = 1; i < texture.MipmapCount; i++)
+				{
+					uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
+					uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
+
+					unsafe
 					{
-						uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
-						uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
-
-						unsafe
-						{
-							Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
-							SetProgramConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
-						}
-
-						int capturedMip = i;
-						CustomCommand(o =>
-						{
-							list.SetComputeRootDescriptorTable(MipGenProgram.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(capturedMip - 1).Handle);
-							list.SetComputeRootDescriptorTable(MipGenProgram.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(capturedMip).Handle);
-						}, new CommandInput(texture, ResourceStates.AllShaderResource));
-					
-					
-						DispatchGroups((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
-						BarrierUAV(texture);
+						Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
+						SetProgramConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
 					}
+
+					RequestState(texture, ResourceStates.AllShaderResource);
+
+					list.SetComputeRootDescriptorTable(MipGenProgram.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
+					list.SetComputeRootDescriptorTable(MipGenProgram.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
+					
+					Dispatch((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
+					BarrierUAV(texture);
 				}
 			}
 		}
 
 		public void RequestState(Resource resource, ResourceStates state)
 		{
-			CommandInput[] inputs = new[]
+			if (resource == null)
 			{
-				new CommandInput(resource, state)
-			};
-
-			AddCommand(null, new CommandInput(resource, state));
-		}
-
-		public void PushEvent(string name)
-		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.BeginEvent(name);
-			};
-
-			AddCommand(buildDelegate, null);
-		}
-
-		public void PopEvent()
-		{
-			Action<ID3D12GraphicsCommandList> buildDelegate = (list) =>
-			{
-				list.EndEvent();
-			};
-
-			AddCommand(buildDelegate, null);
-		}
-
-		/// <summary>
-		/// Executes all commands.
-		/// </summary>
-		public void Execute()
-		{
-			lock (commands)
-			{
-				// Reset D3D list.
-				allocator.Reset();
-				list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
-
-				// Setup common state.
-				list.SetDescriptorHeaps(1, new[]
-				{
-					ShaderResourceView.Heap.handle,
-				});
-
-				List<PendingTransition> transitions = new();
-
-				// Build.
-				for (int i = 0; i < commands.Count; i++)
-				{
-					CommandInput[] currentInputs = commands[i].Inputs;
-					transitions.Clear();
-
-					// Look for additional transitions to batch with.
-					for (int j = i; j < commands.Count; j++)
-					{
-						CommandInput[] inputs = commands[j].Inputs;
-
-						if (inputs == null)
-						{
-							continue;
-						}
-
-						// NOTE: Batching is completely and utterly broken. Rather than try to fix it, I'll just disable it for now.
-						if (j > i)
-						{
-							break;
-						}
-
-						// Look for resource transitons.
-						foreach (CommandInput input in inputs)
-						{
-							if (input.Resource == null)
-							{
-								continue;
-							}
-
-							Debug.Assert(input.Resource.IsAlive, "Resource used by command was disposed before the command list was executed");
-
-							if (input.Resource.State != input.State)
-							{
-								// Already transitioning this resource.
-								if (transitions.Any((o) => o.Resource == input.Resource))
-								{
-									continue;
-								}
-								// Are we looking for batching candicates?
-								else if (j > i)
-								{
-									// Is this resource being used by the current command?
-									if (currentInputs?.Any(o => o.Resource == input.Resource) ?? false)
-									{
-										// Skip it, because the previous check doesn't notice resources that don't need a transition because they're already in the right state.
-										continue;
-									}
-								}
-
-								// Input requires transition. Add it to the batch.
-								transitions.Add(new PendingTransition()
-								{
-									Resource = input.Resource,
-									BeforeState = input.Resource.State,
-									AfterState = input.State,
-								});
-
-								input.Resource.State = input.State;
-							}
-						}
-					}
-				
-					if (transitions.Count > 0)
-					{
-						list.ResourceBarrier(transitions.Select(o => new ResourceBarrier(new ResourceTransitionBarrier(o.Resource.D3DResource, o.BeforeState, o.AfterState))).ToArray());
-					}
-
-					commands[i].BuildAction?.Invoke(list);
-				}
+				return;
 			}
 
-			// Close command list.
-			list.Close();
-
-			// Reset virtual list.
-			commands.Clear();
-			CurrentProgram = null;
-
-			// Execute D3D command list.
-			GPUContext.GraphicsQueue.ExecuteCommandList(list);
+			if ((resource.State & state) == 0)
+			{
+				list.ResourceBarrierTransition(resource, resource.State, state);
+				resource.State = state;
+			}
 		}
 
-		public IntPtr GetPointer()
+		public void BeginEvent(string name)
 		{
-			return list.NativePointer;
+			list.BeginEvent(name);
+		}
+
+		public void EndEvent()
+		{
+			list.EndEvent();
+		}
+
+		public void Open()
+		{
+			allocator.Reset();
+			list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
+
+			// Setup common state.
+			list.SetDescriptorHeaps(1, new[]
+			{
+				ShaderResourceView.Heap.handle,
+			});
+		}
+
+		public void Close()
+		{
+			list.Close();
+
+			// Reset state.
+			CurrentProgram = null;
+		}
+
+		public void Execute()
+		{
+			// Execute D3D command list.
+			GPUContext.GraphicsQueue.ExecuteCommandList(list);
 		}
 	}
 }

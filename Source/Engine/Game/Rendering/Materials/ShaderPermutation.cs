@@ -12,7 +12,8 @@ namespace Engine.Rendering
 		public int ShaderID { get; private set; } = 0;
 		public Shader[] Shaders { get; private set; }
 
-		public ShaderProgram Program { get; private set; }
+		public ShaderProgram MaterialProgram { get; private set; }
+		public ShaderProgram MaskedDepthProgram { get; private set; }
 		public CommandSignature Signature { get; private set; }
 
 		public ShaderPermutation(Shader[] shaders)
@@ -56,20 +57,20 @@ namespace Engine.Rendering
 
 			// Build program from source code.
 			string surfaceTemplate = Embed.GetString("Content/Shaders/Geometry/Material/BaseMaterialPS.hlsl", typeof(Game).Assembly);
-			string programSource = surfaceTemplate.Replace("#insert SURFACE", baseSource).Replace("#insert SETUP", setupSource);
+			string surfaceProgramSource = surfaceTemplate.Replace("#insert SURFACE", baseSource).Replace("#insert SETUP", setupSource);
 
 			// Compile program.
-			Program = new ShaderProgram()
+			MaterialProgram = new ShaderProgram()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
-				.SetPixelShader(programSource, "MaterialPS")
+				.SetPixelShader(surfaceProgramSource, "MaterialPS")
 				.SetDepthMode(DepthMode.Equal, true, false)
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
 			// Compile matching indirect command signature.
 			Signature = new CommandSignature()
-				.AddConstantArg(0, Program)
+				.AddConstantArg(0, MaterialProgram)
 				.AddDispatchMeshArg()
 				.Compile();
 
@@ -80,7 +81,7 @@ namespace Engine.Rendering
 		public void Dispose()
 		{
 			Signature.Dispose();
-			Program.Dispose();
+			MaterialProgram.Dispose();
 		}
 	}
 }

@@ -34,10 +34,10 @@ namespace Engine.Rendering
 				// Build indirect draw commands for this shader ID.
 				BuildDraws(shaderID);
 
-				List.PushEvent($"Draw shader {shaderID}");
+				List.BeginEvent($"Draw shader {shaderID}");
 
 				// Switch to material program.
-				List.SetProgram(permutation.Program);
+				List.SetProgram(permutation.MaterialProgram);
 
 				// Set and reset render targets.
 				List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
@@ -55,7 +55,7 @@ namespace Engine.Rendering
 				List.SetProgramCBV(0, 1, RT.ViewCB);
 
 				List.ExecuteIndirect(permutation.Signature, commandBuffer, Camera.Scene.InstanceCount);
-				List.PopEvent();
+				List.EndEvent();
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceCount > 0)
 			{
-				List.DispatchGroups(Camera.Scene.InstanceCount);
+				List.Dispatch(Camera.Scene.InstanceCount);
 			}
 
 			List.BarrierUAV(commandBuffer);

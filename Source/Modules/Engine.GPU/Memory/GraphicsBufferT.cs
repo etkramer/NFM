@@ -100,7 +100,7 @@ namespace Engine.GPU
 			}
 		}
 
-		internal void Compact(CommandList list)
+		public void Compact(CommandList list)
 		{
 			// If there's nothing allocated, there's nothing to compact.
 			if (allocations.Count < 1)

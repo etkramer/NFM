@@ -35,15 +35,11 @@ namespace Engine.Rendering
 			step.Init();
 		}
 
-		public static T GetStep<T>() where T : RenderStep
-		{
-			return (sceneStage.FirstOrDefault(o => o is T) as T) ?? (cameraStage.FirstOrDefault(o => o is T) as T);
-		}
-
 		public static void Init()
 		{
 			GPUContext.Init(2);
 			DefaultCommandList.Name = "Default List";
+			DefaultCommandList.Open();
 
 			AddStep(new SceneUpdateStep());
 			AddStep(new SkinningStep());
@@ -63,13 +59,14 @@ namespace Engine.Rendering
 				{
 					step.Scene = scene;
 
-					step.List.PushEvent($"{step.GetType().Name} (scene)");
+					step.List.BeginEvent($"{step.GetType().Name} (scene)");
 					step.Run();
-					step.List.PopEvent();
+					step.List.EndEvent();
 				}
 			}
 
 			// Execute default command list and wait for it on the GPU.
+			DefaultCommandList.Close();
 			DefaultCommandList.Execute();
 
 			// Render to each viewport.
@@ -80,6 +77,9 @@ namespace Engine.Rendering
 
 			// Wait for completion.
 			Graphics.WaitFrame();
+
+			// Reopen default command list
+			DefaultCommandList.Open();
 		}
 
 		public static void RenderCamera(CameraNode camera, Swapchain swapchain)
@@ -92,6 +92,7 @@ namespace Engine.Rendering
 		private static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
 		{
 			var rt = RenderTarget.Get(texture.Size);
+			rt.CommandList.Open();
 			rt.UpdateView(camera);
 
 			foreach (CameraStep step in cameraStage)
@@ -99,9 +100,9 @@ namespace Engine.Rendering
 				step.RT = rt;
 				step.Camera = camera;
 
-				step.List.PushEvent($"{step.GetType().Name} (camera)");
+				step.List.BeginEvent($"{step.GetType().Name} (camera)");
 				step.Run();
-				step.List.PopEvent();
+				step.List.EndEvent();
 			}
 
 			rt.CommandList.ResolveTexture(rt.ColorTarget, texture);
@@ -109,6 +110,7 @@ namespace Engine.Rendering
 			rt.CommandList.ClearDepth(rt.DepthBuffer);
 
 			beforeExecute?.Invoke(rt.CommandList);
+			rt.CommandList.Close();
 			rt.CommandList.Execute();
 		}
 
