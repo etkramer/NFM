@@ -26,7 +26,7 @@ namespace Engine.GPU
 				}
 			};
 
-			GPUContext.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
+			Graphics.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
 		}
 
 		public UnorderedAccessView(Texture texture, int mipLevel)
@@ -44,7 +44,7 @@ namespace Engine.GPU
 				}
 			};
 
-			GPUContext.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
+			Graphics.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
 		}
 
 		public void Dispose()

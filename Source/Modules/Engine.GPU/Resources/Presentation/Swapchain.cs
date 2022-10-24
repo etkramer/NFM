@@ -29,7 +29,7 @@ namespace Engine.GPU
 
 			flags = SwapChainFlags.None;
 			flags |= SwapChainFlags.FrameLatencyWaitableObject;
-			if (GPUContext.SupportsTearing)
+			if (Graphics.SupportsTearing)
 			{
 				flags |= SwapChainFlags.AllowTearing;
 			}
@@ -37,10 +37,10 @@ namespace Engine.GPU
 			// Describe swapchain.
 			SwapChainDescription1 swapchainDesc = new()
 			{
-				BufferCount = GPUContext.RenderLatency,
+				BufferCount = Graphics.RenderLatency,
 				Width = 0,
 				Height = 0,
-				Format = GPUContext.RTFormat,
+				Format = Graphics.RTFormat,
 				BufferUsage = Usage.RenderTargetOutput,
 				SwapEffect = SwapEffect.FlipDiscard,
 				SampleDescription = new SampleDescription(1, 0),
@@ -48,7 +48,7 @@ namespace Engine.GPU
 			};
 
 			// Create swapchain.
-			swapchain = GPUContext.DXGIFactory.CreateSwapChainForHwnd(GPUContext.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
+			swapchain = Graphics.DXGIFactory.CreateSwapChainForHwnd(Graphics.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
 
 			// Update size to match actual used by swapchain.
 			var swapchainSize = swapchain.SourceSize;
@@ -74,8 +74,8 @@ namespace Engine.GPU
 		private void CreateRTs()
 		{
             // Create RTs for each backbuffer.
-            backbuffers = new Texture[GPUContext.RenderLatency];
-            for (int i = 0; i < GPUContext.RenderLatency; i++)
+            backbuffers = new Texture[Graphics.RenderLatency];
+            for (int i = 0; i < Graphics.RenderLatency; i++)
             {
 				// Create backbuffer RT.
 				backbuffers[i] = new Texture(swapchain.GetBuffer<ID3D12Resource>(i), Size.X, Size.Y);
@@ -93,7 +93,7 @@ namespace Engine.GPU
 				throw new InvalidOperationException("Resource is in wrong state for present!");
 			}
 
-			Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && GPUContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
+			Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && Graphics.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
 		}
 
 		public void Resize(Vector2i size)
@@ -110,13 +110,13 @@ namespace Engine.GPU
 			Graphics.Flush();
 
 			// Dispose existing render targets.
-			for (int i = 0; i < GPUContext.RenderLatency; i++)
+			for (int i = 0; i < Graphics.RenderLatency; i++)
 			{
 				backbuffers[i].Dispose();
 			}
 
 			// Resize swapchain.
-			swapchain.ResizeBuffers(GPUContext.RenderLatency, size.X, size.Y, Format.Unknown, flags);
+			swapchain.ResizeBuffers(Graphics.RenderLatency, size.X, size.Y, Format.Unknown, flags);
 
 			// Recreate render targets.
 			CreateRTs();

@@ -37,7 +37,7 @@ namespace Engine.Rendering
 
 		public static void Init()
 		{
-			GPUContext.Init(2);
+			Graphics.Init(2);
 			DefaultCommandList.Name = "Default List";
 			DefaultCommandList.Open();
 

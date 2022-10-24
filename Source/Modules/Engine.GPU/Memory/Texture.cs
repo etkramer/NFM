@@ -99,7 +99,7 @@ namespace Engine.GPU
 			};
 
 			// Create D3D resource.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
+			Graphics.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
 
 			D3DResource = resource;
 			State = ResourceStates.CopyDest;
@@ -118,7 +118,7 @@ namespace Engine.GPU
 			D3DResource = resource;
 			Width = width;
 			Height = height;
-			Format = GPUContext.RTFormat;
+			Format = Graphics.RTFormat;
 			MipmapCount = 1;
 			State = ResourceStates.CopyDest;
 

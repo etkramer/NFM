@@ -95,7 +95,7 @@ namespace Engine.GPU
 			};
 
 			// Create buffer.
-			GPUContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.CopyDest, out ID3D12Resource resource);
+			Graphics.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.CopyDest, out ID3D12Resource resource);
 			D3DResource = resource;
 			State = ResourceStates.CopyDest;
 

@@ -22,8 +22,8 @@ namespace Engine.Frontend
 			InitializeComponent();
 
 			// Update frametime.
-			Graphics.OnFrameStart += () => frameTimeAverager.AddValue(Graphics.FrameTime * 1000);
-			Graphics.OnFrameStart += () => (this as INotify).Raise(nameof(memory));
+			Game.OnTick += (t) => frameTimeAverager.AddValue(Graphics.FrameTime * 1000);
+			Game.OnTick += (t) => (this as INotify).Raise(nameof(memory));
 			(frameTimeAverager as INotify).Subscribe(nameof(Averager.Result), () => (this as INotify).Raise(nameof(frameTime)));
 		}
 	}

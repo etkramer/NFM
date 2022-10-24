@@ -18,7 +18,7 @@ namespace Engine.GPU
 				SizeInBytes = (int)MathHelper.Align(capacity * stride, GraphicsBuffer.ConstantAlignment)
 			};
 
-			GPUContext.Device.CreateConstantBufferView(desc, Handle);
+			Graphics.Device.CreateConstantBufferView(desc, Handle);
 		}
 
 		public void Dispose()

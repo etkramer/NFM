@@ -70,7 +70,7 @@ namespace Engine.GPU
 		private DepthMode depthMode = DepthMode.None;
 		private bool depthRead = false;
 		private bool depthWrite = false;
-		private Format[] rtFormats = { GPUContext.RTFormat };
+		private Format[] rtFormats = { Graphics.RTFormat };
 		private int rtSamples = 1;
 		private TopologyType topologyType = TopologyType.Triangle;
 
@@ -292,7 +292,7 @@ namespace Engine.GPU
 				SubObjectStream = new IntPtr(&data)
 			};
 
-			return GPUContext.Device.CreatePipelineState(description, out result);
+			return Graphics.Device.CreatePipelineState(description, out result);
 		}
 
 		/// <summary>
@@ -324,7 +324,7 @@ namespace Engine.GPU
 				};
 
 				// Create root signature.
-				RootSignature = GPUContext.Device.CreateRootSignature(new RootSignatureDescription1(
+				RootSignature = Graphics.Device.CreateRootSignature(new RootSignatureDescription1(
 					RootSignatureFlags.ConstantBufferViewShaderResourceViewUnorderedAccessViewHeapDirectlyIndexed, rootParameters, staticSamplers));
 
 				bool useDepth = depthWrite || (depthRead && depthMode != DepthMode.None);
@@ -342,7 +342,7 @@ namespace Engine.GPU
 						PrimitiveTopology = (PrimitiveTopologyType)topologyType,
 						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
 						RenderTargetFormats = rtFormats,
-						DepthStencilFormat = GPUContext.DSFormat,
+						DepthStencilFormat = Graphics.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
 					}, out PSO);

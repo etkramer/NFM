@@ -8,7 +8,7 @@ namespace Engine.GPU
 {
 	public class CommandList : IDisposable
 	{
-		private readonly CommandAllocator allocator;
+		private ID3D12CommandAllocator[] commandAllocators;
 		internal ID3D12GraphicsCommandList6 list;
 
 		internal ShaderProgram CurrentProgram { get; set; } = null;
@@ -28,15 +28,24 @@ namespace Engine.GPU
 
 		public CommandList()
 		{
-			allocator = new CommandAllocator(CommandListType.Direct);
-			list = GPUContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, allocator.commandAllocators[GPUContext.FrameIndex]);
+			// Create command allocators.
+			commandAllocators = new ID3D12CommandAllocator[Graphics.RenderLatency];
+			for (int i = 0; i < Graphics.RenderLatency; i++)
+			{
+				commandAllocators[i] = Graphics.Device.CreateCommandAllocator(CommandListType.Direct);
+			}
+
+			list = Graphics.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, commandAllocators[Graphics.FrameIndex]);
 			list.Close();
 		}
 
 		public void Dispose()
 		{
 			list.Dispose();
-			allocator.Dispose();
+			for (int i = 0; i < commandAllocators.Length; i++)
+			{
+				commandAllocators[i].Dispose();
+			}
 		}
 
 		public void DispatchMesh(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
@@ -331,7 +340,7 @@ namespace Engine.GPU
 
 				// Calculate subresource info.
 				var footprints = new PlacedSubresourceFootPrint[1];
-				GPUContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
+				Graphics.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
 
 				TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
 				TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
@@ -504,8 +513,8 @@ namespace Engine.GPU
 
 		public void Open()
 		{
-			allocator.Reset();
-			list.Reset(allocator.commandAllocators[GPUContext.FrameIndex]);
+			commandAllocators[Graphics.FrameIndex].Reset();
+			list.Reset(commandAllocators[Graphics.FrameIndex]);
 
 			// Setup common state.
 			list.SetDescriptorHeaps(1, new[]
@@ -525,7 +534,7 @@ namespace Engine.GPU
 		public void Execute()
 		{
 			// Execute D3D command list.
-			GPUContext.GraphicsQueue.ExecuteCommandList(list);
+			Graphics.GraphicsQueue.ExecuteCommandList(list);
 		}
 	}
 }

@@ -45,9 +45,9 @@ namespace Engine.GPU
 				NodeMask = 0,
 			};
 
-			GPUContext.Device.CreateDescriptorHeap(heapDesc, out handle);
+			Graphics.Device.CreateDescriptorHeap(heapDesc, out handle);
 			handle.Name = $"DescriptorHeap ({type})";
-			stride = GPUContext.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
+			stride = Graphics.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
 		}
 
 		public DescriptorHandle Allocate()

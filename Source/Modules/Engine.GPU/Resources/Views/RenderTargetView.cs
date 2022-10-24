@@ -22,7 +22,7 @@ namespace Engine.GPU
 				ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
 			};
 
-			GPUContext.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
+			Graphics.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
 		}
 
 		public void Dispose()

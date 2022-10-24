@@ -75,7 +75,7 @@ namespace Engine.GPU
 				IndirectArguments = arguments.ToArray(),
 			};
 
-			GPUContext.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
+			Graphics.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
 			
 			return this;
 		}
