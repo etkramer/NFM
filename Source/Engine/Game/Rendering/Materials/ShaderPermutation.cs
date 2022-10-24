@@ -7,14 +7,13 @@ namespace Engine.Rendering
 	public class ShaderPermutation : IDisposable
 	{
 		public static List<ShaderPermutation> All { get; } = new();
-		private static int lastProgramID = 0;
+		private static int lastShaderID = 0;
 
 		public int ShaderID { get; private set; } = 0;
 		public Shader[] Shaders { get; private set; }
 
-		public ShaderProgram MaterialProgram { get; private set; }
-		public ShaderProgram MaskedDepthProgram { get; private set; }
-		public CommandSignature Signature { get; private set; }
+		public PipelineState MaterialPSO { get; private set; }
+		public CommandSignature MaterialSignature { get; private set; }
 
 		public ShaderPermutation(Shader[] shaders)
 		{
@@ -55,33 +54,33 @@ namespace Engine.Rendering
 				paramOffset += paramSize;
 			}
 
-			// Build program from source code.
+			// Build PSO from source code.
 			string surfaceTemplate = Embed.GetString("Content/Shaders/Geometry/Material/BaseMaterialPS.hlsl", typeof(Game).Assembly);
-			string surfaceProgramSource = surfaceTemplate.Replace("#insert SURFACE", baseSource).Replace("#insert SETUP", setupSource);
+			string surfaceShaderSource = surfaceTemplate.Replace("#insert SURFACE", baseSource).Replace("#insert SETUP", setupSource);
 
-			// Compile program.
-			MaterialProgram = new ShaderProgram()
+			// Compile PSO.
+			MaterialPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
-				.SetPixelShader(surfaceProgramSource, "MaterialPS")
+				.SetPixelShader(surfaceShaderSource, "MaterialPS")
 				.SetDepthMode(DepthMode.Equal, true, false)
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
 			// Compile matching indirect command signature.
-			Signature = new CommandSignature()
-				.AddConstantArg(0, MaterialProgram)
+			MaterialSignature = new CommandSignature()
+				.AddConstantArg(0, MaterialPSO)
 				.AddDispatchMeshArg()
 				.Compile();
 
-			ShaderID = lastProgramID++;
+			ShaderID = lastShaderID++;
 			All.Add(this);
 		}
 
 		public void Dispose()
 		{
-			Signature.Dispose();
-			MaterialProgram.Dispose();
+			MaterialSignature.Dispose();
+			MaterialPSO.Dispose();
 		}
 	}
 }

@@ -9,12 +9,12 @@ namespace Engine.Rendering
 	public class MaterialStep : CameraStep
 	{
 		private GraphicsBuffer commandBuffer;
-		private ShaderProgram cullProgram;
+		private PipelineState cullProgram;
 
 		public override void Init()
 		{
 			// Compile indirect compute program.
-			cullProgram = new ShaderProgram()
+			cullProgram = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetComputeShader(Embed.GetString("Content/Shaders/Geometry/Shared/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
@@ -37,24 +37,24 @@ namespace Engine.Rendering
 				List.BeginEvent($"Draw shader {shaderID}");
 
 				// Switch to material program.
-				List.SetProgram(permutation.MaterialProgram);
+				List.SetPipelineState(permutation.MaterialPSO);
 
 				// Set and reset render targets.
 				List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
 
 				// Bind program SRVs.
-				List.SetProgramSRV(0, 1, Mesh.VertBuffer);
-				List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
-				List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
-				List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-				List.SetProgramSRV(4, 1, Camera.Scene.TransformBuffer);
-				List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
-				List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
+				List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
+				List.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+				List.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
+				List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+				List.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
+				List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
+				List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 				// Bind program CBVs.
-				List.SetProgramCBV(0, 1, RT.ViewCB);
+				List.SetPipelineCBV(0, 1, RT.ViewCB);
 
-				List.ExecuteIndirect(permutation.Signature, commandBuffer, Camera.Scene.InstanceCount);
+				List.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, Camera.Scene.InstanceCount);
 				List.EndEvent();
 			}
 		}
@@ -65,18 +65,18 @@ namespace Engine.Rendering
 			List.ResetCounter(commandBuffer);
 
 			// Switch to culling program (compute).
-			List.SetProgram(cullProgram);
+			List.SetPipelineState(cullProgram);
 
 			// Set SRV inputs.
-			List.SetProgramSRV(0, 0, MaterialInstance.MaterialBuffer);
-			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
+			List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
+			List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+			List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Set UAV outputs.
-			List.SetProgramUAV(0, 0, commandBuffer);
+			List.SetPipelineUAV(0, 0, commandBuffer);
 
 			// Build for chosen shader.
-			List.SetProgramConstants(0, 0, shaderID);
+			List.SetPipelineConstants(0, 0, shaderID);
 
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceCount > 0)

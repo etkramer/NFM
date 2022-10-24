@@ -11,7 +11,7 @@ namespace Engine.GPU
 		private ID3D12CommandAllocator[] commandAllocators;
 		internal ID3D12GraphicsCommandList6 list;
 
-		internal ShaderProgram CurrentProgram { get; set; } = null;
+		internal PipelineState CurrentPSO { get; set; } = null;
 		public bool IsOpen { get; private set; } = false;
 
 		public string Name
@@ -20,7 +20,7 @@ namespace Engine.GPU
 			set => list.Name = value;
 		}
 
-		private static ShaderProgram MipGenProgram = new ShaderProgram()
+		private static PipelineState MipGenPSO = new PipelineState()
 			.UseIncludes(typeof(CommandList).Assembly)
 			.SetComputeShader(Embed.GetString("Content/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
 			.AsRootConstant(0, 2)
@@ -114,21 +114,21 @@ namespace Engine.GPU
 			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, countBuffer, (ulong)countOffset);
 		}
 
-		public unsafe void SetProgramConstants(BindPoint point, int start, params int[] constants)
+		public unsafe void SetPipelineConstants(BindPoint point, int start, params int[] constants)
 		{
-			if (!CurrentProgram.cRegisterMapping.TryGetValue(point, out int parameterIndex))
+			if (!CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				fixed (int* constantsPtr = constants)
 				{
 					list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 				}
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				fixed (int* constantsPtr = constants)
 				{
@@ -137,120 +137,120 @@ namespace Engine.GPU
 			}
 		}
 
-		public void SetProgramCBV(int slot, int space, GraphicsBuffer target)
+		public void SetPipelineCBV(int slot, int space, GraphicsBuffer target)
 		{
 			RequestState(target, ResourceStates.VertexAndConstantBuffer);
 
-			if (!CurrentProgram.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (!CurrentPSO.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
 			}
 		}
 
-		public void SetProgramUAV(int slot, int space, Texture target, int mipLevel = 0)
+		public void SetPipelineUAV(int slot, int space, Texture target, int mipLevel = 0)
 		{
 			Debug.Assert(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
 			RequestState(target, ResourceStates.UnorderedAccess);
 
-			if (!CurrentProgram.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (!CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
 			}
 		}
 
-		public void SetProgramUAV(int slot, int space, GraphicsBuffer target)
+		public void SetPipelineUAV(int slot, int space, GraphicsBuffer target)
 		{
 			RequestState(target, ResourceStates.UnorderedAccess);
 
-			if (!CurrentProgram.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (!CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
 			}
 		}
 
-		public void SetProgramSRV(int slot, int space, Texture target)
+		public void SetPipelineSRV(int slot, int space, Texture target)
 		{
 			RequestState(target, ResourceStates.AllShaderResource);
 
-			if (!CurrentProgram.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (!CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 			}
 		}
 
-		public void SetProgramSRV(int slot, int space, GraphicsBuffer target)
+		public void SetPipelineSRV(int slot, int space, GraphicsBuffer target)
 		{
 			RequestState(target, ResourceStates.AllShaderResource);
 
-			if (!CurrentProgram.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (!CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
 
-			if (CurrentProgram.IsGraphics)
+			if (CurrentPSO.IsGraphics)
 			{
 				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 			}
-			if (CurrentProgram.IsCompute)
+			if (CurrentPSO.IsCompute)
 			{
 				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 			}
 		}
 
-		public void SetProgram(ShaderProgram program)
+		public void SetPipelineState(PipelineState pso)
 		{
 			// Don't switch PSOs unnecessarily.
-			if (CurrentProgram == program)
+			if (CurrentPSO == pso)
 			{
 				return;
 			}
 
-			list.SetPipelineState(program.PSO);
-			CurrentProgram = program;
+			list.SetPipelineState(pso.PSO);
+			CurrentPSO = pso;
 
-			if (program.IsGraphics)
+			if (pso.IsGraphics)
 			{
-				list.SetGraphicsRootSignature(program.RootSignature);
+				list.SetGraphicsRootSignature(pso.RootSignature);
 			}
-			if (program.IsCompute)
+			if (pso.IsCompute)
 			{
-				list.SetComputeRootSignature(program.RootSignature);
+				list.SetComputeRootSignature(pso.RootSignature);
 			}
 		}
 
@@ -271,12 +271,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, T data) where T : unmanaged
-		{
-			UploadBuffer(handle.Buffer, data, handle.Start);
-		}
-
-		public unsafe void UploadBuffer<T>(BufferAllocation<T> handle, ReadOnlySpan<T> data) where T : unmanaged
+		public void UploadBuffer<T>(BufferAllocation<T> handle, T data) where T : unmanaged
 		{
 			UploadBuffer(handle.Buffer, data, handle.Start);
 		}
@@ -284,6 +279,11 @@ namespace Engine.GPU
 		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, long start = 0) where T : unmanaged
 		{
 			UploadBuffer(buffer, &data, sizeof(T), start * sizeof(T));
+		}
+
+		public void UploadBuffer<T>(BufferAllocation<T> handle, ReadOnlySpan<T> data) where T : unmanaged
+		{
+			UploadBuffer(handle.Buffer, data, handle.Start);
 		}
 
 		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, long start = 0) where T : unmanaged
@@ -463,7 +463,7 @@ namespace Engine.GPU
 			}
 			else
 			{
-				SetProgram(MipGenProgram);
+				SetPipelineState(MipGenPSO);
 
 				for (int i = 1; i < texture.MipmapCount; i++)
 				{
@@ -473,13 +473,13 @@ namespace Engine.GPU
 					unsafe
 					{
 						Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
-						SetProgramConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
+						SetPipelineConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
 					}
 
 					RequestState(texture, ResourceStates.AllShaderResource);
 
-					list.SetComputeRootDescriptorTable(MipGenProgram.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
-					list.SetComputeRootDescriptorTable(MipGenProgram.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
+					list.SetComputeRootDescriptorTable(MipGenPSO.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
+					list.SetComputeRootDescriptorTable(MipGenPSO.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
 					
 					Dispatch((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
 					BarrierUAV(texture);
@@ -528,7 +528,7 @@ namespace Engine.GPU
 			list.Close();
 
 			// Reset state.
-			CurrentProgram = null;
+			CurrentPSO = null;
 		}
 
 		public void Execute()

@@ -10,20 +10,20 @@ namespace Engine.Rendering
 		public GraphicsBuffer CommandBuffer;
 		public CommandSignature DepthCommandSignature;
 
-		private ShaderProgram cullProgram;
-		private ShaderProgram depthProgram;
+		private PipelineState cullPSO;
+		private PipelineState depthPSO;
 
 		public override void Init()
 		{
 			// Compile indirect compute program.
-			cullProgram = new ShaderProgram()
+			cullPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetComputeShader(Embed.GetString("Content/Shaders/Geometry/Shared/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 
 			// Compile depth prepass program.
-			depthProgram = new ShaderProgram()
+			depthPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
 				.SetPixelShader(Embed.GetString("Content/Shaders/Geometry/Prepass/DepthPS.hlsl", typeof(Game).Assembly))
@@ -34,7 +34,7 @@ namespace Engine.Rendering
 
 			// Indirect command signature for depth pass.
 			DepthCommandSignature = new CommandSignature()
-				.AddConstantArg(0, depthProgram)
+				.AddConstantArg(0, depthPSO)
 				.AddDispatchMeshArg()
 				.Compile();
 
@@ -56,17 +56,17 @@ namespace Engine.Rendering
 			List.ResetCounter(CommandBuffer);
 
 			// Switch to culling program (compute).
-			List.SetProgram(cullProgram);
+			List.SetPipelineState(cullPSO);
 
 			// Set SRV inputs.
-			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
+			List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+			List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Set UAV outputs.
-			List.SetProgramUAV(0, 0, CommandBuffer);
+			List.SetPipelineUAV(0, 0, CommandBuffer);
 
 			// Build for all shaders
-			List.SetProgramConstants(0, 0, -1);
+			List.SetPipelineConstants(0, 0, -1);
 
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceCount > 0)
@@ -80,21 +80,21 @@ namespace Engine.Rendering
 		private void DrawDepth()
 		{
 			// Switch to material program.
-			List.SetProgram(depthProgram);
+			List.SetPipelineState(depthPSO);
 
 			// Set render targets.
 			List.SetRenderTarget(null, RT.DepthBuffer);
 
 			// Bind program SRVs.
-			List.SetProgramSRV(0, 1, Mesh.VertBuffer);
-			List.SetProgramSRV(1, 1, Mesh.PrimBuffer);
-			List.SetProgramSRV(2, 1, Mesh.MeshletBuffer);
-			List.SetProgramSRV(3, 1, Mesh.MeshBuffer);
-			List.SetProgramSRV(4, 1, Camera.Scene.TransformBuffer);
-			List.SetProgramSRV(5, 1, Camera.Scene.InstanceBuffer);
+			List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
+			List.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+			List.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
+			List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+			List.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
+			List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 			// Bind program CBVs.
-			List.SetProgramCBV(0, 1, RT.ViewCB);
+			List.SetPipelineCBV(0, 1, RT.ViewCB);
 
 			// Dispatch draw commands.
 			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Camera.Scene.InstanceCount);

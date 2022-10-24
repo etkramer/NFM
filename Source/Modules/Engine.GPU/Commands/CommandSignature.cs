@@ -11,7 +11,7 @@ namespace Engine.GPU
 		private List<IndirectArgumentDescription> arguments = new();
 		internal ID3D12CommandSignature Handle;
 
-		private ShaderProgram program = null;
+		private PipelineState program = null;
 
 		public CommandSignature AddDispatchMeshArg()
 		{
@@ -43,7 +43,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public CommandSignature AddConstantArg(int register, ShaderProgram program)
+		public CommandSignature AddConstantArg(int register, PipelineState program)
 		{
 			if (!program.cRegisterMapping.TryGetValue(new(register, 0), out var rootParam))
 			{

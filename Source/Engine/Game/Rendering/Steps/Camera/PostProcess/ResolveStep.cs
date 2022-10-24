@@ -7,11 +7,11 @@ namespace Engine.Rendering
 {
 	public class ResolveStep : CameraStep
 	{
-		private ShaderProgram gammaProgram;
+		private PipelineState gammaCorrectPSO;
 
 		public override void Init()
 		{
-			gammaProgram = new ShaderProgram()
+			gammaCorrectPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetComputeShader(Embed.GetString("Content/Shaders/PostProcess/GammaCorrectCS.hlsl", typeof(Game).Assembly), "GammaCorrectCS")
 				.Compile().Result;
@@ -20,8 +20,8 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Gamma correct output.
-			List.SetProgram(gammaProgram);
-			List.SetProgramUAV(0, 0, RT.ColorTarget);
+			List.SetPipelineState(gammaCorrectPSO);
+			List.SetPipelineUAV(0, 0, RT.ColorTarget);
 			List.DispatchThreads(RT.ColorTarget.Width, 32, RT.ColorTarget.Height, 32);
 		}
 	}

@@ -40,7 +40,7 @@ namespace Engine.GPU
 		Line = PrimitiveTopologyType.Line
 	}
 
-	public sealed class ShaderProgram : IDisposable
+	public sealed class PipelineState : IDisposable
 	{
 		public bool IsGraphics { get; private set; } = false;
 		public bool IsCompute { get; private set; } = false;
@@ -77,7 +77,7 @@ namespace Engine.GPU
 		// Custom handler for #including files from arbitrary file systems
 		private CustomIncludeHandler shaderIncludeHandler = null;
 
-		public ShaderProgram()
+		public PipelineState()
 		{
 
 		}
@@ -88,19 +88,19 @@ namespace Engine.GPU
 			RootSignature.Dispose();
 		}
 
-		public ShaderProgram SetRTSamples(int samples)
+		public PipelineState SetRTSamples(int samples)
 		{
 			rtSamples = samples;
 			return this;
 		}
 
-		public ShaderProgram SetRTFormat(int rt, Format format)
+		public PipelineState SetRTFormat(int rt, Format format)
 		{
 			rtFormats[rt] = format;
 			return this;
 		}
 
-		public ShaderProgram SetRTCount(int count)
+		public PipelineState SetRTCount(int count)
 		{
 			rtFormats = new Format[count];
 			for (int i = 0; i < count; i++)
@@ -111,13 +111,13 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetCullMode(CullMode mode)
+		public PipelineState SetCullMode(CullMode mode)
 		{
 			cullMode = mode;
 			return this;
 		}
 
-		public ShaderProgram SetDepthMode(DepthMode mode, bool read, bool write)
+		public PipelineState SetDepthMode(DepthMode mode, bool read, bool write)
 		{
 			depthMode = mode;
 			depthRead = read;
@@ -125,13 +125,13 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetTopologyType(TopologyType type)
+		public PipelineState SetTopologyType(TopologyType type)
 		{
 			topologyType = type;
 			return this;
 		}
 
-		public ShaderProgram SetComputeShader(string source, string entryPoint = "ComputeEntry")
+		public PipelineState SetComputeShader(string source, string entryPoint = "ComputeEntry")
 		{
 			IDxcResult computeResult = DxcCompiler.Compile(DxcShaderStage.Compute, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 
@@ -149,7 +149,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetMeshShader(string source, string entryPoint = "MeshEntry")
+		public PipelineState SetMeshShader(string source, string entryPoint = "MeshEntry")
 		{
 			IDxcResult meshResult = DxcCompiler.Compile(DxcShaderStage.Mesh, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 
@@ -167,7 +167,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram SetPixelShader(string source, string entryPoint = "PixelEntry")
+		public PipelineState SetPixelShader(string source, string entryPoint = "PixelEntry")
 		{
 			IDxcResult pixelResult = DxcCompiler.Compile(DxcShaderStage.Pixel, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 			compiledPixel = pixelResult.GetObjectBytecodeArray();
@@ -189,7 +189,7 @@ namespace Engine.GPU
 		/// <summary>
 		/// Specifies that a parameter should be interpreted as a 32-bit root constant.
 		/// </summary>
-		public ShaderProgram AsRootConstant(int slot, int count, int space = 0)
+		public PipelineState AsRootConstant(int slot, int count, int space = 0)
 		{
 			rootParams.Add(new RootParameter1(new RootConstants(slot, space, count), ShaderVisibility.All));
 			cRegisterMapping.Add(new(slot, space), rootParams.Count - 1);
@@ -296,9 +296,9 @@ namespace Engine.GPU
 		}
 
 		/// <summary>
-		/// Compile and validate the shader program.
+		/// Compile and validate the PSO.
 		/// </summary>
-		public Task<ShaderProgram> Compile()
+		public Task<PipelineState> Compile()
 		{
 			return Task.Run(() =>
 			{
@@ -309,7 +309,7 @@ namespace Engine.GPU
 
 				if (IsCompute && IsGraphics)
 				{
-					throw new NotSupportedException("Cannot use a compute shader in the same program as a mesh or pixel shader");
+					throw new NotSupportedException("Cannot use a compute shader in the same PSO as a mesh or pixel shader");
 				}
 
 				// Build root parameters.
@@ -359,7 +359,7 @@ namespace Engine.GPU
 				// Check for errors.
 				if (!result.Success)
 				{
-					throw new InvalidProgramException($"Shader program failed to compile with message \"{result.Description.Trim()}\" ({result.NativeApiCode})");
+					throw new InvalidProgramException($"PSO failed to compile with message \"{result.Description.Trim()}\" ({result.NativeApiCode})");
 				}
 
 				return this;
@@ -419,7 +419,7 @@ namespace Engine.GPU
 			return path.Replace("./", "");
 		}
 
-		public ShaderProgram UseIncludes(Assembly embedSource)
+		public PipelineState UseIncludes(Assembly embedSource)
 		{
 			Func<string, string> includeResolver = (path) =>
 			{
@@ -445,7 +445,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public ShaderProgram UseIncludes(Func<string, string> includeResolver)
+		public PipelineState UseIncludes(Func<string, string> includeResolver)
 		{
 			shaderIncludeHandler = new CustomIncludeHandler(includeResolver);
 			return this;
