@@ -1,18 +1,11 @@
 ﻿using System;
 using Vortice.DXGI;
 using Vortice.Direct3D12;
-using Engine.Aspects;
 
 namespace Engine.GPU
 {
 	public unsafe partial class GraphicsBuffer : Resource, IDisposable
 	{
-		private ShaderResourceView srv;
-		private UnorderedAccessView uav;
-		private ConstantBufferView cbv;
-
-		internal override ID3D12Resource D3DResource { get; private protected set; }
-
 		public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
 		public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;
 		public int Capacity;
@@ -22,6 +15,12 @@ namespace Engine.GPU
 		public bool HasCounter { get; private set; }
 		public bool IsRaw { get; private set; }
 		public long CounterOffset { get; private set; } = 0;
+
+		internal override ID3D12Resource D3DResource { get; private protected set; }
+
+		private ShaderResourceView srv;
+		private UnorderedAccessView uav;
+		private ConstantBufferView cbv;
 
 		public ShaderResourceView GetSRV()
 		{

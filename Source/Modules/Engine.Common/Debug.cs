@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Engine.Common
 {
@@ -48,6 +49,7 @@ namespace Engine.Common
 			LogBase($"ERROR: {ex.GetType().Name}: {ex.Message}");
 		}
 
+		[DebuggerHidden]
 		public static void Assert(bool condition, string message = null)
 		{
 			if (!condition)

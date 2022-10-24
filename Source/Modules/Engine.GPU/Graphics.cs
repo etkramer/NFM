@@ -5,6 +5,9 @@ using Vortice.Direct3D12;
 using Vortice.Direct3D12.Debug;
 using System.Runtime.InteropServices;
 using Feature = Vortice.Direct3D12.Feature;
+using System.Runtime.CompilerServices;
+
+[assembly:DisableRuntimeMarshalling]
 
 namespace Engine.GPU
 {
