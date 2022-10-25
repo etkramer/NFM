@@ -7,14 +7,14 @@ namespace Engine.GPU
 {
 	public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : unmanaged
 	{
+		public nint NumAllocations { get; private set; } = 0;
+		public nint FirstOffset { get; private set; } = 0;
+		public nint LastOffset { get; private set; } = 0;
+
 		private D3D12MA.VirtualBlock virtualBlock;
-
 		private List<BufferAllocation<T>> allocations = new();
-		public int NumAllocations { get; private set; } = 0;
-		public int FirstOffset { get; private set; } = 0;
-		public int LastOffset { get; private set; } = 0;
 
-		public GraphicsBuffer(int elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
+		public GraphicsBuffer(nint elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
 		{
 			// Create block with D3D12MA
 			D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()
@@ -33,7 +33,7 @@ namespace Engine.GPU
 		/// <summary>
 		/// Allocates space in the buffer and returns a handle.
 		/// </summary>
-		public BufferAllocation<T> Allocate(int count, bool preferMinOffset = false)
+		public BufferAllocation<T> Allocate(nint count, bool preferMinOffset = false)
 		{
 			lock (virtualBlock)
 			{
@@ -43,20 +43,21 @@ namespace Engine.GPU
 					flags |= D3D12MA.VirtualAllocationFlags.MinOffset;
 				}
 
-				virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
+				// Allocate space with D3D12MA
+				Debug.Assert(virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
 				{
 					Size = (ulong)count,
 					Alignment = 0,
 					Flags = flags
-				}, out var allocation, out _);
+				}, out var allocation, out _).Success, "Failed to allocate space from buffer");
 
+				// Create a handle from the D3D12MA allocation.
 				virtualBlock.GetAllocationInfo(allocation, out var info);
-
 				var alloc = new BufferAllocation<T>(this)
 				{
 					Handle = allocation,
-					Offset = (long)info.Offset,
-					Size = (long)info.Size
+					Offset = (nint)info.Offset,
+					Size = (nint)info.Size
 				};
 
 				allocations.Add(alloc);
@@ -70,10 +71,10 @@ namespace Engine.GPU
 		{
 			lock (virtualBlock)
 			{
+				virtualBlock.FreeAllocation(alloc.Handle);
+
 				allocations.Remove(alloc);
 				UpdateStats();
-
-				virtualBlock.FreeAllocation(alloc.Handle);
 			}
 		}
 
@@ -104,9 +105,9 @@ namespace Engine.GPU
 
 	public class BufferAllocation<T> : IDisposable where T : unmanaged
 	{
-		public long Offset = 0;
-		public long Size = 0;
-		public long End => Offset + Size;
+		public nint Offset = 0;
+		public nint Size = 0;
+		public nint End => Offset + Size;
 		
 		internal D3D12MA.VirtualAllocation Handle;
 		public GraphicsBuffer<T> Buffer { get; private set; }

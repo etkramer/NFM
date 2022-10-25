@@ -8,12 +8,13 @@ namespace Engine.GPU
 	{
 		public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
 		public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;
+		public nint SizeBytes => (nint)Capacity * Stride;
 		public int Capacity;
 		public int Stride;
 		public int SizeAlignment = 1;
 
 		public bool HasCounter { get; private set; }
-		public long CounterOffset { get; private set; } = 0;
+		public nint CounterOffset { get; private set; } = 0;
 		public bool IsRaw { get; private set; }
 
 		internal override ID3D12Resource D3DResource { get; private protected set; }
@@ -59,21 +60,21 @@ namespace Engine.GPU
 			set => D3DResource.Name = value;
 		}
 
-		public GraphicsBuffer(int sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
+		public GraphicsBuffer(nint sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
 		{
-			Capacity = sizeBytes / stride;
+			Capacity = (int)(sizeBytes / stride);
 			SizeAlignment = sizeAlignment;
 			Stride = stride;
 			HasCounter = hasCounter;
 			IsRaw = isRaw;
 
-			ulong width = (ulong)sizeBytes;
+			nint width = sizeBytes;
 
 			// Ensure enough space for UAV counter.
 			if (hasCounter)
 			{
 				width = MathHelper.Align(width, CounterAlignment) + 4;
-				CounterOffset = (long)(width - 4);
+				CounterOffset = (width - 4);
 			}
 
 			// Ensure user-defined alignment.
@@ -83,7 +84,7 @@ namespace Engine.GPU
 			ResourceDescription bufferDescription = new()
 			{
 				Dimension = ResourceDimension.Buffer,
-				Width = width,
+				Width = (ulong)width,
 				Height = 1,
 				DepthOrArraySize = 1,
 				MipLevels = 1,
@@ -102,7 +103,7 @@ namespace Engine.GPU
 			Name = GetType().Name;
 		}
 
-		public void Resize(long sizeBytes)
+		public void Resize(nint sizeBytes)
 		{
 			throw new NotImplementedException("Buffer resizing is not yet supported.");
 		}

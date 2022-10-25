@@ -82,6 +82,18 @@ namespace Engine.Mathematics
 		}
 
         /// <summary>
+        /// Aligns an integer to the nearest multiple of a.
+        /// </summary>
+		[Pure]
+		public static nint Align(nint n, int a)
+		{
+			nint r = n % a;
+			nint y = (r != 0) ? n + (a - r) : n;
+
+			return y;
+		}
+
+        /// <summary>
         /// Aligns an integer to the next power of two.
         /// </summary>
 		[Pure]

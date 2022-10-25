@@ -1,10 +1,6 @@
 ﻿using System;
-using BCnEncoder.Encoder;
-using BCnEncoder.Shared;
 using Engine.GPU;
 using Engine.Rendering;
-using Microsoft.Toolkit.HighPerformance;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using DXGIFormat = Vortice.DXGI.Format;
 
 namespace Engine.Resources
@@ -128,39 +124,6 @@ namespace Engine.Resources
 		public override void Dispose()
 		{
 			D3DResource.Dispose();
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="input">The uncompressed input data.</param>
-		/// <param name="width">The width of the input data.</param>
-		/// <param name="height">The height of the input data.</param>
-		/// <param name="source">The uncompressed format of the input data.</param>
-		/// <param name="dest">The compressed format that should be converted to.</param>
-		/// <returns>An array of byte arrays containing the data for each mip level.</returns>
-		public static byte[][] Compress(ReadOnlySpan<byte> input, int width, int height, TextureFormat source, TextureFormat dest)
-		{
-			Debug.Assert(!source.IsCompressed() && !source.IsHDR(), "Source must not be a compressed or HDR format!");
-			Debug.Assert(dest.IsCompressed(), "Dest must be a compressed format!");
-
-			BcEncoder encoder = new BcEncoder();
-			encoder.OutputOptions.Quality = CompressionQuality.Fast;
-			encoder.OutputOptions.GenerateMipMaps = true;
-			encoder.OutputOptions.Format = dest switch
-			{
-				TextureFormat.BC1 => CompressionFormat.Bc1,
-				TextureFormat.BC2 => CompressionFormat.Bc2,
-				TextureFormat.BC3 => CompressionFormat.Bc3,
-				TextureFormat.BC5 => CompressionFormat.Bc5,
-				_ => throw new NotSupportedException()
-			};
-			
-			return encoder.EncodeToRawBytes(input, width, height, source switch
-			{
-				TextureFormat.RGBA => PixelFormat.Rgba32,
-				_ => throw new ArgumentOutOfRangeException(nameof(source))
-			});
 		}
 
 		/// <summary>

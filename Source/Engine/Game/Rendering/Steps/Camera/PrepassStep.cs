@@ -71,7 +71,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
 			{
-				List.Dispatch(Camera.Scene.InstanceBuffer.LastOffset + 1);
+				List.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
 			}
 
 			List.BarrierUAV(CommandBuffer);
@@ -97,7 +97,7 @@ namespace Engine.Rendering
 			List.SetPipelineCBV(0, 1, RT.ViewCB);
 
 			// Dispatch draw commands.
-			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, Camera.Scene.InstanceBuffer.NumAllocations);
+			List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
 		}
 	}
 }

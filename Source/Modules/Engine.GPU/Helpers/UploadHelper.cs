@@ -12,7 +12,7 @@ namespace Engine.GPU
 		// 512MB upload heap. TODO: Use a proper allocator, current method means we can't upload to an offset of >512MB.
 		const int UploadSize = 512 * 1024 * 1024;
 
-		public static int UploadOffset = 0;
+		public static nint UploadOffset = 0;
 		public static int Ring => Graphics.FrameIndex;
 		public static ID3D12Resource[] Rings;
 		public static void*[] MappedRings;

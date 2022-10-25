@@ -54,7 +54,7 @@ namespace Engine.Rendering
 				// Bind program CBVs.
 				List.SetPipelineCBV(0, 1, RT.ViewCB);
 
-				List.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, Camera.Scene.InstanceBuffer.NumAllocations);
+				List.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
 				List.EndEvent();
 			}
 		}
@@ -81,7 +81,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
 			{
-				List.Dispatch(Camera.Scene.InstanceBuffer.LastOffset + 1);
+				List.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
 			}
 
 			List.BarrierUAV(commandBuffer);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
 
@@ -109,7 +110,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, int commandStart = 0)
+		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, nint commandStart = 0)
 		{
 			lock (list)
 			{
@@ -298,7 +299,7 @@ namespace Engine.GPU
 			UploadBuffer(handle.Buffer, data, handle.Offset);
 		}
 
-		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, long start = 0) where T : unmanaged
+		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, nint start = 0) where T : unmanaged
 		{
 			UploadBuffer(buffer, &data, sizeof(T), start * sizeof(T));
 		}
@@ -308,7 +309,7 @@ namespace Engine.GPU
 			UploadBuffer(handle.Buffer, data, handle.Offset);
 		}
 
-		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, long start = 0) where T : unmanaged
+		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, nint start = 0) where T : unmanaged
 		{
 			fixed (T* dataPtr = data)
 			{
@@ -316,7 +317,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadBuffer(GraphicsBuffer buffer, void* data, int dataSize, long offset = 0)
+		public unsafe void UploadBuffer(GraphicsBuffer buffer, void* data, nint dataSize, nint offset = 0)
 		{
 			Debug.Assert(buffer.IsAlive);
 
@@ -324,11 +325,11 @@ namespace Engine.GPU
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
-				int uploadOffset = UploadHelper.UploadOffset;
-				long destOffset = offset;
+				nint uploadOffset = UploadHelper.UploadOffset;
+				nint destOffset = offset;
 
 				// Copy data to upload buffer.
-				Unsafe.CopyBlock((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
+				NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
 				UploadHelper.UploadOffset += dataSize;
 
 				// Copy from upload to dest buffer.
@@ -345,7 +346,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public unsafe void UploadTexture(Texture texture, void* data, int dataSize, int mipLevel = 0)
+		public unsafe void UploadTexture(Texture texture, void* data, nint dataSize, int mipLevel = 0)
 		{
 			Debug.Assert(texture.IsAlive);
 
@@ -353,13 +354,13 @@ namespace Engine.GPU
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
-				int uploadOffset = UploadHelper.UploadOffset;
+				nint uploadOffset = UploadHelper.UploadOffset;
 
 				// Realign upload offset for 512b alignment requirement.
-				UploadHelper.UploadOffset = uploadOffset = (int)MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
+				UploadHelper.UploadOffset = uploadOffset = MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
 
 				// Copy data to upload buffer.
-				Unsafe.CopyBlockUnaligned((byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, data, (uint)dataSize);
+				NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
 				UploadHelper.UploadOffset += dataSize;
 
 				// Calculate subresource info.
@@ -373,7 +374,7 @@ namespace Engine.GPU
 			}
 		}
 
-		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, long startOffset = 0, long destOffset = 0, long numBytes = -1)
+		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, nint startOffset = 0, nint destOffset = 0, nint numBytes = -1)
 		{
 			lock (list)
 			{
@@ -390,7 +391,7 @@ namespace Engine.GPU
 		}
 
 		private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
-		public void CopyBuffer(GraphicsBuffer buffer, long startOffset, long destOffset, long numBytes)
+		public void CopyBuffer(GraphicsBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 		{
 			lock (list)
 			{
@@ -427,17 +428,6 @@ namespace Engine.GPU
 				RequestState(dest, ResourceStates.ResolveDest);
 
 				list.ResolveSubresource(dest, 0, source, 0, dest.Format);
-			}
-		}
-
-		public void CopyResource(Resource source, Resource dest)
-		{
-			lock (list)
-			{
-				RequestState(source, ResourceStates.CopySource);
-				RequestState(dest, ResourceStates.CopyDest);
-
-				list.CopyResource(dest.D3DResource, source.D3DResource);
 			}
 		}
 

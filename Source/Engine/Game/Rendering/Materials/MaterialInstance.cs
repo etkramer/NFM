@@ -10,7 +10,7 @@ namespace Engine.Rendering
 {
 	public class MaterialInstance : IDisposable
 	{
-		public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, 4, isRaw: true);
+		public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
 
 		[Inspect] public Material Material { get; set; }
 		[Inspect] public ShaderStack ShaderStack { get; set; }
