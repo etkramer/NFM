@@ -22,6 +22,13 @@ void CullCS(uint3 dispatchID : SV_DispatchThreadID)
 	// Grab instance/mesh data.
 	uint instanceID = dispatchID.x;
 	Instance instance = Instances[instanceID];
+
+	// Invalid mesh reference, instance has probably been zeroed.
+	if (instance.MeshID == 0)
+	{
+		return;
+	}
+
 	Mesh mesh = Meshes[instance.MeshID];
 
 	// Only build draws for chosen shader.

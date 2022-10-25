@@ -273,7 +273,7 @@ namespace Engine.GPU
 
 		public void UploadBuffer<T>(BufferAllocation<T> handle, T data) where T : unmanaged
 		{
-			UploadBuffer(handle.Buffer, data, handle.Start);
+			UploadBuffer(handle.Buffer, data, handle.Offset);
 		}
 
 		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, long start = 0) where T : unmanaged
@@ -283,7 +283,7 @@ namespace Engine.GPU
 
 		public void UploadBuffer<T>(BufferAllocation<T> handle, ReadOnlySpan<T> data) where T : unmanaged
 		{
-			UploadBuffer(handle.Buffer, data, handle.Start);
+			UploadBuffer(handle.Buffer, data, handle.Offset);
 		}
 
 		public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, long start = 0) where T : unmanaged

@@ -13,8 +13,8 @@ namespace Engine.GPU
 		public int SizeAlignment = 1;
 
 		public bool HasCounter { get; private set; }
-		public bool IsRaw { get; private set; }
 		public long CounterOffset { get; private set; } = 0;
+		public bool IsRaw { get; private set; }
 
 		internal override ID3D12Resource D3DResource { get; private protected set; }
 

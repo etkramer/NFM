@@ -14,7 +14,13 @@ namespace Engine.Resources
 		internal static GraphicsBuffer<uint> PrimBuffer = new(2000000);
 		internal static GraphicsBuffer<Vertex> VertBuffer = new(2000000);
 		internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
-		internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(1000000);
+		internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(1000000 + 1);
+
+		static Mesh()
+		{
+			MeshBuffer.Name = "Mesh Buffer";
+			MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
+		}
 
 		// Geometry allocations
 		internal BufferAllocation<uint> PrimHandle;
@@ -88,10 +94,10 @@ namespace Engine.Resources
 				MeshHandle = MeshBuffer.Allocate(1);
 				Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
 				{
-					MeshletCount = (uint)MeshletHandle.Count,
-					MeshletOffset = (uint)MeshletHandle.Start,
-					PrimOffset = (uint)PrimHandle.Start,
-					VertOffset = (uint)VertHandle.Start,
+					MeshletCount = (uint)MeshletHandle.Size,
+					MeshletOffset = (uint)MeshletHandle.Offset,
+					PrimOffset = (uint)PrimHandle.Offset,
+					VertOffset = (uint)VertHandle.Offset,
 				});
 			}
 

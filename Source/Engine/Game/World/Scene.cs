@@ -18,8 +18,8 @@ namespace Engine.World
 			All.Add(this);
 			Nodes = new(nodes);
 
-			InstanceBuffer.Name = "Instance Buffer";
 			TransformBuffer.Name = "Transform Buffer";
+			InstanceBuffer.Name = "Instance Buffer";
 		}
 
 		/// <summary>

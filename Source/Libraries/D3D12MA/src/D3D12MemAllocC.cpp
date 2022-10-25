@@ -18,7 +18,7 @@ EXPORT void VirtualBlock_Clear(VirtualBlock* block)
 	block->Clear();
 }
 
-EXPORT HRESULT VirtualBlock_Allocate(VirtualBlock* block, const VIRTUAL_ALLOCATION_DESC* pDesc, VirtualAllocation* pAllocation, UINT64* pOffset)
+EXPORT HRESULT VirtualBlock_Allocate(VirtualBlock* block, VIRTUAL_ALLOCATION_DESC* pDesc, VirtualAllocation* pAllocation, UINT64* pOffset)
 {
 	return block->Allocate(pDesc, pAllocation, pOffset);
 }

@@ -38,12 +38,10 @@ namespace Engine.World
 			for (int i = 0; i < InstanceHandles?.Length; i++)
 			{
 				MaterialInstances[i].Dispose();
-				InstanceHandles[i].Dispose();
 
-				if (Scene != null)
-				{
-					Scene.InstanceCount--;
-				}
+				// Zero out, then deallocate instance.
+				Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[i], default(GPUInstance));
+				InstanceHandles[i].Dispose();
 			}
 
 			base.Dispose();
@@ -55,12 +53,10 @@ namespace Engine.World
 			for (int i = 0; i < InstanceHandles?.Length; i++)
 			{
 				MaterialInstances[i].Dispose();
-				InstanceHandles[i].Dispose();
 
-				if (Scene != null)
-				{
-					Scene.InstanceCount--;
-				}
+				// Zero out, then deallocate instance.
+				Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[i], default(GPUInstance));
+				InstanceHandles[i].Dispose();
 			}
 
 			// If we don't have a fresh model to switch to, we're done here.
@@ -79,8 +75,7 @@ namespace Engine.World
 			InstanceHandles = new BufferAllocation<GPUInstance>[instanceCount];
 			for (int i = 0; i < instanceCount; i++)
 			{
-				InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1);
-				Scene.InstanceCount++;
+				InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1, true);
 			}
 
 			// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
@@ -95,9 +90,9 @@ namespace Engine.World
 					// Make instance data.
 					GPUInstance instanceData = new()
 					{
-						MeshID = (uint)mesh.MeshHandle.Start,
-						TransformID = (uint)TransformHandle.Start,
-						MaterialID = (uint)MaterialInstances[instanceID].MaterialHandle.Start,
+						MeshID = (int)mesh.MeshHandle.Offset,
+						TransformID = (int)TransformHandle.Offset,
+						MaterialID = (int)MaterialInstances[instanceID].MaterialHandle.Offset,
 					};
 
 					// Upload instance to buffer.

@@ -1,148 +1,104 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Engine.GPU.Native;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
 {
 	public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : unmanaged
 	{
+		private D3D12MA.VirtualBlock virtualBlock;
+
 		private List<BufferAllocation<T>> allocations = new();
+		public int NumAllocations { get; private set; } = 0;
+		public int FirstOffset { get; private set; } = 0;
+		public int LastOffset { get; private set; } = 0;
 
 		public GraphicsBuffer(int elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
 		{
+			// Create block with D3D12MA
+			D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()
+			{
+				Size = (ulong)elementCount,
+				Flags = D3D12MA.VirtualBlockFlags.None,
+			}, out virtualBlock);
+		}
 
+		~GraphicsBuffer()
+		{
+			virtualBlock.Release();
 		}
 
 		/// <summary>
 		/// Allocates space in the buffer and returns a handle.
 		/// </summary>
-		/// <param name="resizeList">The command list to be used for resizing, if necessary.</param>
-		public BufferAllocation<T> Allocate(int count, CommandList resizeList = null)
+		public BufferAllocation<T> Allocate(int count, bool preferMinOffset = false)
 		{
-			lock (allocations)
+			lock (virtualBlock)
 			{
-				BufferAllocation<T> alloc = null;
-
-				for (long i = 0; i < Capacity; i++)
+				var flags = D3D12MA.VirtualAllocationFlags.None;
+				if (preferMinOffset)
 				{
-					long goalStart = i;
-					long goalEnd = i + count;
-
-					bool blocked = false;
-					for (int j = 0; j < allocations.Count; j++) // Loop through blocks that might obstruct this area.
-					{
-						long blockStart = allocations[j].Start;
-						long blockEnd = blockStart + allocations[j].Count - 1;
-
-						// Can already tell this block isn't in the way.
-						if (blockStart > goalEnd || blockEnd < goalStart)
-						{
-							continue;
-						}
-
-						// Check if the goal area is obstructed by this block.
-						blocked = (goalStart >= blockStart && goalStart <= blockEnd) // Starts inside block
-							|| (goalEnd >= blockStart && goalEnd <= blockEnd) // Ends inside block
-							|| (goalStart <= blockStart && goalEnd >= blockStart) // Overlaps block start
-							|| (goalStart <= blockEnd && goalEnd >= blockEnd); // Overlaps block end
-
-						// There's a block in the way, and we know where it ends. Skip past known blocked elements.
-						if (blocked)
-						{
-							i = blockEnd;
-							break;
-						}
-					}
-
-					if (!blocked)
-					{
-						alloc = new BufferAllocation<T>(this)
-						{
-							Start = goalStart,
-							Count = count
-						};
-
-						// Maintain order - allocations that start further in buffer should start further in list
-						for (int j = allocations.Count - 1; j >= -1; j--)
-						{
-							if (j == -1)
-							{
-								allocations.Add(alloc);
-								break;
-							}
-							else if (allocations[j].Start < alloc.Start)
-							{
-								allocations.Insert(j + 1, alloc);
-								break;
-							}
-						}
-
-						break;
-					}
+					flags |= D3D12MA.VirtualAllocationFlags.MinOffset;
 				}
 
-				// Couldn't find a large enough block.
-				if (alloc == null)
+				virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
 				{
-					Resize((Capacity * 2) * sizeof(T));
-					return Allocate(count);
-				}
+					Size = (ulong)count,
+					Alignment = 0,
+					Flags = flags
+				}, out var allocation, out _);
+
+				virtualBlock.GetAllocationInfo(allocation, out var info);
+
+				var alloc = new BufferAllocation<T>(this)
+				{
+					Handle = allocation,
+					Offset = (long)info.Offset,
+					Size = (long)info.Size
+				};
+
+				allocations.Add(alloc);
+				UpdateStats();
 
 				return alloc;
 			}
 		}
 
-		public void Free(BufferAllocation<T> handle)
+		public void Free(BufferAllocation<T> alloc)
 		{
-			lock (allocations)
+			lock (virtualBlock)
 			{
-				allocations.Remove(handle);
+				allocations.Remove(alloc);
+				UpdateStats();
+
+				virtualBlock.FreeAllocation(alloc.Handle);
 			}
 		}
 
-		public void Compact(CommandList list)
+		private void UpdateStats()
 		{
-			// If there's nothing allocated, there's nothing to compact.
-			if (allocations.Count < 1)
-			{
-				return;
-			}
-
-			// Compact first element first
-			if (allocations[0].Start != 0)
-			{
-				list.CopyBuffer(this, allocations[0].Start * sizeof(T), 0, allocations[0].Count * sizeof(T));
-				allocations[0].Start = 0;
-			}
-
-			for (int i = 1; i < allocations.Count; i++)
-			{
-				var alloc = allocations[i];
-				var prevAlloc = allocations[i - 1];
-				
-				// Free space between these allocations.
-				if (alloc.Start != prevAlloc.End)
-				{
-					list.CopyBuffer(this, alloc.Start * sizeof(T), prevAlloc.End * sizeof(T), alloc.Count * sizeof(T));
-					alloc.Start = prevAlloc.End;
-				}
-			}
+			NumAllocations = allocations.Count;
+			FirstOffset = allocations.Min(o => (int)o.Offset);
+			LastOffset = allocations.Max(o => (int)o.Offset);
 		}
 
 		public void Clear()
 		{
-			lock (allocations)
+			lock (virtualBlock)
 			{
-				allocations.Clear();
+				virtualBlock.Clear();
 			}
 		}
 	}
 
 	public class BufferAllocation<T> : IDisposable where T : unmanaged
 	{
-		public long Start = 0;
-		public long Count = 0;
-		public long End => Start + Count;
+		public long Offset = 0;
+		public long Size = 0;
+		public long End => Offset + Size;
+		
+		internal D3D12MA.VirtualAllocation Handle;
 		public GraphicsBuffer<T> Buffer { get; private set; }
 
 		public BufferAllocation(GraphicsBuffer<T> source)
