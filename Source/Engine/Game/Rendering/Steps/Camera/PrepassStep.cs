@@ -71,7 +71,7 @@ namespace Engine.Rendering
 			// Dispatch compute shader.
 			if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
 			{
-				List.Dispatch(Camera.Scene.InstanceBuffer.LastOffset);
+				List.Dispatch(Camera.Scene.InstanceBuffer.LastOffset + 1);
 			}
 
 			List.BarrierUAV(CommandBuffer);
