@@ -12,6 +12,7 @@ using Engine.Plugins;
 using Engine.Resources;
 using Engine.Rendering;
 using Engine.World;
+using System.Threading;
 
 namespace Engine
 {
@@ -44,7 +45,7 @@ namespace Engine
 		public static void Update()
 		{
 			// Begin the new frame.
-			OnTick.Invoke(Graphics.FrameTime);
+			OnTick.Invoke(Metrics.FrameTime);
 
 			// Invoke dispose queue.
 			DispatchQueue.Invoke(0);

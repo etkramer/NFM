@@ -30,7 +30,7 @@ namespace Engine.Rendering
 				for (int i = rtCache.Count - 1; i >= 0; i--)
 				{
 					// Was this RT used in the last frame?
-					if (rtCache[i].lastFrame != Graphics.FrameCount - 1)
+					if (rtCache[i].lastFrame != Metrics.FrameCount - 1)
 					{
 						// If not, dispose it.
 						rtCache[i].Dispose();
@@ -43,7 +43,7 @@ namespace Engine.Rendering
 		public static RenderTarget Get(Vector2i size)
 		{
 			// Try to find an RT that matches the requested size and isn't already being used this frame.
-			var rt = rtCache.FirstOrDefault(o => o.Size == size && o.lastFrame != Graphics.FrameCount);
+			var rt = rtCache.FirstOrDefault(o => o.Size == size && o.lastFrame != Metrics.FrameCount);
 
 			// Create a new RT if necessary.
 			if (rt == null)
@@ -53,7 +53,7 @@ namespace Engine.Rendering
 			}
 
 			// Update it's last frame and return it.
-			rt.lastFrame = Graphics.FrameCount;
+			rt.lastFrame = Metrics.FrameCount;
 			return rt;
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Engine.Editor;
 using Engine.GPU;
 using Engine.GPU.Native;
 using Engine.Rendering;
@@ -102,6 +103,16 @@ namespace Engine.World
 			}
 
 			IsInstanceDirty = false;
+		}
+
+		public override void OnDrawGizmos(GizmosContext context)
+		{
+			if (Selection.Selected.Contains(this) && Model != null)
+			{
+				context.DrawBox(Model.Parts[0].Meshes[0].Bounds);
+			}
+
+			base.OnDrawGizmos(context);
 		}
 	}
 }

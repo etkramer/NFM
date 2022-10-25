@@ -12,9 +12,9 @@ namespace Engine.Frontend
 {
 	public partial class ViewportPanel : ToolPanel
 	{
-		[Notify] string frameTime => $"Frametime: {frameTimeAverager.Result.ToString("0.00")}ms";
+		[Notify] string frameTime => $"Frametime: {frametimeAverager.Result.ToString("0.00")}ms";
 		[Notify] string memory => $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
-		private Averager frameTimeAverager = new Averager(100);
+		private Averager frametimeAverager = new Averager(100);
 
 		public ViewportPanel()
 		{
@@ -22,9 +22,9 @@ namespace Engine.Frontend
 			InitializeComponent();
 
 			// Update frametime.
-			Game.OnTick += (t) => frameTimeAverager.AddValue(Graphics.FrameTime * 1000);
+			Game.OnTick += (t) => frametimeAverager.AddValue(Metrics.FrameTime * 1000);
 			Game.OnTick += (t) => (this as INotify).Raise(nameof(memory));
-			(frameTimeAverager as INotify).Subscribe(nameof(Averager.Result), () => (this as INotify).Raise(nameof(frameTime)));
+			(frametimeAverager as INotify).Subscribe(nameof(Averager.Result), () => (this as INotify).Raise(nameof(frameTime)));
 		}
 	}
 
@@ -43,7 +43,7 @@ namespace Engine.Frontend
 			// Opened event.
 			nativeControl.OnOpen += () =>
 			{
-				Swapchain = new Swapchain(nativeControl.Hwnd, 0);
+				Swapchain = new Swapchain(nativeControl.Hwnd, 1);
 				viewport = new Viewport(this);
 			};
 

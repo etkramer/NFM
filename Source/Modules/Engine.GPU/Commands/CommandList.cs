@@ -86,7 +86,7 @@ namespace Engine.GPU
 		{
 			lock (list)
 			{
-				ResourceBarrier[] barriers = new ResourceBarrier[buffers.Length];
+				Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[buffers.Length];
 				for (int i = 0; i < buffers.Length; i++)
 				{
 					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
@@ -100,7 +100,7 @@ namespace Engine.GPU
 		{
 			lock (list)
 			{
-				ResourceBarrier[] barriers = new ResourceBarrier[textures.Length];
+				Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[textures.Length];
 				for (int i = 0; i < textures.Length; i++)
 				{
 					barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));

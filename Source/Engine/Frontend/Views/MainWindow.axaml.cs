@@ -25,6 +25,20 @@ namespace Engine.Frontend
 		protected override void OnOpened(EventArgs e)
 		{
 			RestorePanels();
+
+			// Show landing dialog.
+			if (LandingDialog.ShowOnStartup)
+			{
+				new LandingDialog().Show();
+			}
+			else
+			{
+				FrontendHelpers.InvokeHandled(() => Project.Reset());
+			}
+
+			// Begin game loop.
+			DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Game.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
+
 			base.OnOpened(e);
 		}
 
@@ -46,27 +60,14 @@ namespace Engine.Frontend
 			dockspace.Dock(group3, group1, DockPosition.Right, 0.14f);
 
 			// Create group (library).
-			TabGroup group4 = new TabGroup();
+			/*TabGroup group4 = new TabGroup();
 			ToolPanel.Spawn<LibraryPanel>(group4);
-			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
+			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);*/
 
 			// Create group (viewport 2).
 			TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
 			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);
-
-			// Show landing dialog.
-			if (LandingDialog.ShowOnStartup)
-			{
-				new LandingDialog().Show();
-			}
-			else
-			{
-				FrontendHelpers.InvokeHandled(() => Project.Reset());
-			}
-
-			// Begin game loop.
-			DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Game.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
 		}
 
 		private bool isQuitConfirmed = false;

@@ -14,9 +14,7 @@ namespace Engine.GPU
 	public static class Graphics
 	{
 		public static int RenderLatency = 2;
-		public static ulong FrameCount = 0;
-		public static int FrameIndex => (int)(FrameCount % (ulong)RenderLatency);
-		public static double FrameTime { get; private set; }
+		public static int FrameIndex => (int)(Metrics.FrameCount % (ulong)RenderLatency);
 
 		public static event Action OnFrameStart = delegate {};
 
@@ -32,8 +30,6 @@ namespace Engine.GPU
 		private static ID3D12Fence frameFence;
 		private static ID3D12Fence flushFence;
 		private static AutoResetEvent frameFenceEvent;
-
-		private static System.Diagnostics.Stopwatch frameTimer = new();
 
 		private static unsafe void DebugCallback(MessageCategory category, MessageSeverity severity, MessageId id, void* description, void* context)
 		{
@@ -130,12 +126,12 @@ namespace Engine.GPU
 
 		public static bool WaitFrame()
 		{
-			GraphicsQueue.Signal(frameFence, ++FrameCount);
+			GraphicsQueue.Signal(frameFence, Metrics.FrameCount);
 			ulong GPUFrameCount = frameFence.CompletedValue;
 
 			// If we are more than RenderLatency frames ahead, wait for the GPU to catch up.
 			bool result = false;
-			if ((FrameCount - GPUFrameCount) >= (ulong)RenderLatency)
+			if ((Metrics.FrameCount - GPUFrameCount) >= (ulong)RenderLatency)
 			{
 				frameFence.SetEventOnCompletion(GPUFrameCount + 1, frameFenceEvent);
 				frameFenceEvent.WaitOne();
@@ -143,12 +139,8 @@ namespace Engine.GPU
 				result = true;
 			}
 
-			// Update frame timer.
-			frameTimer.Stop();
-			FrameTime = frameTimer.Elapsed.TotalSeconds;
-			frameTimer.Restart();
-
 			// Let systems know it's the start of a new frame.
+			Metrics.BeginFrame();
 			OnFrameStart.Invoke();
 
 			return result;
