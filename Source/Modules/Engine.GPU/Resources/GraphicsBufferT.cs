@@ -79,8 +79,17 @@ namespace Engine.GPU
 		private void UpdateStats()
 		{
 			NumAllocations = allocations.Count;
-			FirstOffset = allocations.Min(o => (int)o.Offset);
-			LastOffset = allocations.Max(o => (int)o.Offset);
+
+			if (allocations.Count == 0)
+			{
+				FirstOffset = 0;
+				LastOffset = 0;
+			}
+			else
+			{
+				FirstOffset = allocations.Min(o => (int)o.Offset);
+				LastOffset = allocations.Max(o => (int)o.Offset);
+			}
 		}
 
 		public void Clear()
