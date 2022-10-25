@@ -107,9 +107,13 @@ namespace Engine.GPU
 			throw new NotImplementedException("Buffer resizing is not yet supported.");
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			D3DResource.Release();
+			srv?.Dispose();
+			uav?.Dispose();
+			cbv?.Dispose();
+
 			IsAlive = false;
 		}
 	}

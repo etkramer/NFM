@@ -24,8 +24,9 @@ namespace Engine.GPU
 			}, out virtualBlock);
 		}
 
-		~GraphicsBuffer()
+		public override void Dispose()
 		{
+			base.Dispose();
 			virtualBlock.Release();
 		}
 

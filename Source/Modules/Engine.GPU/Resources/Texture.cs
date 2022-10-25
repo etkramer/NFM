@@ -174,6 +174,11 @@ namespace Engine.GPU
 		public void Dispose()
 		{
 			D3DResource.Release();
+			uavs?.ForEach(o => o?.Dispose());
+			srvs?.ForEach(o => o?.Dispose());
+			rtv?.Dispose();
+			dsv?.Dispose();
+
 			IsAlive = false;
 		}
 	}

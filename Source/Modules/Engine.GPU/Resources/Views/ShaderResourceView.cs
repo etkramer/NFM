@@ -53,7 +53,7 @@ namespace Engine.GPU
 
 		public void Dispose()
 		{
-
+			Handle.Dispose();
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Engine.GPU.Native;
 using Vortice.Direct3D12;
 
 namespace Engine.GPU
@@ -13,33 +14,39 @@ namespace Engine.GPU
 		Sampler = DescriptorHeapType.Sampler,
 	}
 
-	public struct DescriptorHandle
+	public struct DescriptorHandle : IDisposable
 	{
 		public DescriptorHeap Heap;
 		public int Index;
+		internal D3D12MA.VirtualAllocation Allocation;
 
 		public static implicit operator CpuDescriptorHandle(DescriptorHandle handle) => handle.CPUHandle;
 		public static implicit operator GpuDescriptorHandle(DescriptorHandle handle) => handle.GPUHandle;
 
 		public CpuDescriptorHandle CPUHandle => Heap.GetCPUHandle(Index);
 		public GpuDescriptorHandle GPUHandle => Heap.GetGPUHandle(Index);
+
+		public void Dispose()
+		{
+			Heap.Free(this);
+		}
 	}
 
 	public class DescriptorHeap : IDisposable
 	{
 		internal ID3D12DescriptorHeap handle;
+		private D3D12MA.VirtualBlock virtualBlock;
 		private int stride;
-		private int count;
 
 		public HeapType Type { get; }
 
-		public DescriptorHeap(HeapType type, int descriptorCount, bool shaderVisible)
+		public DescriptorHeap(HeapType type, int capacity, bool shaderVisible)
 		{
 			Type = type;
 
 			DescriptorHeapDescription heapDesc = new()
 			{
-				DescriptorCount = descriptorCount,
+				DescriptorCount = capacity,
 				Type = (DescriptorHeapType)type,
 				Flags = shaderVisible ? DescriptorHeapFlags.ShaderVisible : DescriptorHeapFlags.None,
 				NodeMask = 0,
@@ -48,15 +55,37 @@ namespace Engine.GPU
 			Graphics.Device.CreateDescriptorHeap(heapDesc, out handle);
 			handle.Name = $"DescriptorHeap ({type})";
 			stride = Graphics.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
+
+			// Create block with D3D12MA
+			D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()
+			{
+				Size = (ulong)capacity,
+				Flags = D3D12MA.VirtualBlockFlags.None,
+			}, out virtualBlock);
 		}
 
 		public DescriptorHandle Allocate()
 		{
+			virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
+			{
+				Size = 1,
+				Alignment = 0,
+				Flags = D3D12MA.VirtualAllocationFlags.None
+			}, out var allocation, out _);
+
+			virtualBlock.GetAllocationInfo(allocation, out var info);
+
 			return new DescriptorHandle()
 			{
 				Heap = this,
-				Index = count++,
+				Index = (int)info.Offset,
+				Allocation = allocation,
 			};
+		}
+
+		public void Free(DescriptorHandle handle)
+		{
+			virtualBlock.FreeAllocation(handle.Allocation);
 		}
 
 		public IntPtr GetPointer()
