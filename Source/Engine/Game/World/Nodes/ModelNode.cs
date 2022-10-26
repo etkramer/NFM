@@ -18,6 +18,8 @@ namespace Engine.World
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;
+		public bool IsTransformDirty = true;
+		public BufferAllocation<GPUTransform> TransformHandle;
 		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
 		// Material instances
@@ -32,10 +34,17 @@ namespace Engine.World
 			});
 
 			(this as INotify).Subscribe(nameof(IsVisible), () => IsInstanceDirty = true);
+
+			// Transform buffer
+			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
+			(this as INotify).Subscribe(nameof(Rotation), () => IsTransformDirty = true);
+			(this as INotify).Subscribe(nameof(Scale), () => IsTransformDirty = true);
 		}
 
 		public override void Dispose()
 		{
+			TransformHandle?.Dispose();
+
 			for (int i = 0; i < InstanceHandles?.Length; i++)
 			{
 				MaterialInstances[i].Dispose();
@@ -103,6 +112,29 @@ namespace Engine.World
 			}
 
 			IsInstanceDirty = false;
+		}
+
+		public void UpdateTransform()
+		{
+			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
+
+			if (TransformHandle == null)
+			{
+				if (Scene != null)
+				{
+					TransformHandle = Scene.TransformBuffer.Allocate(1);
+				}
+				else
+				{
+					return;
+				}
+			}
+
+			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
+			{
+				ObjectToWorld = transform,
+				WorldToObject = transform.Inverse()
+			});
 		}
 
 		public override void OnDrawGizmos(GizmosContext context)

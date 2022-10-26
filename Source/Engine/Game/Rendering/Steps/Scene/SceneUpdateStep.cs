@@ -10,13 +10,13 @@ namespace Engine.Rendering
 			// Loop through nodes and (re)upload instance data where requested.
 			foreach (Node node in Scene.Nodes)
 			{
-				if (node.IsTransformDirty)
-				{
-					node.UpdateTransform();
-				}
-
 				if (node is ModelNode model)
 				{
+					if (model.IsTransformDirty)
+					{
+						model.UpdateTransform();
+					}
+
 					if (model.IsInstanceDirty)
 					{
 						model.UpdateInstances();

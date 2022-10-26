@@ -31,9 +31,6 @@ namespace Engine.World
 		}
 
 		// Transform buffer
-		public bool IsTransformDirty = true;
-		public BufferAllocation<GPUTransform> TransformHandle;
-
 		public Node()
 		{
 			string name = GetType().Name.PascalToDisplay();
@@ -43,11 +40,6 @@ namespace Engine.World
 			}
 
 			Name = name;
-
-			// Transform buffer
-			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
-			(this as INotify).Subscribe(nameof(Rotation), () => IsTransformDirty = true);
-			(this as INotify).Subscribe(nameof(Scale), () => IsTransformDirty = true);
 		}
 
 		public virtual void Dispose()
@@ -57,7 +49,6 @@ namespace Engine.World
 
 			// Remove self from scene tree.
 			Scene?.Despawn(this);
-			TransformHandle?.Dispose();
 		}
 
 		/// <summary>
@@ -67,29 +58,6 @@ namespace Engine.World
 		{
 			Scene = scene ?? Scene.Main;
 			return this;
-		}
-
-		public void UpdateTransform()
-		{
-			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
-
-			if (TransformHandle == null)
-			{
-				if (Scene != null)
-				{
-					TransformHandle = Scene.TransformBuffer.Allocate(1);
-				}
-				else
-				{
-					return;
-				}
-			}
-
-			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
-			{
-				ObjectToWorld = transform,
-				WorldToObject = transform.Inverse()
-			});
 		}
 
 		public virtual void OnDrawGizmos(GizmosContext context) {}
