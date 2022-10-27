@@ -18,7 +18,7 @@ namespace MeshOptimizer
 	public ref class MeshOperations sealed abstract
 	{
 	public:
-		static void BuildMeshlets(unsigned* indices, int numIndices, void* verts, int numVerts, int vertStride,
+		static void BuildMeshlets(unsigned* indices, int numIndices, int numVerts,
 			[Out] array<unsigned char>^% outPrimIndices, [Out] array<unsigned int>^% outVertIndices, [Out] array<Meshlet>^% outMeshlets);
 	};
 }

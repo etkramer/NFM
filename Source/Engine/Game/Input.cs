@@ -29,7 +29,7 @@ namespace Engine
 		{
 			DispatcherTimer.Run(() =>
 			{
-				OnTick();
+				OnUpdate();
 				return true;
 			}, TimeSpan.Zero);
 		}
@@ -60,7 +60,7 @@ namespace Engine
 			return false;
 		}
 
-		private static void OnTick()
+		private static void OnUpdate()
 		{
 			// No update, therefore no delta.
 			if (!wasMouseMoved)

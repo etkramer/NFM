@@ -71,10 +71,9 @@ namespace Engine.Resources
 			}
 
 			fixed (uint* indicesPtr = Indices)
-			fixed (Vertex* vertsPtr = Vertices)
 			{
 				// Build meshlet data.
-				MeshOperations.BuildMeshlets(indicesPtr, Indices.Length, vertsPtr, Vertices.Length, sizeof(Vertex), out var meshletPrims, out var meshletVerts, out var meshlets);
+				MeshOperations.BuildMeshlets(indicesPtr, Indices.Length, Vertices.Length, out var meshletPrims, out var meshletVerts, out var meshlets);
 
 				// Remap vertices to match meshlet output.
 				Vertex[] verts = new Vertex[meshletVerts.Length];

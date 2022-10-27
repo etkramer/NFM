@@ -5,7 +5,7 @@
 
 namespace MeshOptimizer
 {
-	void MeshOperations::BuildMeshlets(unsigned* indices, int numIndices, void* verts, int numVerts, int vertStride,
+	void MeshOperations::BuildMeshlets(unsigned* indices, int numIndices, int numVerts,
 		[Out] array<unsigned char>^% outPrimIndices, [Out] array<unsigned int>^% outVertIndices, [Out] array<Meshlet>^% outMeshlets)
 	{
 		const float coneWeight = 0.0f;
@@ -19,7 +19,7 @@ namespace MeshOptimizer
 		std::vector<unsigned char> meshletTris(maxMeshlets * maxTris * 3);
 
 		// Build meshlet data
-		size_t meshletCount = meshopt_buildMeshlets(meshlets.data(), meshletVerts.data(), meshletTris.data(), indices, numIndices, (float*)verts, numVerts, vertStride, maxVerts, maxTris, coneWeight);
+		size_t meshletCount = meshopt_buildMeshletsScan(meshlets.data(), meshletVerts.data(), meshletTris.data(), indices, numIndices, numVerts, maxVerts, maxTris);
 		
 		// Trim arrays
 		const meshopt_Meshlet& last = meshlets[meshletCount - 1];

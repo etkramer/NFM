@@ -32,7 +32,6 @@ namespace Engine.Frontend
 			{
 				Selection.Selected
 					.ToObservableChangeSet()
-					.Where(o => o.Adds > 0 || o.Removes > 0)
 					.Subscribe(o =>
 					{
 						var source = Selection.Selected;
@@ -42,11 +41,15 @@ namespace Engine.Frontend
 							ObjectDisplayName = "None";
 							TypeDisplayName = "None";
 							TypeIcon = '\uEB8B';
+
 							PropertyContent = null;
 						}
 						else
 						{
 							Type selectedType = ReflectionHelper.FindCommonAncestor(source.Select(o => o.GetType()));
+
+							TypeDisplayName = selectedType.Name;
+							TypeIcon = selectedType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : '\uEB8B';
 
 							if (source.Count > 1)
 							{
@@ -57,13 +60,10 @@ namespace Engine.Frontend
 								ObjectDisplayName = source.FirstOrDefault()?.Name;
 							}
 
-							TypeDisplayName = selectedType.Name;
-							TypeIcon = selectedType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : '\uEB8B';
-
 							PropertyContent = GetPropertiesContent(selectedType);
 						}
-
-					}).DisposeWith(d);
+					})
+					.DisposeWith(d);
 			});
 		}
 
