@@ -2,12 +2,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
+using ReactiveUI;
 
 namespace Engine.Frontend
 {
 	public abstract class ToolPanel : UserControl
 	{
-		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Tool Window");
+		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Tool Panel");
 
 		public string Title
 		{
@@ -18,20 +19,52 @@ namespace Engine.Frontend
 		public static T Spawn<T>(TabGroup group = null) where T : ToolPanel, new()
 		{
 			T tool = new();
-			tool.Focusable = true;
-
-			/*if (group == null)
-			{
-				FloatingWindow window = new FloatingWindow(tool);
-				window.Show();
-			}
-			else*/
-			{
-				Tab tab = new Tab(tool, group);
-				group.Tabs.Add(tab);
-			}
+			group.Tabs.Add(new Tab(tool, group));
 
 			return tool;
 		}
+	}
+
+	public abstract class ReactiveToolPanel<TViewModel> : ToolPanel, IViewFor<TViewModel> where TViewModel : class
+	{
+		public static readonly StyledProperty<TViewModel> ViewModelProperty = AvaloniaProperty.Register<ReactiveUserControl<TViewModel>, TViewModel>(nameof(ViewModel));
+
+        public ReactiveToolPanel()
+        {
+            // This WhenActivated block calls ViewModel's WhenActivated
+            // block if the ViewModel implements IActivatableViewModel.
+            this.WhenActivated(disposables => { });
+            this.GetObservable(ViewModelProperty).Subscribe(OnViewModelChanged);
+        }
+
+        public TViewModel ViewModel
+        {
+            get => GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
+
+        object IViewFor.ViewModel
+        {
+            get => ViewModel;
+            set => ViewModel = (TViewModel)value;
+        }
+
+        protected override void OnDataContextChanged(EventArgs e)
+        {
+            base.OnDataContextChanged(e);
+            ViewModel = DataContext as TViewModel;
+        }
+
+        private void OnViewModelChanged(object value)
+        {
+            if (value == null)
+            {
+                ClearValue(DataContextProperty);
+            }
+            else if (DataContext != value)
+            {
+                DataContext = value;
+            }
+        }
 	}
 }

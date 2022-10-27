@@ -139,7 +139,7 @@ namespace Engine.World
 
 		public override void OnDrawGizmos(GizmosContext context)
 		{
-			if (Selection.Selected.Contains(this) && Model != null)
+			if (Selection.Selected.Contains(this) && Model != null && IsVisible)
 			{
 				context.DrawBox(Model.Parts[0].Meshes[0].Bounds);
 			}

@@ -39,16 +39,19 @@ namespace Engine.Resources
 		public void SetIndices(uint[] value)
 		{
 			Indices = value;
+			IsCommitted = false;
 		}
 
 		public void SetVertices(Vertex[] value)
 		{
 			Vertices = value;
+			IsCommitted = false;
 		}
 
 		public void SetMaterial(Material value)
 		{
 			Material = value;
+			IsCommitted = false;
 		}
 
 		/// <summary>
@@ -80,14 +83,12 @@ namespace Engine.Resources
 					verts[i] = Vertices[meshletVerts[i]];
 				}
 
-				// Upload vertex data to GPU.
+				// Upload geometry data to GPU.
 				VertHandle = VertBuffer.Allocate(verts.Length);
-				Renderer.DefaultCommandList.UploadBuffer(VertHandle, verts);
-
-				// Upload meshlet/index data to GPU.
 				PrimHandle = PrimBuffer.Allocate(meshletPrims.Length);
-				Renderer.DefaultCommandList.UploadBuffer(PrimHandle, meshletPrims.Select(o => (uint)o).ToArray());
 				MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
+				Renderer.DefaultCommandList.UploadBuffer(VertHandle, verts);
+				Renderer.DefaultCommandList.UploadBuffer(PrimHandle, meshletPrims.Select(o => (uint)o).ToArray());
 				Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
 
 				// Upload mesh info to GPU.
@@ -158,19 +159,19 @@ namespace Engine.Resources
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
+	public unsafe struct Vertex
+	{
+		public Vector3 Position;
+		public Vector3 Normal;
+		public Vector2 UV0;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
 	internal struct GPUMesh
 	{
 		public uint VertOffset; // Start of submesh in vertex buffer.
 		public uint PrimOffset; // Start of submesh in primitive buffer.
 		public uint MeshletOffset; // Start of submesh in meshlet buffer.
 		public uint MeshletCount;   // Number of meshlets used
-	}
-
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct Vertex
-	{
-		public Vector3 Position;
-		public Vector3 Normal;
-		public Vector2 UV0;
 	}
 }

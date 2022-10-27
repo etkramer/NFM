@@ -12,7 +12,6 @@ using Engine.Plugins;
 using Engine.Resources;
 using Engine.Rendering;
 using Engine.World;
-using System.Threading;
 
 namespace Engine
 {

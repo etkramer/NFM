@@ -8,8 +8,6 @@ namespace Engine.World
 
 		[Notify, Save] public static Scene Main { get; set; } = new();
 
-		public event Action OnDispose = delegate{};
-
 		[Notify] public ReadOnlyObservableCollection<Node> Nodes { get; }
 		[Save] private ObservableCollection<Node> nodes { get; set; } = new();
 
@@ -43,8 +41,6 @@ namespace Engine.World
 
 		public void Dispose()
 		{
-			OnDispose.Invoke();
-
 			for (int i = nodes.Count - 1; i >= 0; i--)
 			{
 				nodes[i].Dispose();
