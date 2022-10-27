@@ -21,7 +21,7 @@ namespace Engine.GPU
 			set => list.Name = value;
 		}
 
-		private static PipelineState MipGenPSO = new PipelineState()
+		private static PipelineState mipGenPSO = new PipelineState()
 			.UseIncludes(typeof(CommandList).Assembly)
 			.SetComputeShader(Embed.GetString("Content/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
 			.AsRootConstant(0, 2)
@@ -506,7 +506,7 @@ namespace Engine.GPU
 				}
 				else
 				{
-					SetPipelineState(MipGenPSO);
+					SetPipelineState(mipGenPSO);
 
 					for (int i = 1; i < texture.MipmapCount; i++)
 					{
@@ -521,8 +521,8 @@ namespace Engine.GPU
 
 						RequestState(texture, ResourceStates.AllShaderResource);
 
-						list.SetComputeRootDescriptorTable(MipGenPSO.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
-						list.SetComputeRootDescriptorTable(MipGenPSO.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
+						list.SetComputeRootDescriptorTable(mipGenPSO.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
+						list.SetComputeRootDescriptorTable(mipGenPSO.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
 					
 						Dispatch((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
 						BarrierUAV(texture);

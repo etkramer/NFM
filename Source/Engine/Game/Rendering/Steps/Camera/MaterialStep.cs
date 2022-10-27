@@ -9,12 +9,12 @@ namespace Engine.Rendering
 	public class MaterialStep : CameraStep
 	{
 		private GraphicsBuffer commandBuffer;
-		private PipelineState cullProgram;
+		private PipelineState cullPSO;
 
 		public override void Init()
 		{
 			// Compile indirect compute program.
-			cullProgram = new PipelineState()
+			cullPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetComputeShader(Embed.GetString("Content/Shaders/Geometry/Shared/CullCS.hlsl", typeof(Game).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
@@ -65,7 +65,7 @@ namespace Engine.Rendering
 			List.ResetCounter(commandBuffer);
 
 			// Switch to culling program (compute).
-			List.SetPipelineState(cullProgram);
+			List.SetPipelineState(cullPSO);
 
 			// Set SRV inputs.
 			List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);

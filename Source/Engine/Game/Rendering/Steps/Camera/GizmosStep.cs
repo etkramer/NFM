@@ -34,11 +34,11 @@ namespace Engine.Rendering
 
 		public CameraNode Camera => camera;
 
-		private static PipelineState polylineProgram = null;
+		private static PipelineState polylinePSO = null;
 
 		unsafe static GizmosContext()
 		{
-			polylineProgram = new PipelineState()
+			polylinePSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
 				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/LineMS.hlsl", typeof(Game).Assembly), "LineMS")
 				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Game).Assembly), "GizmosPS")
@@ -84,7 +84,7 @@ namespace Engine.Rendering
 			}
 			
 			// Use the right shader program.
-			renderList.SetPipelineState(polylineProgram);
+			renderList.SetPipelineState(polylinePSO);
 
 			// Bind program constants (keeping in mind cbuffer packing requirements).
 			renderList.SetPipelineCBV(0, 1, renderTarget.ViewCB);

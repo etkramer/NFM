@@ -28,8 +28,8 @@
 			<StackPanel Orientation="Horizontal">
 				<TextBlock Text="{Binding TypeIcon}" FontFamily="{StaticResource IconsFont2}" VerticalAlignment="Center" Foreground="#B0E24D" FontSize="26" Margin="7, 0"/>
 				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
-					<TextBlock Text="{Binding ObjectDisplayName}" Foreground="#B0E24D" FontSize="14" FontWeight="Bold"/>
-					<TextBlock Text="{Binding TypeDisplayName}" Foreground="#BEB0E24D"/>
+					<TextBlock Text="{Binding ObjectName}" Foreground="#B0E24D" FontSize="14" FontWeight="Bold"/>
+					<TextBlock Text="{Binding TypeName}" Foreground="#BEB0E24D"/>
 				</StackPanel>
 			</StackPanel>
 		</Grid>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using AspectInjector.Broker;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -17,53 +18,57 @@ namespace Engine.Frontend
 		public ViewModelActivator Activator { get; } = new();
 
 		[Reactive]
-		public string ObjectDisplayName { get; set; } = "None";
-		[Reactive]
-		public string TypeDisplayName { get; set; } = "None";
-		[Reactive]
-		public char TypeIcon { get; set; } = '\uEB8B';
+		public Type ObjectType { get; set; }
 
 		[Reactive]
 		public Control PropertyContent { get; set; } = null;
 
+		[Reactive]
+		public string ObjectName { get; set; } = "None";
+
+		[ObservableAsProperty]
+		public char TypeIcon { get; }
+
+		[ObservableAsProperty]
+		public string TypeName { get; }
+
 		public InspectorModel()
 		{
-			this.WhenActivated(d =>
+			this.WhenActivated(disposables =>
 			{
+				// Type icon behavior
+				this.WhenAnyValue(o => o.ObjectType)
+					.Select(o => o == null ? '\uEB8B' : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : '\uEB8B')
+					.ToPropertyEx(this, o => o.TypeIcon)
+					.DisposeWith(disposables);
+
+				// Type name behavior
+				this.WhenAnyValue(o => o.ObjectType)
+					.Select(o => o == null ? "None" : ObjectType.Name)
+					.ToPropertyEx(this, o => o.TypeName)
+					.DisposeWith(disposables);
+
 				Selection.Selected
 					.ToObservableChangeSet()
 					.Subscribe(o =>
 					{
 						var source = Selection.Selected;
+						ObjectType = (source.Count == 0) ? null : ReflectionHelper.FindCommonAncestor(source.Select(o => o.GetType()));
 
 						if (source.Count == 0)
 						{
-							ObjectDisplayName = "None";
-							TypeDisplayName = "None";
-							TypeIcon = '\uEB8B';
-
+							ObjectType = null;
+							ObjectName = "None";
 							PropertyContent = null;
 						}
 						else
 						{
-							Type selectedType = ReflectionHelper.FindCommonAncestor(source.Select(o => o.GetType()));
-
-							TypeDisplayName = selectedType.Name;
-							TypeIcon = selectedType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : '\uEB8B';
-
-							if (source.Count > 1)
-							{
-								ObjectDisplayName = $"({source.Count} objects)";
-							}
-							else
-							{
-								ObjectDisplayName = source.FirstOrDefault()?.Name;
-							}
-
-							PropertyContent = GetPropertiesContent(selectedType);
+							ObjectType = ReflectionHelper.FindCommonAncestor(source.Select(o => o.GetType()));
+							ObjectName = source.Count > 1 ? $"({source.Count} objects)" : source.First().Name;
+							PropertyContent = GetPropertiesContent(ObjectType);
 						}
 					})
-					.DisposeWith(d);
+					.DisposeWith(disposables);
 			});
 		}
 
