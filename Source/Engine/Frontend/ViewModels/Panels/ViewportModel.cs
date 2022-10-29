@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using AspectInjector.Broker;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Threading;
-using DynamicData;
-using DynamicData.Binding;
-using Engine.Editor;
 using Engine.GPU;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SharpDX.Direct2D1.Effects;
 
 namespace Engine.Frontend
 {
