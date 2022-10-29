@@ -29,7 +29,7 @@ namespace Engine.Frontend
 
 				Observable.Interval(TimeSpan.FromSeconds(0.1))
 					.StartWith(0)
-					.Select(o => $"Frametime: {(Metrics.FrameTime * 1000).ToString("0.00")}ms")
+					.Select(o => $"Frametime: {Metrics.FrameTime * 1000:0.00}ms")
 					.ToPropertyEx(this, o => o.FrameTimeDisplay)
 					.DisposeWith(disposables);
 			});
