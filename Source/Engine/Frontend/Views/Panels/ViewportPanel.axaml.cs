@@ -1,30 +1,27 @@
 using System;
-using Avalonia;
+using System.ComponentModel;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
-using Engine.Editor;
+using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using Engine.GPU;
 using Engine.Rendering;
-using Engine.World;
+using ReactiveUI;
 
 namespace Engine.Frontend
 {
-	public partial class ViewportPanel : ToolPanel
+	public partial class ViewportPanel : ReactiveToolPanel<ViewportModel>
 	{
-		[Notify] string frameTime => $"Frametime: {frametimeAverager.Result.ToString("0.00")}ms";
-		[Notify] string memory => $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
-		private Averager frametimeAverager = new Averager(100);
-
 		public ViewportPanel()
 		{
-			DataContext = this;
-			InitializeComponent();
+			ViewModel = new ViewportModel();
 
-			// Update frametime.
-			Game.OnTick += (t) => frametimeAverager.AddValue(Metrics.FrameTime * 1000);
-			Game.OnTick += (t) => (this as INotify).Raise(nameof(memory));
-			(frametimeAverager as INotify).Subscribe(nameof(Averager.Result), () => (this as INotify).Raise(nameof(frameTime)));
+			this.WhenActivated(d =>
+			{
+
+			});
+
+			InitializeComponent();
 		}
 	}
 

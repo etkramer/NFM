@@ -147,7 +147,7 @@ namespace Engine.Resources
 
 		public static Texture2D White = FromColor(Color.White);
 		public static Texture2D Black = FromColor(Color.Black);
+		public static Texture2D Purple = FromColor(Color.Purple);
 		public static Texture2D Normal = FromColor(new Color(0.5f, 0.5f, 1));
-		public static Texture2D Purple = FromColor(new Color(1, 0, 1));
 	}
 }

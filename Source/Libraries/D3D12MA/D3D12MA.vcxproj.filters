@@ -23,7 +23,7 @@
     <ClCompile Include="src\D3D12MemAlloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\D3D12MemAllocC.cpp">
+    <ClCompile Include="src\D3D12MemAlloc_exports.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

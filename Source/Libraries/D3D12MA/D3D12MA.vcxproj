@@ -136,7 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\D3D12MemAlloc.cpp" />
-    <ClCompile Include="src\D3D12MemAllocC.cpp" />
+    <ClCompile Include="src\D3D12MemAlloc_exports.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
