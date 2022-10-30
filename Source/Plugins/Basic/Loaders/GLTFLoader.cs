@@ -100,7 +100,8 @@ namespace Basic.Loaders
 					// Grab vertex spans from GLTF.
 					var positions = primitive.GetVertexAccessor("POSITION").AsSpan<Vector3>();
 					var normals = primitive.GetVertexAccessor("NORMAL").AsSpan<Vector3>();
-					var uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsSpan<Vector2>();
+					var uv0 = primitive.GetVertexAccessor("TEXCOORD_0").AsSpan<Vector2>();
+					var uv1 = primitive.GetVertexAccessor("TEXCOORD_1").AsSpan<Vector2>();
 
 					// Read vertex data from accessor streams.
 					Vertex[] vertices = new Vertex[positions.Length];
@@ -110,8 +111,13 @@ namespace Basic.Loaders
 						{
 							Position = (new Vector4(positions[i].X, positions[i].Y, positions[i].Z, 1) * worldMatrix).Xyz,
 							Normal = (new Vector4(normals[i].X, normals[i].Y, normals[i].Z, 1) * worldMatrix).Xyz,
-							UV0 = new Vector2(uvs[i].X, uvs[i].Y)
+							UV0 = new Vector2(uv0[i].X, uv0[i].Y),
 						};
+
+						if (uv1 != default)
+						{
+							vertices[i].UV1 = new Vector2(uv1[i].X, uv1[i].Y);
+						}
 					}
 
 					// Create mesh and add to collection.
@@ -143,8 +149,12 @@ namespace Basic.Loaders
 	{
 		public static unsafe Span<T> AsSpan<T>(this Accessor accessor) where T : unmanaged
 		{
-			var slice = accessor.SourceBufferView.Content.Slice(accessor.ByteOffset, accessor.ByteLength);
+			if (accessor == null)
+			{
+				return default;
+			}
 
+			var slice = accessor.SourceBufferView.Content.Slice(accessor.ByteOffset, accessor.ByteLength);
 			return MemoryMarshal.Cast<byte, T>(slice);
 		}
 

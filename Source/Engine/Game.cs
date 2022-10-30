@@ -19,7 +19,7 @@ namespace Engine
 	{
 		public static event Action<double> OnTick = delegate {};
 
-		public static async Task Init()
+		public static void Init()
 		{
 			// Boot up renderer and load plugins.
 			Renderer.Init();

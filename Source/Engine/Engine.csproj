@@ -8,26 +8,7 @@
 		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <NoWarn>1701;1702;1998</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <NoWarn>1701;1702;1998</NoWarn>
-	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="Content\Shaders\BaseMS.h" />
-		<None Remove="Content\Shaders\BaseMS.hlsl" />
-		<None Remove="Content\Shaders\Gizmos\Gizmos.h" />
-		<None Remove="Content\Shaders\Gizmos\GizmosPS.hlsl" />
-		<None Remove="Content\Shaders\Gizmos\LineMS.hlsl" />
-		<None Remove="Content\Shaders\Geometry\Material\BaseMaterialPS.h" />
-		<None Remove="Content\Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
-		<None Remove="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
-		<None Remove="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
-		<None Remove="Content\Frontend\Fonts\MaterialIcons-Regular.ttf" />
-		<None Remove="Content\Frontend\Fonts\MaterialIconsOutlined-Regular.otf" />
-		<None Remove="Content\Frontend\Icons\icon.ico" />
-		<None Remove="Content\Frontend\Icons\iconsmall.ico" />
 		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIcons-Regular.ttf" />
 		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<AvaloniaResource Include="Content\Frontend\Icons\icon.ico" />
@@ -44,6 +25,7 @@
 		<EmbeddedResource Include="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\CullCS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
+		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup>
