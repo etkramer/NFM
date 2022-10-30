@@ -4,6 +4,7 @@ using Engine.GPU;
 using Engine.GPU.Native;
 using Engine.Rendering;
 using Engine.Resources;
+using ReactiveUI;
 
 namespace Engine.World
 {
@@ -12,9 +13,6 @@ namespace Engine.World
 	{
 		[Inspect] public Model Model { get; set; } = null;
 		[Inspect] public bool IsVisible { get; set; } = true;
-
-		/*[Inspect] */public Material[] Materials { get; set; } = null;
-		/*[Inspect] */public List<Shader> Layers { get; set; } = new();
 	
 		// Mesh instances
 		public bool IsInstanceDirty = true;
@@ -27,18 +25,16 @@ namespace Engine.World
 		
 		public ModelNode()
 		{
-			(this as INotify).Subscribe(nameof(Model), () =>
-			{
-				IsInstanceDirty = true;
-				Materials = Model.Parts.SelectMany(o => o.Meshes).Select(o => o.Material).ToArray();
-			});
+			// Track changes in transform
+			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
+				.Subscribe((o) => IsTransformDirty = true);
 
-			(this as INotify).Subscribe(nameof(IsVisible), () => IsInstanceDirty = true);
-
-			// Transform buffer
-			(this as INotify).Subscribe(nameof(Position), () => IsTransformDirty = true);
-			(this as INotify).Subscribe(nameof(Rotation), () => IsTransformDirty = true);
-			(this as INotify).Subscribe(nameof(Scale), () => IsTransformDirty = true);
+			// Track changes in model/visibility
+			this.WhenAnyValue(o => o.Model, o => o.IsVisible)
+				.Subscribe((o) =>
+				{
+					IsInstanceDirty = true;
+				});
 		}
 
 		public override void Dispose()
