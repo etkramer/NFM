@@ -35,22 +35,29 @@ namespace Engine.Resources
 		public uint[] Indices { get; set; }
 		public Vertex[] Vertices { get; set; }
 		public Material Material { get; set; }
+		public MorphTarget[] MorphTargets { get; set; }
 
-		public void SetIndices(uint[] value)
+		public void SetIndices(uint[] indices)
 		{
-			Indices = value;
+			Indices = indices;
 			IsCommitted = false;
 		}
 
-		public void SetVertices(Vertex[] value)
+		public void SetVertices(Vertex[] vertices)
 		{
-			Vertices = value;
+			Vertices = vertices;
 			IsCommitted = false;
 		}
 
-		public void SetMaterial(Material value)
+		public void SetMaterial(Material material)
 		{
-			Material = value;
+			Material = material;
+			IsCommitted = false;
+		}
+
+		public void SetMorphTargets(MorphTarget[] morphTargets)
+		{
+			MorphTargets = morphTargets;
 			IsCommitted = false;
 		}
 
@@ -154,6 +161,18 @@ namespace Engine.Resources
 			VertHandle?.Dispose();
 			MeshletHandle?.Dispose();
 			MeshHandle?.Dispose();
+		}
+	}
+
+	public class MorphTarget
+	{
+		public string Name { get; }
+		public Vertex[] VertexDeltas { get; }
+
+		public MorphTarget(string name, Vertex[] vertexDeltas)
+		{
+			Name = name;
+			VertexDeltas = vertexDeltas;
 		}
 	}
 

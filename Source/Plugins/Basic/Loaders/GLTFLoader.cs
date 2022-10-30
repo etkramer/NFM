@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using Engine;
 using Engine.Resources;
@@ -12,6 +13,8 @@ using SharpGLTF.Validation;
 using StbiSharp;
 using Engine.Common;
 using SharpGLTF.IO;
+using System.Collections.ObjectModel;
+using System.Text.Json.Nodes;
 
 namespace Basic.Loaders
 {
@@ -27,10 +30,7 @@ namespace Basic.Loaders
 		public override async Task<Model> Load()
 		{
 			// Load GLTF model from file.
-			ModelRoot model = ModelRoot.Load(Path, new ReadSettings()
-			{
-				Validation = ValidationMode.Skip
-			});
+			ModelRoot model = ModelRoot.Load(Path, ValidationMode.Skip);
 
 			// Load textures from GLTF
 			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
@@ -88,43 +88,45 @@ namespace Basic.Loaders
 			{
 				var mesh = node.Mesh;
 
+				// Fetch the names of each morph target.
+				string[] morphNames = null;
+				if (mesh.Extras.TryGetNode("targetNames", out var namesNode))
+				{
+					morphNames = (namesNode.Content as IList).Cast<string>().ToArray();
+				}
+				else
+				{
+					morphNames = new string[0];
+				}
+
 				Mesh[] meshes = new Mesh[mesh.Primitives.Count];
 				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
-					// Find node and read transform.
+					// Get node transform as Z-up.
 					var worldMatrix = (Matrix4)node.WorldMatrix;
-
-					// Transform to Z-up.
 					worldMatrix *= Matrix4.CreateRotation(new(90, 0, 0));
 
-					// Grab vertex spans from GLTF.
-					var positions = primitive.GetVertexAccessor("POSITION").AsSpan<Vector3>();
-					var normals = primitive.GetVertexAccessor("NORMAL").AsSpan<Vector3>();
-					var uv0 = primitive.GetVertexAccessor("TEXCOORD_0").AsSpan<Vector2>();
-					var uv1 = primitive.GetVertexAccessor("TEXCOORD_1").AsSpan<Vector2>();
+					// Build vertices for the base mesh.
+					var baseVertices = BuildVertices(primitive.VertexAccessors, worldMatrix);
 
-					// Read vertex data from accessor streams.
-					Vertex[] vertices = new Vertex[positions.Length];
-					for (int i = 0; i < positions.Length; i++)
+					Debug.Assert(primitive.MorphTargetsCount == morphNames.Length);
+
+					// Build morph targets.
+					var morphTargets = new MorphTarget[primitive.MorphTargetsCount];
+					for (int i = 0; i < morphTargets.Length; i++)
 					{
-						vertices[i] = new Vertex()
-						{
-							Position = (new Vector4(positions[i].X, positions[i].Y, positions[i].Z, 1) * worldMatrix).Xyz,
-							Normal = (new Vector4(normals[i].X, normals[i].Y, normals[i].Z, 1) * worldMatrix).Xyz,
-							UV0 = new Vector2(uv0[i].X, uv0[i].Y),
-						};
+						var morphName = morphNames[i];
+						var morphDeltas = BuildVertices(primitive.GetMorphTargetAccessors(i), worldMatrix);
 
-						if (uv1 != default)
-						{
-							vertices[i].UV1 = new Vector2(uv1[i].X, uv1[i].Y);
-						}
+						morphTargets[i] = new MorphTarget(morphName, morphDeltas);
 					}
 
 					// Create mesh and add to collection.
-					Mesh gameMesh = new Mesh();
-					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
-					gameMesh.SetVertices(vertices);
+					var gameMesh = new Mesh();
+					gameMesh.SetVertices(baseVertices);
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
+					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
+					gameMesh.SetMorphTargets(morphTargets);
 					gameMesh.Commit();
 
 					meshes[primitive.LogicalIndex] = gameMesh;
@@ -134,6 +136,40 @@ namespace Basic.Loaders
 			}
 
 			return new Model(parts.ToArray());
+		}
+
+		private Vertex[] BuildVertices(IReadOnlyDictionary<string, Accessor> accessors, Matrix4 transform)
+		{
+			Debug.Assert(accessors.ContainsKey("POSITION"));
+
+			var positions = accessors.GetValueOrDefault("POSITION").AsSpan<Vector3>();
+			var normals = accessors.GetValueOrDefault("NORMAL").AsSpan<Vector3>();
+			var uv0 = accessors.GetValueOrDefault("TEXCOORD_0").AsSpan<Vector2>();
+			var uv1 = accessors.GetValueOrDefault("TEXCOORD_1").AsSpan<Vector2>();
+
+			Vertex[] result = new Vertex[positions.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				Vertex vertex = new Vertex();
+				vertex.Position = Vector3.TransformVector(new Vector3(positions[i].X, positions[i].Y, positions[i].Z), transform);
+
+				if (normals != default)
+				{
+					vertex.Normal = Vector3.TransformVector(new Vector3(positions[i].X, positions[i].Y, positions[i].Z), transform);
+				}
+				if (uv0 != default)
+				{
+					vertex.UV0 = new Vector2(uv0[i].X, uv0[i].Y);
+				}
+				if (uv1 != default)
+				{
+					vertex.UV1 = new Vector2(uv1[i].X, uv1[i].Y);
+				}
+
+				result[i] = vertex;
+			}
+
+			return result;
 		}
 
 		private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
