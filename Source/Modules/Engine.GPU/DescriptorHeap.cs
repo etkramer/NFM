@@ -46,7 +46,7 @@ namespace Engine.GPU
 
 			DescriptorHeapDescription heapDesc = new()
 			{
-				DescriptorCount = capacity,
+				DescriptorCount = capacity + 1,
 				Type = (DescriptorHeapType)type,
 				Flags = shaderVisible ? DescriptorHeapFlags.ShaderVisible : DescriptorHeapFlags.None,
 				NodeMask = 0,
@@ -59,9 +59,17 @@ namespace Engine.GPU
 			// Create block with D3D12MA
 			D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()
 			{
-				Size = (ulong)capacity,
+				Size = (ulong)capacity + 1,
 				Flags = D3D12MA.VirtualBlockFlags.None,
 			}, out virtualBlock);
+
+			// Reserve first element (0) to represent an invalid index.
+			virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
+			{
+				Size = 1,
+				Alignment = 0,
+				Flags = D3D12MA.VirtualAllocationFlags.MinOffset
+			}, out _, out _);
 		}
 
 		public DescriptorHandle Allocate()
