@@ -61,7 +61,7 @@ namespace Engine.Rendering
 			// Compile PSO.
 			MaterialPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
-				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
+				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly), "BaseMS")
 				.SetPixelShader(surfaceShaderSource, "MaterialPS")
 				.SetDepthMode(DepthMode.Equal, true, false)
 				.AsRootConstant(0, 1)

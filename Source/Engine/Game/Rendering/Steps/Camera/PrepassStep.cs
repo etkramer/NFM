@@ -25,8 +25,8 @@ namespace Engine.Rendering
 			// Compile depth prepass program.
 			depthPSO = new PipelineState()
 				.UseIncludes(typeof(Game).Assembly)
-				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly))
-				.SetPixelShader(Embed.GetString("Content/Shaders/Geometry/Prepass/DepthPS.hlsl", typeof(Game).Assembly))
+				.SetMeshShader(Embed.GetString("Content/Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Game).Assembly), "BaseMS")
+				.SetPixelShader(Embed.GetString("Content/Shaders/Geometry/Prepass/DepthPS.hlsl", typeof(Game).Assembly), "DepthPS")
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetCullMode(CullMode.CCW)
 				.AsRootConstant(0, 1)

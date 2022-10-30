@@ -131,7 +131,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public PipelineState SetComputeShader(string source, string entryPoint = "ComputeEntry")
+		public PipelineState SetComputeShader(string source, string entryPoint)
 		{
 			IDxcResult computeResult = DxcCompiler.Compile(DxcShaderStage.Compute, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 
@@ -149,7 +149,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public PipelineState SetMeshShader(string source, string entryPoint = "MeshEntry")
+		public PipelineState SetMeshShader(string source, string entryPoint)
 		{
 			IDxcResult meshResult = DxcCompiler.Compile(DxcShaderStage.Mesh, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 
@@ -167,7 +167,7 @@ namespace Engine.GPU
 			return this;
 		}
 
-		public PipelineState SetPixelShader(string source, string entryPoint = "PixelEntry")
+		public PipelineState SetPixelShader(string source, string entryPoint)
 		{
 			IDxcResult pixelResult = DxcCompiler.Compile(DxcShaderStage.Pixel, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
 			compiledPixel = pixelResult.GetObjectBytecodeArray();
@@ -262,28 +262,6 @@ namespace Engine.GPU
 			return rootParams.ToArray();
 		}
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct GraphicsPipelineStateStream
-		{
-			public PipelineStateSubObjectTypeRootSignature RootSignature;
-			public PipelineStateSubObjectTypeMeshShader MeshShader;
-			public PipelineStateSubObjectTypePixelShader PixelShader;
-			public PipelineStateSubObjectTypeSampleMask SampleMask;
-			public PipelineStateSubObjectTypePrimitiveTopology PrimitiveTopology;
-			public PipelineStateSubObjectTypeRasterizer RasterizerState;
-			public PipelineStateSubObjectTypeDepthStencil DepthStencilState;
-			public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
-			public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
-			public PipelineStateSubObjectTypeSampleDescription SampleDescription;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct ComputePipelineStateStream
-		{
-			public PipelineStateSubObjectTypeRootSignature RootSignature;
-			public PipelineStateSubObjectTypeComputeShader ComputeShader;
-		}
-
 		private unsafe Result CreatePipelineState<T, TData>(TData data, out T result) where T : ID3D12PipelineState where TData : unmanaged
 		{
 			PipelineStateStreamDescription description = new()
@@ -364,6 +342,28 @@ namespace Engine.GPU
 
 				return this;
 			});
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct GraphicsPipelineStateStream
+		{
+			public PipelineStateSubObjectTypeRootSignature RootSignature;
+			public PipelineStateSubObjectTypeMeshShader MeshShader;
+			public PipelineStateSubObjectTypePixelShader PixelShader;
+			public PipelineStateSubObjectTypeSampleMask SampleMask;
+			public PipelineStateSubObjectTypePrimitiveTopology PrimitiveTopology;
+			public PipelineStateSubObjectTypeRasterizer RasterizerState;
+			public PipelineStateSubObjectTypeDepthStencil DepthStencilState;
+			public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
+			public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
+			public PipelineStateSubObjectTypeSampleDescription SampleDescription;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct ComputePipelineStateStream
+		{
+			public PipelineStateSubObjectTypeRootSignature RootSignature;
+			public PipelineStateSubObjectTypeComputeShader ComputeShader;
 		}
 
 		#region Includes

@@ -1,7 +1,7 @@
 ﻿#include "Content/Shaders/Common.h"
 #include "Content/Shaders/Geometry/Shared/BaseMS.h"
 
-void PixelEntry(VertAttribute vert, PrimAttribute prim)
+void DepthPS(VertAttribute vert, PrimAttribute prim)
 {
 
 }

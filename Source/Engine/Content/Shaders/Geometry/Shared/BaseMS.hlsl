@@ -7,7 +7,7 @@ cbuffer CommandConstants : register(b0)
 
 [NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
-void MeshEntry(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices VertAttribute outVerts[64], out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
+void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices VertAttribute outVerts[64], out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
