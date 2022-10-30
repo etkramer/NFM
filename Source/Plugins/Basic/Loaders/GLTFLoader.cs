@@ -109,13 +109,11 @@ namespace Basic.Loaders
 					// Build vertices for the base mesh.
 					var baseVertices = BuildVertices(primitive.VertexAccessors, worldMatrix);
 
-					Debug.Assert(primitive.MorphTargetsCount == morphNames.Length);
-
 					// Build morph targets.
 					var morphTargets = new MorphTarget[primitive.MorphTargetsCount];
 					for (int i = 0; i < morphTargets.Length; i++)
 					{
-						var morphName = morphNames[i];
+						var morphName = (primitive.MorphTargetsCount == morphNames.Length) ? morphNames[i] : $"Morph {i}";
 						var morphDeltas = BuildVertices(primitive.GetMorphTargetAccessors(i), worldMatrix);
 
 						morphTargets[i] = new MorphTarget(morphName, morphDeltas);
