@@ -29,6 +29,7 @@ namespace Engine.Resources
 		internal BufferAllocation<GPUMesh> MeshHandle;
 
 		public bool IsCommitted { get; private set; } = false;
+		public bool IsDeformable => MorphTargets?.Length > 0;
 
 		public Box3D Bounds { get; set; } = Box3D.Infinity;
 

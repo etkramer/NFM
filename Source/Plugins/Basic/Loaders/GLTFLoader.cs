@@ -151,15 +151,15 @@ namespace Basic.Loaders
 				Vertex vertex = new Vertex();
 				vertex.Position = Vector3.TransformVector(new Vector3(positions[i].X, positions[i].Y, positions[i].Z), transform);
 
-				if (normals != default)
+				if (normals != null)
 				{
-					vertex.Normal = Vector3.TransformVector(new Vector3(positions[i].X, positions[i].Y, positions[i].Z), transform);
+					vertex.Normal = Vector3.TransformVector(new Vector3(normals[i].X, normals[i].Y, normals[i].Z), transform);
 				}
-				if (uv0 != default)
+				if (uv0 != null)
 				{
 					vertex.UV0 = new Vector2(uv0[i].X, uv0[i].Y);
 				}
-				if (uv1 != default)
+				if (uv1 != null)
 				{
 					vertex.UV1 = new Vector2(uv1[i].X, uv1[i].Y);
 				}
@@ -185,7 +185,7 @@ namespace Basic.Loaders
 		{
 			if (accessor == null)
 			{
-				return default;
+				return null;
 			}
 
 			var slice = accessor.SourceBufferView.Content.Slice(accessor.ByteOffset, accessor.ByteLength);
