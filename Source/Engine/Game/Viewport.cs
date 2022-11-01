@@ -36,7 +36,7 @@ namespace Engine.Rendering
 			ID = All.Count;
 
 			// Create work camera.
-			workCamera = new CameraNode().Spawn() as CameraNode;
+			workCamera = new CameraNode(null);
 			workCamera.Name = "Work Camera";
 
 			Game.OnTick += OnTick;

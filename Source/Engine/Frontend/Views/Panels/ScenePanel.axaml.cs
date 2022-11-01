@@ -45,15 +45,15 @@ namespace Engine.Frontend
 		{
 			if (type == "Model")
 			{
-				new ModelNode().Spawn();
+				new ModelNode(null);
 			}
 			else if (type == "Camera")
 			{
-				new CameraNode().Spawn();
+				new CameraNode(null);
 			}
 			else if (type == "PointLight")
 			{
-				new PointLightNode().Spawn();
+				new PointLightNode(null);
 			}
 		}
 	}

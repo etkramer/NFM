@@ -14,5 +14,10 @@ namespace Engine.World
 		/// The light's radius in meters
 		/// </summary>
 		[Inspect] public float Radius { get; set; } = 0.2f;
+
+		public PointLightNode(Scene scene) : base(scene)
+		{
+
+		}
 	}
 }

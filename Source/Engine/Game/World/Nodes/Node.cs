@@ -15,23 +15,10 @@ namespace Engine.World
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 
-		private Scene scene;
-		public Scene Scene
-		{
-			get => scene;
-			set
-			{
-				if (scene != value)
-				{
-					scene?.Despawn(this);
-					scene = value;
-					scene?.Spawn(this);
-				}
-			}
-		}
+		public Scene Scene { get; }
 
 		// Transform buffer
-		public Node()
+		public Node(Scene scene)
 		{
 			string name = GetType().Name.PascalToDisplay();
 			if (name.EndsWith(" Node"))
@@ -40,6 +27,8 @@ namespace Engine.World
 			}
 
 			Name = name;
+			Scene = scene ?? Scene.Main;
+			Scene.AddNode(this);
 		}
 
 		public virtual void Dispose()
@@ -48,18 +37,22 @@ namespace Engine.World
 			Selection.Deselect(this);
 
 			// Remove self from scene tree.
-			Scene?.Despawn(this);
-		}
-
-		/// <summary>
-		/// Spawns the actor into the given scene
-		/// </summary>
-		public Node Spawn(Scene scene = null)
-		{
-			Scene = scene ?? Scene.Main;
-			return this;
+			Scene?.RemoveNode(this);
 		}
 
 		public virtual void OnDrawGizmos(GizmosContext context) {}
+	}
+
+	/// <summary>
+	/// A node with a lifespan tied to it's owner and can't be reparented.
+	/// </summary>
+	public class ChildNode : Node
+	{
+		public Node Owner { get; }
+
+		public ChildNode(Node owner) : base(owner.Scene)
+		{
+			Owner = owner;
+		}
 	}
 }

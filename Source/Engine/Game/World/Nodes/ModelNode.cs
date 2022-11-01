@@ -23,7 +23,7 @@ namespace Engine.World
 		// Material instances
 		public MaterialInstance[] MaterialInstances { get; set; }
 		
-		public ModelNode()
+		public ModelNode(Scene scene) : base(scene)
 		{
 			// Track changes in transform
 			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)

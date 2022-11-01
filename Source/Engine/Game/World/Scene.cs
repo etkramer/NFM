@@ -13,17 +13,17 @@ namespace Engine.World
 
 		public Scene()
 		{
-			All.Add(this);
 			Nodes = new(nodes);
+			All.Add(this);
 
 			TransformBuffer.Name = "Transform Buffer";
 			InstanceBuffer.Name = "Instance Buffer";
 		}
 
 		/// <summary>
-		/// Adds a Node to the scene.
+		/// Adds a Node to the scene. Should ONLY be called from Node's constructor.
 		/// </summary>
-		public void Spawn(Node node)
+		internal void AddNode(Node node)
 		{
 			if (!nodes.Contains(node))
 			{
@@ -32,9 +32,9 @@ namespace Engine.World
 		}
 
 		/// <summary>
-		/// Removes a Node from the scene, but does *not* destroy it. Dispose() must still be called manually.
+		/// Removes a Node from the scene, but does *not* dispose of it. Should ONLY be called from Node's Dispose() implementation.
 		/// </summary>
-		public void Despawn(Node node)
+		internal void RemoveNode(Node node)
 		{
 			nodes.Remove(node);
 		}

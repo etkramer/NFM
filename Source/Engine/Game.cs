@@ -34,11 +34,12 @@ namespace Engine
 		public static void OnProjectCreated()
 		{
 			// Create example model
-			var model = new ModelNode();
+			var model = new ModelNode(null);
 			model.Position = new Vector3(0);
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
-			model.Spawn();
+
+			Debug.Log(model.Scene == null);
 		}
 
 		public static void Update()

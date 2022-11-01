@@ -14,7 +14,7 @@ namespace Engine.World
 
 		public float FOV => MathHelper.RadiansToDegrees(2 * (float)Math.Atan(SensorSize / 2f / FocalLength));
 
-		public CameraNode()
+		public CameraNode(Scene scene) : base(scene)
 		{
 
 		}
