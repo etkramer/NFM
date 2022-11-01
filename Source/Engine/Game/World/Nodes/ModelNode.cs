@@ -53,7 +53,7 @@ namespace Engine.World
 			base.Dispose();
 		}
 
-		public void UpdateInstances()
+		public void UpdateInstances(CommandList list)
 		{
 			// Get rid of existing instances.
 			for (int i = 0; i < InstanceHandles?.Length; i++)
@@ -102,7 +102,7 @@ namespace Engine.World
 					};
 
 					// Upload instance to buffer.
-					Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[instanceID], instanceData);
+					list.UploadBuffer(InstanceHandles[instanceID], instanceData);
 					instanceID++;
 				}
 			}
@@ -110,7 +110,7 @@ namespace Engine.World
 			IsInstanceDirty = false;
 		}
 
-		public void UpdateTransform()
+		public void UpdateTransform(CommandList list)
 		{
 			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
 
@@ -126,7 +126,7 @@ namespace Engine.World
 				}
 			}
 
-			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
+			list.UploadBuffer(TransformHandle, new GPUTransform()
 			{
 				ObjectToWorld = transform,
 				WorldToObject = transform.Inverse()

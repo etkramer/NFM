@@ -14,12 +14,12 @@ namespace Engine.Rendering
 				{
 					if (model.IsTransformDirty)
 					{
-						model.UpdateTransform();
+						model.UpdateTransform(List);
 					}
 
 					if (model.IsInstanceDirty)
 					{
-						model.UpdateInstances();
+						model.UpdateInstances(List);
 					}
 				}
 			}

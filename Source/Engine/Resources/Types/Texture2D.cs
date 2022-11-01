@@ -15,6 +15,7 @@ namespace Engine.Resources
 				TextureFormat.BC2 => true,
 				TextureFormat.BC3 => true,
 				TextureFormat.BC5 => true,
+				TextureFormat.BC7 => true,
 				_ => false
 			};
 		}
@@ -23,8 +24,8 @@ namespace Engine.Resources
 		{
 			return format switch
 			{
-				TextureFormat.RGBA_Float16 => true,
-				TextureFormat.RGBA_Float32 => true,
+				TextureFormat.RGBA16F => true,
+				TextureFormat.RGBA32F => true,
 				_ => false
 			};
 		}
@@ -32,18 +33,19 @@ namespace Engine.Resources
 
 	public enum TextureFormat
 	{
-		RGB = 0,
-		RGBA,
+		RGB8 = 0,
+		RGBA8,
 
 		// Floating-point HDR
-		RGBA_Float16,
-		RGBA_Float32,
+		RGBA16F,
+		RGBA32F,
 
 		// Block Compression
 		BC1,
 		BC2,
 		BC3,
 		BC5,
+		BC7,
 
 		// DXT aliases
 		DXT1 = BC1,
@@ -72,14 +74,15 @@ namespace Engine.Resources
 			// Select the format to use GPU-side.
 			DXGIFormat resourceFormat = format switch
 			{
-				TextureFormat.RGB => DXGIFormat.R8G8B8A8_UNorm,
-				TextureFormat.RGBA => DXGIFormat.R8G8B8A8_UNorm,
-				TextureFormat.RGBA_Float16 => DXGIFormat.R16G16B16A16_Float,
-				TextureFormat.RGBA_Float32 => DXGIFormat.R32G32B32A32_Float,
+				TextureFormat.RGB8 => DXGIFormat.R8G8B8A8_UNorm,
+				TextureFormat.RGBA8 => DXGIFormat.R8G8B8A8_UNorm,
+				TextureFormat.RGBA16F => DXGIFormat.R16G16B16A16_Float,
+				TextureFormat.RGBA32F => DXGIFormat.R32G32B32A32_Float,
 				TextureFormat.BC1 => DXGIFormat.BC1_UNorm,
 				TextureFormat.BC2 => DXGIFormat.BC2_UNorm,
 				TextureFormat.BC3 => DXGIFormat.BC3_UNorm,
 				TextureFormat.BC5 => DXGIFormat.BC5_UNorm,
+				TextureFormat.BC7 => DXGIFormat.BC7_UNorm,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 
@@ -95,7 +98,7 @@ namespace Engine.Resources
 		public void SetPixelData(ReadOnlySpan<byte> data, int mipLevel = 0, bool generateMips = false)
 		{
 			// D3D12 doesn't actually support RGB (24bpp), so we have to convert it to RGBA.
-			if (Format == TextureFormat.RGB)
+			if (Format == TextureFormat.RGB8)
 			{
 				var convertedData = new byte[data.Length + (data.Length / 3)];
 				for (int i = 0, j = 0; i < data.Length; i += 3, j += 4)
@@ -115,7 +118,7 @@ namespace Engine.Resources
 			Renderer.DefaultCommandList.UploadTexture(D3DResource, data, mipLevel);
 
 			// Generate mipmaps if requested.
-			if (generateMips && Format == TextureFormat.RGBA || Format == TextureFormat.RGB)
+			if (generateMips && Format == TextureFormat.RGBA8 || Format == TextureFormat.RGB8)
 			{
 				Renderer.DefaultCommandList.GenerateMips(D3DResource);
 			}
@@ -140,7 +143,7 @@ namespace Engine.Resources
 				}
 			};
 
-			Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA, 1);
+			Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA8, 1);
 			texture.SetPixelData(data);
 			return texture;
 		}

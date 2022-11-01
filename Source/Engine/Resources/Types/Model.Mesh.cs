@@ -11,10 +11,10 @@ namespace Engine.Resources
 	public partial class Mesh : IDisposable
 	{
 		// Geometry buffers
-		internal static GraphicsBuffer<uint> PrimBuffer = new(2000000);
-		internal static GraphicsBuffer<Vertex> VertBuffer = new(2000000);
-		internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(2000000);
-		internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(1000000 + 1);
+		internal static GraphicsBuffer<uint> PrimBuffer = new(20000000 * 3); // Support 20m tris
+		internal static GraphicsBuffer<Vertex> VertBuffer = new(20000000); // Support 20m verts
+		internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(20000000); // Support 20m meshlets
+		internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(20000000 + 1); // Support 20m meshes
 
 		static Mesh()
 		{
@@ -33,10 +33,10 @@ namespace Engine.Resources
 
 		public Box3D Bounds { get; set; } = Box3D.Infinity;
 
-		public uint[] Indices { get; set; }
-		public Vertex[] Vertices { get; set; }
-		public Material Material { get; set; }
-		public MorphTarget[] MorphTargets { get; set; }
+		public uint[] Indices { get; private set; }
+		public Vertex[] Vertices { get; private set; }
+		public Material Material { get; private set; }
+		public MorphTarget[] MorphTargets { get; private set; }
 
 		public void SetIndices(uint[] indices)
 		{
