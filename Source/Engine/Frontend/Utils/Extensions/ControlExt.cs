@@ -47,9 +47,9 @@ namespace Engine.Frontend
 
 	public static partial class ControlExt
 	{
-		public static void Bind(this IControl subject, AvaloniaProperty property, string propertyName, object source = null)
+		public static void Bind(this IControl subject, AvaloniaProperty property, string propertyName, object source = null, BindingMode mode = BindingMode.Default)
 		{
-			AvaloniaObjectExtensions.Bind(subject, property, new Binding(propertyName, BindingMode.Default), source);
+			AvaloniaObjectExtensions.Bind(subject, property, new Binding(propertyName, mode), source);
 		}
 
 		public static Binding BindTo(this IDataTemplate subject, string propertyName, object sourceObject = null) => BindTo(subject as IControl, propertyName, sourceObject);

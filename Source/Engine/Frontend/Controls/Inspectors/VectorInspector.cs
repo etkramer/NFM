@@ -2,89 +2,94 @@
 using System.ComponentModel;
 using System.Reflection;
 using Avalonia;
-using Avalonia.Data;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Engine.Editor;
-using System.Collections.Specialized;
 using Avalonia.Controls.Primitives;
-using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
+using Avalonia.Media;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace Engine.Frontend
 {
-	public class VectorInspector : BaseInspector
+	[CustomInspector(typeof(Vector2), typeof(Vector2i), typeof(Vector3), typeof(Vector3i), typeof(Vector4), typeof(Vector4i))]
+	public partial class VectorInspector : UserControl
 	{
-		[Notify] private object ValueX
+		[Reactive]
+		private object ValueX
 		{
 			set
 			{
-				var vector = GetFirstValue<object>();
+				var vector = Value;
 				vecIndexer.SetValue(vector, value, new object[] {0});
-				SetValue(vector);
+				Value = vector;
 			}
 			get
 			{
-				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {0});
+				return vecIndexer.GetValue(Value, new object[] {0});
 			}
 		}
 
-		[Notify] private object ValueY
+		[Reactive]
+		private object ValueY
 		{
 			set
 			{
-				var vector = GetFirstValue<object>();
+				var vector = Value;
 				vecIndexer.SetValue(vector, value, new object[] {1});
-				SetValue(vector);
+				Value = vector;
 			}
 			get
 			{
-				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {1});
+				return vecIndexer.GetValue(Value, new object[] {1});
 			}
 		}
 
-		[Notify] private object ValueZ
+		[Reactive]
+		private object ValueZ
 		{
 			set
 			{
-				var vector = GetFirstValue<object>();
+				var vector = Value;
 				vecIndexer.SetValue(vector, value, new object[] {2});
-				SetValue(vector);
+				Value = vector;
 			}
 			get
 			{
-				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {2});
+				return vecIndexer.GetValue(Value, new object[] {2});
 			}
 		}
 
-		[Notify] private object ValueW
+		[Reactive]
+		private object ValueW
 		{
 			set
 			{
-				var vector = GetFirstValue<object>();
+				var vector = Value;
 				vecIndexer.SetValue(vector, value, new object[] {3});
-				SetValue(vector);
+				Value = vector;
 			}
 			get
 			{
-				return vecIndexer.GetValue(GetFirstValue<object>(), new object[] {3});
+				return vecIndexer.GetValue(Value, new object[] {3});
 			}
 		}
 
 		private PropertyInfo vecIndexer;
 
-		public VectorInspector(PropertyInfo property, IEnumerable<object> subjects) : base(property, subjects)
+		public VectorInspector()
 		{
-			// Subscribe to property changed notifications.
-			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueX));
-			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueY));
-			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueZ));
-			OnSelectedPropertyChanged += () => (this as INotify).Raise(nameof(ValueW));
+			this.WhenAnyValue(o => o.Value)
+				.Subscribe(o =>
+				{
+					RaisePropertyChanged(nameof(ValueX));
+					RaisePropertyChanged(nameof(ValueY));
+					RaisePropertyChanged(nameof(ValueZ));
+					RaisePropertyChanged(nameof(ValueW));
+				});
 
 			// Count components and grab this[] indexer property.
-			int numComponents = GetNumComponents(property.PropertyType);
-			vecIndexer = property.PropertyType.GetProperty("Item");
+			int numComponents = GetNumComponents(Property.PropertyType);
+			vecIndexer = Property.PropertyType.GetProperty("Item");
 
 			// Loop through vector components...
 			List<Control> inputs = new();
@@ -148,11 +153,9 @@ namespace Engine.Frontend
 			_ => null
 		};
 
-		private SolidColorBrush GetIconBackground(int component)
+		public void Dispose()
 		{
-			var brush = GetIconForeground(component);
-			brush.Opacity = 0.1;
-			return brush;
+
 		}
 	}
 }

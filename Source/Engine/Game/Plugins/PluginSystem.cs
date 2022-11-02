@@ -33,6 +33,7 @@ namespace Engine.Plugins
 					{
 						// Load plugin assembly.
 						Assembly assembly = Assembly.LoadFrom(expectedPath);
+						ReflectionHelper.RegisterAssembly(assembly);
 
 						// Find the plugin type...
 						var pluginType = assembly.GetTypes().FirstOrDefault(o => o.IsAssignableTo(typeof(Plugin)));

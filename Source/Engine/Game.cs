@@ -38,8 +38,6 @@ namespace Engine
 			model.Position = new Vector3(0);
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
-
-			Debug.Log(model.Scene == null);
 		}
 
 		public static void Update()

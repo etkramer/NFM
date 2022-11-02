@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 namespace Engine.Common
 {
@@ -10,6 +12,19 @@ namespace Engine.Common
 		public const BindingFlags BindingFlagsAll = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 		public const BindingFlags BindingFlagsAllStatic = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 		public const BindingFlags BindingFlagsAllNonStatic = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+
+		public static ConcurrentBag<Assembly> LoadedAssemblies { get; } = new();
+
+		static ReflectionHelper()
+		{
+			RegisterAssembly(Assembly.GetExecutingAssembly());
+			RegisterAssembly(Assembly.GetEntryAssembly());
+		}
+
+		public static void RegisterAssembly(Assembly assembly)
+		{
+			LoadedAssemblies.Add(assembly);
+		}
 
 		public static bool IsStatic(this Type type)
 		{
@@ -56,6 +71,11 @@ namespace Engine.Common
 		public static bool HasAttribute<T>(this PropertyInfo property) where T : Attribute
 		{
 			return property.GetCustomAttribute<T>() != null;
+		}
+
+		public static bool HasAttribute<T>(this Type type) where T : Attribute
+		{
+			return type.GetCustomAttribute<T>() != null;
 		}
 
 		public static PropertyInfo[] GetAllProperties(this Type type)

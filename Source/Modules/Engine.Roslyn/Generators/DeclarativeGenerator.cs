@@ -62,7 +62,6 @@ namespace Engine.Aspects
 			}
 		}
 
-
 		private string GenerateSource(ITypeSymbol type, AttributeData[] attributes)
 		{
 			List<string> methods = new();
