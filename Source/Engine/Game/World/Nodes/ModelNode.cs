@@ -137,7 +137,16 @@ namespace Engine.World
 		{
 			if (Selection.Selected.Contains(this) && Model != null && IsVisible)
 			{
-				context.DrawBox(Model.Parts[0].Meshes[0].Bounds);
+				Box3D modelBounds = Box3D.Zero;
+				foreach (var part in Model.Parts)
+				{
+					foreach (var mesh in part.Meshes)
+					{
+						modelBounds += mesh.Bounds;
+					}
+				}
+
+				context.DrawBox(modelBounds);
 			}
 
 			base.OnDrawGizmos(context);

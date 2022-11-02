@@ -45,9 +45,9 @@ namespace Engine.Mathematics
 			return $"{Min}, {Max}";
 		}
 
-		public static Box3D operator+(Box3D left, Vector3 right)
+		public static Box3D operator+(Box3D left, Box3D right)
 		{
-			return new Box3D(left.Min + right, left.Max + right);
+			return new Box3D(Vector3.ComponentMin(left.Min, right.Min), Vector3.ComponentMax(left.Max, right.Max));
 		}
 
 		public static bool operator==(Box3D left, Box3D right)

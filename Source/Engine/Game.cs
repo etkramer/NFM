@@ -28,16 +28,14 @@ namespace Engine
 			// Kick off model loading early.
 			_ = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
 
-			Project.OnProjectCreated += OnProjectCreated;
-		}
-
-		public static void OnProjectCreated()
-		{
-			// Create example model
-			var model = new ModelNode(null);
-			model.Position = new Vector3(0);
-			model.Rotation = new Vector3(0);
-			model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
+			Project.OnProjectCreated += () =>
+			{
+				// Create example model
+				var model = new ModelNode(null);
+				model.Position = new Vector3(0);
+				model.Rotation = new Vector3(0);
+				model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
+			};
 		}
 
 		public static void Update()
