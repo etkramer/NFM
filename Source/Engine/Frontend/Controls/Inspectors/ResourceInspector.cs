@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.LogicalTree;
 using Engine.Resources;
 
@@ -13,12 +14,11 @@ namespace Engine.Frontend
 	{
 		public ResourceInspector()
 		{
-			// Create BoolInput and bind to inspected property.
-			var resourceInput = new ResourceInput();
-			resourceInput.Bind(ResourceInput.ValueProperty, nameof(Value));
-
-			// Set inspector content.
-			Content = resourceInput;
+			// Create ResourceInput and bind to inspected property.
+			Content = new ResourceInput()
+			{
+				[!ResourceInput.ValueProperty] = new Binding(nameof(Value))
+			};
 		}
 
 		public void Dispose()

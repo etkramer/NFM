@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.LogicalTree;
 
 namespace Engine.Frontend
@@ -13,11 +14,10 @@ namespace Engine.Frontend
 		public NumberInspector()
 		{
 			// Create NumInput and bind to inspected property.
-			var numInput = new NumInput();
-			numInput.Bind(NumInput.ValueProperty, nameof(Value));
-
-			// Set inspector content.
-			Content = numInput;
+			Content = new NumInput()
+			{
+				[!NumInput.ValueProperty] = new Binding(nameof(Value))
+			};
 		}
 
 		public void Dispose()

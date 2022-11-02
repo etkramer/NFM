@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.LogicalTree;
 
 namespace Engine.Frontend
@@ -13,11 +14,10 @@ namespace Engine.Frontend
 		public StringInspector()
 		{
 			// Create TextInput and bind to inspected property.
-			var textInput = new TextInput();
-			textInput.Bind(Frontend.TextInput.ValueProperty, nameof(Value));
-
-			// Set inspector content.
-			Content = textInput;
+			Content = new TextInput()
+			{
+				[!Frontend.TextInput.ValueProperty] = new Binding(nameof(Value))
+			};
 		}
 
 		public void Dispose()

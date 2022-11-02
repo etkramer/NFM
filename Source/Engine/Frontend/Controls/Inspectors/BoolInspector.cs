@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.LogicalTree;
 
 namespace Engine.Frontend
@@ -13,11 +14,10 @@ namespace Engine.Frontend
 		public BoolInspector()
 		{
 			// Create BoolInput and bind to inspected property.
-			var boolInput = new BoolInput();
-			boolInput.Bind(BoolInput.ValueProperty, nameof(Value));
-
-			// Set inspector content.
-			Content = boolInput;
+			Content = new BoolInput()
+			{
+				[!BoolInput.ValueProperty] = new Binding(nameof(Value))
+			};
 		}
 
 		public void Dispose()

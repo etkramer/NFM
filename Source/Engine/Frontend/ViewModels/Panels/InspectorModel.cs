@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reflection;
 using AspectInjector.Broker;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using DynamicData;
@@ -97,7 +99,7 @@ namespace Engine.Frontend
 				List<Control> inspectors = new();
 				foreach (var property in bucket)
 				{
-					inspectors.Add(new PropertyInspector(Selection.Selected.ToArray(), property));
+					inspectors.Add(new InspectorPropertyItem(Selection.Selected.ToArray(), property));
 				}
 
 				// Create expander
@@ -116,6 +118,45 @@ namespace Engine.Frontend
 			return new StackPanel()
 				.Orientation(Orientation.Vertical)
 				.Children(expanders.ToArray());
+		}
+
+		public sealed class InspectorPropertyItem : UserControl
+		{
+			[Notify] public PropertyInfo Property { get; set; }
+			[Notify] public IEnumerable<object> Subjects { get; set; }
+
+			[Notify] public Control FieldContent { get; set; }
+
+			public InspectorPropertyItem(IEnumerable<object> subjects, PropertyInfo property)
+			{
+				Subjects = subjects;
+				Property = property;
+				DataContext = this;
+
+				Margin = new(0, 4);
+				HorizontalAlignment = HorizontalAlignment.Stretch;
+				Content = new Grid()
+					.Columns("0.5*, *")
+					.Children(
+						// Name
+						new TextBlock()
+							.Column(0)
+							.Margin(28, 0, 0, 0)
+							.HorizontalAlignment(HorizontalAlignment.Left)
+							.VerticalAlignment(VerticalAlignment.Center)
+							.Text(Property.Name.PascalToDisplay())
+							.Foreground(this.GetResourceBrush("ThemeForegroundMidBrush"))
+							.Size(11),
+						// Field
+						new ContentControl()
+							.Column(1)
+							.Margin(0, 0, 10, 0)		
+							.VerticalAlignment(VerticalAlignment.Center)
+							.Content(nameof(FieldContent), BindingMode.Default)
+					);
+
+				FieldContent = InspectHelper.Create(subjects, Property);
+			}
 		}
 	}
 }
