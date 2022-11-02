@@ -1,4 +1,6 @@
-## 📖 About 
+# 3D Project
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
 This project is a 3D animation tool designed to modernize more traditional animation workflows, especially in the context of machinima. Planned features include:
 - A non-destructive, layer-based animation workflow
@@ -7,10 +9,10 @@ This project is a 3D animation tool designed to modernize more traditional anima
 
 Note that this project is still in early development, and it's goals are continually in flux.
 
-## ⚠ Status
+## Status
 
 While this project has been in development for more than a year in various forms, it is still *far* from feature-complete. The repository has been made public solely for the sake of transparency, and is not expected to be built or contributed to.
 
-## 💡 Licence
+## Licence
 
 This project is licenced under the [MIT licence](LICENSE.md).
