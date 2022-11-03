@@ -39,13 +39,13 @@
 	</Style>
 
 	<Style Selector="Button.dialog1">
-		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="CornerRadius" Value="2"/>
 		<Setter Property="Background" Value="#555555"/>
 		<Setter Property="BorderBrush" Value="#666666"/>
 	</Style>
 
 	<Style Selector="Button.dialog2">
-		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="CornerRadius" Value="2"/>
 		<Setter Property="Background" Value="{StaticResource ThemeAccentColor}"/>
 		<Setter Property="BorderBrush" Value="#4883F1"/>
 	</Style>
@@ -53,7 +53,7 @@
 	<Style Selector="Button.window">
 		<Setter Property="Background" Value="Transparent"/>
 		<Setter Property="BorderThickness" Value="0"/>
-		<Setter Property="CornerRadius" Value="4"/>
+		<Setter Property="CornerRadius" Value="2"/>
 	</Style>
 
 	<Style Selector="Button.window:pointerover">
