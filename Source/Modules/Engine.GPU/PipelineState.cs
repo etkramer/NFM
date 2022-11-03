@@ -323,6 +323,9 @@ namespace Engine.GPU
 						DepthStencilFormat = Graphics.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
+						{
+							AntialiasedLineEnable = topologyType == TopologyType.Line,
+						}
 					}, out PSO);
 				}
 				else if (IsCompute)
