@@ -597,7 +597,7 @@ namespace Engine.Mathematics
 		/// </param>
 		/// <returns>The rotation.</returns>
 		[Pure]
-		public Quaternion ExtractRotation(bool rowNormalize = true)
+		public Rotation ExtractRotation(bool rowNormalize = true)
 		{
 			var row0 = Row0.Xyz;
 			var row1 = Row1.Xyz;
@@ -611,7 +611,7 @@ namespace Engine.Mathematics
 			}
 
 			// code below adapted from Blender
-			var q = default(Quaternion);
+			var q = default(Rotation);
 			var trace = 0.25 * (row0[0] + row1[1] + row2[2] + 1.0);
 
 			if (trace > 0)
@@ -730,7 +730,7 @@ namespace Engine.Mathematics
 		/// </summary>
 		/// <param name="q">The quaternion to rotate by.</param>
 		/// <param name="result">A matrix instance.</param>
-		public static void CreateFromQuaternion(in Quaternion q, out Matrix4 result)
+		public static void CreateFromQuaternion(in Rotation q, out Matrix4 result)
 		{
 			// Adapted from https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix
 			// with the caviat that opentk uses row-major matrices so the matrix we create is transposed
@@ -775,7 +775,7 @@ namespace Engine.Mathematics
 		/// <param name="q">The quaternion to rotate by.</param>
 		/// <returns>A matrix instance.</returns>
 		[Pure]
-		public static Matrix4 CreateFromQuaternion(Quaternion q)
+		public static Matrix4 CreateFromQuaternion(Rotation q)
 		{
 			CreateFromQuaternion(in q, out Matrix4 result);
 			return result;
@@ -787,9 +787,9 @@ namespace Engine.Mathematics
 		/// <returns>A matrix instance.</returns>
 		public static Matrix4 CreateRotation(Vector3 angles)
 		{
-			Matrix4 rotationX = CreateRotationX(MathHelper.DegreesToRadians(angles.X));
-			Matrix4 rotationY = CreateRotationY(MathHelper.DegreesToRadians(angles.Y));
-			Matrix4 rotationZ = CreateRotationZ(MathHelper.DegreesToRadians(angles.Z));
+			Matrix4 rotationX = CreateRotationX(angles.X.ToRadians());
+			Matrix4 rotationY = CreateRotationY(angles.Y.ToRadians());
+			Matrix4 rotationZ = CreateRotationZ(angles.Z.ToRadians());
 			return rotationX * rotationY * rotationZ; // Apply up component last.
 		}
 
@@ -1199,7 +1199,7 @@ namespace Engine.Mathematics
 		[Pure]
 		public static Matrix4 CreatePerspectiveReversed(float fovy, float aspect, float depthNear)
 		{
-			float top = depthNear * MathF.Tan(0.5f * MathHelper.DegreesToRadians(fovy));
+			float top = depthNear * MathF.Tan(0.5f * MathHelper.ToRadians(fovy));
 			float bottom = -top;
 			float left = bottom * aspect;
 			float right = top * aspect;
@@ -1218,28 +1218,6 @@ namespace Engine.Mathematics
 
 			return mat;
 		}
-
-		/// <summary>
-		/// Creates a perspective projection matrix for a reverse depth buffer.
-		/// </summary>
-		/// <param name="fovy">Angle of the field of view in the y direction (in degrees).</param>
-		/// <param name="aspect">Aspect ratio of the view (width / height).</param>
-		/// <param name="zNear">Distance to the near clip plane.</param>
-		/// <returns></returns>
-		/*[Pure]
-		public static Matrix4 CreateReversedPerspectiveFieldOfView(float fovx, float aspect, float zNear)
-		{
-			fovx = MathHelper.DegreesToRadians(fovx);
-			float fovy = 2 * MathF.Atan(MathF.Tan(fovx / 2.0f) * (1.0f / aspect));
-			float f = 1.0f / MathF.Tan(fovy / 2.0f);
-
-			Matrix4 Projection = new(f / aspect, 0.0f, 0.0f, 0.0f, 
-				0.0f, f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, -1.0f,
-				0.0f, 0.0f, zNear, 0.0f);
-
-			return Projection;
-		}*/
 
 		[Pure]
 		public static Matrix4 CreatePerspectiveReversal()

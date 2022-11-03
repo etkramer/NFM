@@ -28,10 +28,10 @@ using System.Xml.Serialization;
 namespace Engine.Mathematics
 {
     /// <summary>
-    /// Represents a Quaternion.
+    /// Represents a quaternion rotation, where all values are in radians.
     /// </summary>
     [Serializable, StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IEquatable<Quaternion>
+    public struct Rotation : IEquatable<Rotation>
     {
         /// <summary>
         /// The X, Y and Z components of this instance.
@@ -44,37 +44,36 @@ namespace Engine.Mathematics
         public float W;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Quaternion"/> struct.
+        /// Initializes a new instance of the <see cref="Rotation"/> struct.
         /// </summary>
         /// <param name="v">The Vector part.</param>
         /// <param name="w">The w part.</param>
-        public Quaternion(Vector3 v, float w)
+        public Rotation(Vector3 v, float w)
         {
             Xyz = v;
             W = w;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Quaternion"/> struct.
+        /// Initializes a new instance of the <see cref="Rotation"/> struct.
         /// </summary>
         /// <param name="x">The x component.</param>
         /// <param name="y">The y component.</param>
         /// <param name="z">The z component.</param>
         /// <param name="w">The w component.</param>
-        public Quaternion(float x, float y, float z, float w)
-            : this(new Vector3(x, y, z), w)
+        public Rotation(float x, float y, float z, float w) : this(new Vector3(x, y, z), w)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Quaternion"/> struct from given Euler angles in radians.
+        /// Initializes a new instance of the <see cref="Rotation"/> struct from given Euler angles in radians.
         /// The rotations will get applied in following order:
         /// 1. around X axis, 2. around Y axis, 3. around Z axis.
         /// </summary>
         /// <param name="rotationX">Counterclockwise rotation around X axis in radian.</param>
         /// <param name="rotationY">Counterclockwise rotation around Y axis in radian.</param>
         /// <param name="rotationZ">Counterclockwise rotation around Z axis in radian.</param>
-        public Quaternion(float rotationX, float rotationY, float rotationZ)
+        public Rotation(float rotationX, float rotationY, float rotationZ)
         {
             rotationX *= 0.5f;
             rotationY *= 0.5f;
@@ -94,12 +93,12 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Quaternion"/> struct from given Euler angles in radians.
+        /// Initializes a new instance of the <see cref="Rotation"/> struct from given Euler angles in radians.
         /// The rotations will get applied in following order:
         /// 1. Around X, 2. Around Y, 3. Around Z.
         /// </summary>
         /// <param name="eulerAngles">The counterclockwise euler angles as a Vector3.</param>
-        public Quaternion(Vector3 eulerAngles)
+        public Rotation(Vector3 eulerAngles)
             : this(eulerAngles.X, eulerAngles.Y, eulerAngles.Z)
         {
         }
@@ -179,61 +178,48 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Convert the current quaternion to Euler angle representation.
-        /// </summary>
-        /// <param name="angles">The Euler angles in radians.</param>
-        public void ToEulerAngles(out Vector3 angles)
-        {
-            angles = ToEulerAngles();
-        }
-
-        /// <summary>
         /// Convert this instance to an Euler angle representation.
         /// </summary>
         /// <returns>The Euler angles in radians.</returns>
-        public Vector3 ToEulerAngles()
-        {
-            /*
-            reference
-            http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-            http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-            */
+        public Vector3 EulerAngles
+		{
+			get
+			{
+				Rotation quat = this;
 
-            var q = this;
+				// Threshold for the singularities found at the north/south poles.
+				const float SINGULARITY_THRESHOLD = 0.4999995f;
 
-            Vector3 eulerAngles;
+				var sqw = quat.W * quat.W;
+				var sqx = quat.X * quat.X;
+				var sqy = quat.Y * quat.Y;
+				var sqz = quat.Z * quat.Z;
+				var unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+				var singularityTest = (quat.X * quat.Z) + (quat.W * quat.Y);
 
-            // Threshold for the singularities found at the north/south poles.
-            const float SINGULARITY_THRESHOLD = 0.4999995f;
+				Vector3 eulerAngles;
+				if (singularityTest > SINGULARITY_THRESHOLD * unit)
+				{
+					eulerAngles.Z = (float)(2 * System.Math.Atan2(quat.X, quat.W));
+					eulerAngles.Y = MathHelper.PiOver2;
+					eulerAngles.X = 0;
+				}
+				else if (singularityTest < -SINGULARITY_THRESHOLD * unit)
+				{
+					eulerAngles.Z = (float)(-2 * System.Math.Atan2(quat.X, quat.W));
+					eulerAngles.Y = -MathHelper.PiOver2;
+					eulerAngles.X = 0;
+				}
+				else
+				{
+					eulerAngles.Z = MathF.Atan2(2 * ((quat.W * quat.Z) - (quat.X * quat.Y)), sqw + sqx - sqy - sqz);
+					eulerAngles.Y = MathF.Asin(2 * singularityTest / unit);
+					eulerAngles.X = MathF.Atan2(2 * ((quat.W * quat.X) - (quat.Y * quat.Z)), sqw - sqx - sqy + sqz);
+				}
 
-            var sqw = q.W * q.W;
-            var sqx = q.X * q.X;
-            var sqy = q.Y * q.Y;
-            var sqz = q.Z * q.Z;
-            var unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
-            var singularityTest = (q.X * q.Z) + (q.W * q.Y);
-
-            if (singularityTest > SINGULARITY_THRESHOLD * unit)
-            {
-                eulerAngles.Z = (float)(2 * System.Math.Atan2(q.X, q.W));
-                eulerAngles.Y = MathHelper.PiOver2;
-                eulerAngles.X = 0;
-            }
-            else if (singularityTest < -SINGULARITY_THRESHOLD * unit)
-            {
-                eulerAngles.Z = (float)(-2 * System.Math.Atan2(q.X, q.W));
-                eulerAngles.Y = -MathHelper.PiOver2;
-                eulerAngles.X = 0;
-            }
-            else
-            {
-                eulerAngles.Z = MathF.Atan2(2 * ((q.W * q.Z) - (q.X * q.Y)), sqw + sqx - sqy - sqz);
-                eulerAngles.Y = MathF.Asin(2 * singularityTest / unit);
-                eulerAngles.X = MathF.Atan2(2 * ((q.W * q.X) - (q.Y * q.Z)), sqw - sqx - sqy + sqz);
-            }
-
-            return eulerAngles;
-        }
+				return eulerAngles;
+			}
+		}
 
         /// <summary>
         /// Gets the length (magnitude) of the quaternion.
@@ -250,7 +236,7 @@ namespace Engine.Mathematics
         /// Returns a copy of the Quaternion scaled to unit length.
         /// </summary>
         /// <returns>The normalized copy.</returns>
-        public Quaternion Normalized()
+        public Rotation Normalized()
         {
             var q = this;
             q.Normalize();
@@ -269,7 +255,7 @@ namespace Engine.Mathematics
         /// Returns the inverse of this Quaternion.
         /// </summary>
         /// <returns>The inverted copy.</returns>
-        public Quaternion Inverted()
+        public Rotation Inverted()
         {
             var q = this;
             q.Invert();
@@ -297,7 +283,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Defines the identity quaternion.
         /// </summary>
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public static readonly Rotation Identity = new Rotation(0, 0, 0, 1);
 
         /// <summary>
         /// Add two quaternions.
@@ -306,9 +292,9 @@ namespace Engine.Mathematics
         /// <param name="right">The second operand.</param>
         /// <returns>The result of the addition.</returns>
         [Pure]
-        public static Quaternion Add(Quaternion left, Quaternion right)
+        public static Rotation Add(Rotation left, Rotation right)
         {
-            return new Quaternion(
+            return new Rotation(
                 left.Xyz + right.Xyz,
                 left.W + right.W);
         }
@@ -319,9 +305,9 @@ namespace Engine.Mathematics
         /// <param name="left">The first operand.</param>
         /// <param name="right">The second operand.</param>
         /// <param name="result">The result of the addition.</param>
-        public static void Add(in Quaternion left, in Quaternion right, out Quaternion result)
+        public static void Add(in Rotation left, in Rotation right, out Rotation result)
         {
-            result = new Quaternion(
+            result = new Rotation(
                 left.Xyz + right.Xyz,
                 left.W + right.W);
         }
@@ -333,9 +319,9 @@ namespace Engine.Mathematics
         /// <param name="right">The right instance.</param>
         /// <returns>The result of the operation.</returns>
         [Pure]
-        public static Quaternion Sub(Quaternion left, Quaternion right)
+        public static Rotation Sub(Rotation left, Rotation right)
         {
-            return new Quaternion(
+            return new Rotation(
                 left.Xyz - right.Xyz,
                 left.W - right.W);
         }
@@ -346,9 +332,9 @@ namespace Engine.Mathematics
         /// <param name="left">The left instance.</param>
         /// <param name="right">The right instance.</param>
         /// <param name="result">The result of the operation.</param>
-        public static void Sub(in Quaternion left, in Quaternion right, out Quaternion result)
+        public static void Sub(in Rotation left, in Rotation right, out Rotation result)
         {
-            result = new Quaternion(
+            result = new Rotation(
                 left.Xyz - right.Xyz,
                 left.W - right.W);
         }
@@ -360,9 +346,9 @@ namespace Engine.Mathematics
         /// <param name="right">The second instance.</param>
         /// <returns>A new instance containing the result of the calculation.</returns>
         [Pure]
-        public static Quaternion Multiply(Quaternion left, Quaternion right)
+        public static Rotation Multiply(Rotation left, Rotation right)
         {
-            Multiply(in left, in right, out Quaternion result);
+            Multiply(in left, in right, out Rotation result);
             return result;
         }
 
@@ -372,9 +358,9 @@ namespace Engine.Mathematics
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <param name="result">A new instance containing the result of the calculation.</param>
-        public static void Multiply(in Quaternion left, in Quaternion right, out Quaternion result)
+        public static void Multiply(in Rotation left, in Rotation right, out Rotation result)
         {
-            result = new Quaternion(
+            result = new Rotation(
                 (right.W * left.Xyz) + (left.W * right.Xyz) + Vector3.Cross(left.Xyz, right.Xyz),
                 (left.W * right.W) - Vector3.Dot(left.Xyz, right.Xyz));
         }
@@ -385,9 +371,9 @@ namespace Engine.Mathematics
         /// <param name="quaternion">The instance.</param>
         /// <param name="scale">The scalar.</param>
         /// <param name="result">A new instance containing the result of the calculation.</param>
-        public static void Multiply(in Quaternion quaternion, float scale, out Quaternion result)
+        public static void Multiply(in Rotation quaternion, float scale, out Rotation result)
         {
-            result = new Quaternion
+            result = new Rotation
             (
                 quaternion.X * scale,
                 quaternion.Y * scale,
@@ -403,9 +389,9 @@ namespace Engine.Mathematics
         /// <param name="scale">The scalar.</param>
         /// <returns>A new instance containing the result of the calculation.</returns>
         [Pure]
-        public static Quaternion Multiply(Quaternion quaternion, float scale)
+        public static Rotation Multiply(Rotation quaternion, float scale)
         {
-            return new Quaternion
+            return new Rotation
             (
                 quaternion.X * scale,
                 quaternion.Y * scale,
@@ -420,9 +406,9 @@ namespace Engine.Mathematics
         /// <param name="q">The quaternion.</param>
         /// <returns>The conjugate of the given quaternion.</returns>
         [Pure]
-        public static Quaternion Conjugate(Quaternion q)
+        public static Rotation Conjugate(Rotation q)
         {
-            return new Quaternion(-q.Xyz, q.W);
+            return new Rotation(-q.Xyz, q.W);
         }
 
         /// <summary>
@@ -430,9 +416,9 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="q">The quaternion.</param>
         /// <param name="result">The conjugate of the given quaternion.</param>
-        public static void Conjugate(in Quaternion q, out Quaternion result)
+        public static void Conjugate(in Rotation q, out Rotation result)
         {
-            result = new Quaternion(-q.Xyz, q.W);
+            result = new Rotation(-q.Xyz, q.W);
         }
 
         /// <summary>
@@ -441,9 +427,9 @@ namespace Engine.Mathematics
         /// <param name="q">The quaternion to invert.</param>
         /// <returns>The inverse of the given quaternion.</returns>
         [Pure]
-        public static Quaternion Invert(Quaternion q)
+        public static Rotation Invert(Rotation q)
         {
-            Invert(in q, out Quaternion result);
+            Invert(in q, out Rotation result);
             return result;
         }
 
@@ -452,13 +438,13 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="q">The quaternion to invert.</param>
         /// <param name="result">The inverse of the given quaternion.</param>
-        public static void Invert(in Quaternion q, out Quaternion result)
+        public static void Invert(in Rotation q, out Rotation result)
         {
             var lengthSq = q.LengthSquared;
             if (lengthSq != 0.0)
             {
                 var i = 1.0f / lengthSq;
-                result = new Quaternion(q.Xyz * -i, q.W * i);
+                result = new Rotation(q.Xyz * -i, q.W * i);
             }
             else
             {
@@ -472,9 +458,9 @@ namespace Engine.Mathematics
         /// <param name="q">The quaternion to normalize.</param>
         /// <returns>The normalized copy.</returns>
         [Pure]
-        public static Quaternion Normalize(Quaternion q)
+        public static Rotation Normalize(Rotation q)
         {
-            Normalize(in q, out Quaternion result);
+            Normalize(in q, out Rotation result);
             return result;
         }
 
@@ -483,10 +469,10 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="q">The quaternion to normalize.</param>
         /// <param name="result">The normalized quaternion.</param>
-        public static void Normalize(in Quaternion q, out Quaternion result)
+        public static void Normalize(in Rotation q, out Rotation result)
         {
             var scale = 1.0f / q.Length;
-            result = new Quaternion(q.Xyz * scale, q.W * scale);
+            result = new Rotation(q.Xyz * scale, q.W * scale);
         }
 
         /// <summary>
@@ -496,7 +482,7 @@ namespace Engine.Mathematics
         /// <param name="angle">The rotation angle in radians.</param>
         /// <returns>The equivalent quaternion.</returns>
         [Pure]
-        public static Quaternion FromAxisAngle(Vector3 axis, float angle)
+        public static Rotation FromAxisAngle(Vector3 axis, float angle)
         {
             if (axis.LengthSquared == 0.0f)
             {
@@ -523,9 +509,9 @@ namespace Engine.Mathematics
         /// <param name="roll">The roll (bank), counterclockwise rotation around Z axis.</param>
         /// <returns>The quaternion.</returns>
         [Pure]
-        public static Quaternion FromEulerAngles(float pitch, float yaw, float roll)
+        public static Rotation FromEulerAngles(float pitch, float yaw, float roll)
         {
-            return new Quaternion(pitch, yaw, roll);
+            return new Rotation(pitch, yaw, roll);
         }
 
         /// <summary>
@@ -536,9 +522,9 @@ namespace Engine.Mathematics
         /// <param name="eulerAngles">The counterclockwise euler angles as a Vector.</param>
         /// <returns>The equivalent Quaternion.</returns>
         [Pure]
-        public static Quaternion FromEulerAngles(Vector3 eulerAngles)
+        public static Rotation FromEulerAngles(Vector3 eulerAngles)
         {
-            return new Quaternion(eulerAngles);
+            return new Rotation(eulerAngles);
         }
 
         /// <summary>
@@ -548,7 +534,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="eulerAngles">The counterclockwise euler angles a Vector.</param>
         /// <param name="result">The equivalent Quaternion.</param>
-        public static void FromEulerAngles(in Vector3 eulerAngles, out Quaternion result)
+        public static void FromEulerAngles(in Vector3 eulerAngles, out Rotation result)
         {
             var c1 = MathF.Cos(eulerAngles.X * 0.5f);
             var c2 = MathF.Cos(eulerAngles.Y * 0.5f);
@@ -564,24 +550,14 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Converts a quaternion to it's euler angle representation.
-        /// </summary>
-        /// <param name="q">The Quaternion.</param>
-        /// <param name="result">The resulting euler angles in radians.</param>
-        public static void ToEulerAngles(in Quaternion q, out Vector3 result)
-        {
-            q.ToEulerAngles(out result);
-        }
-
-        /// <summary>
         /// Builds a quaternion from the given rotation matrix.
         /// </summary>
         /// <param name="matrix">A rotation matrix.</param>
         /// <returns>The equivalent quaternion.</returns>
         [Pure]
-        public static Quaternion FromMatrix(Matrix3 matrix)
+        public static Rotation FromMatrix(Matrix3 matrix)
         {
-            FromMatrix(in matrix, out Quaternion result);
+            FromMatrix(in matrix, out Rotation result);
             return result;
         }
 
@@ -590,7 +566,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="matrix">A rotation matrix.</param>
         /// <param name="result">The equivalent quaternion.</param>
-        public static void FromMatrix(in Matrix3 matrix, out Quaternion result)
+        public static void FromMatrix(in Matrix3 matrix, out Rotation result)
         {
             var trace = matrix.Trace;
 
@@ -649,7 +625,7 @@ namespace Engine.Mathematics
         /// <param name="blend">The blend factor.</param>
         /// <returns>A smooth blend between the given quaternions.</returns>
         [Pure]
-        public static Quaternion Slerp(Quaternion q1, Quaternion q2, float blend)
+        public static Rotation Slerp(Rotation q1, Rotation q2, float blend)
         {
             // if either input is zero, return the other.
             if (q1.LengthSquared == 0.0f)
@@ -700,7 +676,7 @@ namespace Engine.Mathematics
                 blendB = blend;
             }
 
-            var result = new Quaternion((blendA * q1.Xyz) + (blendB * q2.Xyz), (blendA * q1.W) + (blendB * q2.W));
+            var result = new Rotation((blendA * q1.Xyz) + (blendB * q2.Xyz), (blendA * q1.W) + (blendB * q2.W));
             if (result.LengthSquared > 0.0f)
             {
                 return Normalize(result);
@@ -716,7 +692,7 @@ namespace Engine.Mathematics
         /// <param name="right">The second instance.</param>
         /// <returns>The result of the calculation.</returns>
         [Pure]
-        public static Quaternion operator +(Quaternion left, Quaternion right)
+        public static Rotation operator +(Rotation left, Rotation right)
         {
             left.Xyz += right.Xyz;
             left.W += right.W;
@@ -730,7 +706,7 @@ namespace Engine.Mathematics
         /// <param name="right">The second instance.</param>
         /// <returns>The result of the calculation.</returns>
         [Pure]
-        public static Quaternion operator -(Quaternion left, Quaternion right)
+        public static Rotation operator -(Rotation left, Rotation right)
         {
             left.Xyz -= right.Xyz;
             left.W -= right.W;
@@ -744,7 +720,7 @@ namespace Engine.Mathematics
         /// <param name="right">The second instance.</param>
         /// <returns>The result of the calculation.</returns>
         [Pure]
-        public static Quaternion operator *(Quaternion left, Quaternion right)
+        public static Rotation operator *(Rotation left, Rotation right)
         {
             Multiply(in left, in right, out left);
             return left;
@@ -757,7 +733,7 @@ namespace Engine.Mathematics
         /// <param name="scale">The scalar.</param>
         /// <returns>A new instance containing the result of the calculation.</returns>
         [Pure]
-        public static Quaternion operator *(Quaternion quaternion, float scale)
+        public static Rotation operator *(Rotation quaternion, float scale)
         {
             Multiply(in quaternion, scale, out quaternion);
             return quaternion;
@@ -770,9 +746,9 @@ namespace Engine.Mathematics
         /// <param name="scale">The scalar.</param>
         /// <returns>A new instance containing the result of the calculation.</returns>
         [Pure]
-        public static Quaternion operator *(float scale, Quaternion quaternion)
+        public static Rotation operator *(float scale, Rotation quaternion)
         {
-            return new Quaternion
+            return new Rotation
             (
                 quaternion.X * scale,
                 quaternion.Y * scale,
@@ -787,7 +763,7 @@ namespace Engine.Mathematics
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <returns>True, if left equals right; false otherwise.</returns>
-        public static bool operator ==(Quaternion left, Quaternion right)
+        public static bool operator ==(Rotation left, Rotation right)
         {
             return left.Equals(right);
         }
@@ -798,7 +774,7 @@ namespace Engine.Mathematics
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <returns>True, if left does not equal right; false otherwise.</returns>
-        public static bool operator !=(Quaternion left, Quaternion right)
+        public static bool operator !=(Rotation left, Rotation right)
         {
             return !(left == right);
         }
@@ -806,11 +782,11 @@ namespace Engine.Mathematics
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is Quaternion && Equals((Quaternion)obj);
+            return obj is Rotation && Equals((Rotation)obj);
         }
 
         /// <inheritdoc />
-        public bool Equals(Quaternion other)
+        public bool Equals(Rotation other)
         {
             return Xyz.Equals(other.Xyz) &&
                    W == other.W;

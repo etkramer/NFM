@@ -767,7 +767,7 @@ namespace Engine.Mathematics
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <returns>The result of the operation.</returns>
         [Pure]
-        public static Vector2 Transform(Vector2 vec, Quaternion quat)
+        public static Vector2 Transform(Vector2 vec, Rotation quat)
         {
             Transform(in vec, in quat, out Vector2 result);
             return result;
@@ -779,12 +779,12 @@ namespace Engine.Mathematics
         /// <param name="vec">The Vector to transform.</param>
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <param name="result">The result of the operation.</param>
-        public static void Transform(in Vector2 vec, in Quaternion quat, out Vector2 result)
+        public static void Transform(in Vector2 vec, in Rotation quat, out Vector2 result)
         {
-            Quaternion v = new Quaternion(vec.X, vec.Y, 0, 0);
-            Quaternion.Invert(in quat, out Quaternion i);
-            Quaternion.Multiply(in quat, in v, out Quaternion t);
-            Quaternion.Multiply(in t, in i, out v);
+            Rotation v = new Rotation(vec.X, vec.Y, 0, 0);
+            Rotation.Invert(in quat, out Rotation i);
+            Rotation.Multiply(in quat, in v, out Rotation t);
+            Rotation.Multiply(in t, in i, out v);
 
             result.X = v.X;
             result.Y = v.Y;
@@ -945,7 +945,7 @@ namespace Engine.Mathematics
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <returns>The multiplied Vector.</returns>
         [Pure]
-        public static Vector2 operator *(Quaternion quat, Vector2 vec)
+        public static Vector2 operator *(Rotation quat, Vector2 vec)
         {
             Transform(in vec, in quat, out Vector2 result);
             return result;

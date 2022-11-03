@@ -12,7 +12,7 @@ namespace Engine.World
 
 		[Inspect] public float Exposure { get; set; } = 1;
 
-		public float FOV => MathHelper.RadiansToDegrees(2 * (float)Math.Atan(SensorSize / 2f / FocalLength));
+		public float FOV => (2 * (float)Math.Atan(SensorSize / 2f / FocalLength)).ToDegrees();
 
 		public CameraNode(Scene scene) : base(scene)
 		{

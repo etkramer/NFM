@@ -967,7 +967,7 @@ namespace Engine.Mathematics
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <returns>The result of the operation.</returns>
         [Pure]
-        public static Vector3 Transform(Vector3 vec, Quaternion quat)
+        public static Vector3 Transform(Vector3 vec, Rotation quat)
         {
             Transform(in vec, in quat, out Vector3 result);
             return result;
@@ -979,7 +979,7 @@ namespace Engine.Mathematics
         /// <param name="vec">The Vector to transform.</param>
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <param name="result">The result of the operation.</param>
-        public static void Transform(in Vector3 vec, in Quaternion quat, out Vector3 result)
+        public static void Transform(in Vector3 vec, in Rotation quat, out Vector3 result)
         {
             // Since vec.W == 0, we can optimize quat * vec * quat^-1 as follows:
             // vec + 2.0 * cross(quat.xyz, cross(quat.xyz, vec) + quat.w * vec)
@@ -1481,7 +1481,7 @@ namespace Engine.Mathematics
         /// <param name="quat">The quaternion to rotate the Vector by.</param>
         /// <returns>The multiplied Vector.</returns>
         [Pure]
-        public static Vector3 operator *(Quaternion quat, Vector3 vec)
+        public static Vector3 operator *(Rotation quat, Vector3 vec)
         {
             Transform(in vec, in quat, out Vector3 result);
             return result;

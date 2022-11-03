@@ -359,7 +359,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="q">The quaternion to rotate by.</param>
         /// <param name="result">A matrix instance.</param>
-        public static void CreateFromQuaternion(in Quaternion q, out Matrix3x4 result)
+        public static void CreateFromQuaternion(in Rotation q, out Matrix3x4 result)
         {
             float x = q.X;
             float y = q.Y;
@@ -398,7 +398,7 @@ namespace Engine.Mathematics
         /// <param name="q">The quaternion to rotate by.</param>
         /// <returns>A matrix instance.</returns>
         [Pure]
-        public static Matrix3x4 CreateFromQuaternion(Quaternion q)
+        public static Matrix3x4 CreateFromQuaternion(Rotation q)
         {
             CreateFromQuaternion(in q, out Matrix3x4 result);
             return result;

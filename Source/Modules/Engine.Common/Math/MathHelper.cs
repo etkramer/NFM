@@ -888,54 +888,6 @@ namespace Engine.Mathematics
         }
 
         /// <summary>
-        /// Convert degrees to radians.
-        /// </summary>
-        /// <param name="degrees">An angle in degrees.</param>
-        /// <returns>The angle expressed in radians.</returns>
-        [Pure]
-        public static float DegreesToRadians(float degrees)
-        {
-            const float degToRad = MathF.PI / 180.0f;
-            return degrees * degToRad;
-        }
-
-        /// <summary>
-        /// Convert radians to degrees.
-        /// </summary>
-        /// <param name="radians">An angle in radians.</param>
-        /// <returns>The angle expressed in degrees.</returns>
-        [Pure]
-        public static float RadiansToDegrees(float radians)
-        {
-            const float radToDeg = 180.0f / MathF.PI;
-            return radians * radToDeg;
-        }
-
-        /// <summary>
-        /// Convert degrees to radians.
-        /// </summary>
-        /// <param name="degrees">An angle in degrees.</param>
-        /// <returns>The angle expressed in radians.</returns>
-        [Pure]
-        public static double DegreesToRadians(double degrees)
-        {
-            const double degToRad = System.Math.PI / 180.0;
-            return degrees * degToRad;
-        }
-
-        /// <summary>
-        /// Convert radians to degrees.
-        /// </summary>
-        /// <param name="radians">An angle in radians.</param>
-        /// <returns>The angle expressed in degrees.</returns>
-        [Pure]
-        public static double RadiansToDegrees(double radians)
-        {
-            const double radToDeg = 180.0 / System.Math.PI;
-            return radians * radToDeg;
-        }
-
-        /// <summary>
         /// Swaps two float values.
         /// </summary>
         /// <typeparam name="T">The type of the values to swap.</typeparam>
@@ -1373,6 +1325,24 @@ namespace Engine.Mathematics
 			}
 
 			return InverseLength;
+		}
+
+        /// <summary>
+        /// Convert degrees to radians.
+        /// </summary>
+		public static T ToRadians<T>(this T degrees) where T : INumber<T>, IMultiplyOperators<T, float, T>
+		{
+            const float degToRad = MathF.PI / 180.0f;
+            return degrees * degToRad;
+		}
+
+        /// <summary>
+        /// Convert radians to degrees.
+        /// </summary>
+		public static T ToDegrees<T>(this T radians) where T : INumber<T>, IMultiplyOperators<T, float, T>
+		{
+            const float radToDeg = 180.0f / MathF.PI;
+            return radians * radToDeg;
 		}
 
 		internal static readonly string ListSeparator = CultureInfo.CurrentCulture.TextInfo.ListSeparator;

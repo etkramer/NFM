@@ -392,7 +392,7 @@ namespace Engine.Mathematics
         /// you know it's already normalized.
         /// </param>
         /// <returns>The rotation.</returns>
-        public Quaternion ExtractRotation(bool rowNormalize = true)
+        public Rotation ExtractRotation(bool rowNormalize = true)
         {
             var row0 = Row0;
             var row1 = Row1;
@@ -406,7 +406,7 @@ namespace Engine.Mathematics
             }
 
             // code below adapted from Blender
-            var q = default(Quaternion);
+            var q = default(Rotation);
             var trace = 0.25 * (row0[0] + row1[1] + row2[2] + 1.0);
 
             if (trace > 0)
@@ -512,7 +512,7 @@ namespace Engine.Mathematics
         /// </summary>
         /// <param name="q">Quaternion to translate.</param>
         /// <param name="result">Matrix result.</param>
-        public static void CreateFromQuaternion(in Quaternion q, out Matrix3 result)
+        public static void CreateFromQuaternion(in Rotation q, out Matrix3 result)
         {
             // Adapted from https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix
             // with the caviat that opentk uses row-major matrices so the matrix we create is transposed
@@ -552,7 +552,7 @@ namespace Engine.Mathematics
         /// <param name="q">Quaternion to translate.</param>
         /// <returns>A matrix instance.</returns>
         [Pure]
-        public static Matrix3 CreateFromQuaternion(Quaternion q)
+        public static Matrix3 CreateFromQuaternion(Rotation q)
         {
             CreateFromQuaternion(in q, out Matrix3 result);
             return result;
