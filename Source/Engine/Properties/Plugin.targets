@@ -1,9 +1,14 @@
 ﻿<Project>
 	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<PlatformTarget>x64</PlatformTarget>
+
+		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="Engine" HintPath="$(MSBuildThisFileDirectory)..\Engine.dll" Private="False" />
 		<Reference Include="Engine.Common" HintPath="$(MSBuildThisFileDirectory)..\Engine.Common.dll" Private="False" />
-		<Reference Include="Engine.GPU" HintPath="$(MSBuildThisFileDirectory)..\Engine.GPU.dll" Private="False" />
 	</ItemGroup>
 </Project>
