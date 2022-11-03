@@ -58,9 +58,9 @@ namespace Engine.Rendering
 			{
 				// Mouse look
 				Vector3 cameraRotation = Camera.Rotation;
-				cameraRotation.Z += Input.MouseDelta.X * lookSens;
-				cameraRotation.X -= Input.MouseDelta.Y * lookSens;
-				cameraRotation.X = Math.Clamp(cameraRotation.X, -90, 90);
+				cameraRotation.Z = (cameraRotation.Z + Input.MouseDelta.X * lookSens) % 360;
+				cameraRotation.X = Math.Clamp((cameraRotation.X - Input.MouseDelta.Y * lookSens) % 360, -90, 90);
+
 				Camera.Rotation = cameraRotation;
 
 				// Movement
