@@ -51,7 +51,7 @@ namespace Engine.GPU
 
 		public void DispatchMesh(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
-			lock (list)
+			lock (this)
 			{
 				list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 			}
@@ -68,7 +68,7 @@ namespace Engine.GPU
 
 		public void Dispatch(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 		{
-			lock (list)
+			lock (this)
 			{
 				list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 			}
@@ -84,7 +84,7 @@ namespace Engine.GPU
 
 		public void BarrierUAV(params GraphicsBuffer[] buffers)
 		{
-			lock (list)
+			lock (this)
 			{
 				Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[buffers.Length];
 				for (int i = 0; i < buffers.Length; i++)
@@ -98,7 +98,7 @@ namespace Engine.GPU
 
 		public void BarrierUAV(params Texture[] textures)
 		{
-			lock (list)
+			lock (this)
 			{
 				Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[textures.Length];
 				for (int i = 0; i < textures.Length; i++)
@@ -112,7 +112,7 @@ namespace Engine.GPU
 
 		public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, nint commandStart = 0)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
@@ -123,7 +123,7 @@ namespace Engine.GPU
 
 		public unsafe void SetPipelineConstants(BindPoint point, int start, params int[] constants)
 		{
-			lock (list)
+			lock (this)
 			{
 				if (!CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 				{
@@ -149,7 +149,7 @@ namespace Engine.GPU
 
 		public void SetPipelineCBV(int slot, int space, GraphicsBuffer target)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.VertexAndConstantBuffer);
 
@@ -171,7 +171,7 @@ namespace Engine.GPU
 
 		public void SetPipelineUAV(int slot, int space, Texture target, int mipLevel = 0)
 		{
-			lock (list)
+			lock (this)
 			{
 				Debug.Assert(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
 				RequestState(target, ResourceStates.UnorderedAccess);
@@ -194,7 +194,7 @@ namespace Engine.GPU
 
 		public void SetPipelineUAV(int slot, int space, GraphicsBuffer target)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.UnorderedAccess);
 
@@ -216,7 +216,7 @@ namespace Engine.GPU
 
 		public void SetPipelineSRV(int slot, int space, Texture target)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.AllShaderResource);
 
@@ -238,7 +238,7 @@ namespace Engine.GPU
 
 		public void SetPipelineSRV(int slot, int space, GraphicsBuffer target)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.AllShaderResource);
 
@@ -260,7 +260,7 @@ namespace Engine.GPU
 
 		public void SetPipelineState(PipelineState pso)
 		{
-			lock (list)
+			lock (this)
 			{
 				// Don't switch PSOs unnecessarily.
 				if (CurrentPSO == pso)
@@ -321,7 +321,7 @@ namespace Engine.GPU
 		{
 			Debug.Assert(buffer.IsAlive);
 
-			lock (list)
+			lock (this)
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
@@ -350,7 +350,7 @@ namespace Engine.GPU
 		{
 			Debug.Assert(texture.IsAlive);
 
-			lock (list)
+			lock (this)
 			lock (UploadHelper.Lock)
 			{
 				int uploadRing = UploadHelper.Ring;
@@ -376,7 +376,7 @@ namespace Engine.GPU
 
 		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, nint startOffset = 0, nint destOffset = 0, nint numBytes = -1)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(source, ResourceStates.CopySource);
 				RequestState(dest, ResourceStates.CopyDest);
@@ -393,7 +393,7 @@ namespace Engine.GPU
 		private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
 		public void CopyBuffer(GraphicsBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 		{
-			lock (list)
+			lock (this)
 			{
 				CopyBuffer(buffer, intermediateCopyBuffer, startOffset, 0, numBytes);
 				CopyBuffer(intermediateCopyBuffer, buffer, 0, destOffset, numBytes);
@@ -402,7 +402,7 @@ namespace Engine.GPU
 
 		public void CopyTexture(Texture source, Texture dest)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(source, ResourceStates.CopySource);
 				RequestState(dest, ResourceStates.CopyDest);
@@ -413,7 +413,7 @@ namespace Engine.GPU
 
 		public void ResolveTexture(Texture source, Texture dest)
 		{
-			lock (list)
+			lock (this)
 			{
 				// If neither texture is multisampled, perform a regular copy instead.
 				if (source.Samples <= 1 && dest.Samples <= 1)
@@ -433,7 +433,7 @@ namespace Engine.GPU
 
 		public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(renderTarget, ResourceStates.RenderTarget);
 				RequestState(depthStencil, ResourceStates.DepthWrite);
@@ -455,7 +455,7 @@ namespace Engine.GPU
 
 		public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(depthStencil, ResourceStates.DepthWrite);
 				renderTargets.ForEach(o => RequestState(o, ResourceStates.RenderTarget));
@@ -468,7 +468,7 @@ namespace Engine.GPU
 
 		public void ClearRenderTarget(Texture target, Color color = default(Color))
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.RenderTarget);
 
@@ -488,7 +488,7 @@ namespace Engine.GPU
 
 		public void ClearDepth(Texture target)
 		{
-			lock (list)
+			lock (this)
 			{
 				RequestState(target, ResourceStates.DepthWrite);
 
@@ -498,7 +498,7 @@ namespace Engine.GPU
 
 		public void GenerateMips(Texture texture)
 		{
-			lock (list)
+			lock (this)
 			{
 				if (texture.MipmapCount <= 1)
 				{
@@ -533,7 +533,7 @@ namespace Engine.GPU
 
 		public void RequestState(Resource resource, ResourceStates state)
 		{
-			lock (list)
+			lock (this)
 			{
 				if (resource == null)
 				{
@@ -550,7 +550,7 @@ namespace Engine.GPU
 
 		public void BeginEvent(string name)
 		{
-			lock (list)
+			lock (this)
 			{
 				list.BeginEvent(name);
 			}
@@ -558,7 +558,7 @@ namespace Engine.GPU
 
 		public void EndEvent()
 		{
-			lock (list)
+			lock (this)
 			{
 				list.EndEvent();
 			}
@@ -566,7 +566,7 @@ namespace Engine.GPU
 
 		public void Open()
 		{
-			lock (list)
+			lock (this)
 			{
 				commandAllocators[Graphics.FrameIndex].Reset();
 				list.Reset(commandAllocators[Graphics.FrameIndex]);
@@ -583,7 +583,7 @@ namespace Engine.GPU
 
 		public void Close()
 		{
-			lock (list)
+			lock (this)
 			{
 				list.Close();
 				CurrentPSO = null;
@@ -596,7 +596,7 @@ namespace Engine.GPU
 		{
 			Debug.Assert(!IsOpen, "Cannot execute open command list.");
 
-			lock (list)
+			lock (this)
 			{
 				// Execute D3D command list.
 				Graphics.GraphicsQueue.ExecuteCommandList(list);

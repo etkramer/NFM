@@ -14,7 +14,7 @@ namespace Engine.Rendering
 	public static class Renderer
 	{
 		/// <summary>
-		/// Command list used for any command that needs to be done before the renderer does it's thing.
+		/// "Shared" command list, guaranteed to be executed just before any frames are rendered.
 		/// </summary>
 		public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
@@ -66,22 +66,26 @@ namespace Engine.Rendering
 				}
 			}
 
-			// Execute default command list and wait for it on the GPU.
-			DefaultCommandList.EndEvent();
-			DefaultCommandList.Close();
-			DefaultCommandList.Execute();
-
-			// Render to each viewport.
-			foreach (var viewport in Viewport.All)
+			// We don't want other threads submitting uploads while the list is closed.
+			lock (DefaultCommandList)
 			{
-				RenderCamera(viewport.Camera, viewport.Host.Swapchain);
+				// Execute default command list and wait for it on the GPU.
+				DefaultCommandList.EndEvent();
+				DefaultCommandList.Close();
+				DefaultCommandList.Execute();
+
+				// Render to each viewport.
+				foreach (var viewport in Viewport.All)
+				{
+					RenderCamera(viewport.Camera, viewport.Host.Swapchain);
+				}
+
+				// Wait for completion.
+				Graphics.WaitFrame();
+
+				// Reopen default command list
+				DefaultCommandList.Open();
 			}
-
-			// Wait for completion.
-			Graphics.WaitFrame();
-
-			// Reopen default command list
-			DefaultCommandList.Open();
 		}
 
 		public static void RenderCamera(CameraNode camera, Swapchain swapchain)
