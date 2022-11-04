@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 using Avalonia.Controls;
-using SharpDX.Direct2D1;
 
 namespace Engine.Frontend
 {

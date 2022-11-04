@@ -16,7 +16,7 @@ namespace Engine.Frontend
 		public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
 		public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
-		public static StyledProperty<Brush> IconColorProperty = AvaloniaProperty.Register<NumInput, Brush>(nameof(IconColor));
+		public static StyledProperty<IBrush> IconColorProperty = AvaloniaProperty.Register<NumInput, IBrush>(nameof(IconColor));
 
 		[Notify] public string Icon
 		{
@@ -36,7 +36,7 @@ namespace Engine.Frontend
 			}
 		}
 
-		[Notify] public Brush IconColor
+		[Notify] public IBrush IconColor
 		{
 			get => GetValue(IconColorProperty);
 			set

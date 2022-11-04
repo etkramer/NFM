@@ -16,8 +16,6 @@ namespace Engine.Rendering
 	{
 		public static List<Viewport> All { get; } = new();
 
-		public int ID { get; private set; }
-
 		// Basic properties
 		public ViewportHost Host { get; }
 		public Vector2i Size => Host.Swapchain.RT.Size;
@@ -33,7 +31,6 @@ namespace Engine.Rendering
 		public Viewport(ViewportHost host)
 		{
 			Host = host;
-			ID = All.Count;
 
 			// Create work camera.
 			workCamera = new CameraNode(null);

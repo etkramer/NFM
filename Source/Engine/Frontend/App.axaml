@@ -11,7 +11,6 @@
 		
 		<!--Custom Controls (Misc)-->
 		<StyleInclude Source="avares://Engine/Frontend/Controls/WindowButtons.axaml"/>
-		<StyleInclude Source="avares://Engine/Frontend/Controls/Toolbar.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/Tab.axaml"/>
 		<StyleInclude Source="avares://Engine/Frontend/Controls/Docking/TabGroup.axaml"/>
 

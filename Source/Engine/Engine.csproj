@@ -39,7 +39,6 @@
 		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
 		<PackageReference Include="WinApi" Version="4.0.0" />
 		<PackageReference Include="Avalonia" Version="0.10.17" />
-		<PackageReference Include="Avalonia.Direct2D1" Version="0.10.17" />
 		<PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
 		<ProjectReference Include="..\Libraries\Avalonia\src\Skia\Avalonia.Skia\Avalonia.Skia.csproj" />
 		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />

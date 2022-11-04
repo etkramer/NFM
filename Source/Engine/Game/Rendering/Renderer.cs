@@ -4,10 +4,7 @@ using Avalonia.Rendering;
 using Engine.Frontend;
 using Engine.GPU;
 using Engine.World;
-using SharpDX.DXGI;
 using Vortice.Direct3D12;
-using Vortice.Mathematics;
-using static Avalonia.OpenGL.GlInterface;
 
 namespace Engine.Rendering
 {
