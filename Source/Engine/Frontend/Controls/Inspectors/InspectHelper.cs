@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Avalonia.Controls;
@@ -11,35 +12,67 @@ namespace Engine.Frontend
 		public static Control Create(object subject, PropertyInfo property, Type typeOverride = null) => Create(new[] { subject}, property, typeOverride);
 		public static Control Create(IEnumerable<object> subjects, PropertyInfo property, Type typeOverride = null)
 		{
-			Type type = typeOverride ?? property.PropertyType;
+			var inspectorType = FindInspectorType(typeOverride ?? property.PropertyType);
 
-			foreach (var inspectorType in inspectorTypes)
+			if (inspectorType != null)
 			{
-				var inspectorAttribute = inspectorType.GetCustomAttribute<CustomInspectorAttribute>();
+				// Create object, *don't* call constructor, and set base properties.
+				// This is an *extremely* hacky way to avoid using inheritance.
+				var result = FormatterServices.GetUninitializedObject(inspectorType) as Control;
+				inspectorType.GetProperty("Property", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, property);
+				inspectorType.GetProperty("Subjects", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, subjects);
+				inspectorType.GetProperty("DataContext", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, result);
 
-				if (inspectorAttribute.PropertyTypes.Any(o => o.IsAssignableFrom(type)))
-				{
-					// Create object, *don't* call constructor, and set base properties.
-					// This is an *extremely* hacky way to avoid using inheritance.
-					var result = FormatterServices.GetUninitializedObject(inspectorType) as Control;
-					inspectorType.GetProperty("Property", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, property);
-					inspectorType.GetProperty("Subjects", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, subjects);
-					inspectorType.GetProperty("DataContext", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, result);
-
-					// Call constructor and return.
-					inspectorType.GetConstructor(Type.EmptyTypes).Invoke(result, null);
-					return result;
-				}
-			}
-			
-			if (type.IsPrimitive)
-			{
-				// Type is not a composite struct and we're not handling it explicitly. Therefore, it's unsupported.
-				return null;
+				// Call constructor and return.
+				inspectorType.GetConstructor(Type.EmptyTypes).Invoke(result, null);
+				return result;
 			}
 			else
 			{
 				return null;
+			}
+		}
+
+		private static Type FindInspectorType(Type subjectType)
+		{
+			List<(int, Type)> typeCandidates = new();
+
+			foreach (var inspectorType in inspectorTypes)
+			{
+				var supportedTypes = inspectorType.GetCustomAttribute<CustomInspectorAttribute>().PropertyTypes;
+
+				// Exact match.
+				if (supportedTypes.Any(o => o == subjectType))
+				{
+					typeCandidates.Add((0, inspectorType));
+				}
+				// Is descended from this type.
+				else if (supportedTypes.Any(o => subjectType.IsAssignableTo(o)))
+				{
+					typeCandidates.Add((1, inspectorType));
+				}
+			}
+
+			// Found a match.
+			if (typeCandidates.Count > 0)
+			{
+				return typeCandidates
+					.Bucket(o => o.Item1)
+					.LastOrDefault()?
+					.Select(o => o.Item2)
+					.FirstOrDefault();
+			}
+			else
+			{
+				if (subjectType.IsPrimitive)
+				{
+					// Type is not a composite struct and we're not handling it explicitly. Therefore, it's unsupported.
+					return null;
+				}
+				else
+				{
+					return null;
+				}
 			}
 		}
 

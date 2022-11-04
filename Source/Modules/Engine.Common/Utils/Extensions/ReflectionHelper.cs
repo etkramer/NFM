@@ -134,5 +134,30 @@ namespace Engine.Common
 
 			return null;
 		}
+
+		public static Type GetElementType(this System.Collections.IEnumerable enumerable)
+		{
+			if (enumerable is Array)
+			{
+				return enumerable.GetType().GetElementType();
+			}
+			else
+			{
+				// Blatant dynamic abuse...
+				try
+				{
+					return GetElementTypeDynamic((dynamic)enumerable);
+				}
+				catch
+				{
+					return null;
+				}
+			}
+		}
+
+		private static Type GetElementTypeDynamic<T>(IEnumerable<T> enumerable)
+		{
+			return typeof(T);
+		}
 	}
 }

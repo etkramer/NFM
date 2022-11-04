@@ -16,7 +16,7 @@ using SharpGLTF.IO;
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 
-namespace Basic.Loaders
+namespace GLTF.Loaders
 {
 	public class GLTFLoader : ResourceLoader<Model>
 	{

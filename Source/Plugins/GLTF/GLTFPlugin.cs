@@ -1,14 +1,14 @@
 ﻿using System;
-using Basic.Loaders;
+using GLTF.Loaders;
 using Engine.Common;
 using Engine.Resources;
 using Engine.Plugins;
 using Engine.Mathematics;
 using System.Reflection;
 
-namespace Basic
+namespace GLTF
 {
-	public class BasicPlugin : Plugin
+	public class GLTFPlugin : Plugin
 	{
 		public override void OnStart()
 		{
@@ -41,14 +41,14 @@ namespace Basic
 		private void LoadShaders(MountPoint mount)
 		{
 			// Create Opaque shader
-			Shader opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl", typeof(BasicPlugin).Assembly));
+			Shader opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl", typeof(GLTFPlugin).Assembly));
 			opaque.SetBlendMode(BlendMode.Opaque);
 			opaque.AddTexture("BaseColor", Texture2D.Purple);
 			opaque.AddTexture("Normal", Texture2D.Normal);
 			opaque.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 			// Create Transparent shader
-			Shader transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl", typeof(BasicPlugin).Assembly));
+			Shader transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl", typeof(GLTFPlugin).Assembly));
 			transparent.SetBlendMode(BlendMode.Transparent);
 			transparent.AddTexture("BaseColor", Texture2D.Purple);
 			transparent.AddTexture("Normal", Texture2D.Normal);

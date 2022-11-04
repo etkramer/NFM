@@ -108,7 +108,9 @@ namespace Engine.Frontend
 						.IsExpanded(true)
 						.Header(bucketName)
 						.With(o => o.FontWeight = FontWeight.SemiBold)
+						.With(o => o.Padding = new(0, 8))
 						.Content(new StackPanel()
+							.Spacing(8)
 							.Children(inspectors.ToArray())
 						)
 				);
@@ -133,7 +135,7 @@ namespace Engine.Frontend
 				Property = property;
 				DataContext = this;
 
-				Margin = new(0, 4);
+				//Margin = new(0, 4);
 				HorizontalAlignment = HorizontalAlignment.Stretch;
 				Content = new Grid()
 					.Columns("0.5*, *")
@@ -141,9 +143,9 @@ namespace Engine.Frontend
 						// Name
 						new TextBlock()
 							.Column(0)
-							.Margin(28, 0, 0, 0)
+							.Margin(28, 2, 0, 0)
 							.HorizontalAlignment(HorizontalAlignment.Left)
-							.VerticalAlignment(VerticalAlignment.Center)
+							.VerticalAlignment(VerticalAlignment.Top)
 							.Text(Property.Name.PascalToDisplay())
 							.Foreground(this.GetResourceBrush("ThemeForegroundMidBrush"))
 							.Size(11),
