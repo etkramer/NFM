@@ -12,7 +12,7 @@ namespace Engine.Frontend
 {
 	public partial class ScenePanel : ToolPanel
 	{
-		[Notify] public ReadOnlyObservableCollection<Node> Nodes => Scene.Main?.Nodes;
+		[Notify] public ReadOnlyObservableCollection<Node> Nodes => Scene.Main?.RootNodes;
 
 		public ScenePanel()
 		{

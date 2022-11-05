@@ -14,10 +14,10 @@ namespace Engine.Rendering
 			// Set render target.
 			List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
 
-			// Draw gizmos for each actor.
-			foreach (var actor in Camera.Scene.Nodes)
+			// Draw gizmos for each node.
+			foreach (var node in Camera.Scene.EnumerateNodes())
 			{
-				actor.OnDrawGizmos(context);
+				node.OnDrawGizmos(context);
 			}
 			
 			context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));

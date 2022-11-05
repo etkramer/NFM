@@ -8,7 +8,7 @@ namespace Engine.Rendering
 		public override void Run()
 		{
 			// Loop through nodes and (re)upload instance data where requested.
-			foreach (Node node in Scene.Nodes)
+			foreach (Node node in Scene.EnumerateNodes())
 			{
 				if (node is ModelNode model)
 				{

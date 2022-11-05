@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using Engine.Editor;
 using Engine.GPU;
@@ -17,7 +18,40 @@ namespace Engine.World
 
 		public Scene Scene { get; }
 
-		// Transform buffer
+		// Node heirarchy
+		public ReadOnlyObservableCollection<Node> Children { get; }
+		private ObservableCollection<Node> children = new();
+
+		private Node parent;
+		public Node Parent
+		{
+			get => parent;
+			set
+			{
+				Debug.Assert(value == null || value.Scene == Scene,
+					"Nodes can only be parented to other nodes from the same scene.");
+
+				Debug.Assert(value != this,
+					"Nodes cannot be parented to themselves.");
+
+				if (parent != value || value == null /*Could be initial setup...*/)
+				{
+					if (parent == null)
+					{
+						Scene.RemoveRootNode(this);
+					}
+					if (value == null)
+					{
+						Scene.AddRootNode(this);
+					}
+
+					parent?.children.Remove(this);
+					parent = value;
+					parent?.children.Add(this);
+				}
+			}
+		}
+
 		public Node(Scene scene)
 		{
 			string name = GetType().Name.PascalToDisplay();
@@ -28,7 +62,8 @@ namespace Engine.World
 
 			Name = name;
 			Scene = scene ?? Scene.Main;
-			Scene.AddNode(this);
+			Parent = null;
+			Children = new(children);
 		}
 
 		public virtual void Dispose()
@@ -37,7 +72,12 @@ namespace Engine.World
 			Selection.Deselect(this);
 
 			// Remove self from scene tree.
-			Scene?.RemoveNode(this);
+			Parent = null;
+
+			foreach (var child in children)
+			{
+				child.Dispose();
+			}
 		}
 
 		public virtual void OnDrawGizmos(GizmosContext context) {}

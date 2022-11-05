@@ -30,7 +30,7 @@
 		<Grid Grid.Row="1" Background="{StaticResource ControlBackgroundColor}">
 			<TreeView x:Name="sceneTree" Margin="4" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding Nodes}">
 				<TreeView.ItemTemplate>
-					<TreeDataTemplate>
+					<TreeDataTemplate ItemsSource="{Binding Children}">
 						<TextBlock Text="{Binding Name}" Background="Transparent">
 							<TextBlock.ContextFlyout>
 								<MenuFlyout>

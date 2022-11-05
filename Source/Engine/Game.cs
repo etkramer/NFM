@@ -35,6 +35,12 @@ namespace Engine
 				model.Position = new Vector3(0);
 				model.Rotation = new Vector3(0);
 				model.Model = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb").Result;
+
+				var model2 = new ModelNode(null);
+				model2.Position = new Vector3(0);
+				model2.Rotation = new Vector3(0);
+				model2.Model = Asset.LoadAsync<Model>("USER:/Objects/MetalRoughSpheres.glb").Result;
+				model2.Parent = model;
 			};
 		}
 
