@@ -15,8 +15,7 @@ namespace Engine.World
 		[Inspect] public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
-		public bool IsInstanceDirty = true;
-		public bool IsTransformDirty = true;
+		public bool IsInstanceValid = true;
 		public BufferAllocation<GPUTransform> TransformHandle;
 		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
@@ -25,15 +24,11 @@ namespace Engine.World
 		
 		public ModelNode(Scene scene) : base(scene)
 		{
-			// Track changes in transform
-			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
-				.Subscribe((o) => IsTransformDirty = true);
-
 			// Track changes in model/visibility
 			this.WhenAnyValue(o => o.Model, o => o.IsVisible)
 				.Subscribe((o) =>
 				{
-					IsInstanceDirty = true;
+					IsInstanceValid = false;
 				});
 		}
 
@@ -107,12 +102,14 @@ namespace Engine.World
 				}
 			}
 
-			IsInstanceDirty = false;
+			IsInstanceValid = true;
 		}
 
 		public void UpdateTransform(CommandList list)
 		{
+			// Calculate transform.
 			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
+			EnumerateUpward().ForEach(o => transform *= Matrix4.CreateTransform(o.Position, o.Rotation, o.Scale));
 
 			if (TransformHandle == null)
 			{
@@ -126,11 +123,14 @@ namespace Engine.World
 				}
 			}
 
+			// Calculate transform.
 			list.UploadBuffer(TransformHandle, new GPUTransform()
 			{
 				ObjectToWorld = transform,
 				WorldToObject = transform.Inverse()
 			});
+
+			IsTransformValid = true;
 		}
 
 		public override void OnDrawGizmos(GizmosContext context)

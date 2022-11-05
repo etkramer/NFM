@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Engine.Editor;
 using Engine.GPU;
 using Engine.Rendering;
+using ReactiveUI;
 
 namespace Engine.World
 {
@@ -15,6 +16,8 @@ namespace Engine.World
 		[Inspect] public Vector3 Position { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
+
+		public bool IsTransformValid { get; protected set; } = false;
 
 		public Scene Scene { get; }
 
@@ -64,6 +67,10 @@ namespace Engine.World
 			Scene = scene ?? Scene.Main;
 			Parent = null;
 			Children = new(children);
+
+			// Track changes in transform
+			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
+				.Subscribe((o) => InvalidateTransform());
 		}
 
 		public virtual void Dispose()
@@ -77,6 +84,32 @@ namespace Engine.World
 			foreach (var child in children)
 			{
 				child.Dispose();
+			}
+		}
+
+		public void InvalidateTransform()
+		{
+			IsTransformValid = false;
+
+			foreach (var child in children)
+			{
+				child.InvalidateTransform();
+			}
+		}
+
+		/// <summary>
+		/// Enumerates up the node heirarchy, toward the scene root.
+		/// </summary>
+		public IEnumerable<Node> EnumerateUpward()
+		{
+			if (Parent != null)
+			{
+				yield return Parent;
+
+				foreach (var node in Parent.EnumerateUpward())
+				{
+					yield return node;
+				}
 			}
 		}
 

@@ -12,12 +12,12 @@ namespace Engine.Rendering
 			{
 				if (node is ModelNode model)
 				{
-					if (model.IsTransformDirty)
+					if (!model.IsTransformValid)
 					{
 						model.UpdateTransform(List);
 					}
 
-					if (model.IsInstanceDirty)
+					if (!model.IsInstanceValid)
 					{
 						model.UpdateInstances(List);
 					}
