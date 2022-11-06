@@ -9,12 +9,16 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Content\Shaders\Gizmos\GeomMS.hlsl" />
+	</ItemGroup>
+	<ItemGroup>
 		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIcons-Regular.ttf" />
 		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIconsOutlined-Regular.otf" />
 		<AvaloniaResource Include="Content\Frontend\Icons\icon.ico" />
 		<AvaloniaResource Include="Content\Frontend\Icons\iconsmall.ico" />
 		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.h" />
 		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\GeomMS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
 		<EmbeddedResource Include="Content\Shaders\Gizmos\LineMS.hlsl" />

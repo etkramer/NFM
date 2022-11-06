@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices.Marshalling;
 using Engine.GPU;
+using Engine.Resources;
 using Engine.World;
 
 namespace Engine.Rendering
@@ -35,6 +38,10 @@ namespace Engine.Rendering
 		public CameraNode Camera => camera;
 
 		private static PipelineState polylinePSO = null;
+		private static PipelineState geometryPSO = null;
+
+		private static GraphicsBuffer<uint> gizmosIndexBuffer = new GraphicsBuffer<uint>(2048); // Support up to 2048 indices per DrawGeometry() call
+		private static GraphicsBuffer<Vector3> gizmosVertexBuffer = new GraphicsBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
 
 		unsafe static GizmosContext()
 		{
@@ -42,9 +49,17 @@ namespace Engine.Rendering
 				.UseIncludes(typeof(Game).Assembly)
 				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/LineMS.hlsl", typeof(Game).Assembly), "LineMS")
 				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Game).Assembly), "GizmosPS")
-				.AsRootConstant(0, 4 + 4 + 4, 0)
+				.AsRootConstant(0, 4 + 4 + 4)
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetTopologyType(TopologyType.Line)
+				.Compile().Result;
+
+			geometryPSO = new PipelineState()
+				.UseIncludes(typeof(Game).Assembly)
+				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/GeomMS.hlsl", typeof(Game).Assembly), "GeomMS")
+				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Game).Assembly), "GizmosPS")
+				.AsRootConstant(0, 4)
+				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.Compile().Result;
 		}
 
@@ -90,10 +105,29 @@ namespace Engine.Rendering
 			renderList.SetPipelineCBV(0, 1, renderTarget.ViewCB);
 			renderList.SetPipelineConstants(0, 0, AsInt(p0));
 			renderList.SetPipelineConstants(0, 4, AsInt(p1));
-			renderList.SetPipelineConstants(0, 8, AsInt((Vector3)color));
+			renderList.SetPipelineConstants(0, 8, AsInt(color));
 
 			// Dispatch draw command.
 			renderList.DispatchMesh(1);
+		}
+
+		private void DrawGeometry(ReadOnlySpan<Vector4> vertices, ReadOnlySpan<uint> indices, Color color)
+		{
+			Debug.Assert(indices.Length % 3 == 0, "Indices passed to DrawGeometry() must be triangles.");
+
+			renderList.UploadBuffer(gizmosIndexBuffer, indices);
+			renderList.UploadBuffer(gizmosVertexBuffer, vertices);
+			
+			// Use the right shader program.
+			renderList.SetPipelineState(geometryPSO);
+
+			// Bind program constants
+			renderList.SetPipelineSRV(0, 0, gizmosVertexBuffer);
+			renderList.SetPipelineSRV(1, 0, gizmosIndexBuffer);
+			renderList.SetPipelineConstants(0, 0, AsInt(color));
+
+			// Dispatch draw command.
+			renderList.DispatchMesh(indices.Length / 3);
 		}
 
 		private unsafe int AsInt(float value)

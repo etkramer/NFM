@@ -210,11 +210,6 @@ namespace Engine.Mathematics
 			return HashCode.Combine(R, G, B, A);
 		}
 
-		public Color WithAlpha(float Alpha)
-		{
-			return new Color(R, G, B, Alpha);
-		}
-
 		#endregion
 
 		public static readonly Color Invisible = new Color(0, 0, 0, 0);

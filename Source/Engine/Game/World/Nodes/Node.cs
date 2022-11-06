@@ -126,6 +126,7 @@ namespace Engine.World
 		public ChildNode(Node owner) : base(owner.Scene)
 		{
 			Owner = owner;
+			Parent = owner;
 		}
 	}
 }

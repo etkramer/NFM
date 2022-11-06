@@ -88,22 +88,25 @@ namespace Engine.Rendering
 			DepthBuffer.Dispose();
 		}
 
+		public Matrix4 ViewMatrix { get; private set; }
+		public Matrix4 ProjectionMatrix { get; private set; }
+
 		public void UpdateView(CameraNode camera)
 		{
 			// Calculate view/projection matrices.
-			var viewMatrix = Matrix4.CreateTransform(camera.Position, camera.Rotation, Vector3.One).Inverse();
-			var projectionMatrix = Matrix4.CreatePerspectiveReversed(camera.FOV, Size.X / (float)Size.Y, 0.01f);
+			ViewMatrix = Matrix4.CreateTransform(camera.Position, camera.Rotation, Vector3.One).Inverse();
+			ProjectionMatrix = Matrix4.CreatePerspectiveReversed(camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
 			// Apply Z-up projection.
-			projectionMatrix = Matrix4.CreateRotation(new(-90, 180, 0)) * projectionMatrix;
+			ProjectionMatrix = Matrix4.CreateRotation(new(-90, 180, 0)) * ProjectionMatrix;
 
 			// Upload to constant buffer.
 			CommandList.UploadBuffer(ViewCB, new ViewConstants()
 			{
-				WorldToView = viewMatrix,
-				ViewToWorld = viewMatrix.Inverse(),
-				ViewToClip = projectionMatrix,
-				ClipToView = projectionMatrix.Inverse(),
+				WorldToView = ViewMatrix,
+				ViewToWorld = ViewMatrix.Inverse(),
+				ViewToClip = ProjectionMatrix,
+				ClipToView = ProjectionMatrix.Inverse(),
 				ViewportSize = Size,
 			});
 		}
