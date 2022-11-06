@@ -5,7 +5,7 @@ using Engine.World;
 
 namespace Engine.Rendering
 {
-	public class ResolveStep : CameraStep
+	public class TonemapStep : CameraStep
 	{
 		private PipelineState gammaCorrectPSO;
 

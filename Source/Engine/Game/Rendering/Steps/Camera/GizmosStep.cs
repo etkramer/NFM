@@ -34,7 +34,6 @@ namespace Engine.Rendering
 	{
 		private CommandList renderList;
 		private RenderTarget renderTarget;
-
 		public CameraNode Camera { get; private set; }
 
 		private static PipelineState linePSO = null;

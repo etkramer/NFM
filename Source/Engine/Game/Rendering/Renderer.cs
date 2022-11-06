@@ -42,8 +42,8 @@ namespace Engine.Rendering
 			AddStep(new SkinningStep());
 			AddStep(new PrepassStep());
 			AddStep(new MaterialStep());
+			AddStep(new TonemapStep());
 			AddStep(new GizmosStep());
-			AddStep(new ResolveStep());
 		}
 
 		public static void RenderFrame()
