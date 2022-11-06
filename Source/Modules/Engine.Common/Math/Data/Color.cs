@@ -212,7 +212,7 @@ namespace Engine.Mathematics
 
 		#endregion
 
-		public static readonly Color Invisible = new Color(0, 0, 0, 0);
+		public static readonly Color Invisible = new Color(1, 0, 1, 0);
 		public static readonly Color Black = new Color(0, 0, 0, 1);
 		public static readonly Color White = new Color(1, 1, 1, 1);
 		public static readonly Color Purple = new Color(1, 0, 1, 1);

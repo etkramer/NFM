@@ -146,7 +146,7 @@ namespace Engine.World
 					}
 				}
 
-				context.DrawBox(modelBounds);
+				context.DrawBox(modelBounds, Color.White, Color.Invisible);
 			}
 
 			base.OnDrawGizmos(context);

@@ -73,6 +73,7 @@ namespace Engine.GPU
 		private Format[] rtFormats = { Graphics.RTFormat };
 		private int rtSamples = 1;
 		private TopologyType topologyType = TopologyType.Triangle;
+		private bool isBlendEnabled = false;
 
 		// Custom handler for #including files from arbitrary file systems
 		private CustomIncludeHandler shaderIncludeHandler = null;
@@ -128,6 +129,12 @@ namespace Engine.GPU
 		public PipelineState SetTopologyType(TopologyType type)
 		{
 			topologyType = type;
+			return this;
+		}
+
+		public PipelineState SetEnableBlend(bool value)
+		{
+			isBlendEnabled = value;
 			return this;
 		}
 
@@ -325,7 +332,8 @@ namespace Engine.GPU
 						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
 						{
 							AntialiasedLineEnable = topologyType == TopologyType.Line,
-						}
+						},
+						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : BlendDescription.Opaque
 					}, out PSO);
 				}
 				else if (IsCompute)
@@ -360,6 +368,7 @@ namespace Engine.GPU
 			public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
 			public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
 			public PipelineStateSubObjectTypeSampleDescription SampleDescription;
+			public PipelineStateSubObjectTypeBlend BlendDescription;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
