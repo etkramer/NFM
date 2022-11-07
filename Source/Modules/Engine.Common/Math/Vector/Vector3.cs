@@ -1602,5 +1602,21 @@ namespace Engine.Mathematics
             y = Y;
             z = Z;
         }
+
+        /// <summary>
+        /// Convert degrees to radians.
+        /// </summary>
+		public Vector3 ToRadians()
+		{
+			return new Vector3(X.ToRadians(), Y.ToRadians(), Z.ToRadians());
+		}
+
+        /// <summary>
+        /// Convert radians to degrees.
+        /// </summary>
+		public Vector3 ToDegrees()
+		{
+			return new Vector3(X.ToDegrees(), Y.ToDegrees(), Z.ToDegrees());
+		}
     }
 }

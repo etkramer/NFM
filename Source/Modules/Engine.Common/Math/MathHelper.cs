@@ -1330,7 +1330,7 @@ namespace Engine.Mathematics
         /// <summary>
         /// Convert degrees to radians.
         /// </summary>
-		public static T ToRadians<T>(this T degrees) where T : INumber<T>, IMultiplyOperators<T, float, T>
+		public static float ToRadians(this float degrees)
 		{
             const float degToRad = MathF.PI / 180.0f;
             return degrees * degToRad;
@@ -1339,9 +1339,27 @@ namespace Engine.Mathematics
         /// <summary>
         /// Convert radians to degrees.
         /// </summary>
-		public static T ToDegrees<T>(this T radians) where T : INumber<T>, IMultiplyOperators<T, float, T>
+		public static float ToDegrees(this float radians)
 		{
             const float radToDeg = 180.0f / MathF.PI;
+            return radians * radToDeg;
+		}
+
+        /// <summary>
+        /// Convert degrees to radians.
+        /// </summary>
+		public static double ToRadians(this double degrees)
+		{
+            const double degToRad = Math.PI / 180.0;
+            return degrees * degToRad;
+		}
+
+        /// <summary>
+        /// Convert radians to degrees.
+        /// </summary>
+		public static double ToDegrees(this double radians)
+		{
+            const double radToDeg = 180.0 / Math.PI;
             return radians * radToDeg;
 		}
 

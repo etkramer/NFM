@@ -11,8 +11,11 @@ namespace Engine.World
 	[Icon('\uE9FE')]
 	public partial class ModelNode : Node
 	{
-		[Inspect] public Model Model { get; set; } = null;
-		[Inspect] public bool IsVisible { get; set; } = true;
+		[Inspect]
+		public Model Model { get; set; } = null;
+
+		[Inspect]
+		public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
 		public bool IsInstanceValid = true;

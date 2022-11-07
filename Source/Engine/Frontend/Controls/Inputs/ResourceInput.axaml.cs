@@ -13,7 +13,7 @@ namespace Engine.Frontend
 {
 	public class ResourceInput : TemplatedControl
 	{
-		public static StyledProperty<Resource> ValueProperty = AvaloniaProperty.Register<ResourceInput, Resource>(nameof(Value));
+		public static StyledProperty<Resource> ValueProperty = AvaloniaProperty.Register<ResourceInput, Resource>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
 		[Notify] public Resource Value
 		{

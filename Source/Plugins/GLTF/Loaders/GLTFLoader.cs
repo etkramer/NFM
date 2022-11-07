@@ -13,8 +13,6 @@ using SharpGLTF.Validation;
 using StbiSharp;
 using Engine.Common;
 using SharpGLTF.IO;
-using System.Collections.ObjectModel;
-using System.Text.Json.Nodes;
 
 namespace GLTF.Loaders
 {
@@ -82,7 +80,35 @@ namespace GLTF.Loaders
 
 				gameMaterials[i] = gameMaterial;
 			}
+			
+			Debug.Assert(model.LogicalSkins.Count <= 1, "GLTF models with multiple skeletons are not supported");
 
+			// Build skeleton.
+			Bone rootBone = null;
+			if (model.LogicalSkins.Count > 0)
+			{
+				var skin = model.LogicalSkins[0];
+
+				// Find root node (joint with parent outside the skeleton).
+				Node root = skin.Skeleton;
+				if (root == null)
+				{
+					for (int i = 0; i < skin.JointsCount; i++)
+					{
+						var joint = skin.GetJoint(i);
+						if (!joint.Joint.VisualParent.IsSkinJoint)
+						{
+							root = joint.Joint;
+							break;
+						}
+					}
+				}
+
+				// Build the skeleton.
+				rootBone = BuildSkeleton(root);
+			}
+
+			// Build model parts (one per GLTF mesh).
 			var parts = new List<ModelPart>(model.LogicalMeshes.Count);
 			foreach (var node in model.LogicalNodes.Where(o => o.Mesh != null))
 			{
@@ -133,7 +159,23 @@ namespace GLTF.Loaders
 				parts.Add(new ModelPart(meshes));
 			}
 
-			return new Model(parts.ToArray());
+			return new Model(parts.ToArray())
+			{
+				Skeleton = rootBone
+			};
+		}
+
+		private Bone BuildSkeleton(Node node)
+		{
+			// Collect joint info.
+			var boneTransform = (Matrix4)node.WorldMatrix * Matrix4.CreateRotation(new(90, 0, 0));
+			var parentTransform = (Matrix4)node.VisualParent.WorldMatrix  * Matrix4.CreateRotation(new(90, 0, 0));
+
+			// Build child bones.
+			var children = node.VisualChildren
+				.Select(o => BuildSkeleton(o));
+
+			return new Bone(node.Name, boneTransform, parentTransform, children);
 		}
 
 		private Vertex[] BuildVertices(IReadOnlyDictionary<string, Accessor> accessors, Matrix4 transform)
