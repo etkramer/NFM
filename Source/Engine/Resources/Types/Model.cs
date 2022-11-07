@@ -70,12 +70,11 @@ namespace Engine.Resources
 		public string Name { get; }
 		public ImmutableList<Bone> Children { get; }
 
-		public Matrix4 BoneTransform { get; }
 		public Matrix4 InverseBind { get; }
 
-		public Vector3 BasePosition => BoneTransform.Inverse().ExtractTranslation();
-		public Vector3 BaseRotation => BoneTransform.Inverse().ExtractRotation().EulerAngles.ToDegrees();
-		public Vector3 BaseScale => BoneTransform.Inverse().ExtractScale();
+		public Vector3 BasePosition { get; }
+		public Vector3 BaseRotation { get; }
+		public Vector3 BaseScale { get; }
 
 		/// <param name="boneTransform">The transform of the bone in model space (not relative to other bones).</param>
 		/// <param name="parentTransform">The transform of the bone's parent (in model space), or Matrix4.Identity if none exists.</param>
@@ -83,10 +82,13 @@ namespace Engine.Resources
 		{
 			Name = name;
 			Children = children.ToImmutableList();
-
-			// Calculate base transform.
-			BoneTransform = boneTransform * parentTransform.Inverse();
 			InverseBind = boneTransform.Inverse();
+
+			// Calculate base transforms.
+			boneTransform = boneTransform * parentTransform.Inverse();
+			BasePosition = boneTransform.Inverse().ExtractTranslation();
+			BaseRotation = boneTransform.Inverse().ExtractRotation().EulerAngles.ToDegrees();
+			BaseScale = boneTransform.Inverse().ExtractScale();
 		}
 	}
 }

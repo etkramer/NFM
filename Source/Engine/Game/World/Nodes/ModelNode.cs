@@ -114,19 +114,8 @@ namespace Engine.World
 			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
 			EnumerateUpward().ForEach(o => transform *= Matrix4.CreateTransform(o.Position, o.Rotation, o.Scale));
 
-			if (TransformHandle == null)
-			{
-				if (Scene != null)
-				{
-					TransformHandle = Scene.TransformBuffer.Allocate(1);
-				}
-				else
-				{
-					return;
-				}
-			}
-
 			// Calculate transform.
+			TransformHandle ??= Scene.TransformBuffer.Allocate(1);
 			list.UploadBuffer(TransformHandle, new GPUTransform()
 			{
 				ObjectToWorld = transform,
