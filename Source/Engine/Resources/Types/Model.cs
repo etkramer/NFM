@@ -68,6 +68,7 @@ namespace Engine.Resources
 	public class Bone
 	{
 		public string Name { get; }
+		public int ID { get; }
 		public ImmutableList<Bone> Children { get; }
 
 		public Matrix4 InverseBind { get; }
@@ -78,9 +79,11 @@ namespace Engine.Resources
 
 		/// <param name="boneTransform">The transform of the bone in model space (not relative to other bones).</param>
 		/// <param name="parentTransform">The transform of the bone's parent (in model space), or Matrix4.Identity if none exists.</param>
-		public Bone(string name, Matrix4 boneTransform, Matrix4 parentTransform, IEnumerable<Bone> children)
+		/// <param name="id">The ID of this bone. This must be unique for each skeleton, and is used for weights.</param>
+		public Bone(string name, int id, Matrix4 boneTransform, Matrix4 parentTransform, IEnumerable<Bone> children)
 		{
 			Name = name;
+			ID = id;
 			Children = children.ToImmutableList();
 			InverseBind = boneTransform.Inverse();
 

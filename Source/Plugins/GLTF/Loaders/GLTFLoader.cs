@@ -104,8 +104,16 @@ namespace GLTF.Loaders
 					}
 				}
 
+				// Collect joint info.
+				List<(Node, Matrix4)> joints = new(skin.JointsCount);
+				for (int i = 0; i < skin.JointsCount; i++)
+				{
+					var joint = skin.GetJoint(i);
+					joints.Add((joint.Joint, (Matrix4)joint.InverseBindMatrix));
+				}
+
 				// Build the skeleton.
-				rootBone = BuildSkeleton(root);
+				rootBone = BuildSkeleton(root, joints);
 			}
 
 			// Build model parts (one per GLTF mesh).
@@ -165,7 +173,7 @@ namespace GLTF.Loaders
 			};
 		}
 
-		private Bone BuildSkeleton(Node node)
+		private Bone BuildSkeleton(Node node, List<(Node, Matrix4)> joints)
 		{
 			// Collect joint info.
 			var boneTransform = (Matrix4)node.WorldMatrix * Matrix4.CreateRotation(new(90, 0, 0));
@@ -173,9 +181,12 @@ namespace GLTF.Loaders
 
 			// Build child bones.
 			var children = node.VisualChildren
-				.Select(o => BuildSkeleton(o));
+				.Select(o => BuildSkeleton(o, joints));
 
-			return new Bone(node.Name, boneTransform, parentTransform, children);
+			// Find bone ID.
+			int boneID = joints.FindIndex(o => o.Item1 == node);
+
+			return new Bone(node.Name, boneID, boneTransform, parentTransform, children);
 		}
 
 		private Vertex[] BuildVertices(IReadOnlyDictionary<string, Accessor> accessors, Matrix4 transform)
