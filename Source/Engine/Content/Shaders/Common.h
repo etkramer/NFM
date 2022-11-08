@@ -3,6 +3,18 @@ SamplerState DefaultSampler : register(s0, space1); // Same as above
 SamplerState LinearSampler : register(s1, space1);
 SamplerState PointSampler : register(s2, space1);
 
+template <typename TResource>
+struct Bindless
+{
+	uint descriptorIndex;
+
+	TResource operator()()
+	{
+		TResource result = ResourceDescriptorHeap[descriptorIndex];
+		return result;
+	}
+};
+
 float3 LinearToSRGB(in float3 color)
 {
 	const float gamma = 2.2;
