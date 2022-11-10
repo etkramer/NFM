@@ -122,17 +122,6 @@ namespace GLTF.Loaders
 			{
 				var mesh = node.Mesh;
 
-				// Fetch the names of each morph target.
-				string[] morphNames = null;
-				if (mesh.Extras.TryGetNode("targetNames", out var namesNode))
-				{
-					morphNames = (namesNode.Content as IList).Cast<string>().ToArray();
-				}
-				else
-				{
-					morphNames = new string[0];
-				}
-
 				Mesh[] meshes = new Mesh[mesh.Primitives.Count];
 				Parallel.ForEach(mesh.Primitives, (primitive) =>
 				{
@@ -143,22 +132,11 @@ namespace GLTF.Loaders
 					// Build vertices for the base mesh.
 					var baseVertices = BuildVertices(primitive.VertexAccessors, worldMatrix);
 
-					// Build morph targets.
-					var morphTargets = new MorphTarget[primitive.MorphTargetsCount];
-					for (int i = 0; i < morphTargets.Length; i++)
-					{
-						var morphName = (primitive.MorphTargetsCount == morphNames.Length) ? morphNames[i] : $"Morph {i}";
-						var morphDeltas = BuildVertices(primitive.GetMorphTargetAccessors(i), worldMatrix);
-
-						morphTargets[i] = new MorphTarget(morphName, morphDeltas);
-					}
-
 					// Create mesh and add to collection.
 					var gameMesh = new Mesh();
 					gameMesh.SetVertices(baseVertices);
 					gameMesh.SetIndices(primitive.GetIndices().ToArray());
 					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
-					gameMesh.SetMorphTargets(morphTargets);
 					gameMesh.Commit();
 
 					meshes[primitive.LogicalIndex] = gameMesh;
@@ -202,11 +180,11 @@ namespace GLTF.Loaders
 			for (int i = 0; i < result.Length; i++)
 			{
 				Vertex vertex = new Vertex();
-				vertex.Position = Vector3.TransformVector(new Vector3(positions[i].X, positions[i].Y, positions[i].Z), transform);
+				vertex.Position = (new Vector4(positions[i].X, positions[i].Y, positions[i].Z, 1) * transform).Xyz;
 
 				if (normals != null)
 				{
-					vertex.Normal = Vector3.TransformVector(new Vector3(normals[i].X, normals[i].Y, normals[i].Z), transform);
+					vertex.Normal = (new Vector4(normals[i].X, normals[i].Y, normals[i].Z, 1) * transform).Xyz;
 				}
 				if (uv0 != null)
 				{

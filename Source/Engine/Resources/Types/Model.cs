@@ -15,7 +15,7 @@ namespace Engine.Resources
 		public Bone Skeleton { get; set; } = null;
 
 		public bool IsCommitted => Parts?.Any(o => o.Meshes.Any(o2 => o2.IsCommitted)) ?? false;
-		public bool IsDeformable => Parts?.Any(o => o.Meshes.Any(o2 => o2.IsDeformable)) ?? false;
+		public bool IsDeformable => Skeleton != null;
 
 		public Model(params Mesh[] meshes)
 		{

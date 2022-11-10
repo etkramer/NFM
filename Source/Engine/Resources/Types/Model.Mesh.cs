@@ -29,14 +29,11 @@ namespace Engine.Resources
 		internal BufferAllocation<GPUMesh> MeshHandle;
 
 		public bool IsCommitted { get; private set; } = false;
-		public bool IsDeformable => MorphTargets?.Length > 0;
 
 		public Box3D Bounds { get; set; } = Box3D.Infinity;
-
 		public uint[] Indices { get; private set; }
 		public Vertex[] Vertices { get; private set; }
 		public Material Material { get; private set; }
-		public MorphTarget[] MorphTargets { get; private set; }
 
 		public void SetIndices(uint[] indices)
 		{
@@ -53,12 +50,6 @@ namespace Engine.Resources
 		public void SetMaterial(Material material)
 		{
 			Material = material;
-			IsCommitted = false;
-		}
-
-		public void SetMorphTargets(MorphTarget[] morphTargets)
-		{
-			MorphTargets = morphTargets;
 			IsCommitted = false;
 		}
 
@@ -162,18 +153,6 @@ namespace Engine.Resources
 			VertHandle?.Dispose();
 			MeshletHandle?.Dispose();
 			MeshHandle?.Dispose();
-		}
-	}
-
-	public class MorphTarget
-	{
-		public string Name { get; }
-		public Vertex[] VertexDeltas { get; }
-
-		public MorphTarget(string name, Vertex[] vertexDeltas)
-		{
-			Name = name;
-			VertexDeltas = vertexDeltas;
 		}
 	}
 
