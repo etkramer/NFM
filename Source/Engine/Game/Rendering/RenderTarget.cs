@@ -94,7 +94,7 @@ namespace Engine.Rendering
 		public void UpdateView(CameraNode camera)
 		{
 			// Calculate view/projection matrices.
-			ViewMatrix = Matrix4.CreateTransform(camera.Position, camera.Rotation, Vector3.One).Inverse();
+			ViewMatrix = camera.Transform.Inverse();
 			ProjectionMatrix = Matrix4.CreatePerspectiveReversed(camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
 			// Apply Z-up projection.

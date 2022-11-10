@@ -189,9 +189,9 @@ namespace Engine.Resources
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct GPUMesh
 	{
-		public uint VertOffset; // Start of submesh in vertex buffer.
-		public uint PrimOffset; // Start of submesh in primitive buffer.
-		public uint MeshletOffset; // Start of submesh in meshlet buffer.
-		public uint MeshletCount;   // Number of meshlets used
+		public required uint VertOffset; // Start of submesh in vertex buffer.
+		public required uint PrimOffset; // Start of submesh in primitive buffer.
+		public required uint MeshletOffset; // Start of submesh in meshlet buffer.
+		public required uint MeshletCount;   // Number of meshlets used
 	}
 }

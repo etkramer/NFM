@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.ComponentModel.DataAnnotations;
+using System.Reactive.Linq;
 using Engine.Editor;
-using Engine.GPU;
 using Engine.Rendering;
 using ReactiveUI;
 
@@ -11,13 +9,14 @@ namespace Engine.World
 	[Icon('\uE3C2')]
 	public class Node : ISelectable, IDisposable
 	{
-		// Properties (inspectable)
 		[Inspect] public string Name { get; set; }
+
 		[Inspect] public Vector3 Position { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 
-		public bool IsTransformValid { get; protected set; } = false;
+		[Notify]
+		public Matrix4 Transform { get; private set; } = Matrix4.Identity;
 
 		public Scene Scene { get; }
 
@@ -31,11 +30,9 @@ namespace Engine.World
 			get => parent;
 			set
 			{
+				Debug.Assert(value != this, "Nodes cannot be parented to themselves.");
 				Debug.Assert(value == null || value.Scene == Scene,
 					"Nodes can only be parented to other nodes from the same scene.");
-
-				Debug.Assert(value != this,
-					"Nodes cannot be parented to themselves.");
 
 				if (parent != value || value == null /*Could be initial setup...*/)
 				{
@@ -70,7 +67,7 @@ namespace Engine.World
 
 			// Track changes in transform
 			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
-				.Subscribe((o) => InvalidateTransform());
+				.Subscribe(o => Transform = EvaluateTransform());
 		}
 
 		public virtual void Dispose()
@@ -87,15 +84,18 @@ namespace Engine.World
 			}
 		}
 
-		public void InvalidateTransform()
+		public virtual Matrix4 EvaluateTransform()
 		{
-			IsTransformValid = false;
+			// Grab base transform.
+			Matrix4 result = Matrix4.CreateTransform(Position, Rotation, Scale);
 
-			foreach (var child in children)
-			{
-				child.InvalidateTransform();
-			}
+			// Apply parent transforms.
+			EnumerateUpward().ForEach(o => result *= Matrix4.CreateTransform(o.Position, o.Rotation, o.Scale));
+
+			return result;
 		}
+
+		public virtual void OnDrawGizmos(GizmosContext context) {}
 
 		/// <summary>
 		/// Enumerates up the node heirarchy, toward the scene root.
@@ -111,22 +111,6 @@ namespace Engine.World
 					yield return node;
 				}
 			}
-		}
-
-		public virtual void OnDrawGizmos(GizmosContext context) {}
-	}
-
-	/// <summary>
-	/// A node with a lifespan tied to it's owner and can't be reparented.
-	/// </summary>
-	public class ChildNode : Node
-	{
-		public Node Owner { get; }
-
-		public ChildNode(Node owner) : base(owner.Scene)
-		{
-			Owner = owner;
-			Parent = owner;
 		}
 	}
 }

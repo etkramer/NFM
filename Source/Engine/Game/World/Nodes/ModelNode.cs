@@ -1,4 +1,5 @@
 ﻿using System;
+using DynamicData;
 using Engine.Editor;
 using Engine.GPU;
 using Engine.GPU.Native;
@@ -18,7 +19,8 @@ namespace Engine.World
 		public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
-		public bool IsInstanceValid = true;
+		public bool IsInstanceValid { get; private set; } = true;
+		public bool IsTransformValid { get; private set; } = false;
 		public BufferAllocation<GPUTransform> TransformHandle;
 		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
@@ -33,6 +35,24 @@ namespace Engine.World
 				{
 					IsInstanceValid = false;
 				});
+
+			// Track changes in display transform
+			this.WhenAnyValue(o => o.Transform)
+				.Subscribe((o) => InvalidateTransformRecurse(this));
+		}
+
+		private void InvalidateTransformRecurse(Node root)
+		{
+			if (root is ModelNode model)
+			{
+				// Mark this node as needing it's GPU-side transform updated.
+				model.IsTransformValid = false;
+			}
+
+			foreach (var node in root.Children)
+			{
+				InvalidateTransformRecurse(node);
+			}
 		}
 
 		public override void Dispose()
@@ -111,15 +131,11 @@ namespace Engine.World
 		public void UpdateTransform(CommandList list)
 		{
 			// Calculate transform.
-			Matrix4 transform = Matrix4.CreateTransform(Position, Rotation, Scale);
-			EnumerateUpward().ForEach(o => transform *= Matrix4.CreateTransform(o.Position, o.Rotation, o.Scale));
-
-			// Calculate transform.
 			TransformHandle ??= Scene.TransformBuffer.Allocate(1);
 			list.UploadBuffer(TransformHandle, new GPUTransform()
 			{
-				ObjectToWorld = transform,
-				WorldToObject = transform.Inverse()
+				ObjectToWorld = Transform,
+				WorldToObject = Transform.Inverse()
 			});
 
 			IsTransformValid = true;

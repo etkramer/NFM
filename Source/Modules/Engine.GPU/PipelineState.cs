@@ -329,8 +329,10 @@ namespace Engine.GPU
 						RenderTargetFormats = rtFormats,
 						DepthStencilFormat = Graphics.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
-						RasterizerState = new RasterizerDescription((Vortice.Direct3D12.CullMode)cullMode, FillMode.Solid)
+						RasterizerState = new RasterizerDescription()
 						{
+							CullMode = (Vortice.Direct3D12.CullMode)cullMode,
+							FillMode = FillMode.Solid,
 							AntialiasedLineEnable = topologyType == TopologyType.Line,
 						},
 						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : BlendDescription.Opaque
