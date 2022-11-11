@@ -21,6 +21,14 @@ namespace Engine.World
 			InstanceBuffer.Name = "Instance Buffer";
 		}
 
+		public void Tick()
+		{
+			foreach (var node in EnumerateNodes())
+			{
+				node.Tick();
+			}
+		}
+
 		/// <summary>
 		/// Adds a Node as a scene root. Should NEVER be called manually.
 		/// </summary>
@@ -47,17 +55,14 @@ namespace Engine.World
 				rootNodes[i].Dispose();
 			}
 
-			DispatchQueue.Add(() =>
-			{
-				InstanceBuffer.Dispose();
-				TransformBuffer.Dispose();
-			}, 0);
+			InstanceBuffer.Dispose();
+			TransformBuffer.Dispose();
 
 			All.Remove(this);
 		}
 
 		/// <summary>
-		/// Enumerates over *all* nodes in the scene recursively.
+		/// Enumerates over *all* nodes in the scene in a top-down fashion.
 		/// </summary>
 		public IEnumerable<Node> EnumerateNodes() => EnumerateNodes(rootNodes);
 		private IEnumerable<Node> EnumerateNodes(IEnumerable<Node> root)

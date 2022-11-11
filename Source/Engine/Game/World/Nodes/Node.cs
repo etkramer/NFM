@@ -64,10 +64,6 @@ namespace Engine.World
 			Scene = scene ?? Scene.Main;
 			Parent = null;
 			Children = new(children);
-
-			// Track changes in transform
-			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
-				.Subscribe(o => Transform = EvaluateTransform());
 		}
 
 		public virtual void Dispose()
@@ -84,18 +80,26 @@ namespace Engine.World
 			}
 		}
 
+		public virtual void Tick()
+		{
+			Transform = EvaluateTransform();
+		}
+
 		public virtual Matrix4 EvaluateTransform()
 		{
 			// Grab base transform.
 			Matrix4 result = Matrix4.CreateTransform(Position, Rotation, Scale);
 
-			// Apply parent transforms.
-			EnumerateUpward().ForEach(o => result *= Matrix4.CreateTransform(o.Position, o.Rotation, o.Scale));
+			// Apply parent transform.
+			if (parent != null)
+			{
+				result *= parent.Transform;
+			}
 
 			return result;
 		}
 
-		public virtual void OnDrawGizmos(GizmosContext context) {}
+		public virtual void DrawGizmos(GizmosContext context) {}
 
 		/// <summary>
 		/// Enumerates up the node heirarchy, toward the scene root.

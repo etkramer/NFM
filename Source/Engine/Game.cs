@@ -44,8 +44,13 @@ namespace Engine
 			// Begin the new frame.
 			OnTick.Invoke(Metrics.FrameTime);
 
-			// Invoke dispose queue.
-			DispatchQueue.Invoke(0);
+			// Tick scenes.
+			foreach (var scene in Scene.All)
+			{
+				scene.Tick();
+			}
+
+			// Render the frame.
 			Renderer.RenderFrame();
 		}
 

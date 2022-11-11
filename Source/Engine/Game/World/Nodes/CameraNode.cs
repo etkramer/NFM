@@ -23,7 +23,7 @@ namespace Engine.World
 
 		}
 
-		public override void OnDrawGizmos(GizmosContext context)
+		public override void DrawGizmos(GizmosContext context)
 		{
 
 		}

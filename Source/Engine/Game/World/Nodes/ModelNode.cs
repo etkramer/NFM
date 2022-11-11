@@ -29,14 +29,14 @@ namespace Engine.World
 		{
 			// Track changes in model/visibility
 			this.WhenAnyValue(o => o.Model, o => o.IsVisible)
-				.Subscribe((o) =>
+				.Subscribe(o =>
 				{
 					IsInstanceValid = false;
 				});
 
 			// Track changes in display transform
 			this.WhenAnyValue(o => o.Transform)
-				.Subscribe((o) => InvalidateTransformRecurse(this));
+				.Subscribe(o => InvalidateTransformRecurse(this));
 		}
 
 		private void InvalidateTransformRecurse(Node root)
@@ -139,7 +139,7 @@ namespace Engine.World
 			IsTransformValid = true;
 		}
 
-		public override void OnDrawGizmos(GizmosContext context)
+		public override void DrawGizmos(GizmosContext context)
 		{
 			if (Selection.Selected.Contains(this) && Model != null && IsVisible)
 			{
@@ -155,7 +155,7 @@ namespace Engine.World
 				context.DrawBox(modelBounds, Color.White, Color.Invisible);
 			}
 
-			base.OnDrawGizmos(context);
+			base.DrawGizmos(context);
 		}
 	}
 }

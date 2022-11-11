@@ -25,7 +25,7 @@ namespace Engine.Rendering
 			// Draw gizmos for each node
 			foreach (var node in Camera.Scene.EnumerateNodes())
 			{
-				node.OnDrawGizmos(context);
+				node.DrawGizmos(context);
 			}
 		}
 	}
