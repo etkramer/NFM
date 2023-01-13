@@ -94,9 +94,9 @@ namespace NFM.GPU
 			};
 
 			// Create buffer.
-			Graphics.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.CopyDest, out ID3D12Resource resource);
+			Graphics.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.Common, out ID3D12Resource resource);
 			D3DResource = resource;
-			State = ResourceStates.CopyDest;
+			State = ResourceStates.Common;
 
 			// Set debug name.
 			Name = GetType().Name;
