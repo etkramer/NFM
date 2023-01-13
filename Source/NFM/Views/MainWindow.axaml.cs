@@ -27,14 +27,7 @@ namespace NFM.Frontend
 			RestorePanels();
 
 			// Show landing dialog.
-			if (LandingDialog.ShowOnStartup)
-			{
-				new LandingDialog().Show();
-			}
-			else
-			{
-				FrontendHelpers.InvokeHandled(() => Project.Reset());
-			}
+			FrontendHelpers.InvokeHandled(Project.Reset);
 
 			// Begin game loop.
 			DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Engine.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
@@ -77,10 +70,10 @@ namespace NFM.Frontend
 			{
 				e.Cancel = !isQuitConfirmed;
 
-				new Popup("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
+				new Dialog("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
 					.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
 					.Button("Cancel", (o) => o.Close())
-					.Open();
+					.Show();
 			}
 
 			base.OnClosing(e);

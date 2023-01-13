@@ -24,13 +24,13 @@ namespace NFM.Frontend
 				// Create exception dialog.
 				Dispatcher.UIThread.Post(() =>
 				{
-					new Popup(
+					new Dialog(
 							info.SourceException.GetType().Name,
 							$"An unhandled exception has occured. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
 							$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
 							$"{info.SourceException.StackTrace}")
 						.Button("Break", (o) => info.Throw())
-						.Button("Abort", (o) => Environment.Exit(-1)).Open();
+						.Button("Abort", (o) => Environment.Exit(-1)).Show();
 				});
 
 				return false;

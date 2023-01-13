@@ -14,7 +14,7 @@ using Avalonia.Visuals.Media.Imaging;
 
 namespace NFM.Frontend
 {
-	public class Popup
+	public class Dialog
 	{
 		private string title;
 		private string message;
@@ -22,13 +22,13 @@ namespace NFM.Frontend
 
 		private Window win;
 
-		public Popup(string title, string message)
+		public Dialog(string title, string message)
 		{
 			this.title = title;
 			this.message = message;
 		}
 
-		public Popup Button(string name, Action<Popup> onClick)
+		public Dialog Button(string name, Action<Dialog> onClick)
 		{
 			buttons.Add(
 				new Button()
@@ -41,7 +41,7 @@ namespace NFM.Frontend
 			return this;
 		}
 
-		public void Open()
+		public void Show()
 		{
 			win = new Window();
 			win.Title = title;
@@ -117,6 +117,37 @@ namespace NFM.Frontend
 		public void Close()
 		{
 			win.Close();
+		}
+
+		public static async Task<string> ShowSaveDialog(Window parent, params FileFilter[] filters)
+		{
+			SaveFileDialog saveDialog = new SaveFileDialog()
+			{
+				Filters = new List<FileDialogFilter>(filters)
+			};
+
+			return await saveDialog.ShowAsync(parent);
+		}
+
+		public static async Task<string> ShowOpenDialog(Window parent, params FileFilter[] filters)
+		{
+			OpenFileDialog openDialog = new OpenFileDialog()
+			{
+				AllowMultiple = false,
+				Filters = new List<FileDialogFilter>(filters)
+			};
+
+			string[] result = await openDialog.ShowAsync(parent);
+			return result?.Length > 0 ? result[0] : null;
+		}
+
+		public class FileFilter : FileDialogFilter
+		{
+			public FileFilter(string name, params string[] extensions)
+			{
+				Name = name;
+				Extensions = new(extensions);
+			}
 		}
 	}
 }
