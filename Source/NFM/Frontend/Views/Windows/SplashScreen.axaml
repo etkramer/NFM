@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		Width="800"
+		Height="180"
+        x:Class="NFM.Frontend.SplashScreen"
+		WindowStartupLocation="CenterScreen"
+		CanResize="False"
+		Icon="avares://NFM/Content/Frontend/Icons/iconsmall.ico"
+        Title="Loading">
+	
+	<Grid RowDefinitions="auto, *">
+		<Grid Grid.Row="0" ColumnDefinitions="auto, *, auto" Height="38">
+			<Image Grid.Column="0" Source="avares://NFM/Content/Frontend/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 0, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+			<TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Title}" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" IsHitTestVisible="False"/>
+		</Grid>
+		
+		<Grid Grid.Row="1" Background="{StaticResource ToolBackgroundColor}" Focusable="True">
+			<!--<ProgressBar VerticalAlignment="Center" Value="10" Minimum="0" Maximum="20"/>-->
+		</Grid>
+	</Grid>
+</Window>

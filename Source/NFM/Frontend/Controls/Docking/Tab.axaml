@@ -1,0 +1,40 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:NFM.Frontend">
+
+	<!--Base state-->
+	<Style Selector="controls|Tab">
+		<Setter Property="Foreground" Value="{StaticResource ThemeForegroundBrush}"/>
+		<Setter Property="Background" Value="{StaticResource ToolBackgroundColor}"/>
+		<Setter Property="Height" Value="22"/>
+		<Setter Property="Focusable" Value="True"/>
+		<Setter Property="Padding" Value="22, 0, 22, 0"/>
+		
+		<Setter Property="ContextFlyout">
+			<MenuFlyout>
+				<MenuItem Header="Close" Command="{Binding Close}"/>
+			</MenuFlyout>
+		</Setter>
+		
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Button Classes="tab" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="2, 2, 0, 0" Command="{Binding OnClick}">
+					<TextBlock Margin="0, 2, 0, 0" IsHitTestVisible="False" Text="{Binding Panel.Title, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeNormal}" Foreground="{TemplateBinding Foreground}"/>
+				</Button>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+	
+	<!--Inactive state-->
+	<Style Selector="controls|Tab:not(:active):not(:pointerover)">
+		<Setter Property="Foreground" Value="{StaticResource ThemeForegroundLowBrush}"/>
+		<Setter Property="Background" Value="Transparent"/>
+	</Style>
+	
+	<!--Button style-->
+	<Style Selector="controls|Tab /template/ Button">
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Cursor" Value="Arrow"/>
+		<Setter Property="ClickMode" Value="Press"/>
+	</Style>
+</Styles>

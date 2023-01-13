@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:NFM.Frontend">
+
+	<Style Selector="controls|WindowButtons">
+		<Setter Property="Height" Value="38"/>
+		<Setter Property="Padding" Value="18, 0, 18, 0"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<StackPanel Orientation="Horizontal">
+					<Button Name="MinimizeButton" Content="&#xEF2D;" FontFamily="Segoe MDL2 Assets" FontSize="12" Padding="{TemplateBinding Padding}" Classes="window" Command="{Binding MinimizePressed}"/>
+					<Button Name="MaximizeButton" Content="&#xE923;" FontFamily="Segoe MDL2 Assets" FontSize="12" Padding="{TemplateBinding Padding}" Classes="window" Command="{Binding MaximizePressed}"/>
+					<Button Name="CloseButton" Content="&#xEF2C;" FontFamily="Segoe MDL2 Assets" FontSize="12" Padding="{TemplateBinding Padding}" Classes="window" Command="{Binding ClosePressed}"/>
+				</StackPanel>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+	
+	<Style Selector="controls|WindowButtons.dialog">
+		<Setter Property="Template">
+			<ControlTemplate>
+				<StackPanel Orientation="Horizontal">
+					<Button Content="&#xEF2C;" FontFamily="Segoe MDL2 Assets" FontSize="12" Padding="{TemplateBinding Padding}" Classes="window" Command="{Binding ClosePressed}"/>
+				</StackPanel>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+</Styles>

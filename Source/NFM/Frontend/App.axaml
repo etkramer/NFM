@@ -1,0 +1,23 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NFM.Frontend.App">
+    <Application.Styles>
+		<!--Avalonia Default Theme-->
+		<StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
+		<StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml"/>
+		
+		<!--Modified Default Theme-->
+		<StyleInclude Source="avares://NFM/Content/Frontend/EditorTheme.axaml"/>
+		
+		<!--Custom Controls (Misc)-->
+		<StyleInclude Source="avares://NFM/Frontend/Controls/WindowButtons.axaml"/>
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Docking/Tab.axaml"/>
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Docking/TabGroup.axaml"/>
+
+		<!--Custom Controls (Inputs)-->
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Inputs/BoolInput.axaml"/>
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Inputs/TextInput.axaml"/>
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Inputs/NumInput.axaml"/>
+		<StyleInclude Source="avares://NFM/Frontend/Controls/Inputs/ResourceInput.axaml"/>
+    </Application.Styles>
+</Application>

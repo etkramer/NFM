@@ -1,0 +1,19 @@
+<controls:ToolPanel xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:controls="using:NFM.Frontend"
+		x:Class="NFM.Frontend.ViewportPanel"
+		Title="Viewport"
+        mc:Ignorable="d">
+
+	<Grid RowDefinitions="*, 27">
+		<!--Viewport Content-->
+		<controls:ViewportHost Grid.Row="0"/>
+
+		<StackPanel Grid.Row="1" Margin="10, 0" Spacing="10" HorizontalAlignment="Right" Orientation="Horizontal">
+			<TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Text="{Binding MemoryDisplay}"/>
+			<TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Text="{Binding FrameTimeDisplay}"/>
+		</StackPanel>
+	</Grid>
+</controls:ToolPanel>

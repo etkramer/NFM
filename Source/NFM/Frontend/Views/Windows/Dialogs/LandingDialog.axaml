@@ -1,0 +1,38 @@
+<controls:Dialog xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:controls="using:NFM.Frontend"
+        mc:Ignorable="d"
+        x:Class="NFM.Frontend.LandingDialog"
+		Width="450"
+		Height="650"
+        Title="Landing">
+	
+	<Grid RowDefinitions="*, 1, 60">
+		<StackPanel Grid.Row="0" Spacing="10" Margin="15" Orientation="Vertical">
+			<StackPanel Orientation="Vertical">
+				<TextBlock Text="Name" FontSize="{StaticResource FontSizeLarge}" Margin="0, 0, 0, 4"/>
+				<TextBlock Text="Choose a name for your project" Foreground="{StaticResource ThemeForegroundLowColor}" Margin="0, 0, 0, 4" />
+				<controls:TextInput Value="Sandbox" Margin="0, 4, 0, 0"/>
+			</StackPanel>
+			<StackPanel Orientation="Vertical">
+				<TextBlock Text="Aspect ratio" FontSize="{StaticResource FontSizeLarge}" Margin="0, 0, 0, 4"/>
+				<TextBlock Text="Choose the project's aspect ratio" Foreground="{StaticResource ThemeForegroundLowColor}" Margin="0, 0, 0, 4" />
+				<controls:NumInput Value="2.35" Margin="0, 4, 0, 0"/>
+			</StackPanel>
+			<StackPanel Orientation="Vertical">
+				<TextBlock Text="Embed content" FontSize="{StaticResource FontSizeLarge}" Margin="0, 0, 0, 4"/>
+				<TextBlock Text="Embed custom content in project file?" Foreground="{StaticResource ThemeForegroundLowColor}" Margin="0, 0, 0, 4" />
+				<controls:BoolInput Value="True" Margin="0, 4, 0, 0"/>
+			</StackPanel>
+		</StackPanel>
+		
+		<Rectangle Grid.Row="1" Fill="{StaticResource WindowBackgroundColor}"/>
+
+		<StackPanel Grid.Row="2" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+			<Button Content="Create" Width="100" Height="26" Classes="dialog2" Command="{Binding CreatePressed}"/>
+			<Button Content="Load" Width="100" Height="26" Classes="dialog1" Command="{Binding LoadPressed}"/>
+		</StackPanel>
+	</Grid>
+</controls:Dialog>

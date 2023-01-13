@@ -1,0 +1,12 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:NFM.Frontend">
+
+  <Style Selector="controls|BoolInput">
+    <Setter Property="Template">
+      <ControlTemplate>
+		<CheckBox IsChecked="{TemplateBinding Value, Mode=TwoWay}"/>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

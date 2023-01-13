@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<PlatformTarget>x64</PlatformTarget>
+		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Content\Shaders\Gizmos\GeomMS.hlsl" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\GeomMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Gizmos\LineMS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Common.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Geometry.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.h" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\CullCS.hlsl" />
+		<EmbeddedResource Include="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
+		
+		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Modules\NFM.Common\NFM.Common.csproj" />
+		<ProjectReference Include="..\Modules\NFM.GPU\NFM.GPU.csproj" />
+		<ProjectReference Include="..\Modules\NFM.Roslyn\NFM.Roslyn.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="..\Libraries\MeshOptimize\MeshOptimize.vcxproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.17" />
+		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
+		<PackageReference Include="WinApi" Version="4.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:controls="using:NFM.Controls">
+	
+	<Style Selector="Window[WindowState=Maximized] /template/ Panel">
+		<Setter Property="Margin" Value="8" />
+	</Style>
+	
+	<Style Selector="Window">
+		<Setter Property="Background" Value="{DynamicResource WindowBackgroundColor}"/>  
+		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+		<Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>  
+		<Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>
+		<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="1000000"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Panel Name="RootPanel">		
+					<Border Background="{TemplateBinding Background}" IsHitTestVisible="False" />
+				
+					<ContentPresenter Name="PART_ContentPresenter"
+						ContentTemplate="{TemplateBinding ContentTemplate}"
+						Content="{TemplateBinding Content}"
+						Margin="{TemplateBinding Padding}"
+						HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+						VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+				</Panel>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+</Styles>

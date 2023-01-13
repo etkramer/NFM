@@ -1,0 +1,39 @@
+<controls:ToolPanel xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:controls="using:NFM.Frontend"
+		x:Class="NFM.Frontend.InspectorPanel"
+		Title="Inspector"
+        mc:Ignorable="d">
+	
+	<Grid RowDefinitions="32, 50, *">
+		<!--Toolbar-->
+		<Grid ColumnDefinitions="auto, *" Grid.Row="0" Margin="4">
+			<!--Forward/back buttons-->
+			<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+				<Button Classes="window" ToolTip.Tip="Back">
+					<TextBlock Text="&#xE5C4;" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
+				</Button>
+				<Button Classes="window" ToolTip.Tip="Forward" Margin="0, 0, 8, 0" IsEnabled="False">
+					<TextBlock Text="&#xE5C8;" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
+				</Button>
+			</StackPanel>
+
+			<TextBox Classes="search" Watermark="Filter.." Grid.Column="1"/>
+		</Grid>
+
+		<!--Object header-->
+		<Grid Background="{StaticResource ControlBackgroundColor}" Grid.Row="1">
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="{Binding TypeIcon}" FontFamily="{StaticResource IconsFont2}" VerticalAlignment="Center" Foreground="#B0E24D" FontSize="26" Margin="7, 0"/>
+				<StackPanel Orientation="Vertical" VerticalAlignment="Center">
+					<TextBlock Text="{Binding ObjectName}" Foreground="#B0E24D" FontSize="14" FontWeight="Bold"/>
+					<TextBlock Text="{Binding TypeName}" Foreground="#BEB0E24D"/>
+				</StackPanel>
+			</StackPanel>
+		</Grid>
+
+		<ContentControl Grid.Row="2" Content="{Binding PropertyContent}"/>
+	</Grid>
+</controls:ToolPanel>
