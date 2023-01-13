@@ -7,7 +7,7 @@
 		x:Name="Self"
 		xmlns:controls="using:NFM.Frontend"
 		WindowState="Maximized"
-		Icon="avares://NFM/Content/Frontend/Icons/iconsmall.ico"
+		Icon="{StaticResource AppIcon}"
         Title="NFM">
 	
 	<Grid RowDefinitions="auto, auto, *">
@@ -15,7 +15,7 @@
 		<Grid Grid.Row="0" ColumnDefinitions="auto, *">
 			<!--Menu bar-->
 			<StackPanel Grid.Column="0" Orientation="Horizontal">
-				<!--<Image Source="avares://NFM/Content/Frontend/Icons/iconsmall.ico" HorizontalAlignment="Left" Width="24" Margin="10, 2, 5, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>-->
+				<!--<Image Source="{StaticResource AppIcon}" HorizontalAlignment="Left" Width="24" Margin="10, 2, 5, 0" RenderOptions.BitmapInterpolationMode="HighQuality"/>-->
 				<Menu VerticalAlignment="Stretch">
 					<MenuItem Header="File" VerticalAlignment="Stretch" Padding="10, 0, 5, 0">
 						<MenuItem Header="New" Command="{Binding NewPressed}" InputGesture="Ctrl+N" HotKey="Ctrl+N"/>

@@ -64,7 +64,7 @@ namespace NFM.Frontend
 								.Width(24)
 								.Margin(10, 2, 0, 0)
 								.With(o => o.SetValue(RenderOptions.BitmapInterpolationModeProperty, BitmapInterpolationMode.HighQuality))
-								.With(o => o.Source = win.GetResourceBitmap("avares://NFM/Content/Frontend/Icons/iconsmall.ico")),
+								.With(o => o.Source = win.GetResourceBitmap("avares://NFM/Assets/appicon.ico")),
 							new TextBlock()
 								.Column(1)
 								.VerticalAlignment(VerticalAlignment.Center)

@@ -9,13 +9,20 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Content\Shaders\Gizmos\GeomMS.hlsl" />
+	  <AvaloniaXaml Remove="Content\**" />
+	  <Compile Remove="Content\**" />
+	  <EmbeddedResource Remove="Content\**" />
+	  <None Remove="Content\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIcons-Regular.ttf" />
-		<AvaloniaResource Include="Content\Frontend\Fonts\MaterialIconsOutlined-Regular.otf" />
-		<AvaloniaResource Include="Content\Frontend\Icons\icon.ico" />
-		<AvaloniaResource Include="Content\Frontend\Icons\iconsmall.ico" />
+	  <None Remove="Assets\appicon.ico" />
+	  <None Remove="Assets\Fonts\MaterialIcons-Regular.ttf" />
+	  <None Remove="Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AvaloniaResource Include="Assets\appicon.ico" />
+	  <AvaloniaResource Include="Assets\Fonts\MaterialIcons-Regular.ttf" />
+	  <AvaloniaResource Include="Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Modules\NFM.Common\NFM.Common.csproj" />
