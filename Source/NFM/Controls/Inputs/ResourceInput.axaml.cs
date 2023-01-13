@@ -13,9 +13,9 @@ namespace NFM.Frontend
 {
 	public class ResourceInput : TemplatedControl
 	{
-		public static StyledProperty<Resource> ValueProperty = AvaloniaProperty.Register<ResourceInput, Resource>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
+		public static StyledProperty<GameResource> ValueProperty = AvaloniaProperty.Register<ResourceInput, GameResource>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
-		[Notify] public Resource Value
+		[Notify] public GameResource Value
 		{
 			get => GetValue(ValueProperty);
 			set => SetValue(ValueProperty, value);
@@ -30,7 +30,7 @@ namespace NFM.Frontend
 			{
 				return null;
 			}
-			else if (value is Resource resource)
+			else if (value is GameResource resource)
 			{
 				if (resource.Source != null)
 				{

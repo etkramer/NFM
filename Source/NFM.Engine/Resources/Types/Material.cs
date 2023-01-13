@@ -2,7 +2,7 @@
 
 namespace NFM.Resources
 {
-	public sealed class Material : Resource
+	public sealed class Material : GameResource
 	{
 		public Shader Shader { get; }
 

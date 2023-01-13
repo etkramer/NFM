@@ -46,8 +46,8 @@ namespace NFM.Rendering
 		{
 			linePSO = new PipelineState()
 				.UseIncludes(typeof(Engine).Assembly)
-				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/LineMS.hlsl", typeof(Engine).Assembly), "LineMS")
-				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+				.SetMeshShader(Embed.GetString("Shaders/Gizmos/LineMS.hlsl", typeof(Engine).Assembly), "LineMS")
+				.SetPixelShader(Embed.GetString("Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
 				.AsRootConstant(0, 4 + 4 + 4)
 				.SetDepthMode(DepthMode.GreaterEqual, true, true)
 				.SetTopologyType(TopologyType.Line)
@@ -55,8 +55,8 @@ namespace NFM.Rendering
 
 			geometryPSO = new PipelineState()
 				.UseIncludes(typeof(Engine).Assembly)
-				.SetMeshShader(Embed.GetString("Content/Shaders/Gizmos/GeomMS.hlsl", typeof(Engine).Assembly), "GeomMS")
-				.SetPixelShader(Embed.GetString("Content/Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+				.SetMeshShader(Embed.GetString("Shaders/Gizmos/GeomMS.hlsl", typeof(Engine).Assembly), "GeomMS")
+				.SetPixelShader(Embed.GetString("Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
 				.AsRootConstant(0, 4)
 				.SetDepthMode(DepthMode.Always, false, true)
 				.Compile().Result;

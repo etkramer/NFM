@@ -23,7 +23,7 @@ namespace NFM.GPU
 
 		private static PipelineState mipGenPSO = new PipelineState()
 			.UseIncludes(typeof(CommandList).Assembly)
-			.SetComputeShader(Embed.GetString("Content/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
+			.SetComputeShader(Embed.GetString("Shaders/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
 			.AsRootConstant(0, 2)
 			.Compile().Result;
 

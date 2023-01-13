@@ -1,6 +1,6 @@
-﻿#include "Content/Shaders/Common.h"
-#include "Content/Shaders/Geometry/Material/BaseMaterialPS.h"
-#include "Content/Shaders/Geometry/Shared/BaseMS.h"
+﻿#include "Shaders/Common.h"
+#include "Shaders/Geometry/Material/BaseMaterialPS.h"
+#include "Shaders/Geometry/Shared/BaseMS.h"
 
 struct SurfaceState
 {

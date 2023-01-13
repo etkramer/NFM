@@ -8,22 +8,22 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Content\Shaders\Gizmos\GeomMS.hlsl" />
+	  <None Remove="Shaders\Gizmos\GeomMS.hlsl" />
 	</ItemGroup>
 	<ItemGroup>
-		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.h" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\BaseMS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Gizmos\GeomMS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Gizmos\Gizmos.h" />
-		<EmbeddedResource Include="Content\Shaders\Gizmos\GizmosPS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Gizmos\LineMS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Common.h" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Geometry.h" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.h" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\PostProcess\GammaCorrectCS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Shared\CullCS.hlsl" />
-		<EmbeddedResource Include="Content\Shaders\Geometry\Prepass\DepthPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Geometry\Shared\BaseMS.h" />
+		<EmbeddedResource Include="Shaders\Geometry\Shared\BaseMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Gizmos\GeomMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Gizmos\Gizmos.h" />
+		<EmbeddedResource Include="Shaders\Gizmos\GizmosPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Gizmos\LineMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common.h" />
+		<EmbeddedResource Include="Shaders\Geometry\Geometry.h" />
+		<EmbeddedResource Include="Shaders\Geometry\Material\BaseMaterialPS.h" />
+		<EmbeddedResource Include="Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
+		<EmbeddedResource Include="Shaders\PostProcess\GammaCorrectCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Geometry\Shared\CullCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Geometry\Prepass\DepthPS.hlsl" />
 		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>

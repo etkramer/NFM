@@ -1,4 +1,4 @@
-﻿#include "Content/Include/Samplers.h"
+﻿#include "Shaders/Include/Samplers.h"
 
 Texture2D<float4> Source : register(t0);
 RWTexture2D<float4> Dest : register(u0);

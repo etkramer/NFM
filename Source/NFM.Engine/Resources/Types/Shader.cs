@@ -16,7 +16,7 @@ namespace NFM.Resources
 		public Type Type;
 	}
 
-	public class Shader : Resource
+	public class Shader : GameResource
 	{
 		public string ShaderSource { get; set; }
 

@@ -19,7 +19,7 @@ namespace NFM.Resources
 		/// <summary>
 		/// Submits the given asset to the asset system
 		/// </summary>
-		public static bool Submit<T>(Asset<T> asset) where T : Resource
+		public static bool Submit<T>(Asset<T> asset) where T : GameResource
 		{
 			if (Assets.TryAdd(asset.Path, asset))
 			{
@@ -33,7 +33,7 @@ namespace NFM.Resources
 		/// <summary>
 		/// Asynchronously retrieves the asset at the given path
 		/// </summary>
-		public static Task<T> LoadAsync<T>(string path) where T : Resource
+		public static Task<T> LoadAsync<T>(string path) where T : GameResource
 		{
 			if (Assets.TryGetValue(path, out Asset foundAsset))
 			{
@@ -47,7 +47,7 @@ namespace NFM.Resources
 		}
 	}
 
-	public sealed class Asset<T> : Asset where T : Resource
+	public sealed class Asset<T> : Asset where T : GameResource
 	{
 		private object loadingLock = new();
 		private Task<T> loadingTask;

@@ -2,7 +2,7 @@
 
 namespace NFM.Resources
 {
-	public abstract class Resource : IDisposable
+	public abstract class GameResource : IDisposable
 	{
 		internal Asset Source { get; set; } = null;
 

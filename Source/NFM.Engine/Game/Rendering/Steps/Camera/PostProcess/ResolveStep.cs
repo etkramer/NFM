@@ -13,7 +13,7 @@ namespace NFM.Rendering
 		{
 			gammaCorrectPSO = new PipelineState()
 				.UseIncludes(typeof(Engine).Assembly)
-				.SetComputeShader(Embed.GetString("Content/Shaders/PostProcess/GammaCorrectCS.hlsl", typeof(Engine).Assembly), "GammaCorrectCS")
+				.SetComputeShader(Embed.GetString("Shaders/PostProcess/GammaCorrectCS.hlsl", typeof(Engine).Assembly), "GammaCorrectCS")
 				.Compile().Result;
 		}
 

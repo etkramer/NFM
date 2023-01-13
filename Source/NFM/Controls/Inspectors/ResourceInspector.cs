@@ -9,7 +9,7 @@ using NFM.Resources;
 
 namespace NFM.Frontend
 {
-	[CustomInspector(typeof(Resource))]
+	[CustomInspector(typeof(GameResource))]
 	public partial class ResourceInspector : UserControl
 	{
 		public ResourceInspector()

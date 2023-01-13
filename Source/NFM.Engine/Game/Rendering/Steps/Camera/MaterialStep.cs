@@ -16,7 +16,7 @@ namespace NFM.Rendering
 			// Compile indirect compute program.
 			cullPSO = new PipelineState()
 				.UseIncludes(typeof(Engine).Assembly)
-				.SetComputeShader(Embed.GetString("Content/Shaders/Geometry/Shared/CullCS.hlsl", typeof(Engine).Assembly), "CullCS")
+				.SetComputeShader(Embed.GetString("Shaders/Geometry/Shared/CullCS.hlsl", typeof(Engine).Assembly), "CullCS")
 				.AsRootConstant(0, 1)
 				.Compile().Result;
 

@@ -9,7 +9,7 @@ namespace NFM.Resources
 	/// <summary>
 	/// A 3D model, composed of one or multiple parts and optionally a skeleton.
 	/// </summary>
-	public class Model : Resource
+	public class Model : GameResource
 	{
 		public ModelPart[] Parts { get; set; }
 		public Bone Skeleton { get; set; } = null;

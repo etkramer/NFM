@@ -53,7 +53,7 @@ namespace NFM.Resources
 		DXT5 = BC3,
 	}
 
-	public sealed class Texture2D : Resource
+	public sealed class Texture2D : GameResource
 	{
 		public Texture D3DResource { get; private set; }
 

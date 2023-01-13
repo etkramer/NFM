@@ -1,4 +1,4 @@
-﻿#include "Content/Shaders/Geometry/Geometry.h"
+﻿#include "Shaders/Geometry/Geometry.h"
 
 struct IndirectCommand
 {

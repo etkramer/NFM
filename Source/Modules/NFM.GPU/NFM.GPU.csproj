@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Content\Include\Samplers.h" />
+    <None Remove="Shaders\Include\Samplers.h" />
     <None Remove="MipGenCS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Content\Include\Samplers.h" />
-    <EmbeddedResource Include="Content\MipGenCS.hlsl" />
+    <EmbeddedResource Include="Shaders\Include\Samplers.h" />
+    <EmbeddedResource Include="Shaders\MipGenCS.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
