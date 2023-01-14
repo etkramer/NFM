@@ -23,10 +23,10 @@ namespace NFM.Rendering
 			context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 
 			// Draw gizmos for each node
-			foreach (var node in Camera.Scene.EnumerateNodes())
+			/*foreach (var node in Camera.Scene.EnumerateNodes())
 			{
 				node.DrawGizmos(context);
-			}
+			}*/
 		}
 	}
 

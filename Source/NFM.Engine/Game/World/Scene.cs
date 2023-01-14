@@ -26,10 +26,7 @@ namespace NFM.World
 		/// </summary>
 		internal void AddRootNode(Node node)
 		{
-			if (!rootNodes.Contains(node))
-			{
-				rootNodes.Add(node);
-			}
+			rootNodes.Add(node);
 		}
 
 		/// <summary>

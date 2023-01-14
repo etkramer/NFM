@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reactive.Linq;
+using NFM.Common;
 using NFM.Editor;
 using NFM.Rendering;
 using ReactiveUI;
@@ -61,25 +63,26 @@ namespace NFM.World
 			Name = name;
 			Scene = scene ?? Scene.Main;
 			Children = new(children);
-			Parent = null;
 
-			// Track changes in display transform
-			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
-				.Subscribe(o => UpdateTransform());
+			// Don't use setter for performance reasons
+			parent = null;
+			Scene.AddRootNode(this);
+
+			this.SubscribeFast(nameof(Position), nameof(Rotation), nameof(Scale), UpdateTransform);
 		}
 
 		void UpdateTransform()
 		{
-			// Grab base transform.
-			Matrix4 result = Matrix4.CreateTransform(Position, Rotation, Scale);
+			// Grab local transform.
+			Matrix4 localTransform = Matrix4.CreateTransform(Position, Rotation, Scale);
 
 			// Apply parent transforms.
 			if (parent != null)
 			{
-				result *= parent.WorldTransform;
+				localTransform *= parent.WorldTransform;
 			}
 
-			WorldTransform = result;
+			WorldTransform = localTransform;
 
 			// Recursively update children.
 			foreach (var child in Children)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NFM.Common
@@ -33,15 +34,31 @@ namespace NFM.Common
 
 	public static class NotifyExtensions
 	{
-		public static void Subscribe(this INotifyPropertyChanged subject, string propertyName, Action callback)
+		public static void SubscribeFast<TSubject>(this TSubject subject, string propertyName, Action callback)
 		{
-			subject.PropertyChanged += (o, e) =>
+			if (subject is INotifyPropertyChanged changable)
 			{
-				if (e.PropertyName == propertyName || propertyName == null)
+				changable.PropertyChanged += (o, e) =>
 				{
-					callback?.Invoke();
-				}
-			};
+					if (e.PropertyName == propertyName || propertyName == null)
+					{
+						callback?.Invoke();
+					}
+				};
+			}
+		}
+
+		public static void SubscribeFast<TSubject>(this TSubject subject, string propertyName1, string propertyName2, Action callback)
+		{
+			SubscribeFast(subject, propertyName1, callback);
+			SubscribeFast(subject, propertyName2, callback);
+		}
+
+		public static void SubscribeFast<TSubject>(this TSubject subject, string propertyName1, string propertyName2, string propertyName3, Action callback)
+		{
+			SubscribeFast(subject, propertyName1, callback);
+			SubscribeFast(subject, propertyName2, callback);
+			SubscribeFast(subject, propertyName3, callback);
 		}
 
 		public static void Subscribe(this INotifyCollectionChanged subject, Action callback)

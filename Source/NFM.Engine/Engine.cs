@@ -40,7 +40,7 @@ namespace NFM
 				model.Rotation = new Vector3(0);
 				model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
 
-				for (int i = 0; i < 10000; i++)
+				for (int i = 0; i < 100000; i++)
 				{
 					Node node = new Node(null);
 				}
