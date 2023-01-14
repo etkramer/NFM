@@ -35,14 +35,14 @@ namespace NFM.World
 					IsInstanceValid = false;
 				});
 
-			this.WhenAnyValue(o => o.Transform)
+			this.WhenAnyValue(o => o.WorldTransform)
 				.Subscribe(o =>
 				{
 					TransformHandle ??= Scene.TransformBuffer.Allocate(1);
 					Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
 					{
-						ObjectToWorld = Transform,
-						WorldToObject = Transform.Inverse()
+						ObjectToWorld = WorldTransform,
+						WorldToObject = WorldTransform.Inverse()
 					});
 				});
 		}

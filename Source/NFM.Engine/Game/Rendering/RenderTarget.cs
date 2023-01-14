@@ -94,7 +94,7 @@ namespace NFM.Rendering
 		public void UpdateView(CameraNode camera)
 		{
 			// Calculate view/projection matrices.
-			ViewMatrix = camera.Transform.Inverse();
+			ViewMatrix = camera.WorldTransform.Inverse();
 			ProjectionMatrix = Matrix4.CreatePerspectiveReversed(camera.FOV, Size.X / (float)Size.Y, 0.01f);
 
 			// Apply Z-up projection.

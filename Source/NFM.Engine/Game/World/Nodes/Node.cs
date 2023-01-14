@@ -15,7 +15,7 @@ namespace NFM.World
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 
-		[Notify] public Matrix4 Transform { get; private set; } = Matrix4.Identity;
+		[Notify] public Matrix4 WorldTransform { get; private set; } = Matrix4.Identity;
 
 		public Scene Scene { get; }
 
@@ -60,8 +60,8 @@ namespace NFM.World
 
 			Name = name;
 			Scene = scene ?? Scene.Main;
-			Parent = null;
 			Children = new(children);
+			Parent = null;
 
 			// Track changes in display transform
 			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
@@ -76,10 +76,10 @@ namespace NFM.World
 			// Apply parent transforms.
 			if (parent != null)
 			{
-				result *= parent.Transform;
+				result *= parent.WorldTransform;
 			}
 
-			Transform = result;
+			WorldTransform = result;
 
 			// Recursively update children.
 			foreach (var child in Children)

@@ -43,7 +43,7 @@ namespace NFM.Frontend
 			dockspace.Dock(group1, null);
 
 			// Create group (scene panel).
-			TabGroup group2 = new TabGroup();
+			/*TabGroup group2 = new TabGroup();
 			ToolPanel.Spawn<ScenePanel>(group2);
 			dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
 
@@ -58,9 +58,9 @@ namespace NFM.Frontend
 			dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);*/
 
 			// Create group (viewport 2).
-			TabGroup group5 = new TabGroup();
+			/*TabGroup group5 = new TabGroup();
 			ToolPanel.Spawn<ViewportPanel>(group5);
-			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);
+			dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);*/
 		}
 
 		private bool isQuitConfirmed = false;
