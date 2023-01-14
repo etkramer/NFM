@@ -47,12 +47,6 @@ namespace NFM
 			// Begin the new frame.
 			OnTick.Invoke(Metrics.FrameTime);
 
-			// Tick scenes.
-			foreach (var scene in Scene.All)
-			{
-				scene.Tick();
-			}
-
 			// Render the frame.
 			Renderer.RenderFrame();
 		}

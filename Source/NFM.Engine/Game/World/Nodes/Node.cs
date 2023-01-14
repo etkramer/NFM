@@ -15,12 +15,10 @@ namespace NFM.World
 		[Inspect] public Vector3 Rotation { get; set; } = Vector3.Zero;
 		[Inspect] public Vector3 Scale { get; set; } = Vector3.One;
 
-		[Notify]
-		public Matrix4 Transform { get; private set; } = Matrix4.Identity;
+		[Notify] public Matrix4 Transform { get; private set; } = Matrix4.Identity;
 
 		public Scene Scene { get; }
 
-		// Node heirarchy
 		public ReadOnlyObservableCollection<Node> Children { get; }
 		private ObservableCollection<Node> children = new();
 
@@ -64,6 +62,30 @@ namespace NFM.World
 			Scene = scene ?? Scene.Main;
 			Parent = null;
 			Children = new(children);
+
+			// Track changes in display transform
+			this.WhenAnyValue(o => o.Position, o => o.Rotation, o => o.Scale)
+				.Subscribe(o => UpdateTransform());
+		}
+
+		void UpdateTransform()
+		{
+			// Grab base transform.
+			Matrix4 result = Matrix4.CreateTransform(Position, Rotation, Scale);
+
+			// Apply parent transforms.
+			if (parent != null)
+			{
+				result *= parent.Transform;
+			}
+
+			Transform = result;
+
+			// Recursively update children.
+			foreach (var child in Children)
+			{
+				child.UpdateTransform();
+			}
 		}
 
 		public virtual void Dispose()
@@ -80,41 +102,6 @@ namespace NFM.World
 			}
 		}
 
-		public virtual void Tick()
-		{
-			Transform = EvaluateTransform();
-		}
-
-		public virtual Matrix4 EvaluateTransform()
-		{
-			// Grab base transform.
-			Matrix4 result = Matrix4.CreateTransform(Position, Rotation, Scale);
-
-			// Apply parent transform.
-			if (parent != null)
-			{
-				result *= parent.Transform;
-			}
-
-			return result;
-		}
-
 		public virtual void DrawGizmos(GizmosContext context) {}
-
-		/// <summary>
-		/// Enumerates up the node heirarchy, toward the scene root.
-		/// </summary>
-		public IEnumerable<Node> EnumerateUpward()
-		{
-			if (Parent != null)
-			{
-				yield return Parent;
-
-				foreach (var node in Parent.EnumerateUpward())
-				{
-					yield return node;
-				}
-			}
-		}
 	}
 }

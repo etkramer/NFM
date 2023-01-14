@@ -12,11 +12,6 @@ namespace NFM.Rendering
 			{
 				if (node is ModelNode model)
 				{
-					if (!model.IsTransformValid)
-					{
-						model.UpdateTransform(List);
-					}
-
 					if (!model.IsInstanceValid)
 					{
 						model.UpdateInstances(List);

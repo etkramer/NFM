@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Avalonia;
 using NFM.Editor;
 using NFM.GPU;
 using NFM.Rendering;
@@ -18,7 +20,6 @@ namespace NFM.World
 	
 		// Mesh instances
 		public bool IsInstanceValid { get; private set; } = true;
-		public bool IsTransformValid { get; private set; } = false;
 		public BufferAllocation<GPUTransform> TransformHandle;
 		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
@@ -34,23 +35,16 @@ namespace NFM.World
 					IsInstanceValid = false;
 				});
 
-			// Track changes in display transform
 			this.WhenAnyValue(o => o.Transform)
-				.Subscribe(o => InvalidateTransformRecurse(this));
-		}
-
-		private void InvalidateTransformRecurse(Node root)
-		{
-			if (root is ModelNode model)
-			{
-				// Mark this node as needing it's GPU-side transform updated.
-				model.IsTransformValid = false;
-			}
-
-			foreach (var node in root.Children)
-			{
-				InvalidateTransformRecurse(node);
-			}
+				.Subscribe(o =>
+				{
+					TransformHandle ??= Scene.TransformBuffer.Allocate(1);
+					Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
+					{
+						ObjectToWorld = Transform,
+						WorldToObject = Transform.Inverse()
+					});
+				});
 		}
 
 		public override void Dispose()
@@ -124,19 +118,6 @@ namespace NFM.World
 			}
 
 			IsInstanceValid = true;
-		}
-
-		public void UpdateTransform(CommandList list)
-		{
-			// Calculate transform.
-			TransformHandle ??= Scene.TransformBuffer.Allocate(1);
-			list.UploadBuffer(TransformHandle, new GPUTransform()
-			{
-				ObjectToWorld = Transform,
-				WorldToObject = Transform.Inverse()
-			});
-
-			IsTransformValid = true;
 		}
 
 		public override void DrawGizmos(GizmosContext context)

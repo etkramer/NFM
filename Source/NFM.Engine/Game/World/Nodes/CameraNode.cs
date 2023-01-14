@@ -20,7 +20,7 @@ namespace NFM.World
 
 		public CameraNode(Scene scene) : base(scene)
 		{
-
+			
 		}
 
 		public override void DrawGizmos(GizmosContext context)

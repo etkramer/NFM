@@ -21,14 +21,6 @@ namespace NFM.World
 			InstanceBuffer.Name = "Instance Buffer";
 		}
 
-		public void Tick()
-		{
-			foreach (var node in EnumerateNodes())
-			{
-				node.Tick();
-			}
-		}
-
 		/// <summary>
 		/// Adds a Node as a scene root. Should NEVER be called manually.
 		/// </summary>

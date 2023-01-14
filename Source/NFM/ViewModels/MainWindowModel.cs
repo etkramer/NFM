@@ -19,7 +19,7 @@ namespace NFM.Frontend
 
 		public async void OpenPressed(object sender)
 		{
-			string openPath = await Dialog.ShowOpenDialog((sender as Window), new Dialog.FileFilter("Project", "json"));
+			string openPath = await Dialog.ShowOpenDialog(sender as Window, new Dialog.FileFilter("NFM Project", "json"));
 
 			if (openPath != null)
 			{
@@ -40,7 +40,7 @@ namespace NFM.Frontend
 
 		public async void SaveAsPressed(object sender)
 		{
-			string savePath = await Dialog.ShowSaveDialog((sender as Window), new Dialog.FileFilter("Project", "json"));
+			string savePath = await Dialog.ShowSaveDialog((sender as Window), new Dialog.FileFilter("NFM Project", "json"));
 
 			if (savePath != null)
 			{
