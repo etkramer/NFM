@@ -37,7 +37,6 @@ namespace NFM.Rendering
 			DefaultCommandList.Name = "Default List";
 			DefaultCommandList.Open();
 
-			AddStep(new SceneUpdateStep());
 			AddStep(new SkinningStep());
 			AddStep(new PrepassStep());
 			AddStep(new MaterialStep());

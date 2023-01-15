@@ -45,12 +45,12 @@ namespace NFM.Frontend
 			// Create group (scene panel).
 			/*TabGroup group2 = new TabGroup();
 			ToolPanel.Spawn<ScenePanel>(group2);
-			dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
+			dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);*/
 
 			// Create group (inspector panel).
 			TabGroup group3 = new TabGroup();
 			ToolPanel.Spawn<InspectorPanel>(group3);
-			dockspace.Dock(group3, group1, DockPosition.Right, 0.14f);
+			dockspace.Dock(group3, group1, DockPosition.Right, 0.13f);
 
 			// Create group (library).
 			/*TabGroup group4 = new TabGroup();

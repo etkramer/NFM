@@ -49,25 +49,5 @@ namespace NFM.World
 
 			All.Remove(this);
 		}
-
-		/// <summary>
-		/// Enumerates over *all* nodes in the scene in a top-down fashion.
-		/// </summary>
-		public IEnumerable<Node> EnumerateNodes() => EnumerateNodes(rootNodes);
-		private IEnumerable<Node> EnumerateNodes(IEnumerable<Node> root)
-		{
-			foreach (var node in root)
-			{
-				yield return node;
-
-				if (node.Children.Count > 0)
-				{
-					foreach (var child in EnumerateNodes(node.Children))
-					{
-						yield return child;
-					}
-				}
-			}
-		}
 	}
 }

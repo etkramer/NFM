@@ -29,22 +29,21 @@ namespace NFM.World
 		public ModelNode(Scene scene) : base(scene)
 		{
 			// Track changes in model/visibility
-			this.WhenAnyValue(o => o.Model, o => o.IsVisible)
-				.Subscribe(o =>
-				{
-					IsInstanceValid = false;
-				});
+			this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
+			{
+				UpdateInstances(Renderer.DefaultCommandList);
+				IsInstanceValid = false;
+			});
 
-			this.WhenAnyValue(o => o.WorldTransform)
-				.Subscribe(o =>
+			this.SubscribeFast(nameof(WorldTransform), () =>
+			{
+				TransformHandle ??= Scene.TransformBuffer.Allocate(1);
+				Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
 				{
-					TransformHandle ??= Scene.TransformBuffer.Allocate(1);
-					Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
-					{
-						ObjectToWorld = WorldTransform,
-						WorldToObject = WorldTransform.Inverse()
-					});
+					ObjectToWorld = WorldTransform,
+					WorldToObject = WorldTransform.Inverse()
 				});
+			});
 		}
 
 		public override void Dispose()
