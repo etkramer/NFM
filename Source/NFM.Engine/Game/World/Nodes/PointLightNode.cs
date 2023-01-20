@@ -17,7 +17,7 @@ namespace NFM.World
 
 		public PointLightNode(Scene scene) : base(scene)
 		{
-
+			Name = "Point Light";
 		}
 	}
 }

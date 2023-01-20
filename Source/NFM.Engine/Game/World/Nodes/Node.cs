@@ -54,13 +54,7 @@ namespace NFM.World
 
 		public Node(Scene scene)
 		{
-			string name = GetType().Name.PascalToDisplay();
-			if (name.EndsWith(" Node"))
-			{
-				name = name.Remove(name.Length - " Node".Length);
-			}
-
-			Name = name;
+			Name = "Node";
 			Scene = scene ?? Scene.Main;
 			Children = new(children);
 
@@ -77,12 +71,14 @@ namespace NFM.World
 			Matrix4 localTransform = Matrix4.CreateTransform(Position, Rotation, Scale);
 
 			// Apply parent transforms.
-			if (parent != null)
+			if (parent == null)
 			{
-				localTransform *= parent.WorldTransform;
+				WorldTransform = localTransform;
 			}
-
-			WorldTransform = localTransform;
+			else
+			{
+				WorldTransform = localTransform * parent.WorldTransform;
+			}
 
 			// Recursively update children.
 			foreach (var child in Children)

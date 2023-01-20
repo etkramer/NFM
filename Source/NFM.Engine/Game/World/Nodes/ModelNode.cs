@@ -19,7 +19,6 @@ namespace NFM.World
 		public bool IsVisible { get; set; } = true;
 	
 		// Mesh instances
-		public bool IsInstanceValid { get; private set; } = true;
 		public BufferAllocation<GPUTransform> TransformHandle;
 		public BufferAllocation<GPUInstance>[] InstanceHandles;
 
@@ -28,11 +27,12 @@ namespace NFM.World
 		
 		public ModelNode(Scene scene) : base(scene)
 		{
+			Name = "Model";
+
 			// Track changes in model/visibility
 			this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
 			{
 				UpdateInstances(Renderer.DefaultCommandList);
-				IsInstanceValid = false;
 			});
 
 			this.SubscribeFast(nameof(WorldTransform), () =>
@@ -115,8 +115,6 @@ namespace NFM.World
 					instanceID++;
 				}
 			}
-
-			IsInstanceValid = true;
 		}
 
 		public override void DrawGizmos(GizmosContext context)
