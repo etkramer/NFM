@@ -13,7 +13,7 @@ using System.Collections;
 using Avalonia.Controls.Templates;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Input;
-using NFM.Aspects;
+using NFM.Generators;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 

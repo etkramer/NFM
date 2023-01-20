@@ -32,7 +32,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Modules\NFM.Common\NFM.Common.csproj" />
 		<ProjectReference Include="..\Modules\NFM.GPU\NFM.GPU.csproj" />
-		<ProjectReference Include="..\Modules\NFM.Roslyn\NFM.Roslyn.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="..\Modules\NFM.Generators\NFM.Generators.csproj" OutputItemType="Analyzer" />
 		<ProjectReference Include="..\Libraries\MeshOptimize\MeshOptimize.vcxproj" />
 	</ItemGroup>
 	

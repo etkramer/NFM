@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\NFM.Engine\NFM.Engine.csproj" />
-		<ProjectReference Include="..\Modules\NFM.Roslyn\NFM.Roslyn.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="..\Modules\NFM.Generators\NFM.Generators.csproj" OutputItemType="Analyzer" />
 		<ProjectReference Include="..\Libraries\Avalonia\src\Skia\Avalonia.Skia\Avalonia.Skia.csproj" />
 		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />
 	</ItemGroup>

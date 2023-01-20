@@ -1,42 +1,41 @@
 ﻿using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NFM.Roslyn;
 
-namespace NFM.Aspects
+namespace NFM.Generators;
+
+[Generator]
+public class InspectGenerator : ISourceGenerator
 {
-	[Generator]
-	public class InspectGenerator : ISourceGenerator
+	public void Initialize(GeneratorInitializationContext context) {}
+
+	public void Execute(GeneratorExecutionContext context)
 	{
-		public void Initialize(GeneratorInitializationContext context) {}
+		Dictionary<ITypeSymbol, AttributeData[]> types = new(comparer: SymbolEqualityComparer.Default);
 
-		public void Execute(GeneratorExecutionContext context)
+		foreach (SyntaxTree syntaxTree in context.Compilation.SyntaxTrees)
 		{
-			Dictionary<ITypeSymbol, AttributeData[]> types = new(comparer: SymbolEqualityComparer.Default);
+			SemanticModel model = context.Compilation.GetSemanticModel(syntaxTree);
 
-			foreach (SyntaxTree syntaxTree in context.Compilation.SyntaxTrees)
+			foreach (AttributeSyntax attributeSyntax in syntaxTree.GetRoot().DescendantNodesAndSelf().OfType<AttributeSyntax>())
 			{
-				SemanticModel model = context.Compilation.GetSemanticModel(syntaxTree);
+				ITypeSymbol attributeType = model.GetTypeInfo(attributeSyntax).Type;
 
-				foreach (AttributeSyntax attributeSyntax in syntaxTree.GetRoot().DescendantNodesAndSelf().OfType<AttributeSyntax>())
+				if (attributeType.GetFullName() == "NFM.Frontend.CustomInspectorAttribute")
 				{
-					ITypeSymbol attributeType = model.GetTypeInfo(attributeSyntax).Type;
+					// Get inspector info
+					ITypeSymbol inspectorType = model.GetDeclaredSymbol(attributeSyntax.Parent.Parent) as ITypeSymbol;
 
-					if (attributeType.GetFullName() == "NFM.Frontend.CustomInspectorAttribute")
-					{
-						// Get inspector info
-						ITypeSymbol inspectorType = model.GetDeclaredSymbol(attributeSyntax.Parent.Parent) as ITypeSymbol;
-
-						// Generate source
-						context.AddSource($"{inspectorType.GetFullName()}.g.cs", GenerateSource(inspectorType));
-					}
+					// Generate source
+					context.AddSource($"{inspectorType.GetFullName()}.g.cs", GenerateSource(inspectorType));
 				}
 			}
 		}
+	}
 
-		private string GenerateSource(ITypeSymbol inspectorType)
-		{
-			string source = $@"
+	private string GenerateSource(ITypeSymbol inspectorType)
+	{
+		string source = $@"
 			namespace {inspectorType.ContainingNamespace.ToDisplayString()}
 			{{
 				partial class {inspectorType.Name} : System.IDisposable, System.ComponentModel.INotifyPropertyChanged
@@ -105,7 +104,6 @@ namespace NFM.Aspects
 				}}
 			}}";
 
-			return source;
-		}
+		return source;
 	}
 }

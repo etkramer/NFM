@@ -9,7 +9,7 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using NFM.Aspects;
+using NFM.Generators;
 
 namespace NFM.Frontend
 {

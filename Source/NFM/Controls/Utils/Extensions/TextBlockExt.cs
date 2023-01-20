@@ -4,7 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Media;
-using NFM.Aspects;
+using NFM.Generators;
 
 namespace NFM.Frontend
 {

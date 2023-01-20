@@ -1,9 +1,6 @@
 ﻿using System;
 using Vortice.DXGI;
 using Vortice.Direct3D12;
-using System.Runtime.InteropServices;
-using NFM.Aspects;
-using System.Runtime.CompilerServices;
 
 namespace NFM.GPU
 {
@@ -17,7 +14,7 @@ namespace NFM.GPU
 		public static ID3D12Resource[] Rings;
 		public static void*[] MappedRings;
 
-		public static object Lock = new();
+		public static object Lock { get; } = new();
 
 		static UploadHelper()
 		{

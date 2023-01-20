@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NFM.Common\NFM.Common.csproj" />
-    <ProjectReference Include="..\NFM.Roslyn\NFM.Roslyn.csproj" />
+    <ProjectReference Include="..\NFM.Generators\NFM.Generators.csproj" />
   </ItemGroup>
 
 </Project>

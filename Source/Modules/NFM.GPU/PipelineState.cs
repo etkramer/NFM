@@ -5,11 +5,9 @@ using SharpGen.Runtime;
 using Vortice.Direct3D12;
 using Vortice.Dxc;
 using Vortice.DXGI;
-using NFM.Aspects;
 using System.Text;
 using Vortice.Direct3D12.Shader;
 using Vortice.Direct3D;
-using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace NFM.GPU
