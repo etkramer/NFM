@@ -3,9 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        x:Class="NFM.Frontend.MainWindow"
+        x:Class="NFM.MainWindow"
 		x:Name="Self"
-		xmlns:controls="using:NFM.Frontend"
+		xmlns:controls="using:NFM"
 		WindowState="Maximized"
 		Icon="{StaticResource AppIcon}"
         Title="NFM">

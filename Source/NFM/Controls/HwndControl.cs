@@ -5,80 +5,78 @@ using Avalonia.Platform;
 using WinApi.User32;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
-using POINT = NetCoreEx.Geometry.Point;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public unsafe class HwndControl : NativeControlHost
 {
-	public unsafe class HwndControl : NativeControlHost
+	private static List<HwndControl> hosts = new();
+
+	public event Action<Vector2i> OnResize = delegate{};
+	public event Action OnOpen = delegate{};
+	public event Action OnClose = delegate{};
+
+	public IntPtr Hwnd { get; private set; }
+	private bool hasValidMeasure = false;
+
+	protected unsafe override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
 	{
-		private static List<HwndControl> hosts = new();
+		// Create Hwnd.
+		IPlatformHandle platformHandle = base.CreateNativeControlCore(parent);
+		Hwnd = platformHandle.Handle;
+		
+		// Make it clear that the bounds are invalid, and request a new measurement.
+		Bounds = new(0, 0, -1, -1);
+		InvalidateArrange();
 
-		public event Action<Vector2i> OnResize = delegate{};
-		public event Action OnOpen = delegate{};
-		public event Action OnClose = delegate{};
+		hosts.Add(this);
 
-		public IntPtr Hwnd { get; private set; }
-		private bool hasValidMeasure = false;
-
-		protected unsafe override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
+		if (hasValidMeasure)
 		{
-			// Create Hwnd.
-			IPlatformHandle platformHandle = base.CreateNativeControlCore(parent);
-			Hwnd = platformHandle.Handle;
-			
-			// Make it clear that the bounds are invalid, and request a new measurement.
-			Bounds = new(0, 0, -1, -1);
-			InvalidateArrange();
-
-			hosts.Add(this);
-
-			if (hasValidMeasure)
-			{
-				OnOpen.Invoke();
-			}
-
-			return platformHandle;
+			OnOpen.Invoke();
 		}
 
-		protected override void DestroyNativeControlCore(IPlatformHandle control)
-		{
-			// Cleanup viewport and swapchain.
-			if (hasValidMeasure)
-			{
-				OnClose.Invoke();
-			}
+		return platformHandle;
+	}
 
-			hosts.Remove(this);
-			base.DestroyNativeControlCore(control);
+	protected override void DestroyNativeControlCore(IPlatformHandle control)
+	{
+		// Cleanup viewport and swapchain.
+		if (hasValidMeasure)
+		{
+			OnClose.Invoke();
 		}
 
-		private Vector2i lastSize = Vector2i.Zero;
-		protected override Size ArrangeOverride(Size finalSize)
+		hosts.Remove(this);
+		base.DestroyNativeControlCore(control);
+	}
+
+	private Vector2i lastSize = Vector2i.Zero;
+	protected override Size ArrangeOverride(Size finalSize)
+	{
+		Size arrangeResult = base.ArrangeOverride(finalSize);
+		Vector2i size = new((int)arrangeResult.Width, (int)arrangeResult.Height);
+
+		if (!hasValidMeasure)
 		{
-			Size arrangeResult = base.ArrangeOverride(finalSize);
-			Vector2i size = new((int)arrangeResult.Width, (int)arrangeResult.Height);
-
-			if (!hasValidMeasure)
-			{
-				hasValidMeasure = true;
-				OnOpen.Invoke();
-			}
-
-			if (size != lastSize)
-			{
-				// Resize the swapchain if needed.
-				OnResize.Invoke(size);
-			}
-
-			lastSize = size;
-
-			return arrangeResult;
+			hasValidMeasure = true;
+			OnOpen.Invoke();
 		}
 
-		protected override void OnKeyDown(KeyEventArgs e)
+		if (size != lastSize)
 		{
-			Debug.Log("Key down");
-			base.OnKeyDown(e);
+			// Resize the swapchain if needed.
+			OnResize.Invoke(size);
 		}
+
+		lastSize = size;
+
+		return arrangeResult;
+	}
+
+	protected override void OnKeyDown(KeyEventArgs e)
+	{
+		Debug.Log("Key down");
+		base.OnKeyDown(e);
 	}
 }

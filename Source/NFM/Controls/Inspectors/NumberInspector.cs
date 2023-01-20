@@ -6,23 +6,22 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.LogicalTree;
 
-namespace NFM.Frontend
+namespace NFM;
+
+[CustomInspector(typeof(INumber<>))]
+public partial class NumberInspector : UserControl
 {
-	[CustomInspector(typeof(INumber<>))]
-	public partial class NumberInspector : UserControl
+	public NumberInspector()
 	{
-		public NumberInspector()
+		// Create NumInput and bind to inspected property.
+		Content = new NumInput()
 		{
-			// Create NumInput and bind to inspected property.
-			Content = new NumInput()
-			{
-				[!NumInput.ValueProperty] = new Binding(nameof(Value))
-			};
-		}
+			[!NumInput.ValueProperty] = new Binding(nameof(Value))
+		};
+	}
 
-		public void Dispose()
-		{
+	public void Dispose()
+	{
 
-		}
 	}
 }

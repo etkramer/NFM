@@ -4,14 +4,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Media;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public partial class SplashScreen : Window
 {
-	public partial class SplashScreen : Window
+	public SplashScreen()
 	{
-		public SplashScreen()
-		{
-			InitializeComponent();
-			DataContext = this;
-		}
+		InitializeComponent();
+		DataContext = this;
 	}
 }

@@ -9,20 +9,19 @@ using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 using ReactiveUI;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public partial class InspectorPanel : ReactiveToolPanel<InspectorModel>
 {
-	public partial class InspectorPanel : ReactiveToolPanel<InspectorModel>
+	public InspectorPanel()
 	{
-		public InspectorPanel()
+		ViewModel = new InspectorModel();
+
+		this.WhenActivated(d =>
 		{
-			ViewModel = new InspectorModel();
 
-			this.WhenActivated(d =>
-			{
+		});
 
-			});
-
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
 }

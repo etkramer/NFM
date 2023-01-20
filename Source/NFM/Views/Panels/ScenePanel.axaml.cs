@@ -7,53 +7,52 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using NFM.World;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public partial class ScenePanel : ToolPanel
 {
-	public partial class ScenePanel : ToolPanel
+	[Notify] public ReadOnlyObservableCollection<Node> Nodes => Scene.Main?.RootNodes;
+
+	public ScenePanel()
 	{
-		[Notify] public ReadOnlyObservableCollection<Node> Nodes => Scene.Main?.RootNodes;
+		DataContext = this;
+		InitializeComponent();
 
-		public ScenePanel()
+		// Subscribe to property changed notifications in case the scene changes (i.e. new project).
+		StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () => (this as INotify).Raise(nameof(Nodes)));
+
+		// Bind TreeView to editor selection. TODO: Figure out how to move this to XAML.
+		sceneTree.Bind(TreeView.SelectedItemsProperty, new Binding("selected", BindingMode.Default) { Source = typeof(Selection) });
+	}
+
+	private void OnAddPressed(object sender, RoutedEventArgs args)
+	{
+		FlyoutBase.ShowAttachedFlyout(sender as Control);
+	}
+
+	private void OnRemovePressed(object sender, RoutedEventArgs args)
+	{
+		var nodes = sceneTree.SelectedItems.Cast<Node>();
+
+		foreach (var node in nodes.ToArray())
 		{
-			DataContext = this;
-			InitializeComponent();
-
-			// Subscribe to property changed notifications in case the scene changes (i.e. new project).
-			StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () => (this as INotify).Raise(nameof(Nodes)));
-
-			// Bind TreeView to editor selection. TODO: Figure out how to move this to XAML.
-			sceneTree.Bind(TreeView.SelectedItemsProperty, new Binding("selected", BindingMode.Default) { Source = typeof(Selection) });
+			node.Dispose();
 		}
+	}
 
-		private void OnAddPressed(object sender, RoutedEventArgs args)
+	private void OnAddNodePressed(string type)
+	{
+		if (type == "Model")
 		{
-			FlyoutBase.ShowAttachedFlyout(sender as Control);
+			new ModelNode(null);
 		}
-
-		private void OnRemovePressed(object sender, RoutedEventArgs args)
+		else if (type == "Camera")
 		{
-			var nodes = sceneTree.SelectedItems.Cast<Node>();
-
-			foreach (var node in nodes.ToArray())
-			{
-				node.Dispose();
-			}
+			new CameraNode(null);
 		}
-
-		private void OnAddNodePressed(string type)
+		else if (type == "PointLight")
 		{
-			if (type == "Model")
-			{
-				new ModelNode(null);
-			}
-			else if (type == "Camera")
-			{
-				new CameraNode(null);
-			}
-			else if (type == "PointLight")
-			{
-				new PointLightNode(null);
-			}
+			new PointLightNode(null);
 		}
 	}
 }

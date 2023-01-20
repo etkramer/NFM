@@ -6,23 +6,22 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.LogicalTree;
 
-namespace NFM.Frontend
+namespace NFM;
+
+[CustomInspector(typeof(string))]
+public partial class StringInspector : UserControl
 {
-	[CustomInspector(typeof(string))]
-	public partial class StringInspector : UserControl
+	public StringInspector()
 	{
-		public StringInspector()
+		// Create TextInput and bind to inspected property.
+		Content = new TextInput()
 		{
-			// Create TextInput and bind to inspected property.
-			Content = new TextInput()
-			{
-				[!Frontend.TextInput.ValueProperty] = new Binding(nameof(Value))
-			};
-		}
+			[!NFM.TextInput.ValueProperty] = new Binding(nameof(Value))
+		};
+	}
 
-		public void Dispose()
-		{
+	public void Dispose()
+	{
 
-		}
 	}
 }

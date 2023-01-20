@@ -7,23 +7,22 @@ using Avalonia.Data;
 using Avalonia.LogicalTree;
 using NFM.Resources;
 
-namespace NFM.Frontend
+namespace NFM;
+
+[CustomInspector(typeof(GameResource))]
+public partial class ResourceInspector : UserControl
 {
-	[CustomInspector(typeof(GameResource))]
-	public partial class ResourceInspector : UserControl
+	public ResourceInspector()
 	{
-		public ResourceInspector()
+		// Create ResourceInput and bind to inspected property.
+		Content = new ResourceInput()
 		{
-			// Create ResourceInput and bind to inspected property.
-			Content = new ResourceInput()
-			{
-				[!ResourceInput.ValueProperty] = new Binding(nameof(Value))
-			};
-		}
+			[!ResourceInput.ValueProperty] = new Binding(nameof(Value))
+		};
+	}
 
-		public void Dispose()
-		{
+	public void Dispose()
+	{
 
-		}
 	}
 }

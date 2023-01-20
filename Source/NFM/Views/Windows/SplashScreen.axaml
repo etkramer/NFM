@@ -5,7 +5,7 @@
         mc:Ignorable="d"
 		Width="800"
 		Height="180"
-        x:Class="NFM.Frontend.SplashScreen"
+        x:Class="NFM.SplashScreen"
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
 		Icon="{StaticResource AppIcon}"

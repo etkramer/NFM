@@ -7,11 +7,10 @@ using Avalonia.Data;
 using Avalonia.Media;
 using NFM.Generators;
 
-namespace NFM.Frontend
-{
-	[DeclarativeProperty(SetterName = "Background", PropertyName = "Fill", BindingPropertyName = "FillProperty", PropertyType = typeof(Brush), TargetType = typeof(Shape))]
-	public static partial class ShapeExt
-	{
+namespace NFM;
 
-	}
+[DeclarativeProperty(SetterName = "Background", PropertyName = "Fill", BindingPropertyName = "FillProperty", PropertyType = typeof(Brush), TargetType = typeof(Shape))]
+public static partial class ShapeExt
+{
+
 }

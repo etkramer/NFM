@@ -9,42 +9,41 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using NFM.Resources;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public class ResourceInput : TemplatedControl
 {
-	public class ResourceInput : TemplatedControl
-	{
-		public static StyledProperty<GameResource> ValueProperty = AvaloniaProperty.Register<ResourceInput, GameResource>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
+	public static StyledProperty<GameResource> ValueProperty = AvaloniaProperty.Register<ResourceInput, GameResource>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
-		[Notify] public GameResource Value
-		{
-			get => GetValue(ValueProperty);
-			set => SetValue(ValueProperty, value);
-		}
+	[Notify] public GameResource Value
+	{
+		get => GetValue(ValueProperty);
+		set => SetValue(ValueProperty, value);
 	}
+}
 
-	public class ResourceValueConverter : IValueConverter
+public class ResourceValueConverter : IValueConverter
+{
+	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		if (value == null)
 		{
-			if (value == null)
+			return null;
+		}
+		else if (value is GameResource resource)
+		{
+			if (resource.Source != null)
 			{
-				return null;
+				return $"{resource.Source.Path.Split('/').Last()} ({resource.GetType().Name})";
 			}
-			else if (value is GameResource resource)
+			else
 			{
-				if (resource.Source != null)
-				{
-					return $"{resource.Source.Path.Split('/').Last()} ({resource.GetType().Name})";
-				}
-				else
-				{
-					return resource.GetType().Name;
-				}
+				return resource.GetType().Name;
 			}
-
-			throw new InvalidCastException();
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+		throw new InvalidCastException();
 	}
+
+	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
 }

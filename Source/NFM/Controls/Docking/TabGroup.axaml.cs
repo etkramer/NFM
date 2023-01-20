@@ -9,86 +9,85 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Metadata;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public class TabGroup : TemplatedControl
 {
-	public class TabGroup : TemplatedControl
+	public static readonly StyledProperty<ObservableCollection<Tab>> TabsProperty = AvaloniaProperty.Register<TabGroup, ObservableCollection<Tab>>(nameof(Tabs));
+	public static readonly StyledProperty<Tab> SelectedTabProperty = AvaloniaProperty.Register<TabGroup, Tab>(nameof(SelectedTab));
+
+	public DockRelationship Relationship;
+	public Box2D CalculatedSize;
+	public Dockspace Dockspace;
+
+	private int selectedIndex = -1;
+
+	[Content]
+	public ObservableCollection<Tab> Tabs
 	{
-		public static readonly StyledProperty<ObservableCollection<Tab>> TabsProperty = AvaloniaProperty.Register<TabGroup, ObservableCollection<Tab>>(nameof(Tabs));
-		public static readonly StyledProperty<Tab> SelectedTabProperty = AvaloniaProperty.Register<TabGroup, Tab>(nameof(SelectedTab));
+		get { return GetValue(TabsProperty); }
+		internal set { SetValue(TabsProperty, value); }
+	}
 
-		public DockRelationship Relationship;
-		public Box2D CalculatedSize;
-		public Dockspace Dockspace;
+	public Tab SelectedTab
+	{
+		get { return GetValue(SelectedTabProperty); }
+		private set { SetValue(SelectedTabProperty, value); }
+	}
 
-		private int selectedIndex = -1;
+	public TabGroup()
+	{
+		Tabs = new();
+	}
 
-		[Content]
-		public ObservableCollection<Tab> Tabs
+	protected override void OnApplyTemplate(TemplateAppliedEventArgs Event)
+	{
+		ChangeSelection(0);
+	}
+
+	public void ChangeSelection(int index)
+	{
+		if (index != -1)
 		{
-			get { return GetValue(TabsProperty); }
-			internal set { SetValue(TabsProperty, value); }
-		}
-
-		public Tab SelectedTab
-		{
-			get { return GetValue(SelectedTabProperty); }
-			private set { SetValue(SelectedTabProperty, value); }
-		}
-
-		public TabGroup()
-		{
-			Tabs = new();
-		}
-
-		protected override void OnApplyTemplate(TemplateAppliedEventArgs Event)
-		{
-			ChangeSelection(0);
-		}
-
-		public void ChangeSelection(int index)
-		{
-			if (index != -1)
+			if (SelectedTab != null)
 			{
-				if (SelectedTab != null)
-				{
-					SelectedTab.IsSelected = false;
-				}
-
-				selectedIndex = index;
-				UpdateSelectedContent();
-				SelectedTab.IsSelected = true;
+				SelectedTab.IsSelected = false;
 			}
+
+			selectedIndex = index;
+			UpdateSelectedContent();
+			SelectedTab.IsSelected = true;
 		}
+	}
 
-		public void CloseTab(Tab tab)
+	public void CloseTab(Tab tab)
+	{
+		// Remove single tab.
+		if (Tabs.Count > 1)
 		{
-			// Remove single tab.
-			if (Tabs.Count > 1)
-			{
-				Tabs.Remove(tab);
+			Tabs.Remove(tab);
 
-				if (selectedIndex > Tabs.Count - 1)
-				{
-					ChangeSelection(selectedIndex - 1);
-				}
-				else
-				{
-					ChangeSelection(selectedIndex);
-				}
+			if (selectedIndex > Tabs.Count - 1)
+			{
+				ChangeSelection(selectedIndex - 1);
 			}
-			// Remove entire group.
 			else
 			{
-				Dockspace.CloseGroup(this);
+				ChangeSelection(selectedIndex);
 			}
 		}
-
-		private void UpdateSelectedContent()
+		// Remove entire group.
+		else
 		{
-			if (Tabs.Count > selectedIndex)
-			{
-				SelectedTab = Tabs[selectedIndex];
-			}
+			Dockspace.CloseGroup(this);
+		}
+	}
+
+	private void UpdateSelectedContent()
+	{
+		if (Tabs.Count > selectedIndex)
+		{
+			SelectedTab = Tabs[selectedIndex];
 		}
 	}
 }

@@ -21,7 +21,7 @@ public class InspectGenerator : ISourceGenerator
 			{
 				ITypeSymbol attributeType = model.GetTypeInfo(attributeSyntax).Type;
 
-				if (attributeType.GetFullName() == "NFM.Frontend.CustomInspectorAttribute")
+				if (attributeType.GetFullName() == "NFM.CustomInspectorAttribute")
 				{
 					// Get inspector info
 					ITypeSymbol inspectorType = model.GetDeclaredSymbol(attributeSyntax.Parent.Parent) as ITypeSymbol;

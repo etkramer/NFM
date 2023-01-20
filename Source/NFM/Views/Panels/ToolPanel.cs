@@ -4,30 +4,30 @@ using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 
-namespace NFM.Frontend
+namespace NFM;
+
+public abstract class ToolPanel : UserControl
 {
-	public abstract class ToolPanel : UserControl
+	public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Tool Panel");
+
+	public string Title
 	{
-		public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<ToolPanel, string>(nameof(Title), "Tool Panel");
-
-		public string Title
-		{
-			get { return GetValue(TitleProperty); }
-			set { SetValue(TitleProperty, value); }
-		}
-
-		public static T Spawn<T>(TabGroup group = null) where T : ToolPanel, new()
-		{
-			T tool = new();
-			group.Tabs.Add(new Tab(tool, group));
-
-			return tool;
-		}
+		get { return GetValue(TitleProperty); }
+		set { SetValue(TitleProperty, value); }
 	}
 
-	public abstract class ReactiveToolPanel<TViewModel> : ToolPanel, IViewFor<TViewModel> where TViewModel : class
+	public static T Spawn<T>(TabGroup group = null) where T : ToolPanel, new()
 	{
-		public static readonly StyledProperty<TViewModel> ViewModelProperty = AvaloniaProperty.Register<ReactiveUserControl<TViewModel>, TViewModel>(nameof(ViewModel));
+		T tool = new();
+		group.Tabs.Add(new Tab(tool, group));
+
+		return tool;
+	}
+}
+
+public abstract class ReactiveToolPanel<TViewModel> : ToolPanel, IViewFor<TViewModel> where TViewModel : class
+{
+	public static readonly StyledProperty<TViewModel> ViewModelProperty = AvaloniaProperty.Register<ReactiveUserControl<TViewModel>, TViewModel>(nameof(ViewModel));
 
         public ReactiveToolPanel()
         {
@@ -66,5 +66,4 @@ namespace NFM.Frontend
                 DataContext = value;
             }
         }
-	}
 }
