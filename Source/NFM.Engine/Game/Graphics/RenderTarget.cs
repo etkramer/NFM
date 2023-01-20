@@ -84,6 +84,9 @@ public class RenderTarget : IDisposable
 
 	public void Dispose()
 	{
+		CommandList.Dispose();
+		ViewCB.Dispose();
+
 		ColorTarget.Dispose();
 		DepthBuffer.Dispose();
 	}
