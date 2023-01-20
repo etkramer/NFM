@@ -2,32 +2,31 @@
 using Vortice.Direct3D12;
 using Vortice.DXGI;
 
-namespace NFM.GPU
+namespace NFM.GPU;
+
+public class RenderTargetView : IDisposable
 {
-	public class RenderTargetView : IDisposable
+	public static DescriptorHeap Heap = new DescriptorHeap(HeapType.RTV, 4096, false);
+
+	public Texture Target;
+	public DescriptorHandle Handle;
+
+	public RenderTargetView(Texture target)
 	{
-		public static DescriptorHeap Heap = new DescriptorHeap(HeapType.RTV, 4096, false);
+		Target = target;
+		Handle = Heap.Allocate();
 
-		public Texture Target;
-		public DescriptorHandle Handle;
-
-		public RenderTargetView(Texture target)
+		RenderTargetViewDescription desc = new()
 		{
-			Target = target;
-			Handle = Heap.Allocate();
+			Format = Target.Format,
+			ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
+		};
 
-			RenderTargetViewDescription desc = new()
-			{
-				Format = Target.Format,
-				ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
-			};
+		D3DContext.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
+	}
 
-			D3DContext.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
-		}
+	public void Dispose()
+	{
 
-		public void Dispose()
-		{
-
-		}
 	}
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 using Vortice.Direct3D12;
 
-namespace NFM.GPU.Helpers
+namespace NFM.GPU;
+
+public static class InteropHelpers
 {
-	public static class InteropHelpers
+	public static IntPtr PtrFromList(ID3D12GraphicsCommandList list)
 	{
-		public static IntPtr PtrFromList(ID3D12GraphicsCommandList list)
-		{
-			return list.NativePointer;
-		}
+		return list.NativePointer;
 	}
 }
