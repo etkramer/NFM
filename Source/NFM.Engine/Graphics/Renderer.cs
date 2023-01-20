@@ -59,7 +59,7 @@ public static class Renderer
 			// Render to each viewport.
 			foreach (var viewport in Viewport.All)
 			{
-				RenderCamera(viewport.Camera, viewport.Swapchain);
+				RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
 			}
 
 			// Wait for completion.
@@ -70,35 +70,40 @@ public static class Renderer
 		}
 	}
 
-	public static void RenderCamera(CameraNode camera, Swapchain swapchain)
+	public static void RenderCamera<T>(CameraNode camera, Swapchain swapchain) where T : RenderPipeline<T>, new()
 	{
-		RenderCamera(camera, swapchain.RT, (o) => o.RequestState(swapchain.RT, ResourceStates.Present));
+		RenderCamera<T>(camera, swapchain.RT, (o) => o.RequestState(swapchain.RT, ResourceStates.Present));
 		swapchain.Present();
 	}
 	
-	public static void RenderCamera(CameraNode camera, Texture texture) => RenderCamera(camera, texture, null);
-	private static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
+	public static void RenderCamera<T>(CameraNode camera, Texture texture) where T : RenderPipeline<T>, new()  => RenderCamera<T>(camera, texture, null);
+	private static void RenderCamera<T>(CameraNode camera, Texture texture, Action<CommandList> beforeExecute) where T : RenderPipeline<T>, new()
 	{
 		// Grab an RP instance and open it's command list
-		var rp = StandardRenderPipeline.Get(texture);
-		rp.List.Open();
+		var rp = RenderPipeline<T>.Get(texture);
 
-		// Execute the render pipeline
-		rp.Render(texture, camera);
+		lock (rp)
+		{
+			// Execute the render pipeline
+			rp.List.Open();
+			rp.List.BeginEvent($"{typeof(T).Name} for {camera.Name}");
+			rp.Render(texture, camera);
 
-		// Setup gizmos context
-		var context = new GizmosContext(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
-		rp.List.SetRenderTarget(texture);
+			// Setup gizmos context
+			var context = new GizmosContext(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
+			rp.List.SetRenderTarget(texture);
 
-		// Draw axis lines
-		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
-		context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
-		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
+			// Draw axis lines
+			context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
+			context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
+			context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 
-		// Close/execute the command list
-		beforeExecute?.Invoke(rp.List);
-		rp.List.Close();
-		rp.List.Execute();
+			// Close/execute the command list
+			beforeExecute?.Invoke(rp.List);
+			rp.List.EndEvent();
+			rp.List.Close();
+			rp.List.Execute();
+		}
 	}
 
 	public static void Cleanup()

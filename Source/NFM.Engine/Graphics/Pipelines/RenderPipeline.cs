@@ -98,10 +98,12 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 
 		foreach (var step in renderSteps)
 		{
+			List.BeginEvent(step.GetType().Name);
 			step.RP = (TSelf)this;
 			step.Camera = camera;
 
 			step.Run();
+			List.EndEvent();
 		}
 
 		EndRender(List, rt);
