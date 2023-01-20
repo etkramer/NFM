@@ -17,6 +17,11 @@ public struct ViewConstants
 	public Vector2 ViewportSize;
 }
 
+/// <summary>
+/// Describes a series of steps for rendering an image.
+/// Should contain any size-dependent resources - gbuffers, post-processing targets, etc.
+/// One RenderPipeline instance may be recycled for multiple render targets, but only of the same size/resolution.
+/// </summary>
 public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<TSelf>, new()
 {
 	#region Cache
@@ -67,16 +72,19 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 	#endregion
 
 	public GraphicsBuffer<ViewConstants> ViewCB { get; } = new(1, GraphicsBuffer.ConstantAlignment);
-	public CommandList List { get; } = new CommandList();
-	
+
+	public CommandList List { get; } = new CommandList();	
 	protected Vector2i Size { get; private set; } = default;
 
-	private List<CameraStep<TSelf>> renderSteps= new();
-
-	protected void AddStep(CameraStep<TSelf> step)
+	private static List<CameraStep<TSelf>> renderSteps= new();
+	protected static void AddStep<T>() where T : CameraStep<TSelf>, new()
 	{
-		renderSteps.Add(step);
-		step.Init();
+		if (!renderSteps.Any(o => o.GetType() == typeof(T)))
+		{
+			var step = new T();
+			renderSteps.Add(step);
+			step.Init();
+		}
 	}
 
 	protected abstract void Init(Vector2i size);
@@ -105,9 +113,9 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 		ViewCB.Dispose();
 	}
 
-	// TODO: Move these out of here
 	public Matrix4 ViewMatrix { get; private set; }
 	public Matrix4 ProjectionMatrix { get; private set; }
+
 	public void UpdateView(CommandList list, CameraNode camera)
 	{
 		// Calculate view/projection matrices.

@@ -85,9 +85,18 @@ public static class Renderer
 
 		// Execute the render pipeline
 		rp.Render(texture, camera);
-		beforeExecute?.Invoke(rp.List);
+
+		// Setup gizmos context
+		var context = new GizmosContext(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
+		rp.List.SetRenderTarget(texture);
+
+		// Draw axis lines
+		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
+		context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
+		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 
 		// Close/execute the command list
+		beforeExecute?.Invoke(rp.List);
 		rp.List.Close();
 		rp.List.Execute();
 	}

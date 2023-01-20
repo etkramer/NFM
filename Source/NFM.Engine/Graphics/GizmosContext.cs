@@ -8,28 +8,6 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class GizmosStep : CameraStep<StandardRenderPipeline>
-{
-	public override void Run()
-	{
-		var context = new GizmosContext(List, Camera, RP.ViewMatrix, RP.ProjectionMatrix, RP.ViewCB);
-
-		// Set render target
-		List.SetRenderTarget(RP.ColorTarget, RP.DepthBuffer);
-
-		// Draw axis lines
-		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
-		context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
-		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
-
-		// Draw gizmos for each node
-		//foreach (var node in Camera.Scene.EnumerateNodes())
-		//{
-			//node.DrawGizmos(context);
-		//}
-	}
-}
-
 public class GizmosContext
 {
 	private CommandList renderList;

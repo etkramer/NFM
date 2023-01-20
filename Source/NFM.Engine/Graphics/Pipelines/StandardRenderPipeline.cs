@@ -11,10 +11,9 @@ public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 
 	protected override void Init(Vector2i size)
 	{
-		AddStep(new PrepassStep());
-		AddStep(new MaterialStep());
-		AddStep(new TonemapStep());
-		AddStep(new GizmosStep());
+		AddStep<PrepassStep>();
+		AddStep<MaterialStep>();
+		AddStep<TonemapStep>();
 
 		// Create RTs and RT-sized buffers.
 		ColorTarget = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);
@@ -36,5 +35,7 @@ public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 	{
 		ColorTarget.Dispose();
 		DepthBuffer.Dispose();
+
+		base.Dispose();
 	}
 }
