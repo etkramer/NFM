@@ -14,20 +14,11 @@ public static class Renderer
 	/// </summary>
 	public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
-	private static List<SceneStep> sceneStage= new();
-	private static List<CameraStep> cameraStage= new();
+	private static List<SceneStep> sceneSteps= new();
 
-	public static void AddStep<T>(T step) where T : RenderStep
+	public static void AddStep(SceneStep step)
 	{
-		if (step is SceneStep)
-		{
-			sceneStage.Add(step as SceneStep);
-		}
-		else if (step is CameraStep)
-		{
-			cameraStage.Add(step as CameraStep);
-		}
-
+		sceneSteps.Add(step);
 		step.Init();
 	}
 
@@ -38,10 +29,6 @@ public static class Renderer
 		DefaultCommandList.Open();
 
 		AddStep(new SkinningStep());
-		AddStep(new PrepassStep());
-		AddStep(new MaterialStep());
-		AddStep(new TonemapStep());
-		AddStep(new GizmosStep());
 	}
 
 	public static void RenderFrame()
@@ -51,7 +38,7 @@ public static class Renderer
 		foreach (Scene scene in Scene.All)
 		{
 			// Execute per-scene render steps.
-			foreach (var step in sceneStage)
+			foreach (var step in sceneSteps)
 			{
 				step.Scene = scene;
 
@@ -92,30 +79,17 @@ public static class Renderer
 	public static void RenderCamera(CameraNode camera, Texture texture) => RenderCamera(camera, texture, null);
 	private static void RenderCamera(CameraNode camera, Texture texture, Action<CommandList> beforeExecute)
 	{
-		var rt = RenderTarget.Get(texture.Size);
-		rt.CommandList.Open();
-		rt.CommandList.BeginEvent($"Render to Camera ({texture.Name})");
-		rt.UpdateView(camera);
+		// Grab an RP instance and open it's command list
+		var rp = StandardRenderPipeline.Get(texture);
+		rp.List.Open();
 
-		foreach (CameraStep step in cameraStage)
-		{
-			step.RT = rt;
-			step.Camera = camera;
+		// Execute the render pipeline
+		rp.Render(texture, camera);
+		beforeExecute?.Invoke(rp.List);
 
-			step.List.BeginEvent(step.GetType().Name);
-			step.Run();
-			step.List.EndEvent();
-		}
-
-		rt.CommandList.ResolveTexture(rt.ColorTarget, texture);
-		rt.CommandList.ClearRenderTarget(rt.ColorTarget);
-		rt.CommandList.ClearDepth(rt.DepthBuffer);
-
-		beforeExecute?.Invoke(rt.CommandList);
-
-		rt.CommandList.EndEvent();
-		rt.CommandList.Close();
-		rt.CommandList.Execute();
+		// Close/execute the command list
+		rp.List.Close();
+		rp.List.Execute();
 	}
 
 	public static void Cleanup()

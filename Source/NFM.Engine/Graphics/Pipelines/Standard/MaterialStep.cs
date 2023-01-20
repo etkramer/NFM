@@ -6,7 +6,7 @@ using Vortice.DXGI;
 
 namespace NFM.Graphics;
 
-public class MaterialStep : CameraStep
+public class MaterialStep : CameraStep<StandardRenderPipeline>
 {
 	private GraphicsBuffer commandBuffer;
 	private PipelineState cullPSO;
@@ -40,7 +40,7 @@ public class MaterialStep : CameraStep
 			List.SetPipelineState(permutation.MaterialPSO);
 
 			// Set and reset render targets.
-			List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
+			List.SetRenderTarget(RP.ColorTarget, RP.DepthBuffer);
 
 			// Bind program SRVs.
 			List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
@@ -52,7 +52,7 @@ public class MaterialStep : CameraStep
 			List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 			// Bind program CBVs.
-			List.SetPipelineCBV(0, 1, RT.ViewCB);
+			List.SetPipelineCBV(0, 1, RP.ViewCB);
 
 			List.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
 			List.EndEvent();

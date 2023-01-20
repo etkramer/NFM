@@ -60,7 +60,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		// Create group (viewport 2).
 		/*TabGroup group5 = new TabGroup();
 		ToolPanel.Spawn<ViewportPanel>(group5);
-		dockspace.Dock(group5, group1, DockPosition.Right, 0.4f);*/
+		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}
 
 	private bool isQuitConfirmed = false;

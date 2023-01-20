@@ -16,9 +16,9 @@ public abstract class SceneStep : RenderStep
 	public CommandList List => Renderer.DefaultCommandList;
 }
 
-public abstract class CameraStep : RenderStep
+public abstract class CameraStep<T> : RenderStep where T : RenderPipeline<T>, new()
 {
-	public RenderTarget RT { get; set; }
+	public T RP { get; set; }
 	public CameraNode Camera { get; set; }
-	public CommandList List => RT.CommandList;
+	public CommandList List => RP.List;
 }

@@ -468,14 +468,14 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void ClearRenderTarget(Texture target, Color color = default(Color))
+	public void ClearRenderTarget(Texture target, Color color = default)
 	{
 		lock (this)
 		{
 			RequestState(target, ResourceStates.RenderTarget);
 
 			ClearValue value;
-			if (color == default(Color))
+			if (color == default && target.ClearValue.HasValue)
 			{
 				value = target.ClearValue.Value;
 			}

@@ -5,7 +5,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class PrepassStep : CameraStep
+public class PrepassStep : CameraStep<StandardRenderPipeline>
 {
 	public GraphicsBuffer CommandBuffer;
 	public CommandSignature DepthCommandSignature;
@@ -83,7 +83,7 @@ public class PrepassStep : CameraStep
 		List.SetPipelineState(depthPSO);
 
 		// Set render targets.
-		List.SetRenderTarget(null, RT.DepthBuffer);
+		List.SetRenderTarget(null, RP.DepthBuffer);
 
 		// Bind program SRVs.
 		List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
@@ -94,7 +94,7 @@ public class PrepassStep : CameraStep
 		List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 		// Bind program CBVs.
-		List.SetPipelineCBV(0, 1, RT.ViewCB);
+		List.SetPipelineCBV(0, 1, RP.ViewCB);
 
 		// Dispatch draw commands.
 		List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);

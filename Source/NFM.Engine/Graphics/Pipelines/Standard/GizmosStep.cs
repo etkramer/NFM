@@ -8,14 +8,14 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class GizmosStep : CameraStep
+public class GizmosStep : CameraStep<StandardRenderPipeline>
 {
 	public override void Run()
 	{
-		var context = new GizmosContext(List, RT, Camera);
+		var context = new GizmosContext(List, Camera, RP.ViewMatrix, RP.ProjectionMatrix, RP.ViewCB);
 
 		// Set render target
-		List.SetRenderTarget(RT.ColorTarget, RT.DepthBuffer);
+		List.SetRenderTarget(RP.ColorTarget, RP.DepthBuffer);
 
 		// Draw axis lines
 		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
@@ -23,17 +23,16 @@ public class GizmosStep : CameraStep
 		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 
 		// Draw gizmos for each node
-		/*foreach (var node in Camera.Scene.EnumerateNodes())
-		{
-			node.DrawGizmos(context);
-		}*/
+		//foreach (var node in Camera.Scene.EnumerateNodes())
+		//{
+			//node.DrawGizmos(context);
+		//}
 	}
 }
 
 public class GizmosContext
 {
 	private CommandList renderList;
-	private RenderTarget renderTarget;
 	public CameraNode Camera { get; private set; }
 
 	private static PipelineState linePSO = null;
@@ -62,11 +61,18 @@ public class GizmosContext
 			.Compile().Result;
 	}
 
-	public GizmosContext(CommandList list, RenderTarget rt, CameraNode camera)
+	private Matrix4 viewMatrix;
+	private Matrix4 projectionMatrix;
+	private GraphicsBuffer<ViewConstants> viewConstants;
+
+	public GizmosContext(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, GraphicsBuffer<ViewConstants> constants)
 	{
 		renderList = list;
-		renderTarget = rt;
 		Camera = camera;
+
+		viewMatrix = view;
+		projectionMatrix = projection;
+		viewConstants = constants;
 	}
 
 	public void DrawBox(Box3D box, Color borderColor = default, Color fillColor = default)
@@ -155,7 +161,7 @@ public class GizmosContext
 		renderList.SetPipelineState(linePSO);
 
 		// Bind program constants (keeping in mind cbuffer packing requirements).
-		renderList.SetPipelineCBV(0, 1, renderTarget.ViewCB);
+		renderList.SetPipelineCBV(0, 1, viewConstants);
 		renderList.SetPipelineConstants(0, 0, AsInt(p0));
 		renderList.SetPipelineConstants(0, 4, AsInt(p1));
 		renderList.SetPipelineConstants(0, 8, AsInt(color));
@@ -167,8 +173,8 @@ public class GizmosContext
 	private Vector4 ToClipSpace(Vector3 world)
 	{
 		Vector4 clip = new Vector4(world, 1);
-		clip *= renderTarget.ViewMatrix;
-		clip *= renderTarget.ProjectionMatrix;
+		clip *= viewMatrix;
+		clip *= projectionMatrix;
 
 		return clip;
 	}

@@ -5,7 +5,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class TonemapStep : CameraStep
+public class TonemapStep : CameraStep<StandardRenderPipeline>
 {
 	private PipelineState gammaCorrectPSO;
 
@@ -21,7 +21,7 @@ public class TonemapStep : CameraStep
 	{
 		// Gamma correct output.
 		List.SetPipelineState(gammaCorrectPSO);
-		List.SetPipelineUAV(0, 0, RT.ColorTarget);
-		List.DispatchThreads(RT.ColorTarget.Width, 32, RT.ColorTarget.Height, 32);
+		List.SetPipelineUAV(0, 0, RP.ColorTarget);
+		List.DispatchThreads(RP.ColorTarget.Width, 32, RP.ColorTarget.Height, 32);
 	}
 }

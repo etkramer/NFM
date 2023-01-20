@@ -129,7 +129,7 @@ public partial class ModelNode : Node
 				}
 			}
 
-			context.DrawBox(modelBounds, Color.White, Color.Invisible);
+			//context.DrawBox(modelBounds, Color.White, Color.Invisible);
 		}
 
 		base.DrawGizmos(context);
