@@ -13,56 +13,54 @@ using NFM.Resources;
 using NFM.Rendering;
 using NFM.World;
 using System.Runtime.CompilerServices;
-using NFM.Editor;
 
 [assembly: InternalsVisibleTo("NFM")]
 
-namespace NFM
+namespace NFM;
+
+public static class Engine
 {
-	public static class Engine
+	public static event Action<double> OnTick = delegate {};
+
+	public static void Init()
 	{
-		public static event Action<double> OnTick = delegate {};
+		// Boot up renderer and load plugins.
+		Renderer.Init();
+		PluginSystem.Init();
 
-		public static void Init()
+		// Kick off model loading early.
+		_ = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
+
+		// Create default nodes with new project.
+		Project.OnProjectCreated += () =>
 		{
-			// Boot up renderer and load plugins.
-			Renderer.Init();
-			PluginSystem.Init();
+			// Create example model
+			var model = new ModelNode(null);
+			model.Position = new Vector3(0);
+			model.Rotation = new Vector3(0);
+			model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
 
-			// Kick off model loading early.
-			_ = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
-
-			// Create default nodes with new project.
-			Project.OnProjectCreated += () =>
+			for (int i = 0; i < 10000; i++)
 			{
-				// Create example model
-				var model = new ModelNode(null);
-				model.Position = new Vector3(0);
-				model.Rotation = new Vector3(0);
-				model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
+				Node node = new Node(null);
+			}
 
-				for (int i = 0; i < 10000; i++)
-				{
-					Node node = new Node(null);
-				}
+			Selection.Select(model);
+		};
+	}
 
-				Selection.Select(model);
-			};
-		}
+	public static void Update()
+	{
+		// Begin the new frame.
+		OnTick.Invoke(Metrics.FrameTime);
 
-		public static void Update()
-		{
-			// Begin the new frame.
-			OnTick.Invoke(Metrics.FrameTime);
+		// Render the frame.
+		Renderer.RenderFrame();
+	}
 
-			// Render the frame.
-			Renderer.RenderFrame();
-		}
-
-		public static void Cleanup()
-		{
-			// Cleanup the renderer.
-			Renderer.Cleanup();
-		}
+	public static void Cleanup()
+	{
+		// Cleanup the renderer.
+		Renderer.Cleanup();
 	}
 }

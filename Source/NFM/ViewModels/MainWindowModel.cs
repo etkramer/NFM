@@ -2,7 +2,6 @@
 using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using NFM.Editor;
 using NFM.World;
 using ReactiveUI;
 

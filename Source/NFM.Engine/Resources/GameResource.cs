@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace NFM.Resources
-{
-	public abstract class GameResource : IDisposable
-	{
-		internal Asset Source { get; set; } = null;
+namespace NFM.Resources;
 
-		public virtual void Dispose() {}
-	}
+public abstract class GameResource : IDisposable
+{
+	internal Asset Source { get; set; } = null;
+
+	public virtual void Dispose() {}
 }

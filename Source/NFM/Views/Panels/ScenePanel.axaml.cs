@@ -5,7 +5,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using NFM.Editor;
 using NFM.World;
 
 namespace NFM.Frontend

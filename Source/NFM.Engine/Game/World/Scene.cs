@@ -1,53 +1,52 @@
 ﻿using System;
 using System.Collections;
 
-namespace NFM.World
+namespace NFM.World;
+
+public partial class Scene : IDisposable
 {
-	public partial class Scene : IDisposable
+	public static List<Scene> All { get; } = new();
+
+	[Notify, Save] public static Scene Main { get; set; } = new();
+
+	[Notify] public ReadOnlyObservableCollection<Node> RootNodes { get; }
+	[Save] private ObservableCollection<Node> rootNodes { get; set; } = new();
+
+	public Scene()
 	{
-		public static List<Scene> All { get; } = new();
+		RootNodes = new(rootNodes);
+		All.Add(this);
 
-		[Notify, Save] public static Scene Main { get; set; } = new();
+		TransformBuffer.Name = "Transform Buffer";
+		InstanceBuffer.Name = "Instance Buffer";
+	}
 
-		[Notify] public ReadOnlyObservableCollection<Node> RootNodes { get; }
-		[Save] private ObservableCollection<Node> rootNodes { get; set; } = new();
+	/// <summary>
+	/// Adds a Node as a scene root. Should NEVER be called manually.
+	/// </summary>
+	internal void AddRootNode(Node node)
+	{
+		rootNodes.Add(node);
+	}
 
-		public Scene()
+	/// <summary>
+	/// Removes a Node as a scene root. Should NEVER be called manually.
+	/// </summary>
+	internal bool RemoveRootNode(Node node)
+	{
+		return rootNodes.Remove(node);
+	}
+
+	public void Dispose()
+	{
+		for (int i = rootNodes.Count - 1; i >= 0; i--)
 		{
-			RootNodes = new(rootNodes);
-			All.Add(this);
-
-			TransformBuffer.Name = "Transform Buffer";
-			InstanceBuffer.Name = "Instance Buffer";
+			rootNodes[i].Dispose();
 		}
 
-		/// <summary>
-		/// Adds a Node as a scene root. Should NEVER be called manually.
-		/// </summary>
-		internal void AddRootNode(Node node)
-		{
-			rootNodes.Add(node);
-		}
+		InstanceBuffer.Dispose();
+		TransformBuffer.Dispose();
 
-		/// <summary>
-		/// Removes a Node as a scene root. Should NEVER be called manually.
-		/// </summary>
-		internal bool RemoveRootNode(Node node)
-		{
-			return rootNodes.Remove(node);
-		}
-
-		public void Dispose()
-		{
-			for (int i = rootNodes.Count - 1; i >= 0; i--)
-			{
-				rootNodes[i].Dispose();
-			}
-
-			InstanceBuffer.Dispose();
-			TransformBuffer.Dispose();
-
-			All.Remove(this);
-		}
+		All.Remove(this);
 	}
 }

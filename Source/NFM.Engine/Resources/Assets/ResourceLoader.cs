@@ -1,16 +1,15 @@
 ﻿using System;
 
-namespace NFM.Resources
-{
-	/// <summary>
-	/// Describes a loader used when an unloaded asset is requested
-	/// </summary>
-	public abstract class ResourceLoader {}
+namespace NFM.Resources;
 
-	/// <inheritdoc/>
-	public abstract class ResourceLoader<T> : ResourceLoader where T : GameResource
-	{
-		public abstract Task<T> Load();
-		public virtual void Unload() {}
-	}
+/// <summary>
+/// Describes a loader used when an unloaded asset is requested
+/// </summary>
+public abstract class ResourceLoader {}
+
+/// <inheritdoc/>
+public abstract class ResourceLoader<T> : ResourceLoader where T : GameResource
+{
+	public abstract Task<T> Load();
+	public virtual void Unload() {}
 }

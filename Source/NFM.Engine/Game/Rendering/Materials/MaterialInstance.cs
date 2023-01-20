@@ -6,83 +6,82 @@ using NFM.GPU.Native;
 using NFM.Resources;
 using NFM.World;
 
-namespace NFM.Rendering
+namespace NFM.Rendering;
+
+public class MaterialInstance : IDisposable
 {
-	public class MaterialInstance : IDisposable
+	public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
+
+	[Inspect] public Material Material { get; set; }
+	[Inspect] public ShaderStack ShaderStack { get; set; }
+
+	public BufferAllocation<byte> MaterialHandle = null;
+
+	public MaterialInstance(Material baseMaterial)
 	{
-		public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
+		Material = baseMaterial;
+		ShaderStack = new ShaderStack(Material.Shader);
 
-		[Inspect] public Material Material { get; set; }
-		[Inspect] public ShaderStack ShaderStack { get; set; }
+		UpdateMaterialData();
+	}
 
-		public BufferAllocation<byte> MaterialHandle = null;
+	private void UpdateMaterialData()
+	{
+		MaterialHandle?.Dispose();
+		List<byte> materialData = new();
 
-		public MaterialInstance(Material baseMaterial)
+		// Add shader ID to material data.
+		materialData.AddRange(StructureToByteArray(typeof(int), ShaderStack.CurrentPermutation.ShaderID));
+
+		// Loop through all shader parameters
+		foreach (var param in ShaderStack.Parameters)
 		{
-			Material = baseMaterial;
-			ShaderStack = new ShaderStack(Material.Shader);
+			// Grab the default value
+			object value = param.Value;
 
-			UpdateMaterialData();
-		}
-
-		private void UpdateMaterialData()
-		{
-			MaterialHandle?.Dispose();
-			List<byte> materialData = new();
-
-			// Add shader ID to material data.
-			materialData.AddRange(StructureToByteArray(typeof(int), ShaderStack.CurrentPermutation.ShaderID));
-
-			// Loop through all shader parameters
-			foreach (var param in ShaderStack.Parameters)
+			// Is parameter overriden by material?
+			if (Material.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
 			{
-				// Grab the default value
-				object value = param.Value;
-
-				// Is parameter overriden by material?
-				if (Material.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
-				{
-					value = overrideParam.Value;
-				}
-
-				if (param.Type == typeof(bool))
-				{
-					// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
-					materialData.AddRange(StructureToByteArray(typeof(int), (bool)value ? 1 : 0));
-				}
-				else if (param.Type == typeof(Texture2D))
-				{
-					materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).D3DResource.GetSRV().GetDescriptorIndex()));
-				}
-				else
-				{
-					materialData.AddRange(StructureToByteArray(param.Type, value));
-				}
+				value = overrideParam.Value;
 			}
 
-			Debug.Assert(materialData.Count % 4 == 0, "The size of all material parameters must be divisible by 4.");
-
-			// Upload data to GPU.
-			MaterialHandle = MaterialBuffer.Allocate(materialData.Count);
-			Renderer.DefaultCommandList.UploadBuffer(MaterialHandle, materialData.ToArray());
+			if (param.Type == typeof(bool))
+			{
+				// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
+				materialData.AddRange(StructureToByteArray(typeof(int), (bool)value ? 1 : 0));
+			}
+			else if (param.Type == typeof(Texture2D))
+			{
+				materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).D3DResource.GetSRV().GetDescriptorIndex()));
+			}
+			else
+			{
+				materialData.AddRange(StructureToByteArray(param.Type, value));
+			}
 		}
 
-		private byte[] StructureToByteArray(Type type, object data)
-		{
-			int dataSize = Marshal.SizeOf(type);
+		Debug.Assert(materialData.Count % 4 == 0, "The size of all material parameters must be divisible by 4.");
 
-			IntPtr bufferptr = Marshal.AllocHGlobal(dataSize);
-			Marshal.StructureToPtr(data, bufferptr, false);
-			byte[] buffer = new byte[dataSize];
-			Marshal.Copy(bufferptr, buffer, 0, dataSize);
-			Marshal.FreeHGlobal(bufferptr);
+		// Upload data to GPU.
+		MaterialHandle = MaterialBuffer.Allocate(materialData.Count);
+		Renderer.DefaultCommandList.UploadBuffer(MaterialHandle, materialData.ToArray());
+	}
 
-			return buffer;
-		}
+	private byte[] StructureToByteArray(Type type, object data)
+	{
+		int dataSize = Marshal.SizeOf(type);
 
-		public void Dispose()
-		{
-			MaterialHandle?.Dispose();
-		}
+		IntPtr bufferptr = Marshal.AllocHGlobal(dataSize);
+		Marshal.StructureToPtr(data, bufferptr, false);
+		byte[] buffer = new byte[dataSize];
+		Marshal.Copy(bufferptr, buffer, 0, dataSize);
+		Marshal.FreeHGlobal(bufferptr);
+
+		return buffer;
+	}
+
+	public void Dispose()
+	{
+		MaterialHandle?.Dispose();
 	}
 }

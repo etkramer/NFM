@@ -9,7 +9,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using DynamicData;
 using DynamicData.Binding;
-using NFM.Editor;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

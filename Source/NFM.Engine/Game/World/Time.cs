@@ -1,27 +1,26 @@
 ﻿using System;
 
-namespace NFM
+namespace NFM;
+
+public static class Time
 {
-	public static class Time
+	/// <summary>
+	/// Fires when the world time is changed.
+	/// </summary>
+	public static event Action<double> OnTimeChanged = delegate{};
+
+	/// <summary>
+	/// The current (world) time in seconds.
+	/// </summary>
+	public static double Now
 	{
-		/// <summary>
-		/// Fires when the world time is changed.
-		/// </summary>
-		public static event Action<double> OnTimeChanged = delegate{};
-
-		/// <summary>
-		/// The current (world) time in seconds.
-		/// </summary>
-		public static double Now
+		get => now;
+		set
 		{
-			get => now;
-			set
-			{
-				now = value;
-				OnTimeChanged(now);
-			}
+			now = value;
+			OnTimeChanged(now);
 		}
-
-		private static double now = 0d;
 	}
+
+	private static double now = 0d;
 }

@@ -1,56 +1,55 @@
 ﻿using System;
 
-namespace NFM.Resources
+namespace NFM.Resources;
+
+public enum BlendMode
 {
-	public enum BlendMode
+	Opaque,
+	Masked,
+	Transparent,
+}
+
+public struct ShaderParameter
+{
+	public string Name;
+	public object Value;
+	public Type Type;
+}
+
+public class Shader : GameResource
+{
+	public string ShaderSource { get; set; }
+
+	public List<ShaderParameter> Parameters { get; } = new();
+	public BlendMode BlendMode = BlendMode.Opaque;
+
+	public Shader(string source)
 	{
-		Opaque,
-		Masked,
-		Transparent,
+		ShaderSource = source;
 	}
 
-	public struct ShaderParameter
+	public void AddColor(string param, Color defaultValue = default)
 	{
-		public string Name;
-		public object Value;
-		public Type Type;
+		Parameters.Add(new ShaderParameter()
+		{
+			Name = param,
+			Value = defaultValue,
+			Type = typeof(Color)
+		});
 	}
 
-	public class Shader : GameResource
+	public void AddTexture(string param, Texture2D defaultValue = default)
 	{
-		public string ShaderSource { get; set; }
-
-		public List<ShaderParameter> Parameters { get; } = new();
-		public BlendMode BlendMode = BlendMode.Opaque;
-
-		public Shader(string source)
+		Parameters.Add(new ShaderParameter()
 		{
-			ShaderSource = source;
-		}
+			Name = param,
+			Value = defaultValue,
+			Type = typeof(Texture2D)
+		});
+	}
 
-		public void AddColor(string param, Color defaultValue = default)
-		{
-			Parameters.Add(new ShaderParameter()
-			{
-				Name = param,
-				Value = defaultValue,
-				Type = typeof(Color)
-			});
-		}
-
-		public void AddTexture(string param, Texture2D defaultValue = default)
-		{
-			Parameters.Add(new ShaderParameter()
-			{
-				Name = param,
-				Value = defaultValue,
-				Type = typeof(Texture2D)
-			});
-		}
-
-		public void SetBlendMode(BlendMode mode)
-		{
-			BlendMode = mode;
-		}
+	public void SetBlendMode(BlendMode mode)
+	{
+		BlendMode = mode;
 	}
 }

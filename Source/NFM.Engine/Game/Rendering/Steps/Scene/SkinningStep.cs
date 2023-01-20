@@ -1,13 +1,12 @@
 ﻿using System;
 using NFM.World;
 
-namespace NFM.Rendering
+namespace NFM.Rendering;
+
+public class SkinningStep : SceneStep
 {
-	public class SkinningStep : SceneStep
+	public override void Run()
 	{
-		public override void Run()
-		{
-			// Perform skinning, update morph targets, create motion (screen-space) and velocity (world-space) buffers.
-		}
+		// Perform skinning, update morph targets, create motion (screen-space) and velocity (world-space) buffers.
 	}
 }
