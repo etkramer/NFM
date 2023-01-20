@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reactive.Linq;
 using NFM.Common;
-using NFM.Rendering;
+using NFM.Graphics;
 using ReactiveUI;
 
 namespace NFM.World;

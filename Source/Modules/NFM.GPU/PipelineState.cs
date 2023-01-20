@@ -68,7 +68,7 @@ namespace NFM.GPU
 		private DepthMode depthMode = DepthMode.None;
 		private bool depthRead = false;
 		private bool depthWrite = false;
-		private Format[] rtFormats = { Graphics.RTFormat };
+		private Format[] rtFormats = { D3DContext.RTFormat };
 		private int rtSamples = 1;
 		private TopologyType topologyType = TopologyType.Triangle;
 		private bool isBlendEnabled = false;
@@ -275,7 +275,7 @@ namespace NFM.GPU
 				SubObjectStream = new IntPtr(&data)
 			};
 
-			return Graphics.Device.CreatePipelineState(description, out result);
+			return D3DContext.Device.CreatePipelineState(description, out result);
 		}
 
 		/// <summary>
@@ -307,7 +307,7 @@ namespace NFM.GPU
 				};
 
 				// Create root signature.
-				RootSignature = Graphics.Device.CreateRootSignature(new RootSignatureDescription1(
+				RootSignature = D3DContext.Device.CreateRootSignature(new RootSignatureDescription1(
 					RootSignatureFlags.ConstantBufferViewShaderResourceViewUnorderedAccessViewHeapDirectlyIndexed, rootParameters, staticSamplers));
 
 				bool useDepth = depthWrite || (depthRead && depthMode != DepthMode.None);
@@ -325,7 +325,7 @@ namespace NFM.GPU
 						PrimitiveTopology = (PrimitiveTopologyType)topologyType,
 						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
 						RenderTargetFormats = rtFormats,
-						DepthStencilFormat = Graphics.DSFormat,
+						DepthStencilFormat = D3DContext.DSFormat,
 						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
 						RasterizerState = new RasterizerDescription()
 						{

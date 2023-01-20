@@ -1,5 +1,5 @@
 ﻿using System;
-using NFM.Rendering;
+using NFM.Graphics;
 using NFM.Resources;
 
 namespace NFM.World;

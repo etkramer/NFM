@@ -10,7 +10,7 @@ global using NFM.Mathematics;
 using NFM.GPU;
 using NFM.Plugins;
 using NFM.Resources;
-using NFM.Rendering;
+using NFM.Graphics;
 using NFM.World;
 using System.Runtime.CompilerServices;
 
@@ -40,7 +40,7 @@ public static class Engine
 			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
 
-			for (int i = 0; i < 10000; i++)
+			//for (int i = 0; i < 10000; i++)
 			{
 				Node node = new Node(null);
 			}

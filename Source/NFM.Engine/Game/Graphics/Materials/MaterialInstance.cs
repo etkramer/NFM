@@ -6,7 +6,7 @@ using NFM.GPU.Native;
 using NFM.Resources;
 using NFM.World;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public class MaterialInstance : IDisposable
 {

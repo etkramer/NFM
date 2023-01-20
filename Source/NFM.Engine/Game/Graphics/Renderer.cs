@@ -5,7 +5,7 @@ using NFM.GPU;
 using NFM.World;
 using Vortice.Direct3D12;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public static class Renderer
 {
@@ -33,7 +33,7 @@ public static class Renderer
 
 	public static void Init()
 	{
-		Graphics.Init(2);
+		D3DContext.Init(2);
 		DefaultCommandList.Name = "Default List";
 		DefaultCommandList.Open();
 
@@ -76,7 +76,7 @@ public static class Renderer
 			}
 
 			// Wait for completion.
-			Graphics.WaitFrame();
+			D3DContext.WaitFrame();
 
 			// Reopen default command list
 			DefaultCommandList.Open();
@@ -120,6 +120,6 @@ public static class Renderer
 
 	public static void Cleanup()
 	{
-		Graphics.Flush();
+		D3DContext.Flush();
 	}
 }

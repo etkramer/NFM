@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Vortice.Direct3D12;
@@ -23,20 +24,21 @@ namespace NFM.GPU
 
 		private static PipelineState mipGenPSO = new PipelineState()
 			.UseIncludes(typeof(CommandList).Assembly)
-			.SetComputeShader(Embed.GetString("Shaders/MipGenCS.hlsl", typeof(Graphics).Assembly), "MipGenCS")
+			.SetComputeShader(Embed.GetString("Shaders/MipGenCS.hlsl", Assembly.GetExecutingAssembly()), "MipGenCS")
 			.AsRootConstant(0, 2)
 			.Compile().Result;
 
 		public CommandList()
 		{
+			
 			// Create command allocators.
-			commandAllocators = new ID3D12CommandAllocator[Graphics.RenderLatency];
-			for (int i = 0; i < Graphics.RenderLatency; i++)
+			commandAllocators = new ID3D12CommandAllocator[D3DContext.RenderLatency];
+			for (int i = 0; i < D3DContext.RenderLatency; i++)
 			{
-				commandAllocators[i] = Graphics.Device.CreateCommandAllocator(CommandListType.Direct);
+				commandAllocators[i] = D3DContext.Device.CreateCommandAllocator(CommandListType.Direct);
 			}
 
-			list = Graphics.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, commandAllocators[Graphics.FrameIndex]);
+			list = D3DContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, commandAllocators[D3DContext.FrameIndex]);
 			list.Close();
 		}
 
@@ -365,7 +367,7 @@ namespace NFM.GPU
 
 				// Calculate subresource info.
 				var footprints = new PlacedSubresourceFootPrint[1];
-				Graphics.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
+				D3DContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
 
 				TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
 				TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
@@ -568,8 +570,8 @@ namespace NFM.GPU
 		{
 			lock (this)
 			{
-				commandAllocators[Graphics.FrameIndex].Reset();
-				list.Reset(commandAllocators[Graphics.FrameIndex]);
+				commandAllocators[D3DContext.FrameIndex].Reset();
+				list.Reset(commandAllocators[D3DContext.FrameIndex]);
 
 				// Setup common state.
 				list.SetDescriptorHeaps(1, new[]
@@ -599,7 +601,7 @@ namespace NFM.GPU
 			lock (this)
 			{
 				// Execute D3D command list.
-				Graphics.GraphicsQueue.ExecuteCommandList(list);
+				D3DContext.GraphicsQueue.ExecuteCommandList(list);
 			}
 		}
 	}

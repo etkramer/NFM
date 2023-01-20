@@ -5,7 +5,7 @@ using NFM.GPU;
 using NFM.Resources;
 using NFM.World;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public class ShaderStack
 {

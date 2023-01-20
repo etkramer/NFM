@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using NFM.GPU;
-using NFM.Rendering;
+using NFM.Graphics;
 
 namespace NFM.Resources;
 

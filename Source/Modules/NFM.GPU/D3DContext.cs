@@ -7,11 +7,10 @@ using System.Runtime.InteropServices;
 using Feature = Vortice.Direct3D12.Feature;
 using System.Runtime.CompilerServices;
 
-[assembly:DisableRuntimeMarshalling]
 
 namespace NFM.GPU
 {
-	public static class Graphics
+	public static class D3DContext
 	{
 		public static int RenderLatency = 2;
 		public static int FrameIndex => (int)(Metrics.FrameCount % (ulong)RenderLatency);

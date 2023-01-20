@@ -27,7 +27,7 @@ namespace NFM.GPU
 				}
 			};
 
-			Graphics.Device.CreateShaderResourceView(resource, desc, Handle);
+			D3DContext.Device.CreateShaderResourceView(resource, desc, Handle);
 		}
 
 		public ShaderResourceView(Texture target, int mipLevel = -1)
@@ -48,7 +48,7 @@ namespace NFM.GPU
 				},
 			};
 
-			Graphics.Device.CreateShaderResourceView(target.D3DResource, desc, Handle);
+			D3DContext.Device.CreateShaderResourceView(target.D3DResource, desc, Handle);
 		}
 
 		public void Dispose()

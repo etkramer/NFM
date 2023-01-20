@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Avalonia;
 using NFM.GPU;
-using NFM.Rendering;
+using NFM.Graphics;
 using NFM.Resources;
 using ReactiveUI;
 

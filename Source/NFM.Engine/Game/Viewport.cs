@@ -5,7 +5,7 @@ using NFM.World;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 /// <summary>
 /// Contains the game logic for a UI viewport

@@ -22,7 +22,7 @@ namespace NFM.GPU
 				ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
 			};
 
-			Graphics.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
+			D3DContext.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
 		}
 
 		public void Dispose()

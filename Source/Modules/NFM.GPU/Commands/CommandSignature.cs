@@ -75,7 +75,7 @@ namespace NFM.GPU
 				IndirectArguments = arguments.ToArray(),
 			};
 
-			Graphics.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
+			D3DContext.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
 			
 			return this;
 		}

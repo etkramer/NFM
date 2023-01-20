@@ -4,7 +4,7 @@ using NFM.GPU;
 using NFM.World;
 using Vortice.DXGI;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct ViewConstants

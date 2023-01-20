@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 using NFM.GPU;
-using NFM.Rendering;
+using NFM.Graphics;
 using ReactiveUI;
 
 namespace NFM.Frontend

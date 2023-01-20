@@ -18,7 +18,7 @@ namespace NFM.GPU
 				SizeInBytes = (int)MathHelper.Align(capacity * stride, GraphicsBuffer.ConstantAlignment)
 			};
 
-			Graphics.Device.CreateConstantBufferView(desc, Handle);
+			D3DContext.Device.CreateConstantBufferView(desc, Handle);
 		}
 
 		public void Dispose()

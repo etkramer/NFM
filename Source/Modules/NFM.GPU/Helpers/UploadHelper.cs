@@ -10,7 +10,7 @@ namespace NFM.GPU
 		const int UploadSize = 512 * 1024 * 1024;
 
 		public static nint UploadOffset = 0;
-		public static int Ring => Graphics.FrameIndex;
+		public static int Ring => D3DContext.FrameIndex;
 		public static ID3D12Resource[] Rings;
 		public static void*[] MappedRings;
 
@@ -33,11 +33,11 @@ namespace NFM.GPU
 			};
 
 			// Create upload rings.
-			Rings = new ID3D12Resource[Graphics.RenderLatency];
-			MappedRings = new void*[Graphics.RenderLatency];
-			for (int i = 0; i < Graphics.RenderLatency; i++)
+			Rings = new ID3D12Resource[D3DContext.RenderLatency];
+			MappedRings = new void*[D3DContext.RenderLatency];
+			for (int i = 0; i < D3DContext.RenderLatency; i++)
 			{
-				Graphics.Device.CreateCommittedResource(HeapProperties.UploadHeapProperties, HeapFlags.None, copyBufferDescription, ResourceStates.GenericRead, out Rings[i]);
+				D3DContext.Device.CreateCommittedResource(HeapProperties.UploadHeapProperties, HeapFlags.None, copyBufferDescription, ResourceStates.GenericRead, out Rings[i]);
 
 				void* mapPtr = null;
 				Rings[i].Map(0, &mapPtr);
@@ -45,7 +45,7 @@ namespace NFM.GPU
 			}
 
 			// Reset the upload offset at the beginning of every frame.
-			Graphics.OnFrameStart += () =>
+			D3DContext.OnFrameStart += () =>
 			{
 				lock (Lock)
 				{

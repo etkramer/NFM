@@ -23,7 +23,7 @@ namespace NFM.GPU
 				Flags = DepthStencilViewFlags.None
 			};
 
-			Graphics.Device.CreateDepthStencilView(Target.D3DResource, desc, Handle);
+			D3DContext.Device.CreateDepthStencilView(Target.D3DResource, desc, Handle);
 		}
 
 		public void Dispose()

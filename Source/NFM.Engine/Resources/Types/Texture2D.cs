@@ -1,6 +1,6 @@
 ﻿using System;
 using NFM.GPU;
-using NFM.Rendering;
+using NFM.Graphics;
 using DXGIFormat = Vortice.DXGI.Format;
 
 namespace NFM.Resources;

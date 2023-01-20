@@ -26,7 +26,7 @@ namespace NFM.GPU
 				}
 			};
 
-			Graphics.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
+			D3DContext.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
 		}
 
 		public UnorderedAccessView(Texture texture, int mipLevel)
@@ -44,7 +44,7 @@ namespace NFM.GPU
 				}
 			};
 
-			Graphics.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
+			D3DContext.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
 		}
 
 		public void Dispose()

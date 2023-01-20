@@ -24,7 +24,7 @@ namespace NFM.GPU
 
 			flags = SwapChainFlags.None;
 			flags |= SwapChainFlags.FrameLatencyWaitableObject;
-			if (Graphics.SupportsTearing)
+			if (D3DContext.SupportsTearing)
 			{
 				flags |= SwapChainFlags.AllowTearing;
 			}
@@ -32,10 +32,10 @@ namespace NFM.GPU
 			// Describe swapchain.
 			SwapChainDescription1 swapchainDesc = new()
 			{
-				BufferCount = Graphics.RenderLatency,
+				BufferCount = D3DContext.RenderLatency,
 				Width = 0,
 				Height = 0,
-				Format = Graphics.RTFormat,
+				Format = D3DContext.RTFormat,
 				BufferUsage = Usage.RenderTargetOutput,
 				SwapEffect = SwapEffect.FlipDiscard,
 				SampleDescription = new SampleDescription(1, 0),
@@ -43,7 +43,7 @@ namespace NFM.GPU
 			};
 
 			// Create swapchain.
-			swapchain = Graphics.DXGIFactory.CreateSwapChainForHwnd(Graphics.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
+			swapchain = D3DContext.DXGIFactory.CreateSwapChainForHwnd(D3DContext.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
 
 			// Update size to match actual used by swapchain.
 			var swapchainSize = swapchain.SourceSize;
@@ -69,8 +69,8 @@ namespace NFM.GPU
 		private void CreateRTs()
 		{
             // Create RTs for each backbuffer.
-            backbuffers = new Texture[Graphics.RenderLatency];
-            for (int i = 0; i < Graphics.RenderLatency; i++)
+            backbuffers = new Texture[D3DContext.RenderLatency];
+            for (int i = 0; i < D3DContext.RenderLatency; i++)
             {
 				// Create backbuffer RT.
 				backbuffers[i] = new Texture(swapchain.GetBuffer<ID3D12Resource>(i), Size.X, Size.Y);
@@ -88,7 +88,7 @@ namespace NFM.GPU
 				throw new InvalidOperationException("Resource is in wrong state for present!");
 			}
 
-			Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && Graphics.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
+			Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && D3DContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
 		}
 
 		public void Resize(Vector2i size)
@@ -102,16 +102,16 @@ namespace NFM.GPU
 			}
 
 			// Wait for the GPU to finish up with any commands that might be using this swapchain.
-			Graphics.Flush();
+			D3DContext.Flush();
 
 			// Dispose existing render targets.
-			for (int i = 0; i < Graphics.RenderLatency; i++)
+			for (int i = 0; i < D3DContext.RenderLatency; i++)
 			{
 				backbuffers[i].Dispose();
 			}
 
 			// Resize swapchain.
-			swapchain.ResizeBuffers(Graphics.RenderLatency, size.X, size.Y, Format.Unknown, flags);
+			swapchain.ResizeBuffers(D3DContext.RenderLatency, size.X, size.Y, Format.Unknown, flags);
 
 			// Recreate render targets.
 			CreateRTs();

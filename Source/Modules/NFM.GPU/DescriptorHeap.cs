@@ -52,9 +52,9 @@ namespace NFM.GPU
 				NodeMask = 0,
 			};
 
-			Graphics.Device.CreateDescriptorHeap(heapDesc, out handle);
+			D3DContext.Device.CreateDescriptorHeap(heapDesc, out handle);
 			handle.Name = $"DescriptorHeap ({type})";
-			stride = Graphics.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
+			stride = D3DContext.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
 
 			// Create block with D3D12MA
 			D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()

@@ -99,7 +99,7 @@ namespace NFM.GPU
 			};
 
 			// Create D3D resource.
-			Graphics.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
+			D3DContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
 
 			D3DResource = resource;
 			State = ResourceStates.CopyDest;
@@ -118,7 +118,7 @@ namespace NFM.GPU
 			D3DResource = resource;
 			Width = width;
 			Height = height;
-			Format = Graphics.RTFormat;
+			Format = D3DContext.RTFormat;
 			MipmapCount = 1;
 			State = ResourceStates.CopyDest;
 

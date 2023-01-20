@@ -2,7 +2,7 @@
 using NFM.GPU;
 using NFM.World;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public abstract class RenderStep
 {

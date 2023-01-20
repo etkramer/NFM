@@ -2,7 +2,7 @@
 using NFM.GPU;
 using NFM.Resources;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public class ShaderPermutation : IDisposable
 {

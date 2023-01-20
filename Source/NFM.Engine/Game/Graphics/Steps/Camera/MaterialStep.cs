@@ -4,7 +4,7 @@ using NFM.Resources;
 using NFM.World;
 using Vortice.DXGI;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public class MaterialStep : CameraStep
 {

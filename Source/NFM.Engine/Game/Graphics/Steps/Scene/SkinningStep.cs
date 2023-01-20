@@ -1,7 +1,7 @@
 ﻿using System;
 using NFM.World;
 
-namespace NFM.Rendering;
+namespace NFM.Graphics;
 
 public class SkinningStep : SceneStep
 {
