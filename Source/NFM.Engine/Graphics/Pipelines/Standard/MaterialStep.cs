@@ -24,7 +24,7 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 		commandBuffer = new GraphicsBuffer(commandStride * Scene.MaxInstances, commandStride, hasCounter: true);
 	}
 
-	public override void Run()
+	public override void Run(CommandList list)
 	{
 		// Loop through materials to shade.
 		foreach (var permutation in ShaderPermutation.All)
@@ -32,58 +32,58 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 			int shaderID = permutation.ShaderID;
 
 			// Build indirect draw commands for this shader ID.
-			BuildDraws(shaderID);
+			BuildDraws(shaderID, list);
 
-			List.BeginEvent($"Draw shader {shaderID}");
+			list.BeginEvent($"Draw shader {shaderID}");
 
 			// Switch to material program.
-			List.SetPipelineState(permutation.MaterialPSO);
+			list.SetPipelineState(permutation.MaterialPSO);
 
 			// Set and reset render targets.
-			List.SetRenderTarget(RP.ColorTarget, RP.DepthBuffer);
+			list.SetRenderTarget(RP.ColorTarget, RP.DepthBuffer);
 
 			// Bind program SRVs.
-			List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
-			List.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
-			List.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
-			List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
-			List.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
-			List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
-			List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
+			list.SetPipelineSRV(0, 1, Mesh.VertBuffer);
+			list.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+			list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
+			list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+			list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
+			list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
+			list.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
 
 			// Bind program CBVs.
-			List.SetPipelineCBV(0, 1, RP.ViewCB);
+			list.SetPipelineCBV(0, 1, RP.ViewCB);
 
-			List.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
-			List.EndEvent();
+			list.ExecuteIndirect(permutation.MaterialSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+			list.EndEvent();
 		}
 	}
 
-	private void BuildDraws(int shaderID)
+	private void BuildDraws(int shaderID, CommandList list)
 	{
 		// Reset command count.
-		List.ResetCounter(commandBuffer);
+		list.ResetCounter(commandBuffer);
 
 		// Switch to culling program (compute).
-		List.SetPipelineState(cullPSO);
+		list.SetPipelineState(cullPSO);
 
 		// Set SRV inputs.
-		List.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
-		List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
-		List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
+		list.SetPipelineSRV(0, 0, MaterialInstance.MaterialBuffer);
+		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 		// Set UAV outputs.
-		List.SetPipelineUAV(0, 0, commandBuffer);
+		list.SetPipelineUAV(0, 0, commandBuffer);
 
 		// Build for chosen shader.
-		List.SetPipelineConstants(0, 0, shaderID);
+		list.SetPipelineConstants(0, 0, shaderID);
 
 		// Dispatch compute shader.
 		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
 		{
-			List.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
+			list.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
 		}
 
-		List.BarrierUAV(commandBuffer);
+		list.BarrierUAV(commandBuffer);
 	}
 }

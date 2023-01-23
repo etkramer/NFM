@@ -41,10 +41,10 @@ public static class Renderer
 			foreach (var step in sceneSteps)
 			{
 				step.Scene = scene;
-
-				step.List.BeginEvent($"{step.GetType().Name} (scene)");
-				step.Run();
-				step.List.EndEvent();
+				
+				DefaultCommandList.BeginEvent($"{step.GetType().Name} (scene)");
+				step.Run(DefaultCommandList);
+				DefaultCommandList.EndEvent();
 			}
 		}
 

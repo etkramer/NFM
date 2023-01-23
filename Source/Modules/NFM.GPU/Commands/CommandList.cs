@@ -424,7 +424,7 @@ public class CommandList : IDisposable
 				return;
 			}
 
-			Debug.Assert(source.Samples > 1 && dest.Samples <= 1, "Cannot resolve a non-multisampled texture or to a multisampled texture");
+			Debug.Assert(dest.Samples <= 1, "Cannot resolve to a multisampled texture");
 
 			RequestState(source, ResourceStates.ResolveSource);
 			RequestState(dest, ResourceStates.ResolveDest);

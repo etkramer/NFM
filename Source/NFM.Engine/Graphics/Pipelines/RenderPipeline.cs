@@ -102,7 +102,7 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 			step.RP = (TSelf)this;
 			step.Camera = camera;
 
-			step.Run();
+			step.Run(step.RP.List);
 			List.EndEvent();
 		}
 

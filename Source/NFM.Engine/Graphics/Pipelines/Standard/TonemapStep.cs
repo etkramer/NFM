@@ -17,11 +17,11 @@ public class TonemapStep : CameraStep<StandardRenderPipeline>
 			.Compile().Result;
 	}
 
-	public override void Run()
+	public override void Run(CommandList list)
 	{
 		// Gamma correct output.
-		List.SetPipelineState(gammaCorrectPSO);
-		List.SetPipelineUAV(0, 0, RP.ColorTarget);
-		List.DispatchThreads(RP.ColorTarget.Width, 32, RP.ColorTarget.Height, 32);
+		list.SetPipelineState(gammaCorrectPSO);
+		list.SetPipelineUAV(0, 0, RP.ColorTarget);
+		list.DispatchThreads(RP.ColorTarget.Width, 32, RP.ColorTarget.Height, 32);
 	}
 }

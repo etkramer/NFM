@@ -41,62 +41,62 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 		CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * Scene.MaxInstances, DepthCommandSignature.Stride, hasCounter: true);
 	}
 
-	public override void Run()
+	public override void Run(CommandList list)
 	{
 		// Generate indirect draw commands and sort front-back.
-		Cull();
+		Cull(list);
 
 		// Build depth buffer for opaque geometry.
-		DrawDepth();
+		DrawDepth(list);
 	}
 
-	private void Cull()
+	private void Cull(CommandList list)
 	{
 		// Reset command count.
-		List.ResetCounter(CommandBuffer);
+		list.ResetCounter(CommandBuffer);
 
 		// Switch to culling program (compute).
-		List.SetPipelineState(cullPSO);
+		list.SetPipelineState(cullPSO);
 
 		// Set SRV inputs.
-		List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
-		List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
+		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 		// Set UAV outputs.
-		List.SetPipelineUAV(0, 0, CommandBuffer);
+		list.SetPipelineUAV(0, 0, CommandBuffer);
 
 		// Build for all shaders
-		List.SetPipelineConstants(0, 0, -1);
+		list.SetPipelineConstants(0, 0, -1);
 
 		// Dispatch compute shader.
 		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
 		{
-			List.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
+			list.Dispatch((int)Camera.Scene.InstanceBuffer.LastOffset + 1);
 		}
 
-		List.BarrierUAV(CommandBuffer);
+		list.BarrierUAV(CommandBuffer);
 	}
 
-	private void DrawDepth()
+	private void DrawDepth(CommandList list)
 	{
 		// Switch to material program.
-		List.SetPipelineState(depthPSO);
+		list.SetPipelineState(depthPSO);
 
 		// Set render targets.
-		List.SetRenderTarget(null, RP.DepthBuffer);
+		list.SetRenderTarget(null, RP.DepthBuffer);
 
 		// Bind program SRVs.
-		List.SetPipelineSRV(0, 1, Mesh.VertBuffer);
-		List.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
-		List.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
-		List.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
-		List.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
-		List.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
+		list.SetPipelineSRV(0, 1, Mesh.VertBuffer);
+		list.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+		list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
+		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
+		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 
 		// Bind program CBVs.
-		List.SetPipelineCBV(0, 1, RP.ViewCB);
+		list.SetPipelineCBV(0, 1, RP.ViewCB);
 
 		// Dispatch draw commands.
-		List.ExecuteIndirect(DepthCommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+		list.ExecuteIndirect(DepthCommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
 	}
 }

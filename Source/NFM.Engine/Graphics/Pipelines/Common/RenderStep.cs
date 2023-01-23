@@ -7,18 +7,16 @@ namespace NFM.Graphics;
 public abstract class RenderStep
 {
 	public virtual void Init() {}
-	public abstract void Run();
+	public abstract void Run(CommandList list);
 }
 
 public abstract class SceneStep : RenderStep
 {
 	public Scene Scene { get; set; }
-	public CommandList List => Renderer.DefaultCommandList;
 }
 
 public abstract class CameraStep<T> : RenderStep where T : RenderPipeline<T>, new()
 {
 	public T RP { get; set; }
 	public CameraNode Camera { get; set; }
-	public CommandList List => RP.List;
 }
