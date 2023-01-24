@@ -39,12 +39,12 @@ float4 SRGBToLinear(in float4 color)
 	return pow(color, 1.0 / gamma);
 }
 
-uint BitPack(uint low, uint high, int lowBits)
+uint PackBits(uint low, uint high, int lowBits)
 {
 	return (high << lowBits) | low;
 }
 
-uint2 BitUnpack(uint packed, int lowBits)
+uint2 UnpackBits(uint packed, int lowBits)
 {
 	uint low = packed & ((1U << lowBits) - 1U);
 	uint high = packed >> lowBits;

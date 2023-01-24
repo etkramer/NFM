@@ -9,6 +9,8 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="FodyWeavers.xml" />
+	  <None Remove="Shaders\Visibility\PreviewCS.hlsl" />
+	  <None Remove="Shaders\Visibility\VisibilityPS.hlsl" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -25,6 +27,8 @@
 		<EmbeddedResource Include="Shaders\Standard\Tonemap\GammaCorrectCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\CullCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\DepthPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Visibility\PreviewCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Visibility\VisibilityPS.hlsl" />
 		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>

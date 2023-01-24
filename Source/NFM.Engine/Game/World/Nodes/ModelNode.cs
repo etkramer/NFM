@@ -34,7 +34,7 @@ public partial class ModelNode : Node
 			UpdateInstances(Renderer.DefaultCommandList);
 		});
 
-		this.SubscribeFast(nameof(WorldTransform), () =>
+		Action updateTransform = () =>
 		{
 			TransformHandle ??= Scene.TransformBuffer.Allocate(1);
 			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
@@ -42,7 +42,10 @@ public partial class ModelNode : Node
 				ObjectToWorld = WorldTransform,
 				WorldToObject = WorldTransform.Inverse()
 			});
-		});
+		};
+
+		this.SubscribeFast(nameof(WorldTransform), updateTransform);
+		updateTransform.Invoke();
 	}
 
 	public override void Dispose()

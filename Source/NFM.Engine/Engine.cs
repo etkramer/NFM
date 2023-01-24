@@ -36,8 +36,6 @@ public static class Engine
 		{
 			// Create example model
 			var model = new ModelNode(null);
-			model.Position = new Vector3(0);
-			model.Rotation = new Vector3(0);
 			model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
 
 			/*for (int i = 0; i < 100000; i++)

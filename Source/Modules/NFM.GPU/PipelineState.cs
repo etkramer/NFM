@@ -23,13 +23,13 @@ public enum DepthMode
 {
 	None = ComparisonFunction.None,
 	Never = ComparisonFunction.Never,
-        Less = ComparisonFunction.Less,
-        Equal = ComparisonFunction.Equal,
-        LessEqual = ComparisonFunction.LessEqual,
-        Greater = ComparisonFunction.Greater,
-        NotEqual = ComparisonFunction.NotEqual,
-        GreaterEqual = ComparisonFunction.GreaterEqual,
-        Always = ComparisonFunction.Always
+	Less = ComparisonFunction.Less,
+	Equal = ComparisonFunction.Equal,
+	LessEqual = ComparisonFunction.LessEqual,
+	Greater = ComparisonFunction.Greater,
+	NotEqual = ComparisonFunction.NotEqual,
+	GreaterEqual = ComparisonFunction.GreaterEqual,
+	Always = ComparisonFunction.Always
 }
 
 public enum TopologyType
@@ -47,7 +47,8 @@ public sealed class PipelineState : IDisposable
 	{
 		ShaderModel = DxcShaderModel.Model6_6,
 		HLSLVersion = 2021,
-		SkipOptimizations = Debug.IsDebugMode
+		SkipOptimizations = Debug.IsDebugMode,
+		AllResourcesBound = true,
 	};
 
 	// Compiled program
@@ -316,6 +317,12 @@ public sealed class PipelineState : IDisposable
 			Result result = default;
 			if (IsGraphics)
 			{
+				BlendDescription disabledBlend = BlendDescription.Opaque;
+				for (int i = 0; i < D3D12.SimultaneousRenderTargetCount; i++)
+				{
+					disabledBlend.RenderTarget[i].BlendEnable = false;
+				}
+
 				result = CreatePipelineState(new GraphicsPipelineStateStream()
 				{
 					RootSignature = RootSignature,
@@ -333,7 +340,7 @@ public sealed class PipelineState : IDisposable
 						FillMode = FillMode.Solid,
 						AntialiasedLineEnable = topologyType == TopologyType.Line,
 					},
-					BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : BlendDescription.Opaque
+					BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
 				}, out PSO);
 			}
 			else if (IsCompute)
