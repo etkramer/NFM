@@ -55,13 +55,13 @@ public class ShaderPermutation : IDisposable
 		}
 
 		// Build PSO from source code.
-		string surfaceTemplate = Embed.GetString("Shaders/Geometry/Material/BaseMaterialPS.hlsl", typeof(Engine).Assembly);
+		string surfaceTemplate = Embed.GetString("Shaders/Standard/Material/BaseMaterialPS.hlsl", typeof(Engine).Assembly);
 		string surfaceShaderSource = surfaceTemplate.Replace("#insert SURFACE", baseSource).Replace("#insert SETUP", setupSource);
 
 		// Compile PSO.
 		MaterialPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Engine).Assembly), "BaseMS")
+			.SetMeshShader(Embed.GetString("Shaders/Standard/Geometry/BaseMS.hlsl", typeof(Engine).Assembly), "BaseMS")
 			.SetPixelShader(surfaceShaderSource, "MaterialPS")
 			.SetDepthMode(DepthMode.Equal, true, false)
 			.AsRootConstant(0, 1)

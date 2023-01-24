@@ -12,19 +12,19 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<EmbeddedResource Include="Shaders\Geometry\Shared\BaseMS.h" />
-		<EmbeddedResource Include="Shaders\Geometry\Shared\BaseMS.hlsl" />
-		<EmbeddedResource Include="Shaders\Gizmos\GeomMS.hlsl" />
-		<EmbeddedResource Include="Shaders\Gizmos\Gizmos.h" />
-		<EmbeddedResource Include="Shaders\Gizmos\GizmosPS.hlsl" />
-		<EmbeddedResource Include="Shaders\Gizmos\LineMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Geometry\BaseMS.h" />
+		<EmbeddedResource Include="Shaders\Standard\Geometry\BaseMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Gizmos\GeomMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Gizmos\Gizmos.h" />
+		<EmbeddedResource Include="Shaders\Common\Gizmos\GizmosPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Gizmos\LineMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common.h" />
-		<EmbeddedResource Include="Shaders\Geometry\Geometry.h" />
-		<EmbeddedResource Include="Shaders\Geometry\Material\BaseMaterialPS.h" />
-		<EmbeddedResource Include="Shaders\Geometry\Material\BaseMaterialPS.hlsl" />
-		<EmbeddedResource Include="Shaders\PostProcess\GammaCorrectCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Geometry\Shared\CullCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Geometry\Prepass\DepthPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Geometry.h" />
+		<EmbeddedResource Include="Shaders\Standard\Material\BaseMaterialPS.h" />
+		<EmbeddedResource Include="Shaders\Standard\Material\BaseMaterialPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Tonemap\GammaCorrectCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\CullCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\DepthPS.hlsl" />
 		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>

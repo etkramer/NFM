@@ -18,15 +18,15 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 		// Compile indirect compute program.
 		cullPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetComputeShader(Embed.GetString("Shaders/Geometry/Shared/CullCS.hlsl", typeof(Engine).Assembly), "CullCS")
+			.SetComputeShader(Embed.GetString("Shaders/Standard/Prepass/CullCS.hlsl", typeof(Engine).Assembly), "CullCS")
 			.AsRootConstant(0, 1)
 			.Compile().Result;
 
 		// Compile depth prepass program.
 		depthPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Geometry/Shared/BaseMS.hlsl", typeof(Engine).Assembly), "BaseMS")
-			.SetPixelShader(Embed.GetString("Shaders/Geometry/Prepass/DepthPS.hlsl", typeof(Engine).Assembly), "DepthPS")
+			.SetMeshShader(Embed.GetString("Shaders/Standard/Geometry/BaseMS.hlsl", typeof(Engine).Assembly), "BaseMS")
+			.SetPixelShader(Embed.GetString("Shaders/Standard/Prepass/DepthPS.hlsl", typeof(Engine).Assembly), "DepthPS")
 			.SetDepthMode(DepthMode.GreaterEqual, true, true)
 			.SetCullMode(CullMode.CCW)
 			.AsRootConstant(0, 1)

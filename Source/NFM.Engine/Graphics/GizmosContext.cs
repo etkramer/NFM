@@ -23,8 +23,8 @@ public class GizmosContext
 	{
 		linePSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Gizmos/LineMS.hlsl", typeof(Engine).Assembly), "LineMS")
-			.SetPixelShader(Embed.GetString("Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+			.SetMeshShader(Embed.GetString("Shaders/Common/Gizmos/LineMS.hlsl", typeof(Engine).Assembly), "LineMS")
+			.SetPixelShader(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
 			.AsRootConstant(0, 4 + 4 + 4)
 			.SetDepthMode(DepthMode.GreaterEqual, true, true)
 			.SetTopologyType(TopologyType.Line)
@@ -32,8 +32,8 @@ public class GizmosContext
 
 		geometryPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Gizmos/GeomMS.hlsl", typeof(Engine).Assembly), "GeomMS")
-			.SetPixelShader(Embed.GetString("Shaders/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+			.SetMeshShader(Embed.GetString("Shaders/Common/Gizmos/GeomMS.hlsl", typeof(Engine).Assembly), "GeomMS")
+			.SetPixelShader(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
 			.AsRootConstant(0, 4)
 			.SetDepthMode(DepthMode.Always, false, true)
 			.Compile().Result;

@@ -13,7 +13,7 @@ public class TonemapStep : CameraStep<StandardRenderPipeline>
 	{
 		gammaCorrectPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetComputeShader(Embed.GetString("Shaders/PostProcess/GammaCorrectCS.hlsl", typeof(Engine).Assembly), "GammaCorrectCS")
+			.SetComputeShader(Embed.GetString("Shaders/Standard/Tonemap/GammaCorrectCS.hlsl", typeof(Engine).Assembly), "GammaCorrectCS")
 			.Compile().Result;
 	}
 

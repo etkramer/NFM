@@ -1,5 +1,5 @@
-﻿#include "Shaders/Geometry/Geometry.h"
-#include "Shaders/Gizmos/Gizmos.h"
+﻿#include "Shaders/Geometry.h"
+#include "Shaders/Common/Gizmos/Gizmos.h"
 
 cbuffer InputConstants : register(b0)
 {

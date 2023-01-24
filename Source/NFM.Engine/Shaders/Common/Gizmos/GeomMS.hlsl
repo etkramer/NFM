@@ -1,4 +1,4 @@
-﻿#include "Shaders/Gizmos/Gizmos.h"
+﻿#include "Shaders/Common/Gizmos/Gizmos.h"
 
 StructuredBuffer<float4> Vertices : register(t0);
 StructuredBuffer<uint3> Indices : register(t1);

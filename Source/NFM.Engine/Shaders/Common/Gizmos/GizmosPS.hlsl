@@ -1,4 +1,4 @@
-﻿#include "Shaders/Gizmos/Gizmos.h"
+﻿#include "Shaders/Common/Gizmos/Gizmos.h"
 
 float4 GizmosPS(VertexAttribute vert) : SV_TARGET0
 {
