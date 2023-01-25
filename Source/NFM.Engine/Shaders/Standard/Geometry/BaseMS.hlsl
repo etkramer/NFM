@@ -43,11 +43,10 @@ void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, ou
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{
-		uint triangleID = mesh.PrimStart + meshlet.PrimStart + (groupThreadID * 3);
-
 		// Write output triangle.
 		outPrims[groupThreadID].InstanceID = InstanceID;
-		outPrims[groupThreadID].TriangleID = triangleID;
-		outIndices[groupThreadID] = GetPrimitive(triangleID);
+		outPrims[groupThreadID].TriangleID = groupThreadID;
+		outPrims[groupThreadID].MeshletID = groupID;
+		outIndices[groupThreadID] = GetPrimitive(mesh.PrimStart + meshlet.PrimStart + (groupThreadID * 3));
 	}
 }
