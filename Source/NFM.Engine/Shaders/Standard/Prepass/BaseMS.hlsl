@@ -1,13 +1,10 @@
-﻿#include "Shaders/Standard/Geometry/BaseMS.h"
+﻿#include "Shaders/Standard/Prepass/BaseMS.h"
 
-cbuffer CommandConstants : register(b0)
-{
-	int InstanceID;
-}
+int InstanceID : register(b0);
 
 [NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
-void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices VertAttribute outVerts[64], out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
+void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices float4 outVerts[64] : SV_POSITION, out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
@@ -21,7 +18,7 @@ void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, ou
 	if (groupThreadID < meshlet.VertCount)
 	{
 		// Fetch vertex data.
-		Vertex vertex = GetVertex(mesh, meshlet, groupThreadID);
+		Vertex vertex = Vertices[mesh.VertStart + meshlet.VertStart + groupThreadID];
 
 		// Grab the transform matrix.
 		Transform transform = Transforms[instance.TransformID];
@@ -37,9 +34,7 @@ void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, ou
 		normal = normalize(mul(normal.xyz, (float3x3)transform.WorldToObject));
 
 		// Write output vertex.
-		outVerts[groupThreadID].Position = position;
-		outVerts[groupThreadID].Normal = float4(normal, 1);
-		outVerts[groupThreadID].UV0 = vertex.UV0;
+		outVerts[groupThreadID] = position;
 	}
 	if (groupThreadID < meshlet.PrimCount)
 	{

@@ -5,7 +5,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class PreviewStep : CameraStep<StandardRenderPipeline>
+public class MaterialStep : CameraStep<StandardRenderPipeline>
 {
 	private PipelineState previewPSO;
 
@@ -14,7 +14,7 @@ public class PreviewStep : CameraStep<StandardRenderPipeline>
 		// Compile depth prepass program.
 		previewPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
-			.SetComputeShader(Embed.GetString("Shaders/Standard/PreviewCS.hlsl", typeof(Engine).Assembly), "PreviewCS")
+			.SetComputeShader(Embed.GetString("Shaders/Standard/MaterialCS.hlsl", typeof(Engine).Assembly), "MaterialCS")
 			.Compile().Result;
 	}
 

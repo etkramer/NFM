@@ -12,16 +12,16 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<EmbeddedResource Include="Shaders\Standard\Geometry\BaseMS.h" />
-		<EmbeddedResource Include="Shaders\Standard\Geometry\BaseMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.h" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GeomMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GizmosPS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\LineMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common.h" />
-		<EmbeddedResource Include="Shaders\Geometry.h" />
-		<EmbeddedResource Include="Shaders\Standard\Prepass\CullCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Standard\PreviewCS.hlsl" />
+		<EmbeddedResource Include="Shaders\World.h" />
+		<EmbeddedResource Include="Shaders\Standard\CullCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\PrepassPS.hlsl" />
 		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />

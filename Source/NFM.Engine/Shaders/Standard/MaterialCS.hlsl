@@ -1,5 +1,5 @@
 ﻿#include "Shaders/Common.h"
-#include "Shaders/Geometry.h"
+#include "Shaders/World.h"
 
 RWTexture2D<float4> RT : register(u0);
 Texture2D<uint2> VisBuffer : register(t0);
@@ -75,7 +75,7 @@ float3 Interp(BarycentricDeriv deriv, float v0, float v1, float v2)
 }
 
 [numthreads(32, 32, 1)]
-void PreviewCS(uint2 id : SV_DispatchThreadID)
+void MaterialCS(uint2 id : SV_DispatchThreadID)
 {
 	// Grab the frame width/height
 	int2 frameSize;
