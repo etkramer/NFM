@@ -9,8 +9,6 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="FodyWeavers.xml" />
-	  <None Remove="Shaders\Visibility\PreviewCS.hlsl" />
-	  <None Remove="Shaders\Visibility\VisibilityPS.hlsl" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -22,13 +20,9 @@
 		<EmbeddedResource Include="Shaders\Common\Gizmos\LineMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common.h" />
 		<EmbeddedResource Include="Shaders\Geometry.h" />
-		<EmbeddedResource Include="Shaders\Standard\Material\BaseMaterialPS.h" />
-		<EmbeddedResource Include="Shaders\Standard\Material\BaseMaterialPS.hlsl" />
-		<EmbeddedResource Include="Shaders\Standard\Tonemap\GammaCorrectCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\CullCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Standard\Prepass\DepthPS.hlsl" />
-		<EmbeddedResource Include="Shaders\Visibility\PreviewCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Visibility\VisibilityPS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\PreviewCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\PrepassPS.hlsl" />
 		
 		<None Update="Properties\Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>

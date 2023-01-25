@@ -7,21 +7,25 @@ namespace NFM.Graphics;
 public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 {
 	public Texture ColorTarget;
+
+	public Texture VisBuffer;
 	public Texture DepthBuffer;
 
 	protected override void Init(Vector2i size)
 	{
 		AddStep<PrepassStep>();
-		AddStep<MaterialStep>();
-		AddStep<TonemapStep>();
+		AddStep<PreviewStep>();
+		AddStep<LightingStep>();
 
 		// Create RTs and RT-sized buffers.
-		ColorTarget = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm, samples: 1);
-		DepthBuffer = new Texture(size.X, size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float, samples: 1);
+		VisBuffer = new Texture(size.X, size.Y, 1, Format.R32G32_UInt);
+		ColorTarget = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm);
+		DepthBuffer = new Texture(size.X, size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
 	}
 
 	protected override void BeginRender(CommandList list, Texture rt)
 	{
+		list.ClearRenderTarget(VisBuffer);
 		list.ClearRenderTarget(ColorTarget);
 		list.ClearDepth(DepthBuffer);
 	}
@@ -33,6 +37,7 @@ public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 
 	public override void Dispose()
 	{
+		VisBuffer.Dispose();
 		ColorTarget.Dispose();
 		DepthBuffer.Dispose();
 

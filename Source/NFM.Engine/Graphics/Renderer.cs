@@ -59,7 +59,7 @@ public static class Renderer
 			// Render to each viewport.
 			foreach (var viewport in Viewport.All)
 			{
-				RenderCamera<VisibilityRenderPipeline>(viewport.Camera, viewport.Swapchain);
+				RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
 			}
 
 			// Wait for completion.

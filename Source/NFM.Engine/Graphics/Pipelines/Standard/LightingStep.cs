@@ -3,7 +3,7 @@ using NFM.GPU;
 
 namespace NFM.Graphics;
 
-public class LightingStep : CameraStep<VisibilityRenderPipeline>
+public class LightingStep : CameraStep<StandardRenderPipeline>
 {
 	public override void Init()
 	{

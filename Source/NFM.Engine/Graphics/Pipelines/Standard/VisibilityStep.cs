@@ -8,10 +8,10 @@ namespace NFM.Graphics;
 public class PrepassStep : CameraStep<StandardRenderPipeline>
 {
 	public GraphicsBuffer CommandBuffer;
-	public CommandSignature DepthCommandSignature;
+	public CommandSignature CommandSignature;
 
 	private PipelineState cullPSO;
-	private PipelineState depthPSO;
+	private PipelineState visPSO;
 
 	public override void Init()
 	{
@@ -23,34 +23,35 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 			.Compile().Result;
 
 		// Compile depth prepass program.
-		depthPSO = new PipelineState()
+		visPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
 			.SetMeshShader(Embed.GetString("Shaders/Standard/Geometry/BaseMS.hlsl", typeof(Engine).Assembly), "BaseMS")
-			.SetPixelShader(Embed.GetString("Shaders/Standard/Prepass/DepthPS.hlsl", typeof(Engine).Assembly), "DepthPS")
+			.SetPixelShader(Embed.GetString("Shaders/Standard/Prepass/PrepassPS.hlsl", typeof(Engine).Assembly), "PrepassPS")
+			.AsRootConstant(0, 1)
 			.SetDepthMode(DepthMode.GreaterEqual, true, true)
 			.SetCullMode(CullMode.CCW)
-			.AsRootConstant(0, 1)
+			.SetRTFormat(0, Vortice.DXGI.Format.R32G32_UInt)
 			.Compile().Result;
 
 		// Indirect command signature for depth pass.
-		DepthCommandSignature = new CommandSignature()
-			.AddConstantArg(0, depthPSO)
+		CommandSignature = new CommandSignature()
+			.AddConstantArg(0, visPSO)
 			.AddDispatchMeshArg()
 			.Compile();
 
-		CommandBuffer = new GraphicsBuffer(DepthCommandSignature.Stride * Scene.MaxInstances, DepthCommandSignature.Stride, hasCounter: true);
+		CommandBuffer = new GraphicsBuffer(CommandSignature.Stride * Scene.MaxInstances, CommandSignature.Stride, hasCounter: true);
 	}
 
 	public override void Run(CommandList list)
 	{
 		// Generate indirect draw commands and sort front-back.
-		Cull(list);
+		BuildIndirectCommands(list);
 
 		// Build depth buffer for opaque geometry.
-		DrawDepth(list);
+		DrawVisibility(list);
 	}
 
-	private void Cull(CommandList list)
+	private void BuildIndirectCommands(CommandList list)
 	{
 		// Reset command count.
 		list.ResetCounter(CommandBuffer);
@@ -77,13 +78,13 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 		list.BarrierUAV(CommandBuffer);
 	}
 
-	private void DrawDepth(CommandList list)
+	private void DrawVisibility(CommandList list)
 	{
 		// Switch to material program.
-		list.SetPipelineState(depthPSO);
+		list.SetPipelineState(visPSO);
 
 		// Set render targets.
-		list.SetRenderTarget(null, RP.DepthBuffer);
+		list.SetRenderTarget(RP.VisBuffer, RP.DepthBuffer);
 
 		// Bind program SRVs.
 		list.SetPipelineSRV(0, 1, Mesh.VertBuffer);
@@ -97,6 +98,6 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 		list.SetPipelineCBV(0, 1, RP.ViewCB);
 
 		// Dispatch draw commands.
-		list.ExecuteIndirect(DepthCommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+		list.ExecuteIndirect(CommandSignature, CommandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
 	}
 }
