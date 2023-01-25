@@ -7,10 +7,9 @@ Texture2D<float> DepthBuffer : register(t1);
 [numthreads(32, 32, 1)]
 void PreviewCS(uint3 pixel : SV_DispatchThreadID)
 {
+	// Don't try to process out of bounds pixels.
 	int width, height;
 	RT.GetDimensions(width, height);
-
-	// Don't try to process out of bounds pixels.
 	if (pixel.x >= width || pixel.y >= height)
 	{
 		return;
@@ -21,12 +20,9 @@ void PreviewCS(uint3 pixel : SV_DispatchThreadID)
 		return;
 	}
 
-	uint2 value = VisBuffer[pixel.xy];
-	uint2 unpacked = UnpackBits(value.x, 25);
+	uint2 packed = VisBuffer[pixel.xy];
+	uint instanceID = packed.x;
+	uint triangleID = packed.y;
 
-	uint meshletID = unpacked.x;
-	uint primID = unpacked.y;
-	uint instanceID = value.y;
-
-	RT[pixel.xy] = float4(ColorFromIndex(primID), 1);
+	RT[pixel.xy] = float4(ColorFromIndex(instanceID), 1);
 }

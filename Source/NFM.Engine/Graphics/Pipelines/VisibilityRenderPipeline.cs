@@ -15,6 +15,7 @@ public class VisibilityRenderPipeline : RenderPipeline<VisibilityRenderPipeline>
 	{
 		AddStep<VisibilityStep>();
 		AddStep<PreviewStep>();
+		AddStep<LightingStep>();
 
 		// Create RTs and RT-sized buffers.
 		VisBuffer = new Texture(size.X, size.Y, 1, Format.R32G32_UInt);
