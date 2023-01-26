@@ -129,10 +129,10 @@ void MaterialCS(uint2 id : SV_DispatchThreadID)
 	float3 norm2 = normalize(mul(v2.Normal, (float3x3)transform.WorldToObject));
 
 	// Interp normals
-	float x = Interp(deriv, norm0.x, norm1.x, norm2.x)[0];
-	float y = Interp(deriv, norm0.y, norm1.y, norm2.y)[0];
-	float z = Interp(deriv, norm0.z, norm1.z, norm2.z)[0];
-	float3 normal = float3(x, y, z);
+	float3 normal;
+	normal.x = Interp(deriv, norm0.x, norm1.x, norm2.x)[0];
+	normal.y = Interp(deriv, norm0.y, norm1.y, norm2.y)[0];
+	normal.z = Interp(deriv, norm0.z, norm1.z, norm2.z)[0];
 
 	RT[id.xy] = SRGBToLinear(float4(normal / 2 + 0.5, 1));
 }

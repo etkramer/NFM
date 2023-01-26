@@ -19,7 +19,6 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 		cullPSO = new PipelineState()
 			.UseIncludes(typeof(Engine).Assembly)
 			.SetComputeShader(Embed.GetString("Shaders/Standard/CullCS.hlsl", typeof(Engine).Assembly), "CullCS")
-			.AsRootConstant(0, 1)
 			.Compile().Result;
 
 		// Compile depth prepass program.
@@ -65,9 +64,6 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Set UAV outputs.
 		list.SetPipelineUAV(0, 0, CommandBuffer);
-
-		// Build for all shaders
-		list.SetPipelineConstants(0, 0, -1);
 
 		// Dispatch compute shader.
 		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
