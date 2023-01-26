@@ -22,12 +22,6 @@ public partial class Mesh : IDisposable
 		MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
 	}
 
-	// Geometry allocations
-	internal BufferAllocation<uint> PrimHandle;
-	internal BufferAllocation<Vertex> VertHandle;
-	internal BufferAllocation<Meshlet> MeshletHandle;
-	internal BufferAllocation<GPUMesh> MeshHandle;
-
 	public bool IsCommitted { get; private set; } = false;
 
 	public Box3D Bounds { get; set; } = Box3D.Infinity;
@@ -52,6 +46,12 @@ public partial class Mesh : IDisposable
 		Material = material;
 		IsCommitted = false;
 	}
+
+	// Geometry allocations
+	internal BufferAllocation<uint> PrimHandle;
+	internal BufferAllocation<Vertex> VertHandle;
+	internal BufferAllocation<Meshlet> MeshletHandle;
+	internal BufferAllocation<GPUMesh> MeshHandle;
 
 	/// <summary>
 	/// Commits all changes to mesh data - must be called at least once before use.

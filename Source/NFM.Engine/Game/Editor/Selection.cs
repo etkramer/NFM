@@ -10,16 +10,24 @@ public interface ISelectable
 public static class Selection
 {
 	public static ReadOnlyObservableCollection<ISelectable> Selected { get; }
-	private static ObservableRangeCollection<ISelectable> selected { get; } = new();
+	private static ObservableCollection<ISelectable> selected { get; } = new();
 
 	static Selection()
 	{
 		Selected = new(selected);
 	}
 
+	public static void Select(ISelectable item)
+	{
+		selected.Add(item);
+	}
+
 	public static void Select(params ISelectable[] items)
 	{
-		selected.AddRange(items);
+		foreach (var item in items)
+		{
+			Select(item);
+		}
 	}
 
 	public static void Replace(params ISelectable[] items)

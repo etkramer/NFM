@@ -134,5 +134,5 @@ void MaterialCS(uint2 id : SV_DispatchThreadID)
 	normal.y = Interp(deriv, norm0.y, norm1.y, norm2.y)[0];
 	normal.z = Interp(deriv, norm0.z, norm1.z, norm2.z)[0];
 
-	RT[id.xy] = SRGBToLinear(float4(normal / 2 + 0.5, 1));
+	RT[id.xy] = float4(SRGBToLinear(normal / 2 + 0.5), 1);
 }

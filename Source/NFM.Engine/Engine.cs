@@ -32,11 +32,11 @@ public static class Engine
 		_ = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
 
 		// Create default nodes with new project.
-		Project.OnProjectCreated += () =>
+		Project.OnProjectCreated += async () =>
 		{
 			// Create example model
 			var model = new ModelNode(null);
-			model.Model = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb").Result;
+			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
 
 			/*for (int i = 0; i < 100000; i++)
 			{
