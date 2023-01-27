@@ -87,6 +87,11 @@ public partial class ModelNode : Node
 		InstanceHandles.Clear();
 		MaterialInstances.Clear();
 
+		if (!IsVisible)
+		{
+			return;
+		}
+
 		// (Re)build the array of instance handles
 		foreach (var group in Model.MeshGroups)
 		{

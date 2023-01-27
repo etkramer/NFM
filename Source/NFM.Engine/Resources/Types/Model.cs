@@ -7,7 +7,7 @@ namespace NFM.Resources;
 /// <summary>
 /// A 3D model, composed of one or multiple parts and optionally a skeleton.
 /// </summary>
-public class Model : GameResource
+public sealed class Model : GameResource
 {
 	public IEnumerable<MeshGroup> MeshGroups => meshGroups;
 	private List<MeshGroup> meshGroups = new();
@@ -39,7 +39,7 @@ public class Model : GameResource
 	}
 }
 
-public class MeshGroup
+public sealed class MeshGroup
 {
 	/// <summary>
 	/// The name of this group, displayed when selecting group members.

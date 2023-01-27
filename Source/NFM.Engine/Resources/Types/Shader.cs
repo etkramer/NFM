@@ -16,7 +16,7 @@ public struct ShaderParameter
 	public Type Type;
 }
 
-public class Shader : GameResource
+public sealed class Shader : GameResource
 {
 	public string ShaderSource { get; set; }
 
