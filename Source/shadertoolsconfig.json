@@ -1,0 +1,9 @@
+{
+  "hlsl.preprocessorDefinitions": {
+  
+  },
+  "hlsl.additionalIncludeDirectories": [
+    "./NFM.Engine/",
+	"./NFM.Engine/Shaders/",
+  ]
+}
