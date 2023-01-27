@@ -4,7 +4,6 @@ using NFM.Common;
 using NFM.Resources;
 using NFM.Plugins;
 using NFM.Mathematics;
-using System.Reflection;
 
 namespace GLTF
 {

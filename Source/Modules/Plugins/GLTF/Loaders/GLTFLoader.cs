@@ -5,7 +5,6 @@ using NFM;
 using NFM.Resources;
 using NFM.Mathematics;
 using Asset = NFM.Resources.Asset;
-using ModelPart = NFM.Resources.ModelPart;
 using Material = NFM.Resources.Material;
 using Mesh = NFM.Resources.Mesh;
 using SharpGLTF.Schema2;
@@ -28,143 +27,90 @@ namespace GLTF.Loaders
 		public override async Task<Model> Load()
 		{
 			// Load GLTF model from file.
-			ModelRoot model = ModelRoot.Load(Path, ValidationMode.Skip);
+			ModelRoot sourceModel = ModelRoot.Load(Path, ValidationMode.Skip);
 
 			// Load textures from GLTF
-			Texture2D[] gameTextures = new Texture2D[model.LogicalTextures.Count];
-			Parallel.ForEach(model.LogicalTextures, (texture, ct) =>
+			Texture2D[] textures = new Texture2D[sourceModel.LogicalTextures.Count];
+			Parallel.ForEach(sourceModel.LogicalTextures, (sourceTexture, ct) =>
 			{
-				using (StbiImage image = Stbi.LoadFromMemory(texture.PrimaryImage.Content.Content.Span, 4))
+				using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.PrimaryImage.Content.Content.Span, 4))
 				{
-					Texture2D gameTexture = new Texture2D(image.Width, image.Height, TextureFormat.RGBA8, 4);
-					gameTexture.SetPixelData(ToReadWriteSpan(image.Data), 0, true);
+					Texture2D texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
+					texture.SetPixelData(ToReadWriteSpan(sourceImage.Data), 0, true);
 
-					gameTextures[texture.LogicalIndex] = gameTexture;
+					textures[sourceTexture.LogicalIndex] = texture;
 				}
 			});
 
 			// Load materials from GLTF
-			Material[] gameMaterials = new Material[model.LogicalMaterials.Count];
-			for (int i = 0; i < model.LogicalMaterials.Count; i++)
+			Material[] materials = new Material[sourceModel.LogicalMaterials.Count];
+			for (int i = 0; i < sourceModel.LogicalMaterials.Count; i++)
 			{
-				var material = model.LogicalMaterials[i];
+				var sourceMaterial = sourceModel.LogicalMaterials[i];
 
 				// Check if this material uses KHR_materials_transmission
-				bool useTransmission = material.FindChannel("Transmission") != null;
+				bool useTransmission = sourceMaterial.FindChannel("Transmission") != null;
 
-				// Determine shader and create material.
-				Shader shader = material.Alpha switch
+				// Determine shader
+				Shader shader = sourceMaterial.Alpha switch
 				{
 					AlphaMode.MASK => await Asset.LoadAsync<Shader>("USER:/Shaders/Transparent.hlsl"),
 					AlphaMode.BLEND => await Asset.LoadAsync<Shader>("USER:/Shaders/Transparent.hlsl"),
 					_ => await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl")
 				};
-				Material gameMaterial = new Material(shader);
 
-				// Loop over material channels
-				foreach (var channel in material.Channels)
+				// Create material from channels
+				Material material = new Material(shader);
+				foreach (var channel in sourceMaterial.Channels)
 				{
 					if (channel.Key == "BaseColor" && channel.Texture != null)
 					{
-						gameMaterial.SetTexture("BaseColor", gameTextures[channel.Texture.LogicalIndex]);
+						material.SetTexture("BaseColor", textures[channel.Texture.LogicalIndex]);
 					}
 					else if (channel.Key == "Normal" && channel.Texture != null)
 					{
-						gameMaterial.SetTexture("Normal", gameTextures[channel.Texture.LogicalIndex]);
+						material.SetTexture("Normal", textures[channel.Texture.LogicalIndex]);
 					}
 					else if (channel.Key == "MetallicRoughness" && channel.Texture != null)
 					{
-						gameMaterial.SetTexture("ORM", gameTextures[channel.Texture.LogicalIndex]);
+						material.SetTexture("ORM", textures[channel.Texture.LogicalIndex]);
 					}
 				}
 
-				gameMaterials[i] = gameMaterial;
+				materials[i] = material;
 			}
 			
-			Debug.Assert(model.LogicalSkins.Count <= 1, "GLTF models with multiple skeletons are not supported");
+			Debug.Assert(sourceModel.LogicalSkins.Count <= 1, "GLTF models with multiple skeletons are not supported");
 
-			// Build skeleton.
-			Bone rootBone = null;
-			if (model.LogicalSkins.Count > 0)
+			// Create model for NFM
+			Model model = new Model();
+
+			// Build model parts (one per GLTF mesh)
+			foreach (var node in sourceModel.LogicalNodes.Where(o => o.Mesh != null))
 			{
-				var skin = model.LogicalSkins[0];
+				var sourceMesh = node.Mesh;
 
-				// Find root node (joint with parent outside the skeleton).
-				Node root = skin.Skeleton;
-				if (root == null)
+				Parallel.ForEach(sourceMesh.Primitives, (primitive) =>
 				{
-					for (int i = 0; i < skin.JointsCount; i++)
-					{
-						var joint = skin.GetJoint(i);
-						if (!joint.Joint.VisualParent.IsSkinJoint)
-						{
-							root = joint.Joint;
-							break;
-						}
-					}
-				}
-
-				// Collect joint info.
-				List<(Node, Matrix4)> joints = new(skin.JointsCount);
-				for (int i = 0; i < skin.JointsCount; i++)
-				{
-					var joint = skin.GetJoint(i);
-					joints.Add((joint.Joint, (Matrix4)joint.InverseBindMatrix));
-				}
-
-				// Build the skeleton.
-				rootBone = BuildSkeleton(root, joints);
-			}
-
-			// Build model parts (one per GLTF mesh).
-			var parts = new List<ModelPart>(model.LogicalMeshes.Count);
-			foreach (var node in model.LogicalNodes.Where(o => o.Mesh != null))
-			{
-				var mesh = node.Mesh;
-
-				Mesh[] meshes = new Mesh[mesh.Primitives.Count];
-				Parallel.ForEach(mesh.Primitives, (primitive) =>
-				{
-					// Get node transform as Z-up.
+					// Get node transform as Z-up
 					var worldMatrix = (Matrix4)node.WorldMatrix;
 					worldMatrix *= Matrix4.CreateRotation(new(90, 0, 0));
 
-					// Build vertices for the base mesh.
+					// Build vertices for the base mesh
 					var baseVertices = BuildVertices(primitive.VertexAccessors, worldMatrix);
 
-					// Create mesh and add to collection.
-					var gameMesh = new Mesh();
-					gameMesh.SetVertices(baseVertices);
-					gameMesh.SetIndices(primitive.GetIndices().ToArray());
-					gameMesh.SetMaterial(gameMaterials[primitive.Material.LogicalIndex]);
-					gameMesh.Commit();
+					// Create mesh and add to collection
+					var mesh = new Mesh(sourceMesh.Name ?? "unnamed");
+					mesh.SetVertices(baseVertices);
+					mesh.SetIndices(primitive.GetIndices().ToArray());
+					mesh.SetMaterial(materials[primitive.Material.LogicalIndex]);
 
-					meshes[primitive.LogicalIndex] = gameMesh;
+					// Add to new mesh (body) group
+					model.AddMeshGroup(mesh.Name, new Mesh[] { mesh, null }, mesh);
 				});
-
-				parts.Add(new ModelPart(meshes));
 			}
 
-			return new Model(parts.ToArray())
-			{
-				Skeleton = rootBone
-			};
-		}
-
-		private Bone BuildSkeleton(Node node, List<(Node, Matrix4)> joints)
-		{
-			// Collect joint info.
-			var boneTransform = (Matrix4)node.WorldMatrix * Matrix4.CreateRotation(new(90, 0, 0));
-			var parentTransform = (Matrix4)node.VisualParent.WorldMatrix  * Matrix4.CreateRotation(new(90, 0, 0));
-
-			// Build child bones.
-			var children = node.VisualChildren
-				.Select(o => BuildSkeleton(o, joints));
-
-			// Find bone ID.
-			int boneID = joints.FindIndex(o => o.Item1 == node);
-
-			return new Bone(node.Name, boneID, boneTransform, parentTransform, children);
+			return model;
 		}
 
 		private Vertex[] BuildVertices(IReadOnlyDictionary<string, Accessor> accessors, Matrix4 transform)

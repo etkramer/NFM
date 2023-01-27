@@ -26,8 +26,8 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 		list.SetPipelineSRV(1, 0, RP.DepthBuffer);
 
 		// Bind shared buffers.
-		list.SetPipelineSRV(0, 1, Mesh.VertBuffer);
-		list.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+		list.SetPipelineSRV(0, 1, Mesh.VertexBuffer);
+		list.SetPipelineSRV(1, 1, Mesh.IndexBuffer);
 		list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
 		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
 		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);

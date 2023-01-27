@@ -11,8 +11,8 @@ namespace NFM.Resources;
 public partial class Mesh : IDisposable
 {
 	// Geometry buffers
-	internal static GraphicsBuffer<uint> PrimBuffer = new(20000000 * 3); // Support 20m tris
-	internal static GraphicsBuffer<Vertex> VertBuffer = new(20000000); // Support 20m verts
+	internal static GraphicsBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
+	internal static GraphicsBuffer<Vertex> VertexBuffer = new(20000000); // Support 20m verts
 	internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(20000000); // Support 20m meshlets
 	internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(20000000 + 1); // Support 20m meshes
 
@@ -22,34 +22,9 @@ public partial class Mesh : IDisposable
 		MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
 	}
 
-	public bool IsCommitted { get; private set; } = false;
-
-	public Box3D Bounds { get; set; } = Box3D.Infinity;
-	public uint[] Indices { get; private set; }
-	public Vertex[] Vertices { get; private set; }
-	public Material Material { get; private set; }
-
-	public void SetIndices(uint[] indices)
-	{
-		Indices = indices;
-		IsCommitted = false;
-	}
-
-	public void SetVertices(Vertex[] vertices)
-	{
-		Vertices = vertices;
-		IsCommitted = false;
-	}
-
-	public void SetMaterial(Material material)
-	{
-		Material = material;
-		IsCommitted = false;
-	}
-
 	// Geometry allocations
-	internal BufferAllocation<uint> PrimHandle;
-	internal BufferAllocation<Vertex> VertHandle;
+	internal BufferAllocation<uint> IndexHandle;
+	internal BufferAllocation<Vertex> VertexHandle;
 	internal BufferAllocation<Meshlet> MeshletHandle;
 	internal BufferAllocation<GPUMesh> MeshHandle;
 
@@ -58,9 +33,14 @@ public partial class Mesh : IDisposable
 	/// </summary>
 	public unsafe void Commit()
 	{
+		if (IsCommitted)
+		{
+			return;
+		}
+
 		// Free existing allocations.
-		VertHandle?.Dispose();
-		PrimHandle?.Dispose();
+		VertexHandle?.Dispose();
+		IndexHandle?.Dispose();
 		MeshHandle?.Dispose();
 		MeshletHandle?.Dispose();
 
@@ -82,23 +62,24 @@ public partial class Mesh : IDisposable
 			}
 
 			// Upload geometry data to GPU.
-			VertHandle = VertBuffer.Allocate(verts.Length);
-			PrimHandle = PrimBuffer.Allocate(meshletPrims.Length);
+			VertexHandle = VertexBuffer.Allocate(verts.Length);
+			IndexHandle = IndexBuffer.Allocate(meshletPrims.Length);
 			MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
-			Renderer.DefaultCommandList.UploadBuffer(VertHandle, verts);
-			Renderer.DefaultCommandList.UploadBuffer(PrimHandle, meshletPrims.Select(o => (uint)o).ToArray());
+			Renderer.DefaultCommandList.UploadBuffer(VertexHandle, verts);
+			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, meshletPrims.Select(o => (uint)o).ToArray());
 			Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
 
-			// Upload mesh info to GPU.
-			MeshHandle = MeshBuffer.Allocate(1);
-			Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
-			{
-				MeshletCount = (uint)MeshletHandle.Size,
-				MeshletOffset = (uint)MeshletHandle.Offset,
-				PrimOffset = (uint)PrimHandle.Offset,
-				VertOffset = (uint)VertHandle.Offset,
-			});
 		}
+
+		// Upload mesh info to GPU.
+		MeshHandle = MeshBuffer.Allocate(1);
+		Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
+		{
+			MeshletCount = (uint)MeshletHandle.Size,
+			MeshletOffset = (uint)MeshletHandle.Offset,
+			IndexOffset = (uint)IndexHandle.Offset,
+			VertexOffset = (uint)VertexHandle.Offset,
+		});	
 
 		// Mark mesh as committed.
 		IsCommitted = true;
@@ -149,8 +130,8 @@ public partial class Mesh : IDisposable
 
 	public void Dispose()
 	{
-		PrimHandle?.Dispose();
-		VertHandle?.Dispose();
+		IndexHandle?.Dispose();
+		VertexHandle?.Dispose();
 		MeshletHandle?.Dispose();
 		MeshHandle?.Dispose();
 	}
@@ -168,8 +149,8 @@ public unsafe struct Vertex
 [StructLayout(LayoutKind.Sequential)]
 internal struct GPUMesh
 {
-	public required uint VertOffset; // Start of submesh in vertex buffer.
-	public required uint PrimOffset; // Start of submesh in primitive buffer.
+	public required uint VertexOffset; // Start of submesh in vertex buffer.
+	public required uint IndexOffset; // Start of submesh in index buffer.
 	public required uint MeshletOffset; // Start of submesh in meshlet buffer.
 	public required uint MeshletCount;   // Number of meshlets used
 }

@@ -48,8 +48,8 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Switch to prepass PSO
 		list.SetPipelineState(visPSO);
-		list.SetPipelineSRV(0, 1, Mesh.VertBuffer);
-		list.SetPipelineSRV(1, 1, Mesh.PrimBuffer);
+		list.SetPipelineSRV(0, 1, Mesh.VertexBuffer);
+		list.SetPipelineSRV(1, 1, Mesh.IndexBuffer);
 		list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
 		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
 		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);

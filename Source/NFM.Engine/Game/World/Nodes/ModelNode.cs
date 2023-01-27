@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Avalonia;
 using NFM.GPU;
@@ -17,12 +18,14 @@ public partial class ModelNode : Node
 	[Inspect]
 	public bool IsVisible { get; set; } = true;
 
-	// Mesh instances
-	public BufferAllocation<GPUTransform> TransformHandle;
-	public BufferAllocation<GPUInstance>[] InstanceHandles;
+	public Dictionary<MeshGroup, Mesh> ActiveMeshGroups { get; } = new();
 
-	// Material instances
-	public MaterialInstance[] MaterialInstances { get; set; }
+	// Transforms
+	public BufferAllocation<GPUTransform> TransformHandle;
+
+	// Mesh data
+	public Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
+	public Dictionary<Mesh, MaterialInstance> MaterialInstances { get; } = new();
 	
 	public ModelNode(Scene scene) : base(scene)
 	{
@@ -31,6 +34,12 @@ public partial class ModelNode : Node
 		// Track changes in model/visibility
 		this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
 		{
+			ActiveMeshGroups.Clear();
+			foreach (var group in Model.MeshGroups)
+			{
+				ActiveMeshGroups[group] = group.DefaultSelection;
+			}
+
 			UpdateInstances(Renderer.DefaultCommandList);
 		});
 
@@ -52,13 +61,12 @@ public partial class ModelNode : Node
 	{
 		TransformHandle?.Dispose();
 
-		for (int i = 0; i < InstanceHandles?.Length; i++)
+		foreach (var mesh in InstanceHandles.Keys)
 		{
-			MaterialInstances[i].Dispose();
+			MaterialInstances[mesh].Dispose();
 
-			// Zero out, then deallocate instance.
-			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[i], default(GPUInstance));
-			InstanceHandles[i].Dispose();
+			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
+			InstanceHandles[mesh].Dispose();
 		}
 
 		base.Dispose();
@@ -66,45 +74,30 @@ public partial class ModelNode : Node
 
 	public void UpdateInstances(CommandList list)
 	{
-		// Get rid of existing instances.
-		for (int i = 0; i < InstanceHandles?.Length; i++)
+		// Clear existing instances
+		foreach (var mesh in InstanceHandles.Keys)
 		{
-			MaterialInstances[i].Dispose();
+			// Zero out instance data
+			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
 
-			// Zero out, then deallocate instance.
-			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[i], default(GPUInstance));
-			InstanceHandles[i].Dispose();
+			InstanceHandles[mesh].Dispose();
+			MaterialInstances[mesh].Dispose();
 		}
 
-		// If we don't have a fresh model to switch to, we're done here.
-		if (Model == null || Model?.Parts == null || !Model.IsCommitted || !IsVisible || Scene == null)
-		{
-			InstanceHandles = null;
-			MaterialInstances = null;
-			return;
-		}
+		InstanceHandles.Clear();
+		MaterialInstances.Clear();
 
-		// Count instances.
-		int instanceCount = Model.Parts.Sum(o => o.Meshes.Length);
-
-		// (Re)build the array of instance handles.
-		MaterialInstances = new MaterialInstance[instanceCount];
-		InstanceHandles = new BufferAllocation<GPUInstance>[instanceCount];
-		for (int i = 0; i < instanceCount; i++)
+		// (Re)build the array of instance handles
+		foreach (var group in Model.MeshGroups)
 		{
-			InstanceHandles[i] = Scene.InstanceBuffer.Allocate(1, true);
-		}
+			var mesh = ActiveMeshGroups[group];
 
-		// A Model can contain multiple ModelParts, which in turn may contain multiple submeshes. Every submesh needs it's own instance.
-		int instanceID = 0;
-		foreach (ModelPart part in Model.Parts)
-		{
-			foreach (Mesh mesh in part.Meshes)
+			if (mesh != null)
 			{
-				// Create material instance.
-				MaterialInstances[instanceID] = new MaterialInstance(mesh.Material);
+				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
+				MaterialInstances[mesh] = new MaterialInstance(mesh.Material);
 
-				// Make instance data.
+				// Build instance data
 				GPUInstance instanceData = new()
 				{
 					MeshID = (int)mesh.MeshHandle.Offset,
@@ -112,9 +105,8 @@ public partial class ModelNode : Node
 					MaterialID = 0,
 				};
 
-				// Upload instance to buffer.
-				list.UploadBuffer(InstanceHandles[instanceID], instanceData);
-				instanceID++;
+				// Upload instance to buffer
+				list.UploadBuffer(InstanceHandles[mesh], instanceData);
 			}
 		}
 	}
@@ -124,9 +116,11 @@ public partial class ModelNode : Node
 		if (Selection.Selected.Contains(this) && Model != null && IsVisible)
 		{
 			Box3D modelBounds = Box3D.Zero;
-			foreach (var part in Model.Parts)
+			foreach (var group in Model.MeshGroups)
 			{
-				foreach (var mesh in part.Meshes)
+				var mesh = ActiveMeshGroups[group];
+
+				if (mesh != null)
 				{
 					modelBounds += mesh.Bounds;
 				}

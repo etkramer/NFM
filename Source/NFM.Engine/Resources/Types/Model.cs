@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
-using NFM.GPU;
-using NFM.Graphics;
+using System.Collections;
+using MeshOptimizer;
 
 namespace NFM.Resources;
 
@@ -11,86 +9,99 @@ namespace NFM.Resources;
 /// </summary>
 public class Model : GameResource
 {
-	public ModelPart[] Parts { get; set; }
-	public Bone Skeleton { get; set; } = null;
+	public IEnumerable<MeshGroup> MeshGroups => meshGroups;
+	private List<MeshGroup> meshGroups = new();
 
-	public bool IsCommitted => Parts?.Any(o => o.Meshes.Any(o2 => o2.IsCommitted)) ?? false;
-	public bool IsDeformable => Skeleton != null;
+	public IEnumerable<Mesh> Meshes => meshGroups.SelectMany(o => o.Meshes).Where(o => o != null);
+	public bool IsCommitted => Meshes.All(o => o.IsCommitted);
 
-	public Model(params Mesh[] meshes)
+	public bool AddMeshGroup(string groupName, IEnumerable<Mesh> meshes, Mesh defaultSelection = null)
 	{
-		Parts = new[]
+		foreach (var mesh in meshes)
 		{
-			new ModelPart()
-			{
-				Meshes = meshes
-			}
-		};
-	}
+			mesh?.Commit();
+		}
 
-	public Model(params ModelPart[] parts)
-	{
-		Parts = parts;
+		MeshGroup group = new MeshGroup(groupName, meshes, defaultSelection);
+		meshGroups.Add(group);
+
+		return true;
 	}
 
 	public override void Dispose()
 	{
-		foreach (var part in Parts)
+		foreach (var  mesh in Meshes)
 		{
-			part.Dispose();
+			mesh.Dispose();
 		}
 
 		base.Dispose();
 	}
 }
 
-/// <summary>
-/// A group of one or multiple meshes. Can be toggled on/off within the editor, comparable to a bodygroup in SFM.
-/// </summary>
-public class ModelPart : IDisposable
+public class MeshGroup
 {
-	public Mesh[] Meshes { get; set; }
+	/// <summary>
+	/// The name of this group, displayed when selecting group members.
+	/// </summary>
+	public string Name { get; }
 
-	public ModelPart(params Mesh[] meshes)
-	{
-		Meshes = meshes;
-	}
+	/// <summary>
+	/// The group member (mesh) that should be selected by default.
+	/// </summary>
+	public Mesh DefaultSelection { get; }
 
-	public void Dispose()
+	public IEnumerable<Mesh> Meshes => meshes;
+	private Mesh[] meshes;
+
+	internal MeshGroup(string name, IEnumerable<Mesh> meshes, Mesh defaultSelection = null)
 	{
-		foreach (var mesh in Meshes)
-		{
-			mesh.Dispose();
-		}
+		Debug.Assert(meshes != null && meshes?.Count() > 0, "Tried to assign a null or empty collection to a MeshGroup");
+		Debug.Assert(meshes.Contains(defaultSelection), "Tried to set DefaultSelection to a mesh that does not exist in the MeshGroup");
+
+		Name = name;
+		DefaultSelection = defaultSelection;
+		this.meshes = meshes.ToArray();
 	}
 }
 
-public class Bone
+public partial class Mesh : IDisposable
 {
+	/// <summary>
+	/// The name of this mesh, displayed when choosing mesh groups.
+	/// </summary>
 	public string Name { get; }
-	public int ID { get; }
-	public ImmutableList<Bone> Children { get; }
 
-	public Matrix4 InverseBind { get; }
+	/// <summary>
+	/// Does this mesh need to be reuploaded?
+	/// </summary>
+	public bool IsCommitted { get; private set; } = false;
 
-	public Vector3 BasePosition { get; }
-	public Vector3 BaseRotation { get; }
-	public Vector3 BaseScale { get; }
+	public Box3D Bounds { get; set; } = Box3D.Infinity;
+	public uint[] Indices { get; private set; }
+	public Vertex[] Vertices { get; private set; }
+	public Material Material { get; private set; }
 
-	/// <param name="boneTransform">The transform of the bone in model space (not relative to other bones).</param>
-	/// <param name="parentTransform">The transform of the bone's parent (in model space), or Matrix4.Identity if none exists.</param>
-	/// <param name="id">The ID of this bone. This must be unique for each skeleton, and is used for weights.</param>
-	public Bone(string name, int id, Matrix4 boneTransform, Matrix4 parentTransform, IEnumerable<Bone> children)
+	public void SetIndices(uint[] indices)
+	{
+		Indices = indices;
+		IsCommitted = false;
+	}
+
+	public void SetVertices(Vertex[] vertices)
+	{
+		Vertices = vertices;
+		IsCommitted = false;
+	}
+
+	public void SetMaterial(Material material)
+	{
+		Material = material;
+		IsCommitted = false;
+	}
+
+	public Mesh(string name)
 	{
 		Name = name;
-		ID = id;
-		Children = children.ToImmutableList();
-		InverseBind = boneTransform.Inverse();
-
-		// Calculate base transforms.
-		boneTransform = boneTransform * parentTransform.Inverse();
-		BasePosition = boneTransform.Inverse().ExtractTranslation();
-		BaseRotation = boneTransform.Inverse().ExtractRotation().EulerAngles.ToDegrees();
-		BaseScale = boneTransform.Inverse().ExtractScale();
 	}
 }
