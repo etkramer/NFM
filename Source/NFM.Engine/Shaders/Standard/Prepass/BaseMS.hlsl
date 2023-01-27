@@ -4,7 +4,7 @@ int InstanceID : register(b0);
 
 [NumThreads(124, 1, 1)]
 [OutputTopology("triangle")]
-void BaseMS(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices float4 outVerts[64] : SV_POSITION, out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
+void main(uint groupID : SV_GroupID, uint groupThreadID : SV_GroupThreadID, out vertices float4 outVerts[64] : SV_POSITION, out primitives PrimAttribute outPrims[124], out indices uint3 outIndices[124])
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];

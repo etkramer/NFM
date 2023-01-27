@@ -12,7 +12,7 @@ ByteAddressBuffer MaterialParams : register(t0);
 AppendStructuredBuffer<IndirectCommand> Commands : register(u0);
 
 [numthreads(1, 1, 1)]
-void CullCS(uint3 dispatchID : SV_DispatchThreadID)
+void main(uint3 dispatchID : SV_DispatchThreadID)
 {
 	// Grab instance/mesh data.
 	uint instanceID = dispatchID.x;

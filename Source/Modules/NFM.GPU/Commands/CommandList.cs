@@ -23,8 +23,7 @@ public class CommandList : IDisposable
 	}
 
 	private static PipelineState mipGenPSO = new PipelineState()
-		.UseIncludes(typeof(CommandList).Assembly)
-		.SetComputeShader(Embed.GetString("Shaders/MipGenCS.hlsl", Assembly.GetExecutingAssembly()), "MipGenCS")
+		.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/MipGenCS.hlsl"), ShaderStage.Compute))
 		.AsRootConstant(0, 2)
 		.Compile().Result;
 

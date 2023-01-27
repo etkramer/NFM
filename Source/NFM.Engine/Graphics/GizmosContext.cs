@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices.Marshalling;
 using NFM.GPU;
-using NFM.Resources;
 using NFM.World;
 
 namespace NFM.Graphics;
@@ -22,18 +18,16 @@ public class GizmosContext
 	unsafe static GizmosContext()
 	{
 		linePSO = new PipelineState()
-			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Common/Gizmos/LineMS.hlsl", typeof(Engine).Assembly), "LineMS")
-			.SetPixelShader(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+			.SetMeshShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/LineMS.hlsl"), ShaderStage.Mesh))
+			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl"), ShaderStage.Pixel))
 			.AsRootConstant(0, 4 + 4 + 4)
 			.SetDepthMode(DepthMode.GreaterEqual, true, true)
 			.SetTopologyType(TopologyType.Line)
 			.Compile().Result;
 
 		geometryPSO = new PipelineState()
-			.UseIncludes(typeof(Engine).Assembly)
-			.SetMeshShader(Embed.GetString("Shaders/Common/Gizmos/GeomMS.hlsl", typeof(Engine).Assembly), "GeomMS")
-			.SetPixelShader(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl", typeof(Engine).Assembly), "GizmosPS")
+			.SetMeshShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GeomMS.hlsl"), ShaderStage.Mesh))
+			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl"), ShaderStage.Pixel))
 			.AsRootConstant(0, 4)
 			.SetDepthMode(DepthMode.Always, false, true)
 			.Compile().Result;

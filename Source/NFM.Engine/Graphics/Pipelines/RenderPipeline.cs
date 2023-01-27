@@ -1,7 +1,6 @@
 ﻿using System;
 using NFM.GPU;
 using NFM.World;
-using Vortice.DXGI;
 
 namespace NFM.Graphics;
 

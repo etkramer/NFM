@@ -7,7 +7,7 @@ float4 Color : register(b0);
 
 [NumThreads(1, 1, 1)]
 [OutputTopology("triangle")]
-void GeomMS(uint dispatchThreadID : SV_DispatchThreadID, out vertices VertexAttribute outVerts[3], out indices uint3 outIndices[1])
+void main(uint dispatchThreadID : SV_DispatchThreadID, out vertices VertexAttribute outVerts[3], out indices uint3 outIndices[1])
 {
 	SetMeshOutputCounts(3, 1);
 

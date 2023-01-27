@@ -5,10 +5,8 @@ using SharpGen.Runtime;
 using Vortice.Direct3D12;
 using Vortice.Dxc;
 using Vortice.DXGI;
-using System.Text;
 using Vortice.Direct3D12.Shader;
 using Vortice.Direct3D;
-using System.Text.RegularExpressions;
 
 namespace NFM.GPU;
 
@@ -41,7 +39,7 @@ public enum TopologyType
 public sealed class PipelineState : IDisposable
 {
 	public bool IsGraphics { get; private set; } = false;
-	public bool IsCompute { get; private set; } = false;
+	public bool IsCompute => !IsGraphics;
 
 	static readonly DxcCompilerOptions compilerOptions = new()
 	{
@@ -62,9 +60,9 @@ public sealed class PipelineState : IDisposable
 
 	// Parameters
 	private List<RootParameter1> rootParams = new();
-	private ShaderBytecode compiledCompute;
-	private ShaderBytecode compiledMesh;
-	private ShaderBytecode compiledPixel;
+	private ShaderModule compiledCompute;
+	private ShaderModule compiledMesh;
+	private ShaderModule compiledPixel;
 	private CullMode cullMode = CullMode.None;
 	private DepthMode depthMode = DepthMode.None;
 	private bool depthRead = false;
@@ -73,9 +71,6 @@ public sealed class PipelineState : IDisposable
 	private int rtSamples = 1;
 	private TopologyType topologyType = TopologyType.Triangle;
 	private bool isBlendEnabled = false;
-
-	// Custom handler for #including files from arbitrary file systems
-	private CustomIncludeHandler shaderIncludeHandler = null;
 
 	public PipelineState()
 	{
@@ -137,57 +132,23 @@ public sealed class PipelineState : IDisposable
 		return this;
 	}
 
-	public PipelineState SetComputeShader(string source, string entryPoint)
+	public PipelineState SetComputeShader(ShaderModule module)
 	{
-		IDxcResult computeResult = DxcCompiler.Compile(DxcShaderStage.Compute, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
-
-		// Check vertex shader for errors.
-		if (computeResult.GetStatus().Success)
-		{
-			compiledCompute = computeResult.GetObjectBytecodeArray();
-		}
-		else
-		{
-			throw new Exception($"Compute shader failed to compile with message: \n{computeResult.GetErrors() }");
-		}
-
-		IsCompute = true;
+		compiledCompute = module;
+		IsGraphics = false;
 		return this;
 	}
 
-	public PipelineState SetMeshShader(string source, string entryPoint)
+	public PipelineState SetMeshShader(ShaderModule module)
 	{
-		IDxcResult meshResult = DxcCompiler.Compile(DxcShaderStage.Mesh, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
-
-		// Check vertex shader for errors.
-		if (meshResult.GetStatus().Success)
-		{
-			compiledMesh = meshResult.GetObjectBytecodeArray();
-		}
-		else
-		{
-			throw new Exception($"Mesh shader failed to compile with message: \n{meshResult.GetErrors() }");
-		}
-
+		compiledMesh = module;
 		IsGraphics = true;
 		return this;
 	}
 
-	public PipelineState SetPixelShader(string source, string entryPoint)
+	public PipelineState SetPixelShader(ShaderModule module)
 	{
-		IDxcResult pixelResult = DxcCompiler.Compile(DxcShaderStage.Pixel, source, entryPoint, compilerOptions, includeHandler: shaderIncludeHandler);
-		compiledPixel = pixelResult.GetObjectBytecodeArray();
-
-		// Check pixel shader for errors.
-		if (pixelResult.GetStatus().Success)
-		{
-			compiledPixel = pixelResult.GetObjectBytecodeArray();
-		}
-		else
-		{
-			throw new Exception($"Pixel shader failed to compile with message: \n{pixelResult.GetErrors() }");
-		}
-
+		compiledPixel = module;
 		IsGraphics = true;
 		return this;
 	}
@@ -202,15 +163,15 @@ public sealed class PipelineState : IDisposable
 		return this;
 	}
 
-	private RootParameter1[] BuildRootParameters(params ShaderBytecode[] shaders)
+	private RootParameter1[] BuildRootParameters(params ShaderModule[] shaders)
 	{
 		// Loop through all participating shaders.
-		foreach (ShaderBytecode shader in shaders)
+		foreach (ShaderModule shader in shaders)
 		{
 			if (shader != null)
 			{
 				// Build reflection data.
-				if (!DxcCompiler.Utils.CreateReflection(CreateBlob(shader.Data), out ID3D12ShaderReflection reflection).Success)
+				if (!DxcCompiler.Utils.CreateReflection(CreateBlob(shader.Bytecode.ToArray()), out ID3D12ShaderReflection reflection).Success)
 				{
 					// Failed to build reflection data - shader is probably invalid.
 					return new RootParameter1[0];
@@ -326,8 +287,8 @@ public sealed class PipelineState : IDisposable
 				result = CreatePipelineState(new GraphicsPipelineStateStream()
 				{
 					RootSignature = RootSignature,
-					MeshShader = compiledMesh,
-					PixelShader = compiledPixel,
+					MeshShader = new ShaderBytecode(compiledMesh.Bytecode.ToArray()),
+					PixelShader = new ShaderBytecode(compiledPixel.Bytecode.ToArray()),
 					SampleMask = uint.MaxValue,
 					PrimitiveTopology = (PrimitiveTopologyType)topologyType,
 					SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
@@ -348,7 +309,7 @@ public sealed class PipelineState : IDisposable
 				result = CreatePipelineState(new ComputePipelineStateStream()
 				{
 					RootSignature = RootSignature,
-					ComputeShader = compiledCompute,
+					ComputeShader = new ShaderBytecode(compiledCompute.Bytecode.ToArray()),
 				}, out PSO);
 			}
 
@@ -360,6 +321,15 @@ public sealed class PipelineState : IDisposable
 
 			return this;
 		});
+	}
+
+	internal static IDxcBlob CreateBlob(byte[] data)
+	{
+		GCHandle dataPointer = GCHandle.Alloc(data, GCHandleType.Pinned);
+		DxcCompiler.Utils.CreateBlob(dataPointer.AddrOfPinnedObject(), data.Length, Dxc.DXC_CP_UTF8, out IDxcBlobEncoding blob).CheckError();
+		dataPointer.Free();
+			
+		return blob;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -384,93 +354,6 @@ public sealed class PipelineState : IDisposable
 		public PipelineStateSubObjectTypeRootSignature RootSignature;
 		public PipelineStateSubObjectTypeComputeShader ComputeShader;
 	}
-
-	#region Includes
-	sealed class CustomIncludeHandler : CallbackBase, IDxcIncludeHandler
-	{
-		private Func<string, string> resolveMethod;
-
-		public CustomIncludeHandler(Func<string, string> resolver) => this.resolveMethod = resolver;
-
-		public Result LoadSource(string filename, out IDxcBlob includeSource)
-		{
-			string source = resolveMethod.Invoke(filename);
-
-			if (source != null)
-			{
-				includeSource = CreateBlob(Encoding.ASCII.GetBytes(source));
-				return Result.Ok;
-			}
-			else
-			{
-				includeSource = null;
-				return Result.Fail;
-			}
-		}
-	}
-
-	private static IDxcBlob CreateBlob(byte[] data)
-	{
-		GCHandle dataPointer = GCHandle.Alloc(data, GCHandleType.Pinned);
-		DxcCompiler.Utils.CreateBlob(dataPointer.AddrOfPinnedObject(), data.Length, Dxc.DXC_CP_UTF8, out IDxcBlobEncoding blob).CheckError();
-		dataPointer.Free();
-			
-		return blob;
-	}
-
-	private string SimplifyPath(string path)
-	{
-		Regex simplifyRegex = new Regex(@"[^\\/]+(?<!\.\.)[\\/]\.\.[\\/]");
-
-		while (true)
-		{
-			string newPath = simplifyRegex.Replace(path, "" );
-			if (newPath == path)
-			{
-				break;
-			}
-			else
-			{
-				path = newPath;
-			}
-		}
-
-		return path.Replace("./", "");
-	}
-
-	public PipelineState UseIncludes(Assembly embedSource)
-	{
-		Func<string, string> includeResolver = (path) =>
-		{
-			path = SimplifyPath(path);
-			path = $"{embedSource.GetName().Name}.{path.Replace('/', '.')}";
-
-			using (Stream stream = embedSource.GetManifestResourceStream(path))
-			{
-				if (stream != null)
-				{
-					using (StreamReader reader = new(stream))
-					{
-						return reader.ReadToEnd();
-					}
-				}
-			}
-
-			Debug.LogError($"Failed to resolve include \"{path}\"");
-			return null;
-		};
-
-		UseIncludes(includeResolver);
-		return this;
-	}
-
-	public PipelineState UseIncludes(Func<string, string> includeResolver)
-	{
-		shaderIncludeHandler = new CustomIncludeHandler(includeResolver);
-		return this;
-	}
-
-	#endregion
 }
 
 public struct BindPoint

@@ -9,7 +9,7 @@ cbuffer Constants : register(b0)
 }
 
 [numthreads(8, 8, 1)]
-void MipGenCS(uint3 pixel : SV_DispatchThreadID)
+void main(uint3 pixel : SV_DispatchThreadID)
 {
 	float2 texCoords = TexelSize * (pixel.xy + 0.5);
 

@@ -64,18 +64,28 @@ BarycentricDeriv CalcFullBary(float4 pt0, float4 pt1, float4 pt2, float2 pixelNd
 	return ret;
 }
 
-float3 Interp(BarycentricDeriv deriv, float v0, float v1, float v2)
+float BarycentricLerp(in float v0, in float v1, in float v2, in float3 barycentrics)
 {
-	float3 mergedV = float3(v0, v1, v2);
-	float3 ret;
-	ret.x = dot(mergedV, deriv.m_lambda);
-	ret.y = dot(mergedV, deriv.m_ddx);
-	ret.z = dot(mergedV, deriv.m_ddy);
-	return ret;
+	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
+}
+
+float2 BarycentricLerp(in float2 v0, in float2 v1, in float2 v2, in float3 barycentrics)
+{
+	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
+}
+
+float3 BarycentricLerp(in float3 v0, in float3 v1, in float3 v2, in float3 barycentrics)
+{
+	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
+}
+
+float4 BarycentricLerp(in float4 v0, in float4 v1, in float4 v2, in float3 barycentrics)
+{
+	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
 }
 
 [numthreads(32, 32, 1)]
-void MaterialCS(uint2 id : SV_DispatchThreadID)
+void main(uint2 id : SV_DispatchThreadID)
 {
 	// Grab the frame width/height
 	int2 frameSize;
@@ -124,15 +134,12 @@ void MaterialCS(uint2 id : SV_DispatchThreadID)
 	const BarycentricDeriv deriv = CalcFullBary(pt0, pt1, pt2, pixelNDC, frameSize);
 
 	// TODO: Understand why this needs to be done
-	float3 norm0 = normalize(mul(v0.Normal, (float3x3)transform.WorldToObject));
-	float3 norm1 = normalize(mul(v1.Normal, (float3x3)transform.WorldToObject));
-	float3 norm2 = normalize(mul(v2.Normal, (float3x3)transform.WorldToObject));
+	float3 norm0 = normalize(mul(v0.Normal, (float3x3) transform.WorldToObject));
+	float3 norm1 = normalize(mul(v1.Normal, (float3x3) transform.WorldToObject));
+	float3 norm2 = normalize(mul(v2.Normal, (float3x3) transform.WorldToObject));
 
 	// Interp normals
-	float3 normal;
-	normal.x = Interp(deriv, norm0.x, norm1.x, norm2.x)[0];
-	normal.y = Interp(deriv, norm0.y, norm1.y, norm2.y)[0];
-	normal.z = Interp(deriv, norm0.z, norm1.z, norm2.z)[0];
+	float3 normal = BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda);
 
 	RT[id.xy] = float4(SRGBToLinear(normal / 2 + 0.5), 1);
 }

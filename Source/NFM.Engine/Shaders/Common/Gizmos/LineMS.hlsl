@@ -19,7 +19,7 @@ float4 ToClipSpace(float3 pt)
 
 [NumThreads(1, 1, 1)]
 [OutputTopology("line")]
-void LineMS(out vertices VertexAttribute outVerts[2], out indices uint2 outIndices[1])
+void main(out vertices VertexAttribute outVerts[2], out indices uint2 outIndices[1])
 {
 	SetMeshOutputCounts(2, 1);
 
