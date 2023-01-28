@@ -1,7 +1,10 @@
 ﻿#include "Shaders/Common.h"
 #include "Shaders/World.h"
 
-RWTexture2D<float4> RT : register(u0);
+RWTexture2D<float4> MatBuffer0 : register(u0);
+RWTexture2D<float2> MatBuffer1 : register(u1);
+RWTexture2D<float4> MatBuffer2 : register(u2);
+
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
@@ -119,7 +122,7 @@ void main(uint2 id : SV_DispatchThreadID)
 {
 	// Grab the frame width/height
 	int2 frameSize;
-	RT.GetDimensions(frameSize.x, frameSize.y);
+	DepthBuffer.GetDimensions(frameSize.x, frameSize.y);
 
 	// Don't try to process out of bounds pixels
 	if (id.x >= frameSize.x || id.y >= frameSize.y)
@@ -128,15 +131,15 @@ void main(uint2 id : SV_DispatchThreadID)
 	}
 
 	// Early out if this pixel is empty
-	if (DepthBuffer[id.xy] == 0)
+	if (DepthBuffer[id] == 0)
 	{
 		return;
 	}
 
 	// Unpack visbuffer
-	uint instanceID = VisBuffer[id.xy].x;
-	uint meshletID = UnpackBits(VisBuffer[id.xy].y, 25).x;
-	uint triangleID = UnpackBits(VisBuffer[id.xy].y, 25).y;
+	uint instanceID = VisBuffer[id].x;
+	uint meshletID = UnpackBits(VisBuffer[id].y, 25).x;
+	uint triangleID = UnpackBits(VisBuffer[id].y, 25).y;
 
 	// Fetch instance data
 	Instance instance = Instances[instanceID];
@@ -164,7 +167,7 @@ void main(uint2 id : SV_DispatchThreadID)
 	float4 pt2 = mul(mvp, float4(v2.Position, 1));
 
 	// Calculate pixel location in NDC
-	float2 pixelNDC = (float2(id.xy) / float2(frameSize)) * 2.f - 1.f;
+	float2 pixelNDC = (float2(id) / float2(frameSize)) * 2.f - 1.f;
 	pixelNDC.y *= -1;
 
 	// Calculate barycentric derivs
@@ -186,5 +189,8 @@ void main(uint2 id : SV_DispatchThreadID)
 	// Evaluate surface
 	SurfaceModel surface = EvalSurface(instance.MaterialID, uv0, ddx, ddy);
 	
-	RT[id.xy] = float4(SRGBToLinear(surface.Albedo), 1);
+	// Write to g-buffer
+	MatBuffer0[id] = float4(surface.Albedo, 1);
+	MatBuffer1[id] = float2(0, 0);
+	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, 1);
 }

@@ -9,10 +9,12 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="FodyWeavers.xml" />
+	  <None Remove="Shaders\Standard\LightingCS.hlsl" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<EmbeddedResource Include="Shaders\Common\SFTemplate.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\LightingCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.h" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.hlsl" />

@@ -20,10 +20,10 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 			{
 				list.BeginEvent($"Materials for StackID {permutation.StackID}");
 				list.SetPipelineState(permutation.PSO);
-				list.SetPipelineUAV(0, 0, RP.ColorTarget);
+				
+				// Bind inputs
 				list.SetPipelineSRV(0, 0, RP.VisBuffer);
 				list.SetPipelineSRV(1, 0, RP.DepthBuffer);	
-
 				list.SetPipelineSRV(0, 1, Mesh.VertexBuffer);
 				list.SetPipelineSRV(1, 1, Mesh.IndexBuffer);
 				list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
@@ -33,6 +33,12 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 				list.SetPipelineCBV(0, 1, RP.ViewCB);
 				list.SetPipelineSRV(0, 2, MaterialInstance.MaterialBuffer);
 
+				// Material outputs
+				list.SetPipelineUAV(0, 0, RP.MatBuffer0);
+				list.SetPipelineUAV(1, 0, RP.MatBuffer1);
+				list.SetPipelineUAV(2, 0, RP.MatBuffer2);
+
+				// Dispatch material shader
 				list.SetPipelineConstants(0, 0, permutation.StackID);
 				list.DispatchThreads(RP.ColorTarget.Width, 32, RP.ColorTarget.Height, 32);
 				list.EndEvent();
