@@ -107,7 +107,7 @@ public partial class ModelNode : Node
 				{
 					MeshID = (int)mesh.MeshHandle.Offset,
 					TransformID = (int)TransformHandle.Offset,
-					MaterialID = 0,
+					MaterialID = (int)MaterialInstances[mesh].MaterialHandle.Offset,
 				};
 
 				// Upload instance to buffer
