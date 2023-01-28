@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using SharpGen.Runtime;
@@ -84,7 +85,10 @@ public class ShaderModule
 		}
 		else
 		{
-			throw new Exception($"Shader modules failed to link.");
+			var errorBuffer = result.GetErrorBuffer();
+			var errorString = Marshal.PtrToStringAnsi(errorBuffer.BufferPointer, errorBuffer.BufferSize);
+
+			throw new Exception($"Shader modules failed to link with message: {errorString}");
 		}
 	}
 

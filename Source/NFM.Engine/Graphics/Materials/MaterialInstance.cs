@@ -11,17 +11,23 @@ public class MaterialInstance : IDisposable
 	public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
 
 	#region Permutations
+	private static List<(IEnumerable<Shader>, int)> stackIDs = new();
+
 	private static List<MaterialInstance> all = new();
 	private static List<Type> requestedPermutationTypes = new();
 	public static void RequestPermutation<T>() where T : ShaderPermutation, new()
 	{
-		if (!requestedPermutationTypes.Contains(typeof(T)))
+		lock (requestedPermutationTypes)
+		lock (all)
 		{
-			requestedPermutationTypes.Add(typeof(T));
-
-			foreach (var instance in all)
+			if (!requestedPermutationTypes.Contains(typeof(T)))
 			{
-				instance.permutations.Add(ShaderPermutation.FindOrCreate<T>(instance));
+				requestedPermutationTypes.Add(typeof(T));
+
+				foreach (var instance in all)
+				{
+					instance.permutations.Add(ShaderPermutation.FindOrCreate<T>(instance));
+				}
 			}
 		}
 	}
@@ -45,17 +51,19 @@ public class MaterialInstance : IDisposable
 	{
 		Material = baseMaterial;
 		Shaders.Add(Material.Shader);
+
 		all.Add(this);
 
 		// Calculate StackID
-		var matchingStack = all.FirstOrDefault(o => o.Shaders.SequenceEqual(Shaders) && o != this);
-		if (matchingStack == null)
+		var matchingStack = stackIDs.FirstOrDefault(o => o.Item1.SequenceEqual(Shaders));
+		if (matchingStack.Item1 == null)
 		{
 			StackID = lastID++;
+			stackIDs.Add((Shaders.ToArray(), StackID));
 		}
 		else
 		{
-			StackID = matchingStack.StackID;
+			StackID = matchingStack.Item2;
 		}
 
 		// Build parameters table
@@ -73,9 +81,12 @@ public class MaterialInstance : IDisposable
 		UpdateMaterialData();
 
 		// Create requested permutations
-		foreach (var type in requestedPermutationTypes)
+		lock (requestedPermutationTypes)
 		{
-			permutations.Add(ShaderPermutation.FindOrCreate(type, this));
+			foreach (var type in requestedPermutationTypes)
+			{
+				permutations.Add(ShaderPermutation.FindOrCreate(type, this));
+			}
 		}
 	}
 
@@ -137,5 +148,7 @@ public class MaterialInstance : IDisposable
 	public void Dispose()
 	{
 		all.Remove(this);
+		
+		MaterialHandle.Dispose();
 	}
 }

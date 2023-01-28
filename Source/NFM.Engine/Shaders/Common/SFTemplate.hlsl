@@ -29,7 +29,7 @@ void SFMain(inout SurfaceModel surface, in SFInput input);
 
 #pragma MAIN
 
-ByteAddressBuffer MaterialParams : register(t0);
+ByteAddressBuffer MaterialParams : register(t0, space2);
 
 export SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 ddy)
 {

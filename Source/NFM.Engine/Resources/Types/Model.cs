@@ -22,8 +22,11 @@ public sealed class Model : GameResource
 			mesh?.Commit();
 		}
 
-		MeshGroup group = new MeshGroup(groupName, meshes, defaultSelection);
-		meshGroups.Add(group);
+		lock (meshGroups)
+		{
+			MeshGroup group = new MeshGroup(groupName, meshes, defaultSelection);
+			meshGroups.Add(group);
+		}
 
 		return true;
 	}

@@ -5,6 +5,9 @@ RWTexture2D<float4> RT : register(u0);
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
+ByteAddressBuffer MaterialParams : register(t0, space2);
+int ShaderID : register(b0);
+
 uint3 FetchTriangleIndices(Mesh mesh, Meshlet meshlet, uint triangleID)
 {
 	triangleID = mesh.PrimStart + meshlet.PrimStart + (triangleID * 3);
@@ -84,6 +87,23 @@ float4 BarycentricLerp(in float4 v0, in float4 v1, in float4 v2, in float3 baryc
 	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
 }
 
+struct SurfaceModel
+{
+	// Geoemtry
+	float3 Normal;
+
+	// PBR
+	float3 Albedo;
+	float Metallic;
+	float Roughness;
+	float Specular;
+
+	// Non-opaque
+	float Opacity;
+};
+
+SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 ddy);
+
 [numthreads(32, 32, 1)]
 void main(uint2 id : SV_DispatchThreadID)
 {
@@ -110,6 +130,13 @@ void main(uint2 id : SV_DispatchThreadID)
 
 	// Fetch instance data
 	Instance instance = Instances[instanceID];
+	
+	// Early out for mismatching shaders
+	if (MaterialParams.Load(instance.MaterialID) != ShaderID)
+	{
+		return;
+	}
+	
 	Mesh mesh = Meshes[instance.MeshID];
 	Meshlet meshlet = Meshlets[mesh.MeshletStart + meshletID];
 	Transform transform = Transforms[instance.TransformID];
@@ -138,8 +165,12 @@ void main(uint2 id : SV_DispatchThreadID)
 	float3 norm1 = normalize(mul(v1.Normal, (float3x3) transform.WorldToObject));
 	float3 norm2 = normalize(mul(v2.Normal, (float3x3) transform.WorldToObject));
 
-	// Interp normals
+	// Interp vertex data
 	float3 normal = BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda);
+	float2 uv0 = BarycentricLerp(v0.UV0, v1.UV0, v2.UV0, deriv.m_lambda);
+	
+	// Evaluate surface
+	SurfaceModel surface = EvalSurface(instance.MaterialID, uv0, 0, 0);
 
-	RT[id.xy] = float4(SRGBToLinear(normal / 2 + 0.5), 1);
+	RT[id.xy] = float4(SRGBToLinear(surface.Albedo), 1);
 }
