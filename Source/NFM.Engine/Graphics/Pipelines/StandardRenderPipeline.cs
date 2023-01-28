@@ -15,7 +15,6 @@ public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 	{
 		AddStep<PrepassStep>();
 		AddStep<MaterialStep>();
-		AddStep<MaterialStep>();
 	
 		ColorTarget = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm);
 
