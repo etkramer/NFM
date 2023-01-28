@@ -24,6 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFM", "NFM\NFM.csproj", "{4
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFM.Engine", "NFM.Engine\NFM.Engine.csproj", "{144AA19B-2076-4069-897D-F5956EE57409}"
+	ProjectSection(ProjectDependencies) = postProject
+		{48117E56-328C-498D-AE49-299AC33AB300} = {48117E56-328C-498D-AE49-299AC33AB300}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFM.Common", "Modules\NFM.Common\NFM.Common.csproj", "{3F944E66-DAD8-4D1C-B186-6879940FA713}"
 EndProject
