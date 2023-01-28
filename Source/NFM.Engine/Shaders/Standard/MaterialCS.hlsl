@@ -87,6 +87,16 @@ float4 BarycentricLerp(in float4 v0, in float4 v1, in float4 v2, in float3 baryc
 	return v0 * barycentrics.x + v1 * barycentrics.y + v2 * barycentrics.z;
 }
 
+float3 InterpolateWithDeriv(BarycentricDeriv deriv, float v0, float v1, float v2)
+{
+	float3 mergedV = float3(v0, v1, v2);
+	float3 ret;
+	ret.x = dot(mergedV, deriv.m_lambda);
+	ret.y = dot(mergedV, deriv.m_ddx);
+	ret.z = dot(mergedV, deriv.m_ddy);
+	return ret;
+}
+
 struct SurfaceModel
 {
 	// Geoemtry
@@ -169,8 +179,12 @@ void main(uint2 id : SV_DispatchThreadID)
 	float3 normal = BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda);
 	float2 uv0 = BarycentricLerp(v0.UV0, v1.UV0, v2.UV0, deriv.m_lambda);
 	
+	// Calculate UV derivs
+	float2 ddx = InterpolateWithDeriv(deriv, v0.UV0.x, v1.UV0.x, v2.UV0.x).yz;
+	float2 ddy = InterpolateWithDeriv(deriv, v0.UV0.y, v1.UV0.y, v2.UV0.y).yz;
+	
 	// Evaluate surface
-	SurfaceModel surface = EvalSurface(instance.MaterialID, uv0, 0, 0);
-
+	SurfaceModel surface = EvalSurface(instance.MaterialID, uv0, ddx, ddy);
+	
 	RT[id.xy] = float4(SRGBToLinear(surface.Albedo), 1);
 }

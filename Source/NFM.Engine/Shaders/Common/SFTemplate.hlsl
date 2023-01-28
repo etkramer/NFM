@@ -48,6 +48,8 @@ export SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 
 	// Create inputs structure
 	SFInput input;
 	input.UV0 = uv0;
+	input.DDX = ddx;
+	input.DDY = ddy;
 	
 	#pragma SETUP
 	
