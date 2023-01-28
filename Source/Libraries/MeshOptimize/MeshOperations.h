@@ -6,14 +6,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace MeshOptimizer
 {
-	public value struct Meshlet
-	{
-		unsigned int vertexOffset;
-		unsigned int triangleOffset;
 
-		unsigned int vertexCount;
-		unsigned int triangleCount;
-	};
 
 	public ref class MeshOperations sealed abstract
 	{

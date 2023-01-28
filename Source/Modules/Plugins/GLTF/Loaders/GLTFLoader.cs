@@ -122,6 +122,15 @@ namespace GLTF.Loaders
 			var uv0 = accessors.GetValueOrDefault("TEXCOORD_0").AsSpan<Vector2>();
 			var uv1 = accessors.GetValueOrDefault("TEXCOORD_1").AsSpan<Vector2>();
 
+			foreach (var accessor in accessors.Keys)
+			{
+				//if (accessor != "POSITION" && accessor != "NORMAL" && accessor != "TEXCOORD_0" && accessor != "TEXCOORD_1")
+				{
+					Console.Write(accessor);
+				}
+				Console.Write('\n');
+			}
+
 			Vertex[] result = new Vertex[positions.Length];
 			for (int i = 0; i < result.Length; i++)
 			{

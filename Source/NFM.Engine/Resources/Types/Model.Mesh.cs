@@ -1,7 +1,6 @@
 ﻿using System;
 using NFM.GPU;
 using NFM.Graphics;
-using MeshOptimizer;
 
 namespace NFM.Resources;
 
@@ -51,24 +50,30 @@ public partial class Mesh : IDisposable
 
 		fixed (uint* indicesPtr = Indices)
 		{
-			// Build meshlet data.
-			MeshOperations.BuildMeshlets(indicesPtr, Indices.Length, Vertices.Length, out var meshletPrims, out var meshletVerts, out var meshlets);
+			// Build meshlet data
+			MeshOptimizer.BuildMeshlets(Indices, Vertices.Length, out var meshletIndices, out var meshletVerts, out var meshlets);
 
-			// Remap vertices to match meshlet output.
+			// Remap vertices to match meshlet output
 			Vertex[] verts = new Vertex[meshletVerts.Length];
 			for (int i = 0; i < meshletVerts.Length; i++)
 			{
 				verts[i] = Vertices[meshletVerts[i]];
 			}
 
-			// Upload geometry data to GPU.
+			// Cast indices byte->uint (TODO: unpack on the GPU)
+			var resizedMeshletIndices = new uint[meshletIndices.Length];
+			for (int i = 0; i < meshletIndices.Length; i++)
+			{
+				resizedMeshletIndices[i] = meshletIndices[i];
+			}
+
+			// Upload geometry data to GPU
 			VertexHandle = VertexBuffer.Allocate(verts.Length);
-			IndexHandle = IndexBuffer.Allocate(meshletPrims.Length);
+			IndexHandle = IndexBuffer.Allocate(meshletIndices.Length);
 			MeshletHandle = MeshletBuffer.Allocate(meshlets.Length);
 			Renderer.DefaultCommandList.UploadBuffer(VertexHandle, verts);
-			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, meshletPrims.Select(o => (uint)o).ToArray());
+			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, resizedMeshletIndices);
 			Renderer.DefaultCommandList.UploadBuffer(MeshletHandle, meshlets);
-
 		}
 
 		// Upload mesh info to GPU.
