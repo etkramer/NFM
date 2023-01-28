@@ -44,7 +44,7 @@ public class MaterialShaderPermutation : ShaderPermutation
 {
 	public override void Init(ShaderModule module)
 	{
-		Console.WriteLine("Setup permutation");
+
 	}
 
 	public override void Dispose()

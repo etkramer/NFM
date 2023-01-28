@@ -1,20 +1,15 @@
-static Texture2D<float4> BaseColor;
-static Texture2D<float3> Normal;
-static Texture2D<float3> ORM;
 
-Surface SurfaceMain(in SurfaceState state)
+void SFMain(inout SurfaceModel surface, in SFInput input)
 {
-	Surface surface = state.Defaults;
-	
-	float3 orm = ORM.Sample(DefaultSampler, state.UV);
+	float4 color = input.BaseColor.SampleGrad(DefaultSampler, input.UV0, 0, 0);
+	float4 orm = input.ORM.SampleGrad(DefaultSampler, input.UV0, 0, 0);
+	float4 normal = input.Normal.SampleGrad(DefaultSampler, input.UV0, 0, 0);
 	
 	// No way to know if a texture is sRGB during import,
 	// so we just convert it in the shader.
-	surface.Albedo = LinearToSRGB(BaseColor.Sample(DefaultSampler, state.UV));
-	surface.Normal = Normal.Sample(DefaultSampler, state.UV);
+	surface.Albedo = LinearToSRGB(color.rgb);
+	surface.Normal = normal.rgb;
 	surface.Roughness = orm[1];
 	surface.Metallic = orm[2];
-	surface.Opacity = BaseColor.Sample(DefaultSampler, state.UV).a;
-	
-	return surface;
+	surface.Opacity = color.a;
 }
