@@ -4,7 +4,7 @@ using NFM.Resources;
 
 namespace NFM.Graphics;
 
-public class LightingStep : CameraStep<StandardRenderPipeline>
+class LightingStep : CameraStep<StandardRenderPipeline>
 {
 	private PipelineState lightingPSO;
 

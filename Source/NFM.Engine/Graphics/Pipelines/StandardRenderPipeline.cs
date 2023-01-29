@@ -4,7 +4,7 @@ using Vortice.DXGI;
 
 namespace NFM.Graphics;
 
-public class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
+class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 {
 	public Texture ColorTarget;
 

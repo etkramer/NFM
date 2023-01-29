@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using NFM.Graphics;
 
 namespace NFM.Resources;
 
@@ -67,7 +68,7 @@ public sealed class MeshGroup
 	}
 }
 
-public partial class Mesh : IDisposable
+public class Mesh : IDisposable
 {
 	/// <summary>
 	/// The name of this mesh, displayed when choosing mesh groups.
@@ -83,6 +84,13 @@ public partial class Mesh : IDisposable
 	public uint[] Indices { get; private set; }
 	public Vertex[] Vertices { get; private set; }
 	public Material Material { get; private set; }
+
+	internal RenderMesh RenderData = null;
+
+	public Mesh(string name)
+	{
+		Name = name;
+	}
 
 	public void SetIndices(uint[] indices)
 	{
@@ -102,8 +110,33 @@ public partial class Mesh : IDisposable
 		IsCommitted = false;
 	}
 
-	public Mesh(string name)
+	public void Commit()
 	{
-		Name = name;
+		if (IsCommitted)
+		{
+			return;
+		}
+
+		if (RenderData != null)
+		{
+			RenderData.Dispose();
+		}
+
+		RenderData = new RenderMesh(this);
 	}
+
+	public void Dispose()
+	{
+
+	}
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct Vertex
+{
+	public Vector3 Position;
+	public Vector3 Normal;
+	public Vector4 Tangent;
+	public Vector2 UV0;
+	public Vector2 UV1;
 }

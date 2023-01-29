@@ -5,7 +5,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class PrepassStep : CameraStep<StandardRenderPipeline>
+class PrepassStep : CameraStep<StandardRenderPipeline>
 {
 	private PipelineState cullPSO;
 	private PipelineState visPSO;
@@ -46,10 +46,10 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Switch to prepass PSO
 		list.SetPipelineState(visPSO);
-		list.SetPipelineSRV(0, 1, Mesh.VertexBuffer);
-		list.SetPipelineSRV(1, 1, Mesh.IndexBuffer);
-		list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
-		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+		list.SetPipelineSRV(0, 1, RenderMesh.VertexBuffer);
+		list.SetPipelineSRV(1, 1, RenderMesh.IndexBuffer);
+		list.SetPipelineSRV(2, 1, RenderMesh.MeshletBuffer);
+		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
 		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 		list.SetPipelineCBV(0, 1, RP.ViewCB);
@@ -69,7 +69,7 @@ public class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Switch to indirect culling PSO
 		list.SetPipelineState(cullPSO);
-		list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 		list.SetPipelineUAV(0, 0, commandBuffer);
 

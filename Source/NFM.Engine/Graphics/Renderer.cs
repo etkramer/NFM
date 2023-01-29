@@ -7,7 +7,7 @@ using Vortice.Direct3D12;
 
 namespace NFM.Graphics;
 
-public static class Renderer
+static class Renderer
 {
 	/// <summary>
 	/// "Shared" command list, guaranteed to be executed just before any frames are rendered.

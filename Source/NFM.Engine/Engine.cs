@@ -22,7 +22,7 @@ public static class Engine
 {
 	public static event Action<double> OnTick = delegate {};
 
-	public static void Init()
+	internal static void Init()
 	{
 		// Boot up renderer and load plugins.
 		Renderer.Init();
@@ -47,7 +47,7 @@ public static class Engine
 		};
 	}
 
-	public static void Update()
+	internal static void Update()
 	{
 		// Begin the new frame.
 		OnTick.Invoke(Metrics.FrameTime);
@@ -56,7 +56,7 @@ public static class Engine
 		Renderer.RenderFrame();
 	}
 
-	public static void Cleanup()
+	internal static void Cleanup()
 	{
 		// Cleanup the renderer.
 		Renderer.Cleanup();

@@ -4,12 +4,12 @@ using NFM.Resources;
 
 namespace NFM.Graphics;
 
-public class MaterialStep : CameraStep<StandardRenderPipeline>
+class MaterialStep : CameraStep<StandardRenderPipeline>
 {
 	public override void Init()
 	{
 		// Request a permutation for each shader combination
-		MaterialInstance.RequestPermutation<MaterialShaderPermutation>();
+		RenderMaterial.RequestPermutation<MaterialShaderPermutation>();
 	}
 
 	public override void Run(CommandList list)
@@ -24,14 +24,14 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 				// Bind inputs
 				list.SetPipelineSRV(0, 0, RP.VisBuffer);
 				list.SetPipelineSRV(1, 0, RP.DepthBuffer);	
-				list.SetPipelineSRV(0, 1, Mesh.VertexBuffer);
-				list.SetPipelineSRV(1, 1, Mesh.IndexBuffer);
-				list.SetPipelineSRV(2, 1, Mesh.MeshletBuffer);
-				list.SetPipelineSRV(3, 1, Mesh.MeshBuffer);
+				list.SetPipelineSRV(0, 1, RenderMesh.VertexBuffer);
+				list.SetPipelineSRV(1, 1, RenderMesh.IndexBuffer);
+				list.SetPipelineSRV(2, 1, RenderMesh.MeshletBuffer);
+				list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 				list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
 				list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
 				list.SetPipelineCBV(0, 1, RP.ViewCB);
-				list.SetPipelineSRV(0, 2, MaterialInstance.MaterialBuffer);
+				list.SetPipelineSRV(0, 2, RenderMaterial.MaterialBuffer);
 
 				// Material outputs
 				list.SetPipelineUAV(0, 0, RP.MatBuffer0);
@@ -47,7 +47,7 @@ public class MaterialStep : CameraStep<StandardRenderPipeline>
 	}
 }
 
-public class MaterialShaderPermutation : ShaderPermutation
+class MaterialShaderPermutation : ShaderPermutation
 {
 	private static ShaderModule materialModule = new ShaderModule(Embed.GetString("Shaders/Standard/MaterialCS.hlsl"));
 

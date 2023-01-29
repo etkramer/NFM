@@ -4,7 +4,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class SkinningStep : SceneStep
+class SkinningStep : SceneStep
 {
 	public override void Run(CommandList list)
 	{

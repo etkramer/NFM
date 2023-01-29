@@ -21,7 +21,7 @@ public struct ViewConstants
 /// Should contain any size-dependent resources - gbuffers, post-processing targets, etc.
 /// One RenderPipeline instance may be recycled for multiple render targets, but only of the same size/resolution.
 /// </summary>
-public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<TSelf>, new()
+abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<TSelf>, new()
 {
 	#region Cache
 
@@ -90,7 +90,7 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 	protected abstract void BeginRender(CommandList list, Texture rt);
 	protected abstract void EndRender(CommandList list, Texture rt);
 
-	internal void Render(Texture rt, CameraNode camera)
+	public void Render(Texture rt, CameraNode camera)
 	{
 		UpdateView(List, camera);
 		BeginRender(List, rt);

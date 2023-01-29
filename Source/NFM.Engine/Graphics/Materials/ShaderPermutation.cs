@@ -4,7 +4,7 @@ using NFM.Resources;
 
 namespace NFM.Graphics;
 
-public abstract class ShaderPermutation : IDisposable
+abstract class ShaderPermutation : IDisposable
 {
 	public IEnumerable<Shader> Shaders => shaders;
 	private Shader[] shaders;
@@ -19,8 +19,8 @@ public abstract class ShaderPermutation : IDisposable
 	public static IReadOnlyDictionary<Type, IEnumerable<ShaderPermutation>> All => all;
 	private static Dictionary<Type, IEnumerable<ShaderPermutation>> all = new();
 
-	public static ShaderPermutation FindOrCreate<T>(MaterialInstance source) where T : ShaderPermutation, new() => FindOrCreate(typeof(T), source);
-	public static ShaderPermutation FindOrCreate(Type type, MaterialInstance source)
+	public static ShaderPermutation FindOrCreate<T>(RenderMaterial source) where T : ShaderPermutation, new() => FindOrCreate(typeof(T), source);
+	public static ShaderPermutation FindOrCreate(Type type, RenderMaterial source)
 	{
 		// Try to find an existing, matching permutation
 		if (all.TryGetValue(type, out var typedList))

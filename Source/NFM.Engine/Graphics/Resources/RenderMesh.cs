@@ -1,13 +1,10 @@
 ﻿using System;
 using NFM.GPU;
-using NFM.Graphics;
+using NFM.Resources;
 
-namespace NFM.Resources;
+namespace NFM.Graphics;
 
-/// <summary>
-/// A part of a model that contains geometry - each model must have at least one of these per unique material.
-/// </summary>
-public partial class Mesh : IDisposable
+class RenderMesh : IDisposable
 {
 	// Geometry buffers
 	internal static GraphicsBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
@@ -15,7 +12,7 @@ public partial class Mesh : IDisposable
 	internal static GraphicsBuffer<Meshlet> MeshletBuffer = new(20000000); // Support 20m meshlets
 	internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(20000000 + 1); // Support 20m meshes
 
-	static Mesh()
+	static RenderMesh()
 	{
 		MeshBuffer.Name = "Mesh Buffer";
 		MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
@@ -27,37 +24,24 @@ public partial class Mesh : IDisposable
 	internal BufferAllocation<Meshlet> MeshletHandle;
 	internal BufferAllocation<GPUMesh> MeshHandle;
 
-	/// <summary>
-	/// Commits all changes to mesh data - must be called at least once before use.
-	/// </summary>
-	public unsafe void Commit()
+	public unsafe RenderMesh(Mesh source)
 	{
-		if (IsCommitted)
-		{
-			return;
-		}
-
 		// Free existing allocations.
 		VertexHandle?.Dispose();
 		IndexHandle?.Dispose();
 		MeshHandle?.Dispose();
 		MeshletHandle?.Dispose();
 
-		if (Bounds == Box3D.Infinity)
-		{
-			PopulateBounds();
-		}
-
-		fixed (uint* indicesPtr = Indices)
+		fixed (uint* indicesPtr = source.Indices)
 		{
 			// Build meshlet data
-			MeshOptimizer.BuildMeshlets(Indices, Vertices.Length, out var meshletIndices, out var meshletVerts, out var meshlets);
+			MeshOptimizer.BuildMeshlets(source.Indices, source.Vertices.Length, out var meshletIndices, out var meshletVerts, out var meshlets);
 
 			// Remap vertices to match meshlet output
 			Vertex[] verts = new Vertex[meshletVerts.Length];
 			for (int i = 0; i < meshletVerts.Length; i++)
 			{
-				verts[i] = Vertices[meshletVerts[i]];
+				verts[i] = source.Vertices[meshletVerts[i]];
 			}
 
 			// Cast indices byte->uint (TODO: unpack on the GPU)
@@ -84,64 +68,7 @@ public partial class Mesh : IDisposable
 			MeshletOffset = (uint)MeshletHandle.Offset,
 			IndexOffset = (uint)IndexHandle.Offset,
 			VertexOffset = (uint)VertexHandle.Offset,
-		});	
-
-		// Mark mesh as committed.
-		IsCommitted = true;
-	}
-
-	/// <summary>
-	/// Automatically generates tangents using mikktspace
-	/// </summary>
-	public void PopulateTangents()
-	{
-		MikkTSpace.GenTangents(this);
-	}
-
-	/// <summary>
-	/// Automatically generates 3D bounds
-	/// </summary>
-	public void PopulateBounds()
-	{
-		Vector3 min = Vector3.PositiveInfinity;
-		Vector3 max = Vector3.NegativeInfinity;
-
-		// Nothing fancy, just loop over every vert and
-		// compare to the current min/max values.
-		for (int i = 0; i < Vertices.Length; i++)
-		{
-			var vert = Vertices[i];
-
-			// Update minimums.
-			if (vert.Position.X < min.X)
-			{
-				min.X = vert.Position.X;
-			}
-			if (vert.Position.Y < min.Y)
-			{
-				min.Y = vert.Position.Y;
-			}
-			if (vert.Position.Z < min.Z)
-			{
-				min.Z = vert.Position.Z;
-			}
-
-			// Update maximums.
-			if (vert.Position.X > max.X)
-			{
-				max.X = vert.Position.X;
-			}
-			if (vert.Position.Y > max.Y)
-			{
-				max.Y = vert.Position.Y;
-			}
-			if (vert.Position.Z > max.Z)
-			{
-				max.Z = vert.Position.Z;
-			}
-		}
-
-		Bounds = new Box3D(min, max);
+		});
 	}
 
 	public void Dispose()
@@ -151,16 +78,6 @@ public partial class Mesh : IDisposable
 		MeshletHandle?.Dispose();
 		MeshHandle?.Dispose();
 	}
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public unsafe struct Vertex
-{
-	public Vector3 Position;
-	public Vector3 Normal;
-	public Vector4 Tangent;
-	public Vector2 UV0;
-	public Vector2 UV1;
 }
 
 [StructLayout(LayoutKind.Sequential)]

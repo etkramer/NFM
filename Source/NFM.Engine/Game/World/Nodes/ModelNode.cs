@@ -21,11 +21,11 @@ public partial class ModelNode : Node
 	public Dictionary<MeshGroup, Mesh> ActiveMeshGroups { get; } = new();
 
 	// Transforms
-	public BufferAllocation<GPUTransform> TransformHandle;
+	internal BufferAllocation<GPUTransform> TransformHandle;
 
 	// Mesh data
-	public Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
-	public Dictionary<Mesh, MaterialInstance> MaterialInstances { get; } = new();
+	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
+	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = new();
 	
 	public ModelNode(Scene scene) : base(scene)
 	{
@@ -72,7 +72,7 @@ public partial class ModelNode : Node
 		base.Dispose();
 	}
 
-	public void UpdateInstances(CommandList list)
+	void UpdateInstances(CommandList list)
 	{
 		// Clear existing instances
 		foreach (var mesh in InstanceHandles.Keys)
@@ -100,12 +100,12 @@ public partial class ModelNode : Node
 			if (mesh != null)
 			{
 				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
-				MaterialInstances[mesh] = new MaterialInstance(mesh.Material);
+				MaterialInstances[mesh] = new RenderMaterial(mesh.Material);
 
 				// Build instance data
 				GPUInstance instanceData = new()
 				{
-					MeshID = (int)mesh.MeshHandle.Offset,
+					MeshID = (int)mesh.RenderData.MeshHandle.Offset,
 					TransformID = (int)TransformHandle.Offset,
 					MaterialID = (int)MaterialInstances[mesh].MaterialHandle.Offset,
 				};

@@ -6,14 +6,14 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class MaterialInstance : IDisposable
+class RenderMaterial : IDisposable
 {
 	public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
 
 	#region Permutations
 	private static List<(IEnumerable<Shader>, int)> stackIDs = new();
 
-	private static List<MaterialInstance> all = new();
+	private static List<RenderMaterial> all = new();
 	private static List<Type> requestedPermutationTypes = new();
 	public static void RequestPermutation<T>() where T : ShaderPermutation, new()
 	{
@@ -37,7 +37,7 @@ public class MaterialInstance : IDisposable
 
 	#endregion
 
-	[Inspect] public Material Material { get; set; }
+	[Inspect] public Material Source { get; set; }
 
 	public ShaderParameter[] Parameters { get; }
 	public ObservableCollection<Shader> Shaders { get; } = new();
@@ -47,10 +47,10 @@ public class MaterialInstance : IDisposable
 	public int StackID { get; private set; }
 	private static int lastID = 0;
 
-	public MaterialInstance(Material baseMaterial)
+	public RenderMaterial(Material baseMaterial)
 	{
-		Material = baseMaterial;
-		Shaders.Add(Material.Shader);
+		Source = baseMaterial;
+		Shaders.Add(Source.Shader);
 
 		all.Add(this);
 
@@ -70,7 +70,7 @@ public class MaterialInstance : IDisposable
 		Parameters = Shaders.SelectMany(o => o.Parameters).ToArray();
 		for (int i = 0; i < Parameters.Length; i++)
 		{
-			var materialOverride = Material.MaterialOverrides.FirstOrDefault(o => o.Name == Parameters[i].Name);
+			var materialOverride = Source.MaterialOverrides.FirstOrDefault(o => o.Name == Parameters[i].Name);
 			if (materialOverride.Name != null)
 			{
 				Parameters[i].Value = materialOverride.Value;
@@ -105,7 +105,7 @@ public class MaterialInstance : IDisposable
 			object value = param.Value;
 
 			// Is parameter overriden by material?
-			if (Material.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
+			if (Source.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
 			{
 				value = overrideParam.Value;
 			}
