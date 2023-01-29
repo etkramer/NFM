@@ -7,7 +7,7 @@ struct _ViewConstants
 	float4x4 ViewToClip;
 	float4x4 ClipToView;
 
-	float2 ViewportSize;
+	float3 EyePosition;
 };
 ConstantBuffer<_ViewConstants> ViewConstants : register(b0, space1);
 
@@ -47,6 +47,7 @@ struct Vertex
 {
 	float3 Position;
 	float3 Normal;
+	float4 Tangent;
 	float2 UV0;
 	float2 UV1;
 };

@@ -45,7 +45,7 @@ public partial class Mesh : IDisposable
 
 		if (Bounds == Box3D.Infinity)
 		{
-			Bounds = CalculateBounds();
+			PopulateBounds();
 		}
 
 		fixed (uint* indicesPtr = Indices)
@@ -90,7 +90,18 @@ public partial class Mesh : IDisposable
 		IsCommitted = true;
 	}
 
-	public Box3D CalculateBounds()
+	/// <summary>
+	/// Automatically generates tangents using mikktspace
+	/// </summary>
+	public void PopulateTangents()
+	{
+		MikkTSpace.GenTangents(this);
+	}
+
+	/// <summary>
+	/// Automatically generates 3D bounds
+	/// </summary>
+	public void PopulateBounds()
 	{
 		Vector3 min = Vector3.PositiveInfinity;
 		Vector3 max = Vector3.NegativeInfinity;
@@ -130,7 +141,7 @@ public partial class Mesh : IDisposable
 			}
 		}
 
-		return new Box3D(min, max);
+		Bounds = new Box3D(min, max);
 	}
 
 	public void Dispose()
@@ -147,6 +158,7 @@ public unsafe struct Vertex
 {
 	public Vector3 Position;
 	public Vector3 Normal;
+	public Vector4 Tangent;
 	public Vector2 UV0;
 	public Vector2 UV1;
 }

@@ -13,7 +13,7 @@ public struct ViewConstants
 	public Matrix4 ViewToClip;
 	public Matrix4 ClipToView;
 
-	public Vector2 ViewportSize;
+	public Vector3 EyePosition;
 }
 
 /// <summary>
@@ -133,7 +133,7 @@ public abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPi
 			ViewToWorld = ViewMatrix.Inverse(),
 			ViewToClip = ProjectionMatrix,
 			ClipToView = ProjectionMatrix.Inverse(),
-			ViewportSize = Size,
+			EyePosition = camera.WorldTransform.ExtractTranslation(),
 		});
 	}
 }

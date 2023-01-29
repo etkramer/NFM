@@ -2,7 +2,7 @@
 #include "Shaders/World.h"
 
 RWTexture2D<float4> MatBuffer0 : register(u0);
-RWTexture2D<float2> MatBuffer1 : register(u1);
+RWTexture2D<half2> MatBuffer1 : register(u1);
 RWTexture2D<float4> MatBuffer2 : register(u2);
 
 Texture2D<uint2> VisBuffer : register(t0);
@@ -115,6 +115,15 @@ struct SurfaceModel
 	float Opacity;
 };
 
+// https://github.com/DigitalRune/DigitalRune/blob/master/Source/DigitalRune.Graphics.Content/DigitalRune/Encoding.fxh
+half2 EncodeNormalSphereMap(half3 normal)
+{
+	// See http://aras-p.info/texts/CompactNormalStorage.html.
+	half2 encodedNormal = (half2) normalize(normal.xy) * (half) sqrt(-normal.z * 0.5 + 0.5);
+	encodedNormal = encodedNormal * 0.5 + 0.5;
+	return encodedNormal;
+}
+
 SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 ddy);
 
 [numthreads(32, 32, 1)]
@@ -174,9 +183,9 @@ void main(uint2 id : SV_DispatchThreadID)
 	const BarycentricDeriv deriv = CalcFullBary(pt0, pt1, pt2, pixelNDC, frameSize);
 
 	// TODO: Understand why this needs to be done
-	float3 norm0 = normalize(mul(v0.Normal, (float3x3) transform.WorldToObject));
-	float3 norm1 = normalize(mul(v1.Normal, (float3x3) transform.WorldToObject));
-	float3 norm2 = normalize(mul(v2.Normal, (float3x3) transform.WorldToObject));
+	float3 norm0 = normalize(mul(v0.Normal, (float3x3)transform.WorldToObject));
+	float3 norm1 = normalize(mul(v1.Normal, (float3x3)transform.WorldToObject));
+	float3 norm2 = normalize(mul(v2.Normal, (float3x3)transform.WorldToObject));
 
 	// Interp vertex data
 	float3 normal = BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda);
@@ -191,6 +200,6 @@ void main(uint2 id : SV_DispatchThreadID)
 	
 	// Write to g-buffer
 	MatBuffer0[id] = float4(surface.Albedo, 1);
-	MatBuffer1[id] = float2(0, 0);
+	MatBuffer1[id] = EncodeNormalSphereMap(normal);
 	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, 1);
 }

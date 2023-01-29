@@ -104,6 +104,7 @@ namespace GLTF.Loaders
 					mesh.SetVertices(baseVertices);
 					mesh.SetIndices(primitive.GetIndices().ToArray());
 					mesh.SetMaterial(materials[primitive.Material.LogicalIndex]);
+					mesh.PopulateTangents();
 
 					// Add to new mesh (body) group
 					model.AddMeshGroup(mesh.Name, new Mesh[] { mesh, null }, mesh);
@@ -115,21 +116,10 @@ namespace GLTF.Loaders
 
 		private Vertex[] BuildVertices(IReadOnlyDictionary<string, Accessor> accessors, Matrix4 transform)
 		{
-			Debug.Assert(accessors.ContainsKey("POSITION"));
-
 			var positions = accessors.GetValueOrDefault("POSITION").AsSpan<Vector3>();
 			var normals = accessors.GetValueOrDefault("NORMAL").AsSpan<Vector3>();
 			var uv0 = accessors.GetValueOrDefault("TEXCOORD_0").AsSpan<Vector2>();
 			var uv1 = accessors.GetValueOrDefault("TEXCOORD_1").AsSpan<Vector2>();
-
-			foreach (var accessor in accessors.Keys)
-			{
-				//if (accessor != "POSITION" && accessor != "NORMAL" && accessor != "TEXCOORD_0" && accessor != "TEXCOORD_1")
-				{
-					Console.Write(accessor);
-				}
-				Console.Write('\n');
-			}
 
 			Vertex[] result = new Vertex[positions.Length];
 			for (int i = 0; i < result.Length; i++)
