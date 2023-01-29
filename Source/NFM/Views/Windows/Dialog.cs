@@ -10,7 +10,6 @@ using Avalonia.Platform;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media.Imaging;
 using System.Linq;
-using Avalonia.Visuals.Media.Imaging;
 
 namespace NFM;
 

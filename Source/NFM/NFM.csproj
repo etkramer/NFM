@@ -21,15 +21,17 @@
 	<ItemGroup>
 		<ProjectReference Include="..\NFM.Engine\NFM.Engine.csproj" />
 		<ProjectReference Include="..\Modules\NFM.Generators\NFM.Generators.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="..\Libraries\Avalonia\src\Skia\Avalonia.Skia\Avalonia.Skia.csproj" />
 		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.17" />
 		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
 		<PackageReference Include="WinApi" Version="4.0.0" />
-		<PackageReference Include="Avalonia" Version="0.10.17" />
+		<PackageReference Include="Avalonia" Version="11.0.0-preview4" />
+		<PackageReference Include="Avalonia.Skia" Version="11.0.0-preview4" />
+		<PackageReference Include="Avalonia.Native" Version="11.0.0-preview4" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
+		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.0-preview4" />
 		<PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
 	</ItemGroup>
 </Project>

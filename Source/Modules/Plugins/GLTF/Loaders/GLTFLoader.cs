@@ -104,7 +104,6 @@ namespace GLTF.Loaders
 					mesh.SetVertices(baseVertices);
 					mesh.SetIndices(primitive.GetIndices().ToArray());
 					mesh.SetMaterial(materials[primitive.Material.LogicalIndex]);
-					mesh.PopulateTangents();
 
 					// Add to new mesh (body) group
 					model.AddMeshGroup(mesh.Name, new Mesh[] { mesh, null }, mesh);
