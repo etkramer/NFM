@@ -2,6 +2,7 @@
 using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using NFM.World;
 using ReactiveUI;
 
@@ -18,7 +19,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 
 	public async void OpenPressed(object sender)
 	{
-		string openPath = await Dialog.ShowOpenDialog(sender as Window, new Dialog.FileFilter("NFM Project", "json"));
+		var openPath = (await Dialog.ShowOpenDialog(MainWindow.Instance, new Dialog.FileFilter("NFM Project", "json"))).FirstOrDefault();
 
 		if (openPath != null)
 		{
@@ -39,7 +40,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 
 	public async void SaveAsPressed(object sender)
 	{
-		string savePath = await Dialog.ShowSaveDialog((sender as Window), new Dialog.FileFilter("NFM Project", "json"));
+		var savePath = await Dialog.ShowSaveDialog(MainWindow.Instance, new Dialog.FileFilter("NFM Project", "json"));
 
 		if (savePath != null)
 		{
@@ -48,7 +49,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 	}
 
 	public void NewPressed() => Project.Reset();
-	public void QuitPressed(object sender) => (sender as Window).Close();
+	public void QuitPressed(object sender) => MainWindow.Instance.Close();
 	public void UndoPressed() => Command.Undo();
 	public void RedoPressed() => Command.Redo();
 	public void DeletePressed() => Selection.Selected.OfType<Node>().ToArray().ForEach(o => o.Dispose());

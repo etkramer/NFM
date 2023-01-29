@@ -1,0 +1,34 @@
+<controls:ToolPanel xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:controls="using:NFM"
+		x:Class="NFM.OutlinerPanel"
+		Title="Outliner"
+        mc:Ignorable="d">
+
+	<Grid RowDefinitions="30, *">
+		<!--Toolbar-->
+		<Grid Grid.Row="0" ColumnDefinitions="*, auto" Margin="4">
+			<Button Grid.Column="1" Classes="window" ToolTip.Tip="Add Node" Margin="4, 0, 0, 0" Command="{Binding OnAddPressed}">
+				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
+				<Button.Flyout>
+					<MenuFlyout Placement="Bottom">
+						<MenuItem Header="Add Model" Command="{Binding OnAddNodePressed}" CommandParameter="Model"/>
+						<MenuItem Header="Add Camera" Command="{Binding OnAddNodePressed}" CommandParameter="Camera"/>
+						<MenuItem Header="Add Light (Point)" Command="{Binding OnAddNodePressed}" CommandParameter="PointLight"/>
+					</MenuFlyout>
+				</Button.Flyout>
+			</Button>
+
+			<TextBox Grid.Column="0" Watermark="Filter.." Classes="search"/>
+		</Grid>
+
+		<!--Scene Tree-->
+		<Grid Grid.Row="1" Background="{StaticResource ControlBackgroundColor}">
+			<TreeDataGrid>
+				
+			</TreeDataGrid>
+		</Grid>
+	</Grid>
+</controls:ToolPanel>

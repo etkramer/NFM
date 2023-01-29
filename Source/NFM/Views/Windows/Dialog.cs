@@ -5,11 +5,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.Layout;
 using Avalonia.Data;
-using Avalonia.Controls.Presenters;
-using Avalonia.Platform;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media.Imaging;
-using System.Linq;
+using Avalonia.Platform.Storage;
 
 namespace NFM;
 
@@ -120,32 +118,49 @@ public class Dialog
 
 	public static async Task<string> ShowSaveDialog(Window parent, params FileFilter[] filters)
 	{
-		SaveFileDialog saveDialog = new SaveFileDialog()
+		var result = await parent.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
 		{
-			Filters = new List<FileDialogFilter>(filters)
-		};
+			FileTypeChoices = filters.Select(o => new FilePickerFileType(o.Name) { Patterns = o.Extensions.Select(o => $".{o}").ToArray() }).ToArray(),
+		});
 
-		return await saveDialog.ShowAsync(parent);
+		if (result?.TryGetUri(out var uri) ?? false)
+		{
+			return uri.AbsolutePath;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
-	public static async Task<string> ShowOpenDialog(Window parent, params FileFilter[] filters)
+	public static async Task<IEnumerable<string>> ShowOpenDialog(Window parent, params FileFilter[] filters)
 	{
-		OpenFileDialog openDialog = new OpenFileDialog()
+		var result = await parent.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
 		{
-			AllowMultiple = false,
-			Filters = new List<FileDialogFilter>(filters)
-		};
+			FileTypeFilter = filters.Select(o => new FilePickerFileType(o.Name) { Patterns = o.Extensions.Select(o => $".{o}").ToArray() }).ToArray(),
+		});
 
-		string[] result = await openDialog.ShowAsync(parent);
-		return result?.Length > 0 ? result[0] : null;
+		List<string> resultPaths = new();
+		foreach (var path in result)
+		{
+			if (path?.TryGetUri(out var uri) ?? false)
+			{
+				resultPaths.Add(uri.AbsolutePath);
+			}
+		}
+
+		return resultPaths;
 	}
 
-	public class FileFilter : FileDialogFilter
+	public class FileFilter
 	{
+		public string Name { get; }
+		public IEnumerable<string> Extensions { get; }
+
 		public FileFilter(string name, params string[] extensions)
 		{
 			Name = name;
-			Extensions = new(extensions);
+			Extensions = extensions;
 		}
 	}
 }

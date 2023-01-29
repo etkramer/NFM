@@ -9,9 +9,11 @@ namespace NFM;
 public partial class MainWindow : ReactiveWindow<MainWindowModel>
 {
 	public const bool UseQuitDialog = false;
+	public static MainWindow Instance { get; private set; }
 
 	public MainWindow()
 	{
+		Instance = this;
 		ViewModel = new MainWindowModel();
 
 		this.WhenActivated(d =>
@@ -42,9 +44,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		ToolPanel.Spawn<ViewportPanel>(group1);
 		dockspace.Dock(group1, null);
 
-		// Create group (scene panel).
+		// Create group (outliner panel).
 		TabGroup group2 = new TabGroup();
-		ToolPanel.Spawn<ScenePanel>(group2);
+		ToolPanel.Spawn<OutlinerPanel>(group2);
 		dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
 
 		// Create group (inspector panel).
