@@ -33,8 +33,6 @@ class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 
 	protected override void BeginRender(CommandList list, Texture rt)
 	{
-		list.ClearRenderTarget(ColorTarget);
-		list.ClearRenderTarget(VisBuffer);
 		list.ClearDepth(DepthBuffer);
 	}
 

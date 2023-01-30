@@ -85,7 +85,7 @@ namespace GLTF.Loaders
 			// Create model for NFM
 			Model model = new Model();
 
-			VisitNodes(sourceModel.RootNode, Matrix4.Identity, (node) =>
+			VisitMeshNodes(sourceModel.RootNode, Matrix4.Identity, (node) =>
 			{
 				// Get node transform as Z-up
 				var worldTransform = node.Item2 * Matrix4.CreateRotation(new(90, 0, 0));
@@ -125,7 +125,7 @@ namespace GLTF.Loaders
 			return model;
 		}
 
-		private unsafe void VisitNodes(AI.Node baseNode, Matrix4 baseTransform, Action<(AI.Node, Matrix4)> visit)
+		private unsafe void VisitMeshNodes(AI.Node baseNode, Matrix4 baseTransform, Action<(AI.Node, Matrix4)> visit)
 		{
 			var nodeTransform = baseNode.Transform;
 			baseTransform = baseTransform * (*(Matrix4*)&nodeTransform);
@@ -137,7 +137,7 @@ namespace GLTF.Loaders
 
 			foreach (var node in baseNode.Children)
 			{
-				VisitNodes(node, baseTransform, visit);
+				VisitMeshNodes(node, baseTransform, visit);
 			}
 		}
 

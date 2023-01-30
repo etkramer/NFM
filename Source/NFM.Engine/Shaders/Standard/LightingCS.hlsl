@@ -21,9 +21,10 @@ void main(uint2 id : SV_DispatchThreadID)
 		return;
 	}
 
-	// Early out if this pixel is empty
+	// Output background color for empty pixels
 	if (DepthBuffer[id] == 0)
 	{
+		RT[id] = SRGBToLinear(float4(0.002, 0.002, 0.002, 1));
 		return;
 	}
 	
