@@ -29,14 +29,14 @@ public static class Engine
 		PluginSystem.Init();
 
 		// Kick off model loading early.
-		_ = Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
+		_ = Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
 
 		// Create default nodes with new project.
 		Project.OnProjectCreated += async () =>
 		{
 			// Create example model
 			var model = new ModelNode(null);
-			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/TransmissionTest.glb");
+			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
 
 			/*for (int i = 0; i < 100000; i++)
 			{

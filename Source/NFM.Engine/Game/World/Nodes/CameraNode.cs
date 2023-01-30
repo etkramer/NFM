@@ -22,9 +22,4 @@ public class CameraNode : Node
 	{
 		Name = "Camera";
 	}
-
-	public override void DrawGizmos(GizmosContext context)
-	{
-
-	}
 }

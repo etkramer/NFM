@@ -122,12 +122,63 @@ public class Mesh : IDisposable
 			RenderData.Dispose();
 		}
 
+		if (Bounds == Box3D.Infinity)
+		{
+			PopulateBounds();
+		}
+
 		RenderData = new RenderMesh(this);
 	}
 
 	public void Dispose()
 	{
 		RenderData.Dispose();
+	}
+
+	/// <summary>
+	/// Automatically generates 3D bounds
+	/// </summary>
+	void PopulateBounds()
+	{
+		Vector3 min = Vector3.PositiveInfinity;
+		Vector3 max = Vector3.NegativeInfinity;
+
+		// Nothing fancy, just loop over every vert and
+		// compare to the current min/max values.
+		for (int i = 0; i < Vertices.Length; i++)
+		{
+			var vert = Vertices[i];
+
+			// Update minimums.
+			if (vert.Position.X < min.X)
+			{
+				min.X = vert.Position.X;
+			}
+			if (vert.Position.Y < min.Y)
+			{
+				min.Y = vert.Position.Y;
+			}
+			if (vert.Position.Z < min.Z)
+			{
+				min.Z = vert.Position.Z;
+			}
+
+			// Update maximums.
+			if (vert.Position.X > max.X)
+			{
+				max.X = vert.Position.X;
+			}
+			if (vert.Position.Y > max.Y)
+			{
+				max.Y = vert.Position.Y;
+			}
+			if (vert.Position.Z > max.Z)
+			{
+				max.Z = vert.Position.Z;
+			}
+		}
+
+		Bounds = new Box3D(min, max);
 	}
 }
 

@@ -90,8 +90,11 @@ static class Renderer
 			rp.Render(texture, camera);
 
 			// Setup gizmos context
-			var context = new GizmosContext(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
+			var context = new Gizmos(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
 			rp.List.SetRenderTarget(texture);
+
+			// Draw gizmos for any subscribers
+			context.FireGizmosEvent();
 
 			// Draw axis lines
 			context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));

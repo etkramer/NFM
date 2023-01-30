@@ -5,6 +5,9 @@ namespace NFM;
 public interface ISelectable
 {
 	string Name { get; }
+
+	void OnSelect();
+	void OnDeselect();
 }
 
 public static class Selection
@@ -20,6 +23,7 @@ public static class Selection
 	public static void Select(ISelectable item)
 	{
 		selected.Add(item);
+		item.OnSelect();
 	}
 
 	public static void Select(params ISelectable[] items)
@@ -30,22 +34,31 @@ public static class Selection
 		}
 	}
 
-	public static void Replace(params ISelectable[] items)
+	public static void Deselect(ISelectable item)
 	{
-		DeselectAll();
-		Select(items);
+		selected.Remove(item);
+		item.OnDeselect();
 	}
 
 	public static void Deselect(params ISelectable[] items)
 	{
 		foreach (ISelectable item in items)
 		{
-			selected.Remove(item);
+			Deselect(item);
 		}
+	}
+
+	public static void Replace(params ISelectable[] items)
+	{
+		DeselectAll();
+		Select(items);
 	}
 
 	public static void DeselectAll()
 	{
-		selected.Clear();
+		for (int i = selected.Count - 1; i >= 0; i--)
+		{
+			Deselect(selected[i]);
+		}
 	}
 }

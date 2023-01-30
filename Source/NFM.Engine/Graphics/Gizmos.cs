@@ -4,7 +4,7 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-public class GizmosContext
+public class Gizmos
 {
 	private CommandList renderList;
 	public CameraNode Camera { get; private set; }
@@ -15,7 +15,9 @@ public class GizmosContext
 	private static GraphicsBuffer<uint> gizmosIndexBuffer = new GraphicsBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
 	private static GraphicsBuffer<Vector3> gizmosVertexBuffer = new GraphicsBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
 
-	unsafe static GizmosContext()
+	public static event EventHandler<Gizmos> OnDrawGizmos;
+
+	unsafe static Gizmos()
 	{
 		linePSO = new PipelineState()
 			.SetMeshShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/LineMS.hlsl"), ShaderStage.Mesh))
@@ -37,7 +39,7 @@ public class GizmosContext
 	private Matrix4 projectionMatrix;
 	private GraphicsBuffer<ViewConstants> viewConstants;
 
-	public GizmosContext(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, GraphicsBuffer<ViewConstants> constants)
+	public Gizmos(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, GraphicsBuffer<ViewConstants> constants)
 	{
 		renderList = list;
 		Camera = camera;
@@ -168,6 +170,11 @@ public class GizmosContext
 
 		// Dispatch draw command.
 		renderList.DispatchMesh(indices.Length / 3);
+	}
+
+	internal void FireGizmosEvent()
+	{
+		OnDrawGizmos?.Invoke(null, this);
 	}
 
 	private unsafe int AsInt(float value)

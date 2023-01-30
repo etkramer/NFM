@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Avalonia;
 using NFM.GPU;
 using NFM.Graphics;
 using NFM.Resources;
@@ -116,9 +115,21 @@ public partial class ModelNode : Node
 		}
 	}
 
-	public override void DrawGizmos(GizmosContext context)
+	public override void OnSelect()
 	{
-		if (Selection.Selected.Contains(this) && Model != null && IsVisible)
+		Gizmos.OnDrawGizmos += OnDrawGizmos;
+		base.OnSelect();
+	}
+
+	public override void OnDeselect()
+	{
+		Gizmos.OnDrawGizmos -= OnDrawGizmos;
+		base.OnDeselect();
+	}
+
+	public void OnDrawGizmos(object sender, Gizmos context)
+	{
+		if (Model != null && IsVisible)
 		{
 			Box3D modelBounds = Box3D.Zero;
 			foreach (var group in Model.MeshGroups)
@@ -131,9 +142,7 @@ public partial class ModelNode : Node
 				}
 			}
 
-			//context.DrawBox(modelBounds, Color.White, Color.Invisible);
+			context.DrawBox(modelBounds, Color.White, Color.Invisible);
 		}
-
-		base.DrawGizmos(context);
 	}
 }

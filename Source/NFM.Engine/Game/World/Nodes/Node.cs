@@ -100,5 +100,6 @@ public class Node : ISelectable, IDisposable
 		}
 	}
 
-	public virtual void DrawGizmos(GizmosContext context) {}
+	public virtual void OnSelect() {}
+	public virtual void OnDeselect() {}
 }
