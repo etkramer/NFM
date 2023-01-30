@@ -127,7 +127,7 @@ public class Mesh : IDisposable
 
 	public void Dispose()
 	{
-
+		RenderData.Dispose();
 	}
 }
 

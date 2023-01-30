@@ -12,7 +12,7 @@ class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 	public Texture DepthBuffer;
 
 	public Texture MatBuffer0; // RGB: Albedo
-	public Texture MatBuffer1; // RG: Normal
+	public Texture MatBuffer1; // RGB: Normal
 	public Texture MatBuffer2; // R: Metallic, G: Specular, B: Roughness
 
 	protected override void Init(Vector2i size)
@@ -27,7 +27,7 @@ class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 		DepthBuffer = new Texture(size.X, size.Y, 1, Format.R32_Typeless, dsFormat: Format.D32_Float, srFormat: Format.R32_Float);
 
 		MatBuffer0 = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm);
-		MatBuffer1 = new Texture(size.X, size.Y, 1, Format.R16G16_Float);
+		MatBuffer1 = new Texture(size.X, size.Y, 1, Format.R16G16B16A16_Float);
 		MatBuffer2 = new Texture(size.X, size.Y, 1, Format.R8G8B8A8_UNorm);
 	}
 
