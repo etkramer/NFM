@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Vortice.Direct3D;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
 
@@ -259,6 +260,18 @@ public class CommandList : IDisposable
 		}
 	}
 
+	public void SeIndexBuffer(GraphicsBuffer target)
+	{
+		RequestState(target, ResourceStates.IndexBuffer);
+
+		list.IASetIndexBuffer(new IndexBufferView()
+		{
+			Format = Format.R32_UInt,
+			SizeInBytes = (int)target.SizeBytes,
+			BufferLocation = target.D3DResource.GPUVirtualAddress
+		});
+	}
+
 	public void SetPipelineState(PipelineState pso)
 	{
 		lock (this)
@@ -275,6 +288,7 @@ public class CommandList : IDisposable
 			if (pso.IsGraphics)
 			{
 				list.SetGraphicsRootSignature(pso.RootSignature);
+				list.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
 			}
 			if (pso.IsCompute)
 			{

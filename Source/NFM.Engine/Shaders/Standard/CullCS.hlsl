@@ -3,9 +3,12 @@
 struct IndirectCommand
 {
 	uint InstanceID;
-	uint ThreadGroupCountX;
-	uint ThreadGroupCountY;
-	uint ThreadGroupCountZ;
+	
+	uint IndexCountPerInstance;
+	uint InstanceCount;
+	uint StartIndexLocation;
+	uint BaseVertexLocation;
+	uint StartInstanceLocation;
 };
 
 ByteAddressBuffer MaterialParams : register(t0);
@@ -27,15 +30,18 @@ void main(uint3 dispatchID : SV_DispatchThreadID)
 	Mesh mesh = Meshes[instance.MeshID];
 
 	// Check visibility.
-	bool visible = mesh.MeshletCount > 0;
+	bool visible = true;
 	if (visible)
 	{
 		// Build command.
 		IndirectCommand command;
 		command.InstanceID = instanceID;
-		command.ThreadGroupCountX = mesh.MeshletCount;
-		command.ThreadGroupCountY = 1;
-		command.ThreadGroupCountZ = 1;
+		
+		command.IndexCountPerInstance = mesh.IndexCount;
+		command.InstanceCount = 1;
+		command.StartIndexLocation = mesh.IndexOffset;
+		command.BaseVertexLocation = mesh.VertexOffset;
+		command.StartInstanceLocation = 0;
 
 		// Store command and update count.
 		Commands.Append(command);

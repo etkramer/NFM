@@ -16,8 +16,7 @@
 		<EmbeddedResource Include="Shaders\Common\SFTemplate.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\LightingCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
-		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.h" />
-		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseMS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseVS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GeomMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GizmosPS.hlsl" />

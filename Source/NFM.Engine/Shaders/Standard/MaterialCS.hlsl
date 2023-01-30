@@ -11,15 +11,15 @@ Texture2D<float> DepthBuffer : register(t1);
 ByteAddressBuffer MaterialParams : register(t0, space2);
 int ShaderID : register(b0);
 
-uint3 FetchTriangleIndices(Mesh mesh, Meshlet meshlet, uint triangleID)
+uint3 FetchTriangleIndices(Mesh mesh, uint triangleID)
 {
-	triangleID = mesh.PrimStart + meshlet.PrimStart + (triangleID * 3);
-	return uint3(Primitives[triangleID], Primitives[triangleID + 1], Primitives[triangleID + 2]);
+	triangleID = mesh.IndexOffset + (triangleID * 3);
+	return uint3(Indices[triangleID], Indices[triangleID + 1], Indices[triangleID + 2]);
 }
 
-Vertex FetchVertexData(Mesh mesh, Meshlet meshlet, uint vert)
+Vertex FetchVertexData(Mesh mesh, uint index)
 {
-	return Vertices[mesh.VertStart + meshlet.VertStart + vert];
+	return Vertices[mesh.VertexOffset + index];
 }
 
 struct BarycentricDeriv
@@ -138,8 +138,7 @@ void main(uint2 id : SV_DispatchThreadID)
 
 	// Unpack visbuffer
 	uint instanceID = VisBuffer[id].x;
-	uint meshletID = UnpackBits(VisBuffer[id].y, 25).x;
-	uint triangleID = UnpackBits(VisBuffer[id].y, 25).y;
+	uint triangleID = VisBuffer[id].y;
 
 	// Fetch instance data
 	Instance instance = Instances[instanceID];
@@ -151,14 +150,13 @@ void main(uint2 id : SV_DispatchThreadID)
 	}
 	
 	Mesh mesh = Meshes[instance.MeshID];
-	Meshlet meshlet = Meshlets[mesh.MeshletStart + meshletID];
 	Transform transform = Transforms[instance.TransformID];
 
 	// Fetch vertex data for triangle
-	uint3 triangleIndices = FetchTriangleIndices(mesh, meshlet, triangleID);
-	Vertex v0 = FetchVertexData(mesh, meshlet, triangleIndices[0]);
-	Vertex v1 = FetchVertexData(mesh, meshlet, triangleIndices[1]);
-	Vertex v2 = FetchVertexData(mesh, meshlet, triangleIndices[2]);
+	uint3 triangleIndices = FetchTriangleIndices(mesh, triangleID);
+	Vertex v0 = FetchVertexData(mesh, triangleIndices[0]);
+	Vertex v1 = FetchVertexData(mesh, triangleIndices[1]);
+	Vertex v2 = FetchVertexData(mesh, triangleIndices[2]);
 
 	// Transform vertices to clip space
 	float4x4 mvp = mul(ViewConstants.ViewToClip, mul(ViewConstants.WorldToView, transform.ObjectToWorld));

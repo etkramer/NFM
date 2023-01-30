@@ -28,19 +28,9 @@ struct Transform
 // One per loaded mesh.
 struct Mesh
 {
-	uint VertStart; // Start of submesh in vertex buffer.
-	uint PrimStart; // Start of submesh in primitive buffer.
-	uint MeshletStart; // Start of submesh in meshlet buffer.
-	uint MeshletCount;   // Number of meshlets used
-};
-
-// (Mesh.MeshletCount) per loaded mesh.
-struct Meshlet
-{
-	uint VertStart; // First vertex in vertex buffer (relative to start of submesh)
-	uint PrimStart;   // First primitive in primitive buffer (relative to start of submesh)
-	uint VertCount; // Number of vertices used
-	uint PrimCount;   // Number of primitives used
+	uint VertexOffset; // Start of vertices in vertex buffer
+	uint IndexOffset; // Start of indices in index buffer
+	uint IndexCount; // Number of indices in index buffer
 };
 
 struct Vertex
@@ -54,8 +44,7 @@ struct Vertex
 
 // Global geometry data.
 StructuredBuffer<Vertex> Vertices : register(t0, space1);
-StructuredBuffer<uint> Primitives : register(t1, space1);
-StructuredBuffer<Meshlet> Meshlets : register(t2, space1);
+StructuredBuffer<uint> Indices : register(t1, space1);
 StructuredBuffer<Mesh> Meshes : register(t3, space1);
 StructuredBuffer<Transform> Transforms : register(t4, space1);
 StructuredBuffer<Instance> Instances : register(t5, space1);

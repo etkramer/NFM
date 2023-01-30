@@ -1,7 +1,9 @@
 ﻿#include "Shaders/Common.h"
-#include "Shaders/Standard/Prepass/BaseMS.h"
+#include "Shaders/World.h"
 
-uint2 main(PrimAttribute prim) : SV_TARGET0
+int InstanceID : register(b0);
+
+uint2 main(uint primitiveID : SV_PrimitiveID) : SV_TARGET0
 {
-	return uint2(prim.InstanceID, PackBits(prim.MeshletID, prim.TriangleID, 25));
+	return uint2(InstanceID, primitiveID);
 }

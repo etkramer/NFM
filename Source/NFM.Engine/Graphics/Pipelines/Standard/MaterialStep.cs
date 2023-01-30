@@ -26,7 +26,6 @@ class MaterialStep : CameraStep<StandardRenderPipeline>
 				list.SetPipelineSRV(1, 0, RP.DepthBuffer);	
 				list.SetPipelineSRV(0, 1, RenderMesh.VertexBuffer);
 				list.SetPipelineSRV(1, 1, RenderMesh.IndexBuffer);
-				list.SetPipelineSRV(2, 1, RenderMesh.MeshletBuffer);
 				list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 				list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
 				list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);

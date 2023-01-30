@@ -61,6 +61,7 @@ public sealed class PipelineState : IDisposable
 	// Parameters
 	private List<RootParameter1> rootParams = new();
 	private ShaderModule compiledCompute;
+	private ShaderModule compiledVertex;
 	private ShaderModule compiledMesh;
 	private ShaderModule compiledPixel;
 	private CullMode cullMode = CullMode.None;
@@ -71,11 +72,6 @@ public sealed class PipelineState : IDisposable
 	private int rtSamples = 1;
 	private TopologyType topologyType = TopologyType.Triangle;
 	private bool isBlendEnabled = false;
-
-	public PipelineState()
-	{
-
-	}
 
 	public void Dispose()
 	{
@@ -136,6 +132,13 @@ public sealed class PipelineState : IDisposable
 	{
 		compiledCompute = module;
 		IsGraphics = false;
+		return this;
+	}
+
+	public PipelineState SetVertexShader(ShaderModule module)
+	{
+		compiledVertex = module;
+		IsGraphics = true;
 		return this;
 	}
 
@@ -247,18 +250,18 @@ public sealed class PipelineState : IDisposable
 	{
 		return Task.Run(() =>
 		{
-			if (IsGraphics && (compiledPixel == null || compiledMesh == null))
+			if (IsGraphics && (compiledPixel == null || (compiledVertex == null && compiledMesh == null)))
 			{
-				throw new NotSupportedException("Cannot use a pixel shader without a mesh shader, or vice versa");
+				throw new NotSupportedException("Cannot use a pixel shader without a vertex/mesh shader, or vice versa");
 			}
 
 			if (IsCompute && IsGraphics)
 			{
-				throw new NotSupportedException("Cannot use a compute shader in the same PSO as a mesh or pixel shader");
+				throw new NotSupportedException("Cannot use a compute shader in the same PSO as a vertex/mesh or pixel shader");
 			}
 
 			// Build root parameters.
-			RootParameter1[] rootParameters = BuildRootParameters(compiledMesh, compiledPixel, compiledCompute);
+			RootParameter1[] rootParameters = BuildRootParameters(compiledVertex, compiledMesh, compiledPixel, compiledCompute);
 
 			// Create static samplers.
 			StaticSamplerDescription[] staticSamplers = new[]
@@ -284,25 +287,50 @@ public sealed class PipelineState : IDisposable
 					disabledBlend.RenderTarget[i].BlendEnable = false;
 				}
 
-				result = CreatePipelineState(new GraphicsPipelineStateStream()
+				if (compiledVertex == null)
 				{
-					RootSignature = RootSignature,
-					MeshShader = new ShaderBytecode(compiledMesh.Bytecode.ToArray()),
-					PixelShader = new ShaderBytecode(compiledPixel.Bytecode.ToArray()),
-					SampleMask = uint.MaxValue,
-					PrimitiveTopology = (PrimitiveTopologyType)topologyType,
-					SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
-					RenderTargetFormats = rtFormats,
-					DepthStencilFormat = D3DContext.DSFormat,
-					DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
-					RasterizerState = new RasterizerDescription()
+					result = CreatePipelineState(new MeshPipelineStateStream()
 					{
-						CullMode = (Vortice.Direct3D12.CullMode)cullMode,
-						FillMode = FillMode.Solid,
-						AntialiasedLineEnable = topologyType == TopologyType.Line,
-					},
-					BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
-				}, out PSO);
+						RootSignature = RootSignature,
+						MeshShader = new ShaderBytecode(compiledMesh.Bytecode.ToArray()),
+						PixelShader = new ShaderBytecode(compiledPixel.Bytecode.ToArray()),
+						SampleMask = uint.MaxValue,
+						PrimitiveTopology = (PrimitiveTopologyType)topologyType,
+						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
+						RenderTargetFormats = rtFormats,
+						DepthStencilFormat = D3DContext.DSFormat,
+						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
+						RasterizerState = new RasterizerDescription()
+						{
+							CullMode = (Vortice.Direct3D12.CullMode)cullMode,
+							FillMode = FillMode.Solid,
+							AntialiasedLineEnable = topologyType == TopologyType.Line,
+						},
+						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
+					}, out PSO);
+				}
+				else
+				{
+					result = CreatePipelineState(new VertexPipelineStateStream()
+					{
+						RootSignature = RootSignature,
+						VertexShader = new ShaderBytecode(compiledVertex.Bytecode.ToArray()),
+						PixelShader = new ShaderBytecode(compiledPixel.Bytecode.ToArray()),
+						SampleMask = uint.MaxValue,
+						PrimitiveTopology = (PrimitiveTopologyType)topologyType,
+						SampleDescription = new SampleDescription(rtSamples, rtSamples == 1 ? 0 : 1),
+						RenderTargetFormats = rtFormats,
+						DepthStencilFormat = D3DContext.DSFormat,
+						DepthStencilState = useDepth ? new DepthStencilDescription(true, depthWrite ? DepthWriteMask.All : DepthWriteMask.Zero, (ComparisonFunction)depthMode) : DepthStencilDescription.None,
+						RasterizerState = new RasterizerDescription()
+						{
+							CullMode = (Vortice.Direct3D12.CullMode)cullMode,
+							FillMode = FillMode.Solid,
+							AntialiasedLineEnable = topologyType == TopologyType.Line,
+						},
+						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
+					}, out PSO);
+				}
 			}
 			else if (IsCompute)
 			{
@@ -333,7 +361,40 @@ public sealed class PipelineState : IDisposable
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GraphicsPipelineStateStream
+	public struct CommonPipelineStateStream
+	{
+		public PipelineStateSubObjectTypeRootSignature RootSignature;
+		public PipelineStateSubObjectTypeVertexShader VertexShader;
+		public PipelineStateSubObjectTypeMeshShader MeshShader;
+		public PipelineStateSubObjectTypePixelShader PixelShader;
+		public PipelineStateSubObjectTypeSampleMask SampleMask;
+		public PipelineStateSubObjectTypePrimitiveTopology PrimitiveTopology;
+		public PipelineStateSubObjectTypeRasterizer RasterizerState;
+		public PipelineStateSubObjectTypeDepthStencil DepthStencilState;
+		public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
+		public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
+		public PipelineStateSubObjectTypeSampleDescription SampleDescription;
+		public PipelineStateSubObjectTypeBlend BlendDescription;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct VertexPipelineStateStream
+	{
+		public PipelineStateSubObjectTypeRootSignature RootSignature;
+		public PipelineStateSubObjectTypeVertexShader VertexShader;
+		public PipelineStateSubObjectTypePixelShader PixelShader;
+		public PipelineStateSubObjectTypeSampleMask SampleMask;
+		public PipelineStateSubObjectTypePrimitiveTopology PrimitiveTopology;
+		public PipelineStateSubObjectTypeRasterizer RasterizerState;
+		public PipelineStateSubObjectTypeDepthStencil DepthStencilState;
+		public PipelineStateSubObjectTypeRenderTargetFormats RenderTargetFormats;
+		public PipelineStateSubObjectTypeDepthStencilFormat DepthStencilFormat;
+		public PipelineStateSubObjectTypeSampleDescription SampleDescription;
+		public PipelineStateSubObjectTypeBlend BlendDescription;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MeshPipelineStateStream
 	{
 		public PipelineStateSubObjectTypeRootSignature RootSignature;
 		public PipelineStateSubObjectTypeMeshShader MeshShader;

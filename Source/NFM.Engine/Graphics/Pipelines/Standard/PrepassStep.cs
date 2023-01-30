@@ -22,7 +22,7 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Compile depth prepass program.
 		visPSO = new PipelineState()
-			.SetMeshShader(new ShaderModule(Embed.GetString("Shaders/Standard/Prepass/BaseMS.hlsl"), ShaderStage.Mesh))
+			.SetVertexShader(new ShaderModule(Embed.GetString("Shaders/Standard/Prepass/BaseVS.hlsl"), ShaderStage.Vertex))
 			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Standard/Prepass/PrepassPS.hlsl"), ShaderStage.Pixel))
 			.AsRootConstant(0, 1)
 			.SetDepthMode(DepthMode.GreaterEqual, true, true)
@@ -33,7 +33,7 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 		// Indirect command signature for depth pass.
 		commandSignature = new CommandSignature()
 			.AddConstantArg(0, visPSO)
-			.AddDispatchMeshArg()
+			.AddDrawIndexedArg()
 			.Compile();
 
 		commandBuffer = new GraphicsBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
@@ -47,8 +47,6 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 		// Switch to prepass PSO
 		list.SetPipelineState(visPSO);
 		list.SetPipelineSRV(0, 1, RenderMesh.VertexBuffer);
-		list.SetPipelineSRV(1, 1, RenderMesh.IndexBuffer);
-		list.SetPipelineSRV(2, 1, RenderMesh.MeshletBuffer);
 		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
 		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
@@ -56,6 +54,8 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 
 		// Output to vis/depth buffers
 		list.SetRenderTarget(RP.VisBuffer, RP.DepthBuffer);
+
+		list.SeIndexBuffer(RenderMesh.IndexBuffer);
 
 		// Indirect dispatch
 		list.BarrierUAV(commandBuffer);

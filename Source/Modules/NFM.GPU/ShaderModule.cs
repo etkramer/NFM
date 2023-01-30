@@ -12,6 +12,7 @@ public enum ShaderStage : uint
 {
 	Compute = DxcShaderStage.Compute,
 	Pixel = DxcShaderStage.Pixel,
+	Vertex = DxcShaderStage.Vertex,
 	Mesh = DxcShaderStage.Mesh,
 	Library = DxcShaderStage.Library,
 }

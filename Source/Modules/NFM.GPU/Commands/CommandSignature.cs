@@ -13,16 +13,16 @@ public sealed class CommandSignature : IDisposable
 
 	private PipelineState program = null;
 
-	public CommandSignature AddDispatchMeshArg()
+	public CommandSignature AddDrawIndexedArg()
 	{
 		arguments.Add(new IndirectArgumentDescription
 		{
-			Type = IndirectArgumentType.DispatchMesh,
+			Type = IndirectArgumentType.DrawIndexed,
 		});
 
 		unsafe
 		{
-			Stride += sizeof(DispatchMeshArguments);
+			Stride += sizeof(DrawIndexedArguments);
 		}
 
 		return this;
