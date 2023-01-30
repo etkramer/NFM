@@ -38,6 +38,12 @@ public static class Engine
 			var model = new ModelNode(null);
 			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
 
+			/*for (int i = 0; i < 100000; i++)
+			{
+				Node node = new Node(null);
+				node.Parent = model;
+			}*/
+
 			Selection.Select(model);
 		};
 	}
