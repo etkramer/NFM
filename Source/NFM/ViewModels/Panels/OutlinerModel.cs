@@ -29,7 +29,7 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 
 	ITreeDataGridSource<Node> GetSource(IEnumerable<Node> nodes)
 	{
-		return new HierarchicalTreeDataGridSource<Node>(nodes)
+		var source = new HierarchicalTreeDataGridSource<Node>(nodes)
 		{
 			Columns =
 			{
@@ -37,6 +37,22 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 				new TextColumn<Node, string>("Type", o => o.GetType().Name, new GridLength(1, GridUnitType.Star)),
 			},
 		};
+
+		// Keep selection in sync
+		source.RowSelection.SelectionChanged += (o, e) =>
+		{
+			if (e.DeselectedItems != null)
+			{
+				Selection.Deselect(e.DeselectedItems.ToArray());
+			}
+			if (e.SelectedItems != null)
+			{
+				Selection.Select(e.SelectedItems.ToArray());
+			}
+		};
+
+		source.RowSelection.SingleSelect = false;
+		return source;
 	}
 
 	public void OnAddPressed() {}

@@ -43,8 +43,6 @@ public static class Engine
 				Node node = new Node(null);
 				node.Parent = model;
 			}*/
-
-			Selection.Select(model);
 		};
 	}
 
