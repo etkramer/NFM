@@ -9,12 +9,11 @@ public partial class Scene : IDisposable
 
 	[Notify, Save] public static Scene Main { get; set; } = new();
 
-	[Notify] public ReadOnlyObservableCollection<Node> RootNodes { get; }
+	[Notify] public IEnumerable<Node> RootNodes => rootNodes;
 	[Save] private ObservableCollection<Node> rootNodes { get; set; } = new();
 
 	public Scene()
 	{
-		RootNodes = new(rootNodes);
 		All.Add(this);
 
 		TransformBuffer.Name = "Transform Buffer";

@@ -4,7 +4,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NFM.World;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using Avalonia.Controls.Models.TreeDataGrid;
 using ReactiveUI.Fody.Helpers;
 
@@ -19,8 +18,9 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 
 	public OutlinerModel()
 	{
-		// Subscribe to property changed notifications in case the scene changes (i.e. new project).
 		NodesSource = GetSource(Scene.Main.RootNodes);
+
+		// Subscribe to property changed notifications in case the scene changes (i.e. new project).
 		StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () =>
 		{
 			NodesSource = GetSource(Scene.Main.RootNodes);
@@ -33,7 +33,7 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 		{
 			Columns =
 			{
-				new HierarchicalExpanderColumn<Node>(new TextColumn<Node, string>("Name", o => o.Name, new GridLength(1, GridUnitType.Star)), o => o.Children),
+				new HierarchicalExpanderColumn<Node>(new TextColumn<Node, string>("Name", o => o.Name, new GridLength(1.5f, GridUnitType.Star)), o => o.Children),
 				new TextColumn<Node, string>("Type", o => o.GetType().Name, new GridLength(1, GridUnitType.Star)),
 			},
 		};
@@ -45,20 +45,7 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 		FlyoutBase.ShowAttachedFlyout(sender as Control);
 	}
 
-	public void OnAddNodePressed() {}
-	public void OnAddNodePressed(string type)
-	{
-		if (type == "Model")
-		{
-			new ModelNode(null);
-		}
-		else if (type == "Camera")
-		{
-			new CameraNode(null);
-		}
-		else if (type == "PointLight")
-		{
-			new PointLightNode(null);
-		}
-	}
+	public void OnAddModelPressed() => new ModelNode(null);
+	public void OnAddCameraPressed() => new CameraNode(null);
+	public void OnAddPointLightPressed() => new PointLightNode(null);
 }

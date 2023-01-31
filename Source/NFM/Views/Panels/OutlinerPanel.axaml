@@ -14,9 +14,9 @@
 				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
 				<Button.Flyout>
 					<MenuFlyout Placement="Bottom">
-						<MenuItem Header="Add Model" Command="{Binding OnAddNodePressed}" CommandParameter="Model"/>
-						<MenuItem Header="Add Camera" Command="{Binding OnAddNodePressed}" CommandParameter="Camera"/>
-						<MenuItem Header="Add Light (Point)" Command="{Binding OnAddNodePressed}" CommandParameter="PointLight"/>
+						<MenuItem Header="Add Model" Command="{Binding OnAddModelPressed}"/>
+						<MenuItem Header="Add Camera" Command="{Binding OnAddCameraPressed}" CommandParameter="Camera"/>
+						<MenuItem Header="Add Light (Point)" Command="{Binding OnAddPointLightPressed}" CommandParameter="PointLight"/>
 					</MenuFlyout>
 				</Button.Flyout>
 			</Button>
@@ -26,9 +26,7 @@
 
 		<!--Scene Tree-->
 		<Grid Grid.Row="1" Background="{StaticResource ControlBackgroundColor}">
-			<TreeDataGrid Source="{Binding NodesSource}">
-				
-			</TreeDataGrid>
+			<TreeDataGrid Source="{Binding NodesSource}" ShowColumnHeaders="False" AutoDragDropRows="False"/>
 		</Grid>
 	</Grid>
 </controls:ToolPanel>

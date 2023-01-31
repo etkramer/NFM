@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reactive.Linq;
+using DynamicData.Binding;
 using NFM.Common;
 using NFM.Graphics;
 using ReactiveUI;
@@ -20,7 +21,7 @@ public class Node : ISelectable, IDisposable
 
 	public Scene Scene { get; }
 
-	public ReadOnlyObservableCollection<Node> Children { get; }
+	public IEnumerable<Node> Children => children;
 	private ObservableCollection<Node> children = new();
 
 	private Node parent;
@@ -55,7 +56,6 @@ public class Node : ISelectable, IDisposable
 	{
 		Name = "Node";
 		Scene = scene ?? Scene.Main;
-		Children = new(children);
 
 		// Don't use setter for performance reasons
 		parent = null;

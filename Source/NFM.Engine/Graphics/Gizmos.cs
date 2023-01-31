@@ -146,7 +146,8 @@ public class Gizmos
 
 	public void DrawArrow(Vector3 p0, Vector3 p1, float radius, Color color = default)
 	{
-		float headLength = 0.03f;
+		float headLength = radius * 5;
+
 		Vector3 direction = (p1 - p0).Normalized();
 		DrawLine(p0, p1 - (headLength * direction), color);
 		DrawCone(p1 - (headLength * direction), p1, radius, color);
