@@ -144,6 +144,52 @@ public class Gizmos
 		renderList.DispatchMesh(1);
 	}
 
+	public void DrawArrow(Vector3 p0, Vector3 p1, float radius, Color color = default)
+	{
+		float headLength = 0.03f;
+		Vector3 direction = (p1 - p0).Normalized();
+		DrawLine(p0, p1 - (headLength * direction), color);
+		DrawCone(p1 - (headLength * direction), p1, radius, color);
+	}
+
+	public void DrawCone(Vector3 p0, Vector3 p1, float radius, Color color = default)
+	{
+		const int numSegments = 12;
+		const float aMax = (MathF.PI * 2.0f) * (numSegments - 1.0f) / numSegments;
+
+		Span<Vector4> vertices = stackalloc Vector4[numSegments + 2];
+		Span<uint> indices = stackalloc uint[(numSegments + 1) * 3];
+
+		// Populate vertices
+		vertices[numSegments + 1] = ToClipSpace(p1);
+		for (int i = 0; i <= numSegments; i++)
+		{
+			// Calculate vertex coords
+			float aMin = 0f;
+			float a = aMin + (i / (float)numSegments) * (aMax - aMin);
+			var vertex = new Vector3(0 + MathF.Cos(a) * radius, 0 + MathF.Sin(a) * radius, 0);
+
+			// Rotate vertex
+			Vector3 fromDirection = new Vector3(0, 0, -1);
+			Vector3 toDirection = (p1 - p0).Normalized();
+			float angleRadians = MathF.Acos(Vector3.Dot(fromDirection, toDirection));
+			Vector3 axis = Vector3.Cross(fromDirection, toDirection);
+
+			vertex = p0 + Vector3.Transform(vertex, Rotation.FromAxisAngle(axis, angleRadians));
+			vertices[i] = ToClipSpace(vertex);
+		}
+		
+		// Populate indices
+		for (int i = 0; i <= numSegments; i++)
+		{
+			indices[(i * 3) + 0] = (uint)i;
+			indices[(i * 3) + 1] = (i == numSegments) ? 0 : (uint)i + 1;
+			indices[(i * 3) + 2] = numSegments + 1;
+		}
+
+		DrawGeometry(vertices, indices, color);
+	}
+
 	private Vector4 ToClipSpace(Vector3 world)
 	{
 		Vector4 clip = new Vector4(world, 1);
