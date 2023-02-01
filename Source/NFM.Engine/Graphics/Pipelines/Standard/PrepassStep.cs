@@ -7,21 +7,21 @@ namespace NFM.Graphics;
 
 class PrepassStep : CameraStep<StandardRenderPipeline>
 {
-	private PipelineState cullPSO;
-	private PipelineState visPSO;
+	private static PipelineState cullPSO;
+	private static PipelineState visPSO;
 
-	private GraphicsBuffer commandBuffer;
-	private CommandSignature commandSignature;
+	private static GraphicsBuffer commandBuffer;
+	private static CommandSignature commandSignature;
 
 	public override void Init()
 	{
 		// Compile indirect compute program.
-		cullPSO = new PipelineState()
+		cullPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/CullCS.hlsl"), ShaderStage.Compute))
 			.Compile().Result;
 
 		// Compile depth prepass program.
-		visPSO = new PipelineState()
+		visPSO ??= new PipelineState()
 			.SetVertexShader(new ShaderModule(Embed.GetString("Shaders/Standard/Prepass/BaseVS.hlsl"), ShaderStage.Vertex))
 			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Standard/Prepass/PrepassPS.hlsl"), ShaderStage.Pixel))
 			.AsRootConstant(0, 1)
@@ -31,12 +31,12 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 			.Compile().Result;
 
 		// Indirect command signature for depth pass.
-		commandSignature = new CommandSignature()
+		commandSignature ??= new CommandSignature()
 			.AddConstantArg(0, visPSO)
 			.AddDrawIndexedArg()
 			.Compile();
 
-		commandBuffer = new GraphicsBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
+		commandBuffer ??= new GraphicsBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
 	}
 
 	public override void Run(CommandList list)

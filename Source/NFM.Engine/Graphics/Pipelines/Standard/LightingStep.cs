@@ -6,12 +6,12 @@ namespace NFM.Graphics;
 
 class LightingStep : CameraStep<StandardRenderPipeline>
 {
-	private PipelineState lightingPSO;
+	private static PipelineState lightingPSO;
 
 	public override void Init()
 	{
 		// Compile indirect compute program.
-		lightingPSO = new PipelineState()
+		lightingPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/LightingCS.hlsl"), ShaderStage.Compute))
 			.Compile().Result;
 	}

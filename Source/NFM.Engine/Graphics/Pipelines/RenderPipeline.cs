@@ -75,15 +75,23 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 	public CommandList List { get; } = new CommandList();	
 	protected Vector2i Size { get; private set; } = default;
 
-	private static List<CameraStep<TSelf>> renderSteps= new();
-	protected static void AddStep<T>() where T : CameraStep<TSelf>, new()
+	private List<CameraStep<TSelf>> renderSteps= new();
+
+	protected void AddStep<T>() where T : CameraStep<TSelf>, new()
 	{
 		if (!renderSteps.Any(o => o.GetType() == typeof(T)))
 		{
 			var step = new T();
-			renderSteps.Add(step);
+			step.RP = (TSelf)this;
 			step.Init();
+
+			renderSteps.Add(step);
 		}
+	}
+
+	protected T GetStep<T>() where T : CameraStep<TSelf>
+	{
+		return renderSteps.FirstOrDefault(o => o.GetType() == typeof(T)) as T;
 	}
 
 	protected abstract void Init(Vector2i size);
@@ -98,7 +106,6 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 		foreach (var step in renderSteps)
 		{
 			List.BeginEvent(step.GetType().Name);
-			step.RP = (TSelf)this;
 			step.Camera = camera;
 
 			step.Run(step.RP.List);
@@ -112,6 +119,11 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 	{
 		List.Dispose();
 		ViewCB.Dispose();
+
+		foreach (var step in renderSteps)
+		{
+			step.Dispose();
+		}
 	}
 
 	public Matrix4 ViewMatrix { get; private set; }

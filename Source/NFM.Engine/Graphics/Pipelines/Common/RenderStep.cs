@@ -4,10 +4,12 @@ using NFM.World;
 
 namespace NFM.Graphics;
 
-abstract class RenderStep
+abstract class RenderStep : IDisposable
 {
 	public virtual void Init() {}
 	public abstract void Run(CommandList list);
+
+	public virtual void Dispose() {}
 }
 
 abstract class SceneStep : RenderStep
