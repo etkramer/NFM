@@ -128,6 +128,7 @@ public class Mesh : IDisposable
 		}
 
 		RenderData = new RenderMesh(this);
+		IsCommitted = true;
 	}
 
 	public void Dispose()

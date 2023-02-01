@@ -34,9 +34,13 @@ public partial class ModelNode : Node
 		this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
 		{
 			ActiveMeshGroups.Clear();
-			foreach (var group in Model.MeshGroups)
+
+			if (Model != null)
 			{
-				ActiveMeshGroups[group] = group.DefaultSelection;
+				foreach (var group in Model.MeshGroups)
+				{
+					ActiveMeshGroups[group] = group.DefaultSelection;
+				}
 			}
 
 			UpdateInstances(Renderer.DefaultCommandList);
@@ -86,7 +90,7 @@ public partial class ModelNode : Node
 		InstanceHandles.Clear();
 		MaterialInstances.Clear();
 
-		if (!IsVisible)
+		if (!IsVisible || Model == null)
 		{
 			return;
 		}
