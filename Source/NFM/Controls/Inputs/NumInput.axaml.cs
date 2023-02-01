@@ -49,7 +49,7 @@ public class NumInput : TemplatedControl
 	private string value;
 	[Notify] private string valueProxy
 	{
-		get => Value?.ToString();
+		get => value;
 		set => this.value = value;
 	}
 
@@ -72,7 +72,8 @@ public class NumInput : TemplatedControl
 		RoutingStrategies.Tunnel);
 
 		// Make sure proxy responds to changes in source.
-		ValueProperty.Changed.Subscribe(o => (this as INotify).Raise(nameof(valueProxy)));
+		valueProxy = Value.ToString();
+		ValueProperty.Changed.Subscribe(o => valueProxy = Value.ToString());
 
 		base.OnApplyTemplate(e);
 	}
@@ -98,7 +99,7 @@ public class NumInput : TemplatedControl
 			Value = num;
 
 			// Make sure text field resets even if the number hasn't changed.
-			(this as INotify).Raise(nameof(valueProxy));
+			valueProxy = Value.ToString();
 		}
 		else
 		{
