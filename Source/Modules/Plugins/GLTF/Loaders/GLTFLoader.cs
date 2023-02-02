@@ -118,7 +118,7 @@ namespace GLTF.Loaders
 					mesh.SetMaterial(materials[sourceMesh.MaterialIndex]);
 
 					// Add to new mesh (body) group
-					model.AddMeshGroup(mesh.Name, new Mesh[] { mesh, null }, mesh);
+					model.AddMesh(mesh);
 				}
 			});
 

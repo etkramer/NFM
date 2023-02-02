@@ -17,8 +17,6 @@ public partial class ModelNode : Node
 	[Inspect]
 	public bool IsVisible { get; set; } = true;
 
-	public Dictionary<MeshGroup, Mesh> ActiveMeshGroups { get; } = new();
-
 	// Transforms
 	internal BufferAllocation<GPUTransform> TransformHandle;
 
@@ -33,16 +31,6 @@ public partial class ModelNode : Node
 		// Track changes in model/visibility
 		this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
 		{
-			ActiveMeshGroups.Clear();
-
-			if (Model != null)
-			{
-				foreach (var group in Model.MeshGroups)
-				{
-					ActiveMeshGroups[group] = group.DefaultSelection;
-				}
-			}
-
 			UpdateInstances(Renderer.DefaultCommandList);
 		});
 
@@ -96,14 +84,12 @@ public partial class ModelNode : Node
 		}
 
 		// (Re)build the array of instance handles
-		foreach (var group in Model.MeshGroups)
+		foreach (var mesh in Model.Meshes)
 		{
-			var mesh = ActiveMeshGroups[group];
-
-			if (mesh != null)
+			if (mesh.IsVisible)
 			{
 				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
-				MaterialInstances[mesh] = new RenderMaterial(mesh.Material);
+				MaterialInstances[mesh] = new RenderMaterial(mesh.Materials[0]);
 
 				// Build instance data
 				GPUInstance instanceData = new()
@@ -136,11 +122,9 @@ public partial class ModelNode : Node
 		if (Model != null && IsVisible)
 		{
 			Box3D modelBounds = Box3D.Zero;
-			foreach (var group in Model.MeshGroups)
+			foreach (var mesh in Model.Meshes)
 			{
-				var mesh = ActiveMeshGroups[group];
-
-				if (mesh != null)
+				if (mesh.IsVisible)
 				{
 					modelBounds += mesh.Bounds;
 				}

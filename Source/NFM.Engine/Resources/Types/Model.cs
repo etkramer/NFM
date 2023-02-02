@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Avalonia.Controls;
 using NFM.Graphics;
 
 namespace NFM.Resources;
@@ -9,23 +10,17 @@ namespace NFM.Resources;
 /// </summary>
 public sealed class Model : GameResource
 {
-	public IEnumerable<MeshGroup> MeshGroups => meshGroups;
-	private List<MeshGroup> meshGroups = new();
+	public IEnumerable<Mesh> Meshes => meshes;
+	private List<Mesh> meshes = new();
 
-	public IEnumerable<Mesh> Meshes => meshGroups.SelectMany(o => o.Meshes).Where(o => o != null);
-	public bool IsCommitted => Meshes.All(o => o.IsCommitted);
+	public bool IsCommitted => meshes.All(o => o.IsCommitted);
 
-	public bool AddMeshGroup(string groupName, IEnumerable<Mesh> meshes, Mesh defaultSelection = null)
+	public bool AddMesh(Mesh mesh)
 	{
-		foreach (var mesh in meshes)
+		if (mesh != null)
 		{
-			mesh?.Commit();
-		}
-
-		lock (meshGroups)
-		{
-			MeshGroup group = new MeshGroup(groupName, meshes, defaultSelection);
-			meshGroups.Add(group);
+			meshes.Add(mesh);
+			mesh.Commit();
 		}
 
 		return true;
@@ -42,33 +37,7 @@ public sealed class Model : GameResource
 	}
 }
 
-public sealed class MeshGroup
-{
-	/// <summary>
-	/// The name of this group, displayed when selecting group members.
-	/// </summary>
-	public string Name { get; }
-
-	/// <summary>
-	/// The group member (mesh) that should be selected by default.
-	/// </summary>
-	public Mesh DefaultSelection { get; }
-
-	public IEnumerable<Mesh> Meshes => meshes;
-	private Mesh[] meshes;
-
-	internal MeshGroup(string name, IEnumerable<Mesh> meshes, Mesh defaultSelection = null)
-	{
-		Debug.Assert(meshes != null && meshes?.Count() > 0, "Tried to assign a null or empty collection to a MeshGroup");
-		Debug.Assert(meshes.Contains(defaultSelection), "Tried to set DefaultSelection to a mesh that does not exist in the MeshGroup");
-
-		Name = name;
-		DefaultSelection = defaultSelection;
-		this.meshes = meshes.ToArray();
-	}
-}
-
-public class Mesh : IDisposable
+public sealed class Mesh
 {
 	/// <summary>
 	/// The name of this mesh, displayed when choosing mesh groups.
@@ -80,10 +49,17 @@ public class Mesh : IDisposable
 	/// </summary>
 	public bool IsCommitted { get; private set; } = false;
 
+	/// <summary>
+	/// Should this mesh be visible by default?
+	/// </summary>
+	public bool IsVisible { get; private set; } = true;
+
+	public int NumLODs { get; private set; } = 0;
+
 	public Box3D Bounds { get; set; } = Box3D.Infinity;
-	public uint[] Indices { get; private set; }
-	public Vertex[] Vertices { get; private set; }
-	public Material Material { get; private set; }
+	public uint[][] Indices { get; private set; } = new uint[0][];
+	public Vertex[][] Vertices { get; private set; } = new Vertex[0][];
+	public Material[] Materials { get; private set; } = new Material[0];
 
 	internal RenderMesh RenderData = null;
 
@@ -92,22 +68,45 @@ public class Mesh : IDisposable
 		Name = name;
 	}
 
-	public void SetIndices(uint[] indices)
+	public void SetIndices(uint[] indices, int lod = 0)
 	{
-		Indices = indices;
+		CheckLOD(lod);
+		Indices[lod] = indices;
 		IsCommitted = false;
 	}
 
-	public void SetVertices(Vertex[] vertices)
+	public void SetVertices(Vertex[] vertices, int lod = 0)
 	{
-		Vertices = vertices;
+		CheckLOD(lod);
+		Vertices[lod] = vertices;
 		IsCommitted = false;
 	}
 
-	public void SetMaterial(Material material)
+	public void SetMaterial(Material material, int lod = 0)
 	{
-		Material = material;
+		CheckLOD(lod);
+		Materials[lod] = material;
 		IsCommitted = false;
+	}
+
+	private void CheckLOD(int lod)
+	{
+		Debug.Assert(lod <= 4, "Meshes may not contain more than five LOD levels (up to LOD4)");
+
+		if (lod >= NumLODs)
+		{
+			NumLODs = lod + 1;
+			
+			var vertices = Vertices;
+			var indices = Indices;
+			var material = Materials;
+			Array.Resize(ref vertices, NumLODs);
+			Array.Resize(ref indices, NumLODs);
+			Array.Resize(ref material, NumLODs);
+			Vertices = vertices;
+			Indices = indices;
+			Materials = material;
+		}
 	}
 
 	public void Commit()
@@ -148,7 +147,7 @@ public class Mesh : IDisposable
 		// compare to the current min/max values.
 		for (int i = 0; i < Vertices.Length; i++)
 		{
-			var vert = Vertices[i];
+			var vert = Vertices[0][i];
 
 			// Update minimums.
 			if (vert.Position.X < min.X)

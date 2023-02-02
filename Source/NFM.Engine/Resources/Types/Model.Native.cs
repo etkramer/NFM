@@ -37,11 +37,11 @@ static unsafe class MikkTSpace
 		public nint m_setTSpace;
 	}
 
-	public static void GenTangents(Mesh mesh)
+	public static void GenTangents(Mesh mesh, int lod)
 	{
 		getNumFaces getNumFacesImpl = (pContext) =>
 		{
-			return mesh.Indices.Length / 3;
+			return mesh.Indices[lod].Length / 3;
 		};
 
 		getNumVerticesOfFace getNumVerticesOfFaceImpl = (pContext, iFace) =>
@@ -51,27 +51,27 @@ static unsafe class MikkTSpace
 
 		getPosition getPositionImpl = (pContext, fvPosOut, iFace, iVert) =>
 		{
-			var vert = mesh.Vertices[mesh.Indices[(iFace * 3) + iVert]];
+			var vert = mesh.Vertices[lod][mesh.Indices[lod][(iFace * 3) + iVert]];
 			*(Vector3*)fvPosOut = vert.Position;
 		};
 
 		getNormal getNormalImpl = (pContext, fvNormOut, iFace, iVert) =>
 		{
-			var vert = mesh.Vertices[mesh.Indices[(iFace * 3) + iVert]];
+			var vert = mesh.Vertices[lod][mesh.Indices[lod][(iFace * 3) + iVert]];
 			*(Vector3*)fvNormOut = vert.Normal;
 		};
 
 		getTexCoord getTexCoordImpl = (pContext, fvTexcOut, iFace, iVert) =>
 		{
-			var vert = mesh.Vertices[mesh.Indices[(iFace * 3) + iVert]];
+			var vert = mesh.Vertices[lod][mesh.Indices[lod][(iFace * 3) + iVert]];
 			*(Vector2*)fvTexcOut = vert.UV0;
 		};
 
 		setTSpaceBasic setTSpaceBasicImpl = (pContext, fvTangent, fSign, iFace, iVert) =>
 		{
-			uint vertIndex = mesh.Indices[(iFace * 3) + iVert];
+			uint vertIndex = mesh.Indices[lod][(iFace * 3) + iVert];
 
-			mesh.Vertices[vertIndex].Tangent = new Vector4()
+			mesh.Vertices[lod][vertIndex].Tangent = new Vector4()
 			{
 				X = fvTangent[0],
 				Y = fvTangent[1],

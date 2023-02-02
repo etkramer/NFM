@@ -29,13 +29,13 @@ class RenderMesh : IDisposable
 		IndexHandle?.Dispose();
 		MeshHandle?.Dispose();
 
-		fixed (uint* indicesPtr = source.Indices)
+		fixed (uint* indicesPtr = source.Indices[0])
 		{
 			// Upload geometry data to GPU
-			VertexHandle = VertexBuffer.Allocate(source.Vertices.Length);
-			IndexHandle = IndexBuffer.Allocate(source.Indices.Length);
-			Renderer.DefaultCommandList.UploadBuffer(VertexHandle, source.Vertices);
-			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, source.Indices);
+			VertexHandle = VertexBuffer.Allocate(source.Vertices[0].Length);
+			IndexHandle = IndexBuffer.Allocate(source.Indices[0].Length);
+			Renderer.DefaultCommandList.UploadBuffer(VertexHandle, source.Vertices[0]);
+			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, source.Indices[0]);
 		}
 
 		// Upload mesh info to GPU.
@@ -44,7 +44,7 @@ class RenderMesh : IDisposable
 		{
 			VertexOffset = (uint)VertexHandle.Offset,
 			IndexOffset = (uint)IndexHandle.Offset,
-			IndexCount = (uint)source.Indices.Length,
+			IndexCount = (uint)source.Indices[0].Length,
 		});
 	}
 
