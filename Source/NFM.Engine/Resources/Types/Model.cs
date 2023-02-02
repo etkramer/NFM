@@ -70,28 +70,28 @@ public sealed class Mesh
 
 	public void SetIndices(uint[] indices, int lod = 0)
 	{
-		CheckLOD(lod);
+		CheckLODIndex(lod);
 		Indices[lod] = indices;
 		IsCommitted = false;
 	}
 
 	public void SetVertices(Vertex[] vertices, int lod = 0)
 	{
-		CheckLOD(lod);
+		CheckLODIndex(lod);
 		Vertices[lod] = vertices;
 		IsCommitted = false;
 	}
 
 	public void SetMaterial(Material material, int lod = 0)
 	{
-		CheckLOD(lod);
+		CheckLODIndex(lod);
 		Materials[lod] = material;
 		IsCommitted = false;
 	}
 
-	private void CheckLOD(int lod)
+	private void CheckLODIndex(int lod)
 	{
-		Debug.Assert(lod <= 4, "Meshes may not contain more than five LOD levels (up to LOD4)");
+		Debug.Assert(lod <= 3, "Meshes may not contain more than four LOD levels (up to LOD3)");
 
 		if (lod >= NumLODs)
 		{

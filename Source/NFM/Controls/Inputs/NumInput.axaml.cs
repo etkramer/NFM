@@ -97,16 +97,10 @@ public class NumInput : TemplatedControl
 		if (TryParseNum(value ?? Value.ToString(), Value.GetType(), out object num))
 		{
 			Value = num;
+		}
 
-			// Make sure text field resets even if the number hasn't changed.
-			valueProxy = Value.ToString();
-		}
-		else
-		{
-			// Reset value.
-			valueProxy = Value.ToString();
-			textBox.Text = value;
-		}
+		// Make sure text field resets even if the number hasn't changed.
+		valueProxy = Value.ToString();
 	}
 
 	private static DataTable computeTable = new();

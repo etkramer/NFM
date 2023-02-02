@@ -9,7 +9,7 @@ class RenderMesh : IDisposable
 	// Geometry buffers
 	internal static GraphicsBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
 	internal static GraphicsBuffer<Vertex> VertexBuffer = new(20000000); // Support 20m verts
-	internal static GraphicsBuffer<GPUMesh> MeshBuffer = new(20000000 + 1); // Support 20m meshes
+	internal static GraphicsBuffer<MeshData> MeshBuffer = new(20000000 + 1); // Support 20m meshes
 
 	static RenderMesh()
 	{
@@ -20,7 +20,7 @@ class RenderMesh : IDisposable
 	// Geometry allocations
 	internal BufferAllocation<uint> IndexHandle;
 	internal BufferAllocation<Vertex> VertexHandle;
-	internal BufferAllocation<GPUMesh> MeshHandle;
+	internal BufferAllocation<MeshData> MeshHandle;
 
 	public unsafe RenderMesh(Mesh source)
 	{
@@ -40,7 +40,7 @@ class RenderMesh : IDisposable
 
 		// Upload mesh info to GPU.
 		MeshHandle = MeshBuffer.Allocate(1);
-		Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new GPUMesh()
+		Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
 		{
 			VertexOffset = (uint)VertexHandle.Offset,
 			IndexOffset = (uint)IndexHandle.Offset,
@@ -57,7 +57,7 @@ class RenderMesh : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct GPUMesh
+internal struct MeshData
 {
 	public required uint VertexOffset; // Start of vertices in vertex buffer
 	public required uint IndexOffset; // Start of indices in index buffer
