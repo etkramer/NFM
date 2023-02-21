@@ -2,7 +2,7 @@
 
 namespace NFM.World;
 
-[Icon('\uEA24')]
+[Icon("emoji_objects")]
 public class PointLightNode : Node
 {
 	/// <summary>

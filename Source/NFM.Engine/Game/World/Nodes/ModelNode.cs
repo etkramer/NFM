@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace NFM.World;
 
-[Icon('\uE9FE')]
+[Icon("view_in_ar")]
 public partial class ModelNode : Node
 {
 	[Inspect]

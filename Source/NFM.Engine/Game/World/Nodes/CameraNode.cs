@@ -4,7 +4,7 @@ using NFM.Resources;
 
 namespace NFM.World;
 
-[Icon('\uE412')]
+[Icon("photo_camera")]
 public class CameraNode : Node
 {
 	[Inspect]

@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace NFM.World;
 
-[Icon('\uE3C2')]
+[Icon("crop_free")]
 public class Node : ISelectable, IDisposable
 {
 	[Inspect] public string Name { get; set; }

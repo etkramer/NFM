@@ -28,10 +28,10 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 	public string ObjectName { get; set; } = "None";
 
 	[ObservableAsProperty]
-	public char TypeIcon { get; }
+	public string TypeName { get; } = "None";
 
 	[ObservableAsProperty]
-	public string TypeName { get; }
+	public string TypeIcon { get; } = "question_mark";
 
 	public InspectorModel()
 	{
@@ -39,7 +39,7 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 		{
 			// Type icon behavior
 			this.WhenAnyValue(o => o.ObjectType)
-				.Select(o => o == null ? '\uEB8B' : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : '\uEB8B')
+				.Select(o => o == null ? "question_mark" : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : "question_mark")
 				.ToPropertyEx(this, o => o.TypeIcon)
 				.DisposeWith(disposables);
 
