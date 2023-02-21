@@ -13,10 +13,10 @@
 			<!--Forward/back buttons-->
 			<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
 				<Button Classes="window" ToolTip.Tip="Back">
-					<TextBlock Text="&#xE5C4;" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
+					<TextBlock Text="arrow_back" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
 				</Button>
 				<Button Classes="window" ToolTip.Tip="Forward" Margin="0, 0, 8, 0" IsEnabled="False">
-					<TextBlock Text="&#xE5C8;" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
+					<TextBlock Text="arrow_forward" FontSize="16" FontFamily="{StaticResource IconsFont}"/>
 				</Button>
 			</StackPanel>
 

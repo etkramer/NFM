@@ -3,7 +3,7 @@
         xmlns:controls="using:NFM">
 
   <Style Selector="controls|NumInput">
-	<Setter Property="Icon" Value="&#xF1B9;"/>
+	<Setter Property="Icon" Value="multiple_stop"/>
 	<Setter Property="IconColor" Value="#A1C35D"/>
 	  
     <Setter Property="Template">

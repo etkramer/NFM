@@ -11,7 +11,7 @@
 		<!--Toolbar-->
 		<Grid Grid.Row="0" ColumnDefinitions="*, auto" Margin="4">
 			<Button Grid.Column="1" Classes="window" ToolTip.Tip="Add Node" Margin="4, 0, 0, 0" Command="{Binding OnAddPressed}">
-				<TextBlock Text="&#xE145;" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
+				<TextBlock Text="add" FontSize="16" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" TextAlignment="Center"/>
 				<Button.Flyout>
 					<MenuFlyout Placement="Bottom">
 						<MenuItem Header="Add Model" Command="{Binding OnAddModelPressed}"/>

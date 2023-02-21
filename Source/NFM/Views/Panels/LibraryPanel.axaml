@@ -46,7 +46,7 @@
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Folders}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
-							<TextBlock Text="&#xE2C7;" FontFamily="{StaticResource IconsFont}" Background="Transparent" Foreground="#E6DB74" VerticalAlignment="Center" FontSize="16"/>
+							<TextBlock Text="folder" FontFamily="{StaticResource IconsFont}" Background="Transparent" Foreground="#E6DB74" VerticalAlignment="Center" FontSize="16"/>
 							<TextBlock Text="{Binding Name}" Background="Transparent"/>
 						</StackPanel>
 					</TreeDataTemplate>
@@ -68,7 +68,7 @@
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal" Background="Transparent" Spacing="8" Height="19">
-							<TextBlock Text="&#xE2C7;" Foreground="#E6DB74" Margin="10, 0, 0, 0" FontSize="18" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+							<TextBlock Text="folder" Foreground="#E6DB74" Margin="10, 0, 0, 0" FontSize="18" FontFamily="{StaticResource IconsFont}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
 							<TextBlock Text="{Binding Name}" Foreground="{StaticResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
 						</StackPanel>
 					</DataTemplate>

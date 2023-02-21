@@ -53,10 +53,9 @@ public class NumInput : TemplatedControl
 		set => this.value = value;
 	}
 
-	private TextBox textBox;
 	protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
 	{
-		textBox = e.NameScope.Find<TextBox>("PART_TextBox");
+		var textBox = e.NameScope.Find<TextBox>("PART_TextBox");
 		textBox.KeyDown += OnKeyDown;
 		textBox.LostFocus += OnLostFocus;
 		textBox.IsUndoEnabled = false;
@@ -72,8 +71,14 @@ public class NumInput : TemplatedControl
 		RoutingStrategies.Tunnel);
 
 		// Make sure proxy responds to changes in source.
-		valueProxy = Value.ToString();
-		ValueProperty.Changed.Subscribe(o => valueProxy = Value.ToString());
+		Action resetProxy = () =>
+		{
+			// Limit decimal places
+			valueProxy = string.Format("{0:0.##}", Value);
+		};
+
+		ValueProperty.Changed.Subscribe(o => resetProxy.Invoke());
+		resetProxy.Invoke();
 
 		base.OnApplyTemplate(e);
 	}
