@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using NFM.Common;
 using NFM.Resources;
-using static NFM.LibraryPanel;
 
 namespace NFM;
 

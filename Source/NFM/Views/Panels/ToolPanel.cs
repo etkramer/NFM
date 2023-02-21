@@ -15,14 +15,6 @@ public abstract class ToolPanel : UserControl
 		get { return GetValue(TitleProperty); }
 		set { SetValue(TitleProperty, value); }
 	}
-
-	public static T Spawn<T>(TabGroup group = null) where T : ToolPanel, new()
-	{
-		T tool = new();
-		group.Tabs.Add(new Tab(tool, group));
-
-		return tool;
-	}
 }
 
 public abstract class ReactiveToolPanel<TViewModel> : ToolPanel, IViewFor<TViewModel> where TViewModel : class

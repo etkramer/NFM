@@ -41,27 +41,27 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 	{
 		// Create group (viewport 1).
 		TabGroup group1 = new TabGroup();
-		ToolPanel.Spawn<ViewportPanel>(group1);
+		group1.Add(new ViewportPanel());
 		dockspace.Dock(group1, null);
 
 		// Create group (outliner panel).
 		TabGroup group2 = new TabGroup();
-		ToolPanel.Spawn<OutlinerPanel>(group2);
+		group2.Add(new OutlinerPanel());
 		dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
 
 		// Create group (inspector panel).
 		TabGroup group3 = new TabGroup();
-		ToolPanel.Spawn<InspectorPanel>(group3);
+		group3.Add(new InspectorPanel());
 		dockspace.Dock(group3, group1, DockPosition.Right, 0.13f);
 
 		// Create group (library).
-		/*TabGroup group4 = new TabGroup();
-		ToolPanel.Spawn<LibraryPanel>(group4);
-		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);*/
+		TabGroup group4 = new TabGroup();
+		group4.Add(new LibraryPanel());
+		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
 
 		// Create group (viewport 2).
 		/*TabGroup group5 = new TabGroup();
-		ToolPanel.Spawn<ViewportPanel>(group5);
+		group5.Add(new ViewportPanel());
 		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}
 

@@ -60,6 +60,11 @@ public class TabGroup : TemplatedControl
 		}
 	}
 
+	public void Add<T>(T control) where T : ToolPanel
+	{
+		Tabs.Add(new Tab(control, this));
+	}
+
 	public void CloseTab(Tab tab)
 	{
 		// Remove single tab.
