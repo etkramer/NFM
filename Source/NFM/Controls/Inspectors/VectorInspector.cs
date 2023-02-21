@@ -144,13 +144,13 @@ public partial class VectorInspector : UserControl
 		_ => null
 	};
 
-	private SolidColorBrush GetIconForeground(int component) => component switch
+	private SolidColorBrush GetIconForeground(int component) => foregroundBrushes[component];
+	private static SolidColorBrush[] foregroundBrushes = new[]
 	{
-		0 => SolidColorBrush.Parse("#E26E6E"),
-		1 => SolidColorBrush.Parse("#A8CC60"),
-		2 => SolidColorBrush.Parse("#84B5E6"),
-		3 => SolidColorBrush.Parse("#6E6EE2"),
-		_ => null
+		SolidColorBrush.Parse("#E26E6E"),
+		SolidColorBrush.Parse("#A8CC60"),
+		SolidColorBrush.Parse("#84B5E6"),
+		SolidColorBrush.Parse("#6E6EE2"),
 	};
 
 	public void Dispose()

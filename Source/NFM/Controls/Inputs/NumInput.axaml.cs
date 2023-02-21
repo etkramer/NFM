@@ -1,4 +1,7 @@
+using System.ComponentModel;
 using System.Data;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
@@ -8,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using ReactiveUI.Fody.Helpers;
 
 namespace NFM;
 
@@ -18,16 +22,8 @@ public class NumInput : TemplatedControl
 	public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
 	public static StyledProperty<IBrush> IconColorProperty = AvaloniaProperty.Register<NumInput, IBrush>(nameof(IconColor));
 
-	[Notify] public string Icon
-	{
-		get => GetValue(IconProperty);
-		set
-		{
-			SetValue(IconProperty, value);
-		}
-	}
-
-	[Notify] public object Value
+	[Reactive]
+	public object Value
 	{
 		get => GetValue(ValueProperty);
 		set
@@ -36,7 +32,18 @@ public class NumInput : TemplatedControl
 		}
 	}
 
-	[Notify] public IBrush IconColor
+	[Reactive]
+	public string Icon
+	{
+		get => GetValue(IconProperty);
+		set
+		{
+			SetValue(IconProperty, value);
+		}
+	}
+
+	[Reactive]
+	public IBrush IconColor
 	{
 		get => GetValue(IconColorProperty);
 		set
@@ -45,12 +52,14 @@ public class NumInput : TemplatedControl
 		}
 	}
 
-	// Stores string changes before they've been applied.
-	private string value;
-	[Notify] private string valueProxy
+	[Notify]
+	string valueProxy { get; set; }
+
+	CompositeDisposable disposables = new();
+
+	public NumInput()
 	{
-		get => value;
-		set => this.value = value;
+		DetachedFromLogicalTree += (o, e) => disposables.Dispose();
 	}
 
 	protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -60,7 +69,7 @@ public class NumInput : TemplatedControl
 		textBox.LostFocus += OnLostFocus;
 		textBox.IsUndoEnabled = false;
 
-		// Ignore alphabetical inputs.
+		// Ignore alphabetical inputs
 		textBox.AddHandler(TextInputEvent, (o, e) =>
 		{
 			if (!e.Text.All(c => !char.IsLetter(c)))
@@ -70,20 +79,23 @@ public class NumInput : TemplatedControl
 		},
 		RoutingStrategies.Tunnel);
 
-		// Make sure proxy responds to changes in source.
-		Action resetProxy = () =>
-		{
-			// Limit decimal places
-			valueProxy = string.Format("{0:0.##}", Value);
-		};
-
-		ValueProperty.Changed.Subscribe(o => resetProxy.Invoke());
-		resetProxy.Invoke();
+		// WARNING: This subscription is never disposed
+		// Make sure proxy responds to changes in source
+		valueProxy = FormatNumber(Value);
+		var sub = ValueProperty.Changed
+			.Where(o => o.Sender == this)
+			.Subscribe(o => valueProxy = FormatNumber(Value))
+			.DisposeWith(disposables);
 
 		base.OnApplyTemplate(e);
 	}
 
-	private void OnKeyDown(object sender, KeyEventArgs args)
+	string FormatNumber(object value)
+	{
+		return string.Format("{0:0.##}", value);
+	}
+
+	void OnKeyDown(object sender, KeyEventArgs args)
 	{
 		if (args.Key == Key.Enter)
 		{
@@ -91,7 +103,7 @@ public class NumInput : TemplatedControl
 		}
 	}
 
-	private void OnLostFocus(object sender, RoutedEventArgs args)
+	void OnLostFocus(object sender, RoutedEventArgs args)
 	{
 		if (Value == null)
 		{
@@ -99,32 +111,32 @@ public class NumInput : TemplatedControl
 		}
 
 		// Set input to new value.
-		if (TryParseNum(value ?? Value.ToString(), Value.GetType(), out object num))
+		if (TryParseNum(valueProxy, Value.GetType(), out object num))
 		{
 			Value = num;
 		}
 
-		// Make sure text field resets even if the number hasn't changed.
+		// Make sure text field resets even if the number hasn't changed
 		valueProxy = Value.ToString();
 	}
 
-	private static DataTable computeTable = new();
-	private bool TryParseNum(string text, Type numType, out object num)
+	static DataTable computeTable = new();
+	bool TryParseNum(string text, Type numType, out object num)
 	{
-		// Interpret emptied field as zero.
+		// Interpret emptied field as zero
 		if (string.IsNullOrWhiteSpace(text))
 		{
 			num = Convert.ChangeType(0, numType);
 			return true;
 		}
 
-		// Try to simplify the text as an expression.
+		// Try to simplify the text as an expression
 		try
 		{
 			object computedValue = computeTable.Compute(text, null);
 			text = computedValue.ToString();
 		}
-		catch {} // No problem, probably just not a valid expression.
+		catch {} // No problem, probably just not a valid expression
 
 		if (IsFloat(numType))
 		{
@@ -152,7 +164,7 @@ public class NumInput : TemplatedControl
 		return false;
 	}
 
-	private bool IsUnsigned(Type type)
+	bool IsUnsigned(Type type)
 	{
 		return type == typeof(byte)
 			|| type == typeof(ushort)
@@ -160,7 +172,7 @@ public class NumInput : TemplatedControl
 			|| type == typeof(ulong);
 	}
 
-	private bool IsFloat(Type type)
+	bool IsFloat(Type type)
 	{
 		return type == typeof(float)
 			|| type == typeof(double);

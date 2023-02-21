@@ -10,7 +10,7 @@
 				<Border Background="#19E6E62E" Width="20" MinHeight="20" VerticalAlignment="Stretch">
 					<TextBlock Text="edit" FontSize="14" FontFamily="{StaticResource IconsFont}" Foreground="#E6E62E" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
 				</Border>
-				<TextBox x:Name="PART_TextBox" Grid.Column="1" Padding="4, 0" VerticalContentAlignment="Center" Text="{TemplateBinding ValueProxy, Mode=TwoWay}" Foreground="{StaticResource ThemeForegroundMidBrush}" TextWrapping="Wrap"/>
+				<TextBox x:Name="PART_TextBox" Grid.Column="1" Padding="4, 0" VerticalContentAlignment="Center" Text="{Binding valueProxy, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Foreground="{StaticResource ThemeForegroundMidBrush}" TextWrapping="Wrap"/>
 			</Grid>
 		</Border>
       </ControlTemplate>

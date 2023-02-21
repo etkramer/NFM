@@ -1,3 +1,5 @@
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -11,7 +13,6 @@ namespace NFM;
 public class TextInput : TemplatedControl
 {
 	public static StyledProperty<string> ValueProperty = AvaloniaProperty.Register<TextInput, string>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
-	public static AvaloniaProperty<string> ValueProxyProperty = AvaloniaProperty.RegisterDirect<TextInput, string>(nameof(ValueProxy), o => o.ValueProxy, (o, v) => o.ValueProxy = v);
 
 	[Notify] public string Value
 	{
@@ -22,12 +23,14 @@ public class TextInput : TemplatedControl
 		}
 	}
 
-	// Stores string changes before they've been applied.
-	private string value;
-	private string ValueProxy
+	[Notify]
+	string valueProxy { get; set; }
+
+	CompositeDisposable disposables = new();
+
+	public TextInput()
 	{
-		get => Value;
-		set => this.value = value;
+		DetachedFromLogicalTree += (o, e) => disposables.Dispose();
 	}
 
 	protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -38,12 +41,16 @@ public class TextInput : TemplatedControl
 		textBox.IsUndoEnabled = false;
 
 		// Make sure proxy responds to changes in source.
-		ValueProperty.Changed.Subscribe(o => RaisePropertyChanged(ValueProxyProperty, default, Value));
+		valueProxy = Value;
+		ValueProperty.Changed
+			.Where(o => o.Sender == this)
+			.Subscribe(o => valueProxy = Value)
+			.DisposeWith(disposables);
 
 		base.OnApplyTemplate(e);
 	}
 
-	private void OnKeyDown(object sender, KeyEventArgs args)
+	void OnKeyDown(object sender, KeyEventArgs args)
 	{
 		if (args.Key == Key.Enter)
 		{
@@ -51,9 +58,9 @@ public class TextInput : TemplatedControl
 		}
 	}
 
-	private void OnLostFocus(object sender, RoutedEventArgs args)
+	void OnLostFocus(object sender, RoutedEventArgs args)
 	{
 		// Apply value.
-		Value = value;
+		Value = valueProxy;
 	}
 }
