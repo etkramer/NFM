@@ -12,141 +12,139 @@ using StbiSharp;
 using NFM.Common;
 using NFM.World;
 using AI = Assimp;
-using System.Xml.Linq;
 
-namespace GLTF.Loaders
+namespace GLTF.Loaders;
+
+public class GLTFLoader : ResourceLoader<Model>
 {
-	public class GLTFLoader : ResourceLoader<Model>
+	public string Path;
+
+	public GLTFLoader(string path)
 	{
-		public string Path;
+		Path = path;
+	}
 
-		public GLTFLoader(string path)
+	public override async Task<Model> Load()
+	{
+		// Load GLTF model from file.
+		AssimpContext importer = new AssimpContext();
+		var sourceModel = importer.ImportFile(Path, PostProcessSteps.None);
+
+		// Load textures from GLTF
+		var textures = new Texture2D[sourceModel.TextureCount];
+		Parallel.For(0, sourceModel.TextureCount, (i) =>
 		{
-			Path = path;
-		}
+			var sourceTexture = sourceModel.Textures[i];
+			Debug.Assert(sourceTexture.HasCompressedData);
 
-		public override async Task<Model> Load()
+			using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.CompressedData.AsSpan(), 4))
+			{
+				Texture2D texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
+				texture.SetPixelData(ToReadWriteSpan(sourceImage.Data), 0, true);
+
+				textures[i] = texture;
+			}
+		});
+
+		// Load materials from GLTF
+		Material[] materials = new Material[sourceModel.MaterialCount];
+		for (int i = 0; i < sourceModel.MaterialCount; i++)
 		{
-			// Load GLTF model from file.
-			AssimpContext importer = new AssimpContext();
-			var sourceModel = importer.ImportFile(Path, PostProcessSteps.None);
+			var sourceMaterial = sourceModel.Materials[i];
 
-			// Load textures from GLTF
-			var textures = new Texture2D[sourceModel.TextureCount];
-			Parallel.For(0, sourceModel.TextureCount, (i) =>
+			// Determine shader
+			Shader shader = await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl");
+
+			// Load textures
+			sourceMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var baseColor);
+			sourceMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);
+			sourceMaterial.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
+
+			// Create material from channels
+			Material material = new Material(shader);
+			if (!string.IsNullOrEmpty(baseColor.FilePath))
 			{
-				var sourceTexture = sourceModel.Textures[i];
-				Debug.Assert(sourceTexture.HasCompressedData);
-
-				using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.CompressedData.AsSpan(), 4))
-				{
-					Texture2D texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
-					texture.SetPixelData(ToReadWriteSpan(sourceImage.Data), 0, true);
-
-					textures[i] = texture;
-				}
-			});
-
-			// Load materials from GLTF
-			Material[] materials = new Material[sourceModel.MaterialCount];
-			for (int i = 0; i < sourceModel.MaterialCount; i++)
+				int index = int.Parse(baseColor.FilePath.Split('*')[1]);
+				material.SetTexture("BaseColor", textures[index]);
+			}
+			if (!string.IsNullOrEmpty(normal.FilePath))
 			{
-				var sourceMaterial = sourceModel.Materials[i];
-
-				// Determine shader
-				Shader shader = await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl");
-
-				// Load textures
-				sourceMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var baseColor);
-				sourceMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);
-				sourceMaterial.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
-
-				// Create material from channels
-				Material material = new Material(shader);
-				if (!string.IsNullOrEmpty(baseColor.FilePath))
-				{
-					int index = int.Parse(baseColor.FilePath.Split('*')[1]);
-					material.SetTexture("BaseColor", textures[index]);
-				}
-				if (!string.IsNullOrEmpty(normal.FilePath))
-				{
-					int index = int.Parse(normal.FilePath.Split('*')[1]);
-					material.SetTexture("Normal", textures[index]);
-				}
-				if (!string.IsNullOrEmpty(orm.FilePath))
-				{
-					int index = int.Parse(orm.FilePath.Split('*')[1]);
-					material.SetTexture("ORM", textures[index]);
-				}
-
-				materials[i] = material;
+				int index = int.Parse(normal.FilePath.Split('*')[1]);
+				material.SetTexture("Normal", textures[index]);
+			}
+			if (!string.IsNullOrEmpty(orm.FilePath))
+			{
+				int index = int.Parse(orm.FilePath.Split('*')[1]);
+				material.SetTexture("ORM", textures[index]);
 			}
 
-			// Create model for NFM
-			Model model = new Model();
+			materials[i] = material;
+		}
 
-			VisitMeshNodes(sourceModel.RootNode, Matrix4.Identity, (node) =>
+		// Create model for NFM
+		Model model = new Model();
+
+		VisitMeshNodes(sourceModel.RootNode, Matrix4.Identity, (node) =>
+		{
+			// Get node transform as Z-up
+			var worldTransform = node.Item2 * Matrix4.CreateRotation(new(90, 0, 0));
+
+			for (int i = 0; i < node.Item1.MeshCount; i++)
 			{
-				// Get node transform as Z-up
-				var worldTransform = node.Item2 * Matrix4.CreateRotation(new(90, 0, 0));
+				var sourceMesh = sourceModel.Meshes[node.Item1.MeshIndices[i]];
 
-				for (int i = 0; i < node.Item1.MeshCount; i++)
+				// Reformat vertices
+				Vertex[] vertices = new Vertex[sourceMesh.Vertices.Count];
+				for (int j = 0; j < sourceMesh.Vertices.Count; j++)
 				{
-					var sourceMesh = sourceModel.Meshes[node.Item1.MeshIndices[i]];
+					var position = (new Vector4(sourceMesh.Vertices[j].X, sourceMesh.Vertices[j].Y, sourceMesh.Vertices[j].Z, 1) * worldTransform).Xyz;
+					var normal = (new Vector4(sourceMesh.Normals[j].X, sourceMesh.Normals[j].Y, sourceMesh.Normals[j].Z, 1) * worldTransform).Xyz;
+					var uv0 = sourceMesh.TextureCoordinateChannels[0][j];
 
-					// Reformat vertices
-					Vertex[] vertices = new Vertex[sourceMesh.Vertices.Count];
-					for (int j = 0; j < sourceMesh.Vertices.Count; j++)
+					unsafe
 					{
-						var position = (new Vector4(sourceMesh.Vertices[j].X, sourceMesh.Vertices[j].Y, sourceMesh.Vertices[j].Z, 1) * worldTransform).Xyz;
-						var normal = (new Vector4(sourceMesh.Normals[j].X, sourceMesh.Normals[j].Y, sourceMesh.Normals[j].Z, 1) * worldTransform).Xyz;
-						var uv0 = sourceMesh.TextureCoordinateChannels[0][j];
-
-						unsafe
-						{
-							vertices[j] = new Vertex();
-							vertices[j].Position = position;
-							vertices[j].Normal = normal;
-							vertices[j].UV0 = (*(Vector2*)&uv0) * new Vector2(1, -1);
-						}
+						vertices[j] = new Vertex();
+						vertices[j].Position = position;
+						vertices[j].Normal = normal;
+						vertices[j].UV0 = (*(Vector2*)&uv0) * new Vector2(1, -1);
 					}
-
-					// Create mesh
-					var mesh = new Mesh(sourceMesh.Name ?? "unnamed");
-					mesh.SetVertices(vertices);
-					mesh.SetIndices(sourceMesh.GetUnsignedIndices());
-					mesh.SetMaterial(materials[sourceMesh.MaterialIndex]);
-
-					// Add to new mesh (body) group
-					model.AddMesh(mesh);
 				}
-			});
 
-			return model;
+				// Create mesh
+				var mesh = new Mesh(sourceMesh.Name ?? "unnamed");
+				mesh.SetVertices(vertices);
+				mesh.SetIndices(sourceMesh.GetUnsignedIndices());
+				mesh.SetMaterial(materials[sourceMesh.MaterialIndex]);
+
+				// Add to new mesh (body) group
+				model.AddMesh(mesh);
+			}
+		});
+
+		return model;
+	}
+
+	private unsafe void VisitMeshNodes(AI.Node baseNode, Matrix4 baseTransform, Action<(AI.Node, Matrix4)> visit)
+	{
+		var nodeTransform = baseNode.Transform;
+		baseTransform = baseTransform * (*(Matrix4*)&nodeTransform);
+
+		if (baseNode.HasMeshes)
+		{
+			visit((baseNode, baseTransform.Transpose()));
 		}
 
-		private unsafe void VisitMeshNodes(AI.Node baseNode, Matrix4 baseTransform, Action<(AI.Node, Matrix4)> visit)
+		foreach (var node in baseNode.Children)
 		{
-			var nodeTransform = baseNode.Transform;
-			baseTransform = baseTransform * (*(Matrix4*)&nodeTransform);
-
-			if (baseNode.HasMeshes)
-			{
-				visit((baseNode, baseTransform.Transpose()));
-			}
-
-			foreach (var node in baseNode.Children)
-			{
-				VisitMeshNodes(node, baseTransform, visit);
-			}
+			VisitMeshNodes(node, baseTransform, visit);
 		}
+	}
 
-		private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
+	private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
+	{
+		fixed (T* dataPtr = source)
 		{
-			fixed (T* dataPtr = source)
-			{
-				return new Span<T>(dataPtr, source.Length);
-			}
+			return new Span<T>(dataPtr, source.Length);
 		}
 	}
 }
