@@ -25,7 +25,7 @@
 		</Grid>
 
 		<!--Scene Tree-->
-		<Grid Grid.Row="1" Background="{StaticResource ControlBackgroundColor}">
+		<Grid Grid.Row="1" Background="{DynamicResource ThemeControlLowColor}">
 			<TreeDataGrid Source="{Binding NodesSource}" ShowColumnHeaders="False" AutoDragDropRows="False"/>
 		</Grid>
 	</Grid>

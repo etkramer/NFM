@@ -24,7 +24,7 @@
 		</Grid>
 
 		<!--Object header-->
-		<Grid Background="{StaticResource ControlBackgroundColor}" Grid.Row="1">
+		<Grid Background="{DynamicResource ThemeControlLowColor}" Grid.Row="1">
 			<StackPanel Orientation="Horizontal">
 				<TextBlock Text="{Binding TypeIcon}" FontFamily="{StaticResource IconsFont2}" VerticalAlignment="Center" Foreground="#B0E24D" FontSize="26" Margin="7, 0"/>
 				<StackPanel Orientation="Vertical" VerticalAlignment="Center">

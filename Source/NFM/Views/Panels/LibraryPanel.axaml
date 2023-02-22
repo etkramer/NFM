@@ -41,7 +41,7 @@
 
 	<Grid ColumnDefinitions="240, 8, *">
 		<!--Folder View (Left)-->
-		<Panel Grid.Column="0" Background="{StaticResource ControlBackgroundColor}">
+		<Panel Grid.Column="0" Background="{DynamicResource ThemeControlLowColor}">
 			<TreeView x:Name="folderTreeView" Margin="0" Padding="0" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding FolderTree}">
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Folders}">
@@ -62,7 +62,7 @@
 				<TextBox x:Name="searchBox" Classes="search" Watermark="Search"/>
 			</Grid>
 
-			<Rectangle Grid.Row="1" Fill="{StaticResource ControlBackgroundColor}"/>
+			<Rectangle Grid.Row="1" Fill="{DynamicResource ThemeControlLowColor}"/>
 
 			<ListBox Grid.Row="2" BorderThickness="0" Background="{x:Null}" Items="{Binding SearchResults}" Margin="4, 8">
 				<ListBox.ItemTemplate>

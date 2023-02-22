@@ -1,44 +1,26 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="NFM.DefaultTheme">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<SimpleTheme Mode="Dark"/>
 
 	<Style>
 		<Style.Resources>
 			<FontFamily x:Key="IconsFont">avares://NFM/Assets/Fonts/MaterialIcons-Regular.ttf#Material Icons</FontFamily>
 			<FontFamily x:Key="IconsFont2">avares://NFM/Assets/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
 
-			<!--<Color x:Key="WindowBackgroundColor">#1A191A</Color>-->
-			<!--<Color x:Key="ToolBackgroundColor">#38393C</Color>-->
-			<Color x:Key="ControlBackgroundColor">#201F21</Color>
-			<Color x:Key="ControlForegroundColor">#C6C5C4</Color>
+			<Color x:Key="ThemeBackgroundColor">#1a191a</Color>
+			<Color x:Key="ThemeBackgroundLowColor">#222</Color>
+			<Color x:Key="ThemeControlLowColor">#201f21</Color>
+			<Color x:Key="ThemeControlMidColor">#C6C5C4</Color>
+			<Color x:Key="ThemeControlHighColor">#38393c</Color>
 
-			<Color x:Key="ThemeAccentColor">#3472E6</Color>
-			<Color x:Key="HighlightColor">#FFFFFF</Color>
+			<SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{DynamicResource ThemeBackgroundColor}"/>
+			<SolidColorBrush x:Key="ThemeBackgroundLowBrush" Color="{DynamicResource ThemeBackgroundLowColor}"/>
+			<SolidColorBrush x:Key="ThemeControlLowBrush" Color="{DynamicResource ThemeControlLowColor}"/>
+			<SolidColorBrush x:Key="ThemeControlMidBrush" Color="{DynamicResource ThemeControlHighColor}"/>
+			<SolidColorBrush x:Key="ThemeControlHighBrush" Color="{DynamicResource ThemeControlHighColor}"/>
 
-			<Color x:Key="ThemeBackgroundColor">#1A1A1A</Color>
-
-			<Color x:Key="ThemeControlHighlightLowColor">#A8A8A8</Color>
-			<Color x:Key="ThemeControlHighlightHighColor">#505050</Color>
-			<Color x:Key="ThemeForegroundColor">#D4D4D4</Color>
-			<Color x:Key="ThemeForegroundLowColor">#808080</Color>
-
-			<Color x:Key="ErrorColor">#FF0000</Color>
-			<Color x:Key="ErrorLowColor">#10FF0000</Color>
-
-			<SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
-			<SolidColorBrush x:Key="ThemeControlMidHighBrush" Color="{DynamicResource ThemeControlMidHighColor}"/>
 			<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundColor}" Opacity="0.85"/>
-
-			<SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="{StaticResource ThemeAccentColor}" Opacity="0.4"/>
-
-			<SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource ThemeAccentColor}"/>
-			<SolidColorBrush x:Key="HighlightForegroundBrush" Color="{DynamicResource HighlightColor}"/>
-			
-			<SolidColorBrush x:Key="ThemeAccentBrush2" Color="{DynamicResource ThemeAccentColor}"/>
-			<SolidColorBrush x:Key="ThemeAccentBrush3" Color="{DynamicResource ThemeAccentColor}"/>
-			<SolidColorBrush x:Key="ThemeAccentBrush4" Color="{DynamicResource ThemeAccentColor}"/>
-
-			<x:Double x:Key="FontSizeLarge">13</x:Double>
 		</Style.Resources>
 	</Style>
 

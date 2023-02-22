@@ -20,4 +20,16 @@
 		<Setter Property="BorderThickness" Value="0"/>
 		<Setter Property="CornerRadius" Value="2"/>
 	</Style>
+
+	<Style Selector="Button.window:pointerover">
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+
+	<Style Selector="Button.window:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="#303030"/>
+	</Style>
+
+	<Style Selector="Button.window:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="#285C7F"/>
+	</Style>
 </Styles>

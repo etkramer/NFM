@@ -9,11 +9,11 @@
 	
 	<Style Selector="CheckBox:checked /template/ Path#checkMark">
 		<Setter Property="IsVisible" Value="True"/>
-		<Setter Property="Fill" Value="{StaticResource ControlForegroundColor}"/>
+		<Setter Property="Fill" Value="{StaticResource ThemeForegroundBrush}"/>
 	</Style>
 	
 	<Style Selector="CheckBox:indeterminate /template/ Rectangle#indeterminateMark">
 		<Setter Property="IsVisible" Value="True"/>
-		<Setter Property="Fill" Value="{StaticResource ControlForegroundColor}"/>
+		<Setter Property="Fill" Value="{StaticResource ThemeForegroundBrush}"/>
 	</Style>
 </Styles>

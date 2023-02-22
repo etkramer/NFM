@@ -1,18 +1,13 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="NFM.App">
-    <Application.Styles>
-		
-		<!--Default Theme-->
-		<FluentTheme Mode="Dark"/>
-		<SimpleTheme Mode="Dark"/>
-		
-		<!--Modified Default Theme-->
-		<StyleInclude Source="avares://NFM/Assets/Theme.axaml"/>
-		<StyleInclude Source="avares://NFM/Assets/Theme2.axaml"/>
-		
+    <Application.Styles>		
 		<!--Third-party Controls-->
+		<FluentTheme Mode="Dark"/>
 		<StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
+
+		<!--Default Theme-->
+		<StyleInclude Source="avares://NFM/Assets/Theme.axaml"/>
 		
 		<!--Custom Controls (Misc)-->
 		<StyleInclude Source="avares://NFM/Controls/Docking/Tab.axaml"/>
