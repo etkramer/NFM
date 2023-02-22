@@ -46,6 +46,7 @@ public class Dialog
 		win.Icon = (Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime).MainWindow.Icon;
 		win.SizeToContent = SizeToContent.WidthAndHeight;
 		win.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+		win.Width = 2; win.Height = 2;
 
 		win.DataContext = win;
 		win.Content = new Grid()
@@ -78,7 +79,7 @@ public class Dialog
 				new Grid()
 					.Rows("*, 1, 60")
 					.Row(1)
-					.Background(win.GetResourceBrush("ToolBackgroundColor"))
+					.Background(win.GetResourceBrush("ThemeControlHighBrush"))
 					.Focusable(true)
 					.Children(
 						new ContentControl()
@@ -91,14 +92,14 @@ public class Dialog
 							),
 						new Rectangle()
 							.Row(1)
-							.Background(win.GetResourceBrush("ControlBackgroundColor")),				
+							.Background(win.GetResourceBrush("ThemeControlLowBrush")),				
 						new StackPanel()
 							.Row(2)
 							.Margin(30)
 							.Spacing(10)
 							.HorizontalAlignment(HorizontalAlignment.Center)
 							.VerticalAlignment(VerticalAlignment.Center)
-							.Background(win.GetResourceBrush("ToolBackgroundColor"))
+							.Background(win.GetResourceBrush("ThemeControlHighBrush"))
 							.Orientation(Orientation.Horizontal)
 							.Children(buttons.ToArray())
 					)
