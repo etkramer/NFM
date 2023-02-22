@@ -8,13 +8,13 @@
 				<DockPanel>
 					<!--Tab well-->
 					<Grid DockPanel.Dock="Top">
-						<ItemsPresenter Items="{TemplateBinding Tabs}">
-							<ItemsPresenter.ItemsPanel>
+						<ItemsControl Items="{TemplateBinding Tabs}">
+							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>
 									<StackPanel Orientation="Horizontal"/>
 								</ItemsPanelTemplate>
-							</ItemsPresenter.ItemsPanel>
-						</ItemsPresenter>
+							</ItemsControl.ItemsPanel>
+						</ItemsControl>
 					</Grid>
 
 					<!--Content area-->
