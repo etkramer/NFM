@@ -26,7 +26,7 @@
 
 	<StyleInclude Source="avares://NFM/Assets/Styles/Button.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/CheckBox.axaml"/>
-	<StyleInclude Source="avares://NFM/Assets/Styles/MenuItem.axaml"/>
+	<StyleInclude Source="avares://NFM/Assets/Styles/Menu.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/TextBox.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/Window.axaml"/>
 </Styles>
