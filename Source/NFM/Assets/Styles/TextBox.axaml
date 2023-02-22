@@ -8,6 +8,7 @@
 		<Setter Property="SelectionBrush" Value="{StaticResource ThemeControlHighlightMidBrush}"/>
 		<Setter Property="SelectionForegroundBrush" Value="#82B9FF"/>
 		<Setter Property="Foreground" Value="{StaticResource ThemeForegroundMidBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource ThemeControlLowBrush}"/>
 	</Style>
 
 	<Style Selector="TextBox.search">

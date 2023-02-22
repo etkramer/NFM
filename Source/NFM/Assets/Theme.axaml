@@ -7,8 +7,8 @@
 			<FontFamily x:Key="IconsFont">avares://NFM/Assets/Fonts/MaterialIcons-Regular.ttf#Material Icons</FontFamily>
 			<FontFamily x:Key="IconsFont2">avares://NFM/Assets/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
 
-			<Color x:Key="WindowBackgroundColor">#1A191A</Color>
-			<Color x:Key="ToolBackgroundColor">#38393C</Color>
+			<!--<Color x:Key="WindowBackgroundColor">#1A191A</Color>-->
+			<!--<Color x:Key="ToolBackgroundColor">#38393C</Color>-->
 			<Color x:Key="ControlBackgroundColor">#201F21</Color>
 			<Color x:Key="ControlForegroundColor">#C6C5C4</Color>
 
@@ -46,6 +46,5 @@
 	<StyleInclude Source="avares://NFM/Assets/Styles/CheckBox.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/MenuItem.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/TextBox.axaml"/>
-	<StyleInclude Source="avares://NFM/Assets/Styles/Expander.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/Window.axaml"/>
 </Styles>

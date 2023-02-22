@@ -18,7 +18,7 @@
 					</Grid>
 
 					<!--Content area-->
-					<ContentPresenter VerticalAlignment="Stretch" BorderThickness="2" CornerRadius="0, 2, 2, 2" Content="{Binding SelectedTab.Panel, RelativeSource={RelativeSource TemplatedParent}}" Background="{StaticResource ToolBackgroundColor}" BorderBrush="{StaticResource ToolBackgroundColor}" Focusable="True"/>
+					<ContentPresenter VerticalAlignment="Stretch" BorderThickness="2" CornerRadius="0" Content="{Binding SelectedTab.Panel, RelativeSource={RelativeSource TemplatedParent}}" Background="{DynamicResource ThemeControlHighColor}" BorderBrush="{DynamicResource ThemeControlHighColor}" Focusable="True"/>
 				</DockPanel>
 			</ControlTemplate>
 		</Setter>

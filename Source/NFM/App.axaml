@@ -8,13 +8,13 @@
 		<SimpleTheme Mode="Dark"/>
 		
 		<!--Modified Default Theme-->
-		<StyleInclude Source="avares://NFM/Assets/EditorTheme.axaml"/>
+		<StyleInclude Source="avares://NFM/Assets/Theme.axaml"/>
+		<StyleInclude Source="avares://NFM/Assets/Theme2.axaml"/>
 		
 		<!--Third-party Controls-->
 		<StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
 		
 		<!--Custom Controls (Misc)-->
-		<StyleInclude Source="avares://NFM/Controls/WindowButtons.axaml"/>
 		<StyleInclude Source="avares://NFM/Controls/Docking/Tab.axaml"/>
 		<StyleInclude Source="avares://NFM/Controls/Docking/TabGroup.axaml"/>
 

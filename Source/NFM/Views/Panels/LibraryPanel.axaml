@@ -54,7 +54,7 @@
 			</TreeView>
 		</Panel>
 		
-		<GridSplitter Grid.Column="1" Background="{StaticResource WindowBackgroundColor}"/>
+		<GridSplitter Grid.Column="1" Background="{DynamicResource ThemeBackgroundBrush}"/>
 
 		<!--Asset View (Right)-->
 		<Grid Grid.Column="2" RowDefinitions="27, 1, *">

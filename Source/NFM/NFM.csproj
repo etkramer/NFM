@@ -36,4 +36,10 @@
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
 		<PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Assets\Theme.axaml.cs">
+	    <DependentUpon>Theme.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 </Project>

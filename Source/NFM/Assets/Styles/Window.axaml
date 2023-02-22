@@ -1,15 +1,25 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:controls="using:NFM.Controls">
 	
-	<Style Selector="Window[WindowState=Maximized] /template/ Panel">
-		<Setter Property="Margin" Value="8" />
-	</Style>
-	
 	<Style Selector="Window">
-		<Setter Property="Background" Value="{DynamicResource WindowBackgroundColor}"/>  
+		<Setter Property="Background" Value="{DynamicResource ThemeBackgroundBrush}"/>  
 		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
 		<Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>  
 		<Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>
 		<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="1000000"/>
 		<Setter Property="ExtendClientAreaChromeHints" Value="NoChrome"/>
 	</Style>
+
+	<Style Selector="Window">
+		<Setter Property="Background" Value="{DynamicResource ThemeBackgroundLowBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+		<Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>
+		<Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>
+		<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="1000000"/>
+		<Setter Property="ExtendClientAreaChromeHints" Value="NoChrome"/>
+	</Style>
+
+	<Style Selector="Window[IsActive=true]">
+		<Setter Property="Background" Value="{DynamicResource ThemeBackgroundBrush}" />
+	</Style>
+
 </Styles>
