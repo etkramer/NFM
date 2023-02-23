@@ -26,7 +26,8 @@ public static class Selection
 		item.OnSelect();
 	}
 
-	public static void Select(params ISelectable[] items)
+	public static void Select(params ISelectable[] items) => Select(items);
+	public static void Select(IEnumerable<ISelectable> items)
 	{
 		foreach (var item in items)
 		{
@@ -40,18 +41,13 @@ public static class Selection
 		item.OnDeselect();
 	}
 
-	public static void Deselect(params ISelectable[] items)
+	public static void Deselect(params ISelectable[] items) => Deselect(items);
+	public static void Deselect(IEnumerable<ISelectable> items)
 	{
 		foreach (ISelectable item in items)
 		{
 			Deselect(item);
 		}
-	}
-
-	public static void Replace(params ISelectable[] items)
-	{
-		DeselectAll();
-		Select(items);
 	}
 
 	public static void DeselectAll()

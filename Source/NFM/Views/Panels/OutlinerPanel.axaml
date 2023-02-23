@@ -26,7 +26,13 @@
 
 		<!--Scene Tree-->
 		<Grid Grid.Row="1" Background="{DynamicResource ThemeControlLowColor}">
-			<TreeDataGrid Source="{Binding NodesSource}" ShowColumnHeaders="False" AutoDragDropRows="False"/>
+			<TreeView Items="{Binding NodesSource}" SelectionMode="Multiple" SelectedItems="{Binding SelectedNodes}" BorderThickness="0" Background="{x:Null}">
+				<TreeView.ItemTemplate>
+					<TreeDataTemplate ItemsSource="{Binding Children}">
+						<TextBlock Text="{Binding Name}"/>
+					</TreeDataTemplate>
+				</TreeView.ItemTemplate>
+			</TreeView>
 		</Grid>
 	</Grid>
 </controls:ToolPanel>

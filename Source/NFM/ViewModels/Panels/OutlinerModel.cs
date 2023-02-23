@@ -4,8 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NFM.World;
 using ReactiveUI;
-using Avalonia.Controls.Models.TreeDataGrid;
 using ReactiveUI.Fody.Helpers;
+using System.Collections.Specialized;
 
 namespace NFM;
 
@@ -14,45 +14,54 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 	public ViewModelActivator Activator { get; } = new();
 
 	[Reactive]
-	public ITreeDataGridSource<Node> NodesSource { get; private set; }
+	public IEnumerable<Node> NodesSource { get; private set; }
+
+	public IEnumerable<Node> SelectedNodes { get; }
 
 	public OutlinerModel()
 	{
-		NodesSource = GetSource(Scene.Main.RootNodes);
+		NodesSource = Scene.Main.RootNodes;
+
+		SelectedNodes = new ObservableCollection<Node>();
+		(SelectedNodes as INotifyCollectionChanged).CollectionChanged += (o, e) =>
+		{
+			if (e.Action == NotifyCollectionChangedAction.Add)
+			{
+				Selection.Select(e.NewItems.Cast<ISelectable>());
+			}
+			else if (e.Action == NotifyCollectionChangedAction.Remove)
+			{
+				Selection.Deselect(e.OldItems.Cast<ISelectable>());
+			}
+			else if (e.Action == NotifyCollectionChangedAction.Reset)
+			{
+				Selection.DeselectAll();
+			}
+			else if (e.Action == NotifyCollectionChangedAction.Replace)
+			{
+				Selection.Deselect(e.OldItems.Cast<ISelectable>());
+				Selection.Select(e.NewItems.Cast<ISelectable>());
+			}
+		};
 
 		// Subscribe to property changed notifications in case the scene changes (i.e. new project).
 		StaticNotify.Subscribe(typeof(Scene), nameof(Scene.Main), () =>
 		{
-			NodesSource = GetSource(Scene.Main.RootNodes);
+			(SelectedNodes as IList<Node>).Clear();
+			NodesSource = Scene.Main.RootNodes;
 		});
 	}
 
-	ITreeDataGridSource<Node> GetSource(IEnumerable<Node> nodes)
+	void OnSelectionChanged(object sender, SelectionChangedEventArgs args)
 	{
-		var source = new HierarchicalTreeDataGridSource<Node>(nodes)
+		if (args.RemovedItems != null)
 		{
-			Columns =
-			{
-				new HierarchicalExpanderColumn<Node>(new TextColumn<Node, string>("Name", o => o.Name, new GridLength(1.5f, GridUnitType.Star)), o => o.Children),
-				new TextColumn<Node, string>("Type", o => o.GetType().Name, new GridLength(1, GridUnitType.Star)),
-			},
-		};
-
-		// Keep selection in sync
-		source.RowSelection.SelectionChanged += (o, e) =>
+			Selection.Deselect(args.RemovedItems.Cast<ISelectable>());
+		}
+		if (args.AddedItems != null)
 		{
-			if (e.DeselectedItems != null)
-			{
-				Selection.Deselect(e.DeselectedItems.ToArray());
-			}
-			if (e.SelectedItems != null)
-			{
-				Selection.Select(e.SelectedItems.ToArray());
-			}
-		};
-
-		source.RowSelection.SingleSelect = false;
-		return source;
+			Selection.Select(args.RemovedItems.Cast<ISelectable>());
+		}
 	}
 
 	public void OnAddPressed() {}
