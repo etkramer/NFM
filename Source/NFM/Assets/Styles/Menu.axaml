@@ -6,7 +6,7 @@
 		<Setter Property="VerticalAlignment" Value="Center"/>
 	</Style>
 
-	<Style Selector="Popup">
+	<Style Selector="MenuItem /template/ Popup#PART_Popup">
 		<Setter Property="HorizontalOffset" Value="-2"/>
 	</Style>
 </Styles>

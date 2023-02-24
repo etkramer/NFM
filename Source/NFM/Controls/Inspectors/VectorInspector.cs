@@ -154,9 +154,4 @@ public partial class VectorInspector : UserControl
 		SolidColorBrush.Parse("#84B5E6"),
 		SolidColorBrush.Parse("#6E6EE2"),
 	};
-
-	public void Dispose()
-	{
-
-	}
 }

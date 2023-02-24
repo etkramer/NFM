@@ -17,11 +17,9 @@ namespace NFM;
 
 public partial class App : Application
 {
-	public static App Instance;
+	public static App Instance { get; private set; }
 
-	public static void Main() => Run();
-
-	public static void Run()
+	public static void Main()
 	{
 		Win32PlatformOptions opts = new()
 		{

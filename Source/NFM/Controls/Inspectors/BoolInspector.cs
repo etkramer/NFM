@@ -21,9 +21,4 @@ public partial class BoolInspector : UserControl
 			[!BoolInput.ValueProperty] = new Binding(nameof(Value))
 		};
 	}
-
-	public void Dispose()
-	{
-
-	}
 }

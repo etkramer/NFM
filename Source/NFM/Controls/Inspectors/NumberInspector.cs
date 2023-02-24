@@ -21,9 +21,4 @@ public partial class NumberInspector : UserControl
 			[!NumInput.ValueProperty] = new Binding(nameof(Value))
 		};
 	}
-
-	public void Dispose()
-	{
-
-	}
 }

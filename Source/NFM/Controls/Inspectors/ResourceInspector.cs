@@ -22,9 +22,4 @@ public partial class ResourceInspector : UserControl
 			[!ResourceInput.ValueProperty] = new Binding(nameof(Value))
 		};
 	}
-
-	public void Dispose()
-	{
-
-	}
 }

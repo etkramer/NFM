@@ -38,7 +38,7 @@ public class InspectGenerator : ISourceGenerator
 		string source = $@"
 			namespace {inspectorType.ContainingNamespace.ToDisplayString()}
 			{{
-				partial class {inspectorType.Name} : System.IDisposable, System.ComponentModel.INotifyPropertyChanged
+				partial class {inspectorType.Name} : System.ComponentModel.INotifyPropertyChanged
 				{{
 					protected System.Reflection.PropertyInfo Property {{ get; set; }}
 					protected System.Collections.Generic.IEnumerable<object> Subjects {{ get; set; }}
@@ -85,7 +85,10 @@ public class InspectGenerator : ISourceGenerator
 
 					protected override void OnDetachedFromLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs e)
 					{{
-						Dispose();
+						if (this is System.IDisposable disposable)
+						{{
+							disposable.Dispose();
+						}}
 
 						// Respond to changes in source property.
 						if (Subjects.First() is System.ComponentModel.INotifyPropertyChanged notify)

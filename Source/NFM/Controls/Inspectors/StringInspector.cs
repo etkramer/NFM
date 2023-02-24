@@ -21,9 +21,4 @@ public partial class StringInspector : UserControl
 			[!NFM.TextInput.ValueProperty] = new Binding(nameof(Value))
 		};
 	}
-
-	public void Dispose()
-	{
-
-	}
 }
