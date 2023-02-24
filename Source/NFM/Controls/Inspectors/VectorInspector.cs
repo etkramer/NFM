@@ -78,6 +78,8 @@ public partial class VectorInspector : UserControl
 
 	public VectorInspector()
 	{
+		DataContext = this;
+
 		this.WhenAnyValue(o => o.Value)
 			.Subscribe(o =>
 			{

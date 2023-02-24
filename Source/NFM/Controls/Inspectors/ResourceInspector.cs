@@ -14,6 +14,8 @@ public partial class ResourceInspector : UserControl
 {
 	public ResourceInspector()
 	{
+		DataContext = this;
+
 		// Create ResourceInput and bind to inspected property.
 		Content = new ResourceInput()
 		{

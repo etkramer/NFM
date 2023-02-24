@@ -13,6 +13,8 @@ public partial class StringInspector : UserControl
 {
 	public StringInspector()
 	{
+		DataContext = this;
+
 		// Create TextInput and bind to inspected property.
 		Content = new TextInput()
 		{

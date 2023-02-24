@@ -13,6 +13,8 @@ public partial class NumberInspector : UserControl
 {
 	public NumberInspector()
 	{
+		DataContext = this;
+
 		// Create NumInput and bind to inspected property.
 		Content = new NumInput()
 		{

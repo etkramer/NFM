@@ -155,7 +155,7 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 						.Content(nameof(FieldContent), BindingMode.Default)
 				);
 
-			//FieldContent = InspectHelper.Create(subjects, Property);
+			FieldContent = InspectHelper.Create(subjects, Property);
 		}
 	}
 }

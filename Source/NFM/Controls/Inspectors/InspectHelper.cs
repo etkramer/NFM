@@ -22,7 +22,6 @@ public static class InspectHelper
 			var result = FormatterServices.GetUninitializedObject(inspectorType) as Control;
 			inspectorType.GetProperty("Property", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, property);
 			inspectorType.GetProperty("Subjects", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, subjects);
-			inspectorType.GetProperty("DataContext", ReflectionHelper.BindingFlagsAllNonStatic | BindingFlags.FlattenHierarchy).SetValue(result, result);
 
 			// Call constructor and return.
 			inspectorType.GetConstructor(Type.EmptyTypes).Invoke(result, null);
