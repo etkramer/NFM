@@ -57,6 +57,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 
 		// Create group (library).
 		TabGroup group4 = new TabGroup();
+		group4.Add(new ProfilerPanel());
 		group4.Add(new LibraryPanel());
 		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
 
