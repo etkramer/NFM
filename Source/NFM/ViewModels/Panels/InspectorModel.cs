@@ -139,7 +139,7 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 					// Name
 					new TextBlock()
 						.Column(0)
-						.Margin(28, 2, 0, 0)
+						.Margin(14, 2, 0, 0)
 						.HorizontalAlignment(HorizontalAlignment.Left)
 						.VerticalAlignment(VerticalAlignment.Top)
 						.Text(Property.Name.PascalToDisplay())

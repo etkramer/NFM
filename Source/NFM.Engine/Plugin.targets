@@ -8,7 +8,7 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="NFM.Engine" HintPath="$(MSBuildThisFileDirectory)..\NFM.Engine.dll" Private="False" />
-		<Reference Include="NFM.Common" HintPath="$(MSBuildThisFileDirectory)..\NFM.Common.dll" Private="False" />
+		<Reference Include="NFM.Engine" HintPath="$(MSBuildThisFileDirectory)NFM.Engine.dll" Private="False" />
+		<Reference Include="NFM.Common" HintPath="$(MSBuildThisFileDirectory)NFM.Common.dll" Private="False" />
 	</ItemGroup>
 </Project>
