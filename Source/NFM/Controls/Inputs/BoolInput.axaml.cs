@@ -9,7 +9,8 @@ public class BoolInput : TemplatedControl
 {
 	public static StyledProperty<bool> ValueProperty = AvaloniaProperty.Register<BoolInput, bool>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
-	[Notify] public bool Value
+	[Notify]
+	public bool Value
 	{
 		get => GetValue(ValueProperty);
 		set

@@ -5,7 +5,6 @@
 		xmlns:local="using:NFM"
         mc:Ignorable="d"
         x:Class="NFM.MainWindow"
-		x:Name="Self"
 		ExtendClientAreaToDecorationsHint="False"
 		WindowState="Maximized"
 		Icon="{StaticResource AppIcon}"
@@ -19,12 +18,12 @@
 				<Menu VerticalAlignment="Stretch">
 					<MenuItem Header="File" VerticalAlignment="Stretch" Padding="10, 0, 5, 0">
 						<MenuItem Header="New" Command="{Binding NewPressed}" InputGesture="Ctrl+N" HotKey="Ctrl+N"/>
-						<MenuItem Header="Open" Command="{Binding OpenPressed}" InputGesture="Ctrl+O" HotKey="Ctrl+O" CommandParameter="{Binding ElementName=Self}"/>
+						<MenuItem Header="Open" Command="{Binding OpenPressed}" InputGesture="Ctrl+O" HotKey="Ctrl+O" CommandParameter="{Binding ElementName=$self}"/>
 						<Separator/>
-						<MenuItem Header="Save" Command="{Binding SavePressed}" InputGesture="Ctrl+S" HotKey="Ctrl+S" CommandParameter="{Binding ElementName=Self}"/>
+						<MenuItem Header="Save" Command="{Binding SavePressed}" InputGesture="Ctrl+S" HotKey="Ctrl+S" CommandParameter="{Binding ElementName=$self}"/>
 						<MenuItem Header="Save As" Command="{Binding SaveAsPressed}"/>
 						<Separator/>
-						<MenuItem Header="Quit" Command="{Binding QuitPressed}" CommandParameter="{Binding ElementName=Self}"/>
+						<MenuItem Header="Quit" Command="{Binding QuitPressed}" CommandParameter="{Binding ElementName=$self}"/>
 					</MenuItem>
 					<MenuItem Header="Edit" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
 						<MenuItem Header="Undo" Command="{Binding UndoPressed}" InputGesture="Ctrl+Z" HotKey="Ctrl+Z"/>

@@ -1,8 +1,6 @@
-using System.ComponentModel;
 using System.Data;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -11,11 +9,12 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace NFM;
 
-public class NumInput : TemplatedControl
+public class NumInput : TemplatedControl, IActivatableView
 {
 	public static StyledProperty<object> ValueProperty = AvaloniaProperty.Register<NumInput, object>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
@@ -55,11 +54,17 @@ public class NumInput : TemplatedControl
 	[Notify]
 	string valueProxy { get; set; }
 
-	CompositeDisposable disposables = new();
-
 	public NumInput()
 	{
-		DetachedFromLogicalTree += (o, e) => disposables.Dispose();
+		this.WhenActivated(d =>
+		{
+			// Make sure proxy responds to changes in source
+			valueProxy = FormatNumber(Value);
+			ValueProperty.Changed
+				.Where(o => o.Sender == this)
+				.Subscribe(o => valueProxy = FormatNumber(Value))
+				.DisposeWith(d);
+		});
 	}
 
 	protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -67,25 +72,11 @@ public class NumInput : TemplatedControl
 		var textBox = e.NameScope.Find<TextBox>("PART_TextBox");
 		textBox.KeyDown += OnKeyDown;
 		textBox.LostFocus += OnLostFocus;
-		textBox.IsUndoEnabled = false;
-
-		// Ignore alphabetical inputs
 		textBox.AddHandler(TextInputEvent, (o, e) =>
 		{
-			if (!e.Text.All(c => !char.IsLetter(c)))
-			{
-				e.Handled = true;
-			}
+			e.Handled = !e.Text.All(c => !char.IsLetter(c));
 		},
 		RoutingStrategies.Tunnel);
-
-		// WARNING: This subscription is never disposed
-		// Make sure proxy responds to changes in source
-		valueProxy = FormatNumber(Value);
-		var sub = ValueProperty.Changed
-			.Where(o => o.Sender == this)
-			.Subscribe(o => valueProxy = FormatNumber(Value))
-			.DisposeWith(disposables);
 
 		base.OnApplyTemplate(e);
 	}

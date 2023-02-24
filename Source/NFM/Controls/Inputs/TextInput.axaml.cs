@@ -7,10 +7,11 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using ReactiveUI;
 
 namespace NFM;
 
-public class TextInput : TemplatedControl
+public class TextInput : TemplatedControl, IActivatableView
 {
 	public static StyledProperty<string> ValueProperty = AvaloniaProperty.Register<TextInput, string>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
@@ -26,11 +27,17 @@ public class TextInput : TemplatedControl
 	[Notify]
 	string valueProxy { get; set; }
 
-	CompositeDisposable disposables = new();
-
 	public TextInput()
 	{
-		DetachedFromLogicalTree += (o, e) => disposables.Dispose();
+		this.WhenActivated(d =>
+		{
+			// Make sure proxy responds to changes in source.
+			valueProxy = Value;
+			ValueProperty.Changed
+				.Where(o => o.Sender == this)
+				.Subscribe(o => valueProxy = Value)
+				.DisposeWith(d);
+		});
 	}
 
 	protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -38,14 +45,6 @@ public class TextInput : TemplatedControl
 		var textBox = e.NameScope.Find<TextBox>("PART_TextBox");
 		textBox.KeyDown += OnKeyDown;
 		textBox.LostFocus += OnLostFocus;
-		textBox.IsUndoEnabled = false;
-
-		// Make sure proxy responds to changes in source.
-		valueProxy = Value;
-		ValueProperty.Changed
-			.Where(o => o.Sender == this)
-			.Subscribe(o => valueProxy = Value)
-			.DisposeWith(disposables);
 
 		base.OnApplyTemplate(e);
 	}
