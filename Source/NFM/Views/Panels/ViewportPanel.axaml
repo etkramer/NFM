@@ -7,7 +7,7 @@
 		Title="Viewport"
         mc:Ignorable="d">
 
-	<Grid RowDefinitions="*, 27">
+	<Grid RowDefinitions="*, 26">
 		<!--Viewport Content-->
 		<controls:ViewportHost Grid.Row="0"/>
 

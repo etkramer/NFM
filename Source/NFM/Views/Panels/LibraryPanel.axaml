@@ -1,10 +1,8 @@
 <engine:ToolPanel
 		xmlns="https://github.com/avaloniaui"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:engine="using:NFM"
-		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 		Title="Asset Library"
 		x:Class="NFM.LibraryPanel">
 
@@ -54,7 +52,7 @@
 			</TreeView>
 		</Panel>
 		
-		<GridSplitter Grid.Column="1" Background="{DynamicResource ThemeBackgroundBrush}"/>
+		<GridSplitter Grid.Column="1" Background="{DynamicResource ThemeBackgroundBrush}" Width="7"/>
 
 		<!--Asset View (Right)-->
 		<Grid Grid.Column="2" RowDefinitions="27, 1, *">
