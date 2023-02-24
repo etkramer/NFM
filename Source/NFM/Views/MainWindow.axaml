@@ -11,7 +11,7 @@
 		Icon="{StaticResource AppIcon}"
         Title="NFM">
 	
-	<Grid RowDefinitions="32, auto, *">
+	<Grid RowDefinitions="auto, auto, *">
 		<!--Title bar-->
 		<Grid Grid.Row="0" ColumnDefinitions="auto, *">
 			<!--Menu bar-->

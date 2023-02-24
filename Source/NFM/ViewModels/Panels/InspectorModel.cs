@@ -75,15 +75,25 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 
 	public Control GetPropertiesContent(Type type)
 	{
-		// Filter and bucket properties by category.
+		// Filter and bucket properties by category
 		var buckets = type.GetProperties()
 			.Where(o => o.HasAttribute<InspectAttribute>())
 			.Bucket(o => o.DeclaringType);
 
-		// Loop over types.
-		List<Control> expanders = new();
+		var contents = new List<Control>();
+
+		// Loop over buckets
 		foreach (var bucket in buckets.Reverse())
 		{
+			// Add a separator for all but the first bucket
+			if (bucket != buckets.Last())
+			{
+				var separator = new Separator();
+				separator.Background(separator.GetResourceBrush("ThemeBackgroundColor"));
+				separator.Margin = new(0);
+				contents.Add(separator);
+			}
+
 			// Get the type that properties in this bucket belong to.
 			Type bucketType = bucket.First().DeclaringType;
 
@@ -95,30 +105,18 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 			}
 
 			// Loop over properties.
-			List<Control> inspectors = new();
 			foreach (var property in bucket)
 			{
-				inspectors.Add(new InspectorPropertyItem(Selection.Selected.ToArray(), property));
+				contents.Add(new InspectorPropertyItem(Selection.Selected.ToArray(), property));
 			}
-
-			// Create expander
-			expanders.Add(
-				new Expander()
-					.IsExpanded(true)
-					.Header(bucketName)
-					.With(o => o.FontWeight = FontWeight.SemiBold)
-					.With(o => o.Padding = new(0, 8))
-					.Content(new StackPanel()
-						.Spacing(8)
-						.Children(inspectors.ToArray())
-					)
-			);
 		}
 
 		// Submit the property grid.
 		return new StackPanel()
 			.Orientation(Orientation.Vertical)
-			.Children(expanders.ToArray());
+			.Spacing(8)
+			.With(o => o.Margin = new(0, 8))
+			.Children(contents);
 	}
 
 	public sealed class InspectorPropertyItem : UserControl

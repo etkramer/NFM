@@ -23,6 +23,11 @@
 
 			<SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
 			<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundColor}" Opacity="0.85"/>
+
+			<ResourceDictionary.MergedDictionaries>
+				<MergeResourceInclude Source="avares://NFM/Assets/Themes/Menu.xaml"/>
+				<MergeResourceInclude Source="avares://NFM/Assets/Themes/MenuItem.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Styles.Resources>
 
