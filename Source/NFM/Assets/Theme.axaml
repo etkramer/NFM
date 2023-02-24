@@ -1,10 +1,10 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-	<SimpleTheme Mode="Dark"/>
+	<SimpleTheme/>
 
-	<Style>
-		<Style.Resources>
+	<Styles.Resources>
+		<ResourceDictionary>
 			<FontFamily x:Key="IconsFont">avares://NFM/Assets/Fonts/MaterialIcons-Regular.ttf#Material Icons</FontFamily>
 			<FontFamily x:Key="IconsFont2">avares://NFM/Assets/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
 
@@ -13,6 +13,7 @@
 			<Color x:Key="ThemeControlLowColor">#201f21</Color>
 			<Color x:Key="ThemeControlMidColor">#C6C5C4</Color>
 			<Color x:Key="ThemeControlHighColor">#38393c</Color>
+			<Color x:Key="ThemeForegroundColor">#FFDEDEDE</Color>
 
 			<SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{DynamicResource ThemeBackgroundColor}"/>
 			<SolidColorBrush x:Key="ThemeBackgroundLowBrush" Color="{DynamicResource ThemeBackgroundLowColor}"/>
@@ -20,9 +21,10 @@
 			<SolidColorBrush x:Key="ThemeControlMidBrush" Color="{DynamicResource ThemeControlHighColor}"/>
 			<SolidColorBrush x:Key="ThemeControlHighBrush" Color="{DynamicResource ThemeControlHighColor}"/>
 
+			<SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
 			<SolidColorBrush x:Key="ThemeForegroundMidBrush" Color="{DynamicResource ThemeForegroundColor}" Opacity="0.85"/>
-		</Style.Resources>
-	</Style>
+		</ResourceDictionary>
+	</Styles.Resources>
 
 	<StyleInclude Source="avares://NFM/Assets/Styles/Button.axaml"/>
 	<StyleInclude Source="avares://NFM/Assets/Styles/CheckBox.axaml"/>

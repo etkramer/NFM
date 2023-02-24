@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 using ReactiveUI;
@@ -65,8 +66,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}
 
-	private bool isQuitConfirmed = false;
-	protected override void OnClosing(CancelEventArgs e)
+	bool isQuitConfirmed = false;
+	protected override void OnClosing(WindowClosingEventArgs e)
 	{
 		if (UseQuitDialog)
 		{

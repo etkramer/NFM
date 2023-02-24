@@ -47,13 +47,13 @@ namespace NFM;
 
 public static partial class ControlExt
 {
-	public static void Bind(this IControl subject, AvaloniaProperty property, string propertyName, object source = null, BindingMode mode = BindingMode.Default)
+	public static void Bind(this Control subject, AvaloniaProperty property, string propertyName, object source = null, BindingMode mode = BindingMode.Default)
 	{
 		AvaloniaObjectExtensions.Bind(subject, property, new Binding(propertyName, mode), source);
 	}
 
-	public static Binding BindTo(this IDataTemplate subject, string propertyName, object sourceObject = null) => BindTo(subject as IControl, propertyName, sourceObject);
-	public static Binding BindTo(this IControl subject, string propertyName, object sourceObject = null)
+	public static Binding BindTo(this IDataTemplate subject, string propertyName, object sourceObject = null) => BindTo(subject as Control, propertyName, sourceObject);
+	public static Binding BindTo(this Control subject, string propertyName, object sourceObject = null)
 	{
 		Binding binding = new Binding(propertyName);
 		if (sourceObject != null)
@@ -68,7 +68,7 @@ public static partial class ControlExt
 		return subject;
 	}
 
-	public static T Content<T>(this T subject, IControl content) where T : TreeDataTemplate
+	public static T Content<T>(this T subject, Control content) where T : TreeDataTemplate
 	{
 		subject.Content = content;
 		return subject;
@@ -80,13 +80,13 @@ public static partial class ControlExt
 		return subject;
 	}
 
-	public static T GetResource<T>(this IControl subject, string resourceName)
+	public static T GetResource<T>(this Control subject, string resourceName)
 	{
 		T res = (T)Application.Current.FindResource(resourceName);
 		return res;
 	}
 
-	public static Brush GetResourceBrush(this IControl subject, string resourceName)
+	public static Brush GetResourceBrush(this Control subject, string resourceName)
 	{
 		object resource = Application.Current.FindResource(resourceName);
 		if (resource is Avalonia.Media.Color)
@@ -101,7 +101,7 @@ public static partial class ControlExt
 		return null;
 	}
 
-	public static Bitmap GetResourceBitmap(this IControl subject, string uri)
+	public static Bitmap GetResourceBitmap(this Control subject, string uri)
 	{
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
             var asset = assets.Open(new Uri(uri));

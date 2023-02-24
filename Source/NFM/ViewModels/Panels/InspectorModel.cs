@@ -134,7 +134,6 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 			Property = property;
 			DataContext = this;
 
-			//Margin = new(0, 4);
 			HorizontalAlignment = HorizontalAlignment.Stretch;
 			Content = new Grid()
 				.Columns("0.5*, *")
@@ -156,7 +155,7 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 						.Content(nameof(FieldContent), BindingMode.Default)
 				);
 
-			FieldContent = InspectHelper.Create(subjects, Property);
+			//FieldContent = InspectHelper.Create(subjects, Property);
 		}
 	}
 }

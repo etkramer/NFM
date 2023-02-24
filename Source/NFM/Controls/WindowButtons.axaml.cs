@@ -31,7 +31,7 @@ public class WindowButtons : TemplatedControl
 
 	public event Action DoThing = delegate {};
 
-	private Window GetWindow(IControl top = null)
+	private Window GetWindow(Control top = null)
 	{
 		if (top == null)
 		{

@@ -124,13 +124,13 @@ public class Dialog
 			FileTypeChoices = filters.Select(o => new FilePickerFileType(o.Name) { Patterns = o.Extensions.Select(o => $".{o}").ToArray() }).ToArray(),
 		});
 
-		if (result?.TryGetUri(out var uri) ?? false)
+		if (result == null)
 		{
-			return uri.AbsolutePath;
+			return null;
 		}
 		else
 		{
-			return null;
+			return result.Path.AbsolutePath;
 		}
 	}
 
@@ -144,9 +144,9 @@ public class Dialog
 		List<string> resultPaths = new();
 		foreach (var path in result)
 		{
-			if (path?.TryGetUri(out var uri) ?? false)
+			if (path != null)
 			{
-				resultPaths.Add(uri.AbsolutePath);
+				resultPaths.Add(path.Path.AbsolutePath);
 			}
 		}
 

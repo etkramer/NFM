@@ -22,7 +22,7 @@ namespace NFM;
 [DeclarativeProperty(SetterName = "Header", PropertyName = "Header", PropertyType = typeof(string), TargetType = typeof(HeaderedSelectingItemsControl))]
 public static partial class PanelExt
 {
-	public static T Children<T>(this T subject, params IControl[] items) where T : Panel
+	public static T Children<T>(this T subject, params Control[] items) where T : Panel
 	{
 		if (items != null)
 		{
