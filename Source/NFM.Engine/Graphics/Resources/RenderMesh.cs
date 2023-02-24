@@ -7,9 +7,9 @@ namespace NFM.Graphics;
 class RenderMesh : IDisposable
 {
 	// Geometry buffers
-	internal static GraphicsBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
-	internal static GraphicsBuffer<Vertex> VertexBuffer = new(20000000); // Support 20m verts
-	internal static GraphicsBuffer<MeshData> MeshBuffer = new(20000000 + 1); // Support 20m meshes
+	internal static TypedBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
+	internal static TypedBuffer<Vertex> VertexBuffer = new(20000000); // Support 20m verts
+	internal static TypedBuffer<MeshData> MeshBuffer = new(20000000 + 1); // Support 20m meshes
 
 	static RenderMesh()
 	{

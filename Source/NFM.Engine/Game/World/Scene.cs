@@ -7,10 +7,10 @@ public partial class Scene : IDisposable
 {
 	public static List<Scene> All { get; } = new();
 
-	[Notify, Save] public static Scene Main { get; set; } = new();
+	[Notify] public static Scene Main { get; set; } = new();
 
 	[Notify] public IEnumerable<Node> RootNodes => rootNodes;
-	[Save] private ObservableCollection<Node> rootNodes { get; set; } = new();
+	private ObservableCollection<Node> rootNodes { get; set; } = new();
 
 	public Scene()
 	{

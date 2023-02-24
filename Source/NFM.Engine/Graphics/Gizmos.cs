@@ -12,8 +12,8 @@ public class Gizmos
 	private static PipelineState linePSO = null;
 	private static PipelineState geometryPSO = null;
 
-	private static GraphicsBuffer<uint> gizmosIndexBuffer = new GraphicsBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
-	private static GraphicsBuffer<Vector3> gizmosVertexBuffer = new GraphicsBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
+	private static TypedBuffer<uint> gizmosIndexBuffer = new TypedBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
+	private static TypedBuffer<Vector3> gizmosVertexBuffer = new TypedBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
 
 	public static event EventHandler<Gizmos> OnDrawGizmos;
 
@@ -37,9 +37,9 @@ public class Gizmos
 
 	private Matrix4 viewMatrix;
 	private Matrix4 projectionMatrix;
-	private GraphicsBuffer<ViewConstants> viewConstants;
+	private TypedBuffer<ViewConstants> viewConstants;
 
-	public Gizmos(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, GraphicsBuffer<ViewConstants> constants)
+	public Gizmos(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, TypedBuffer<ViewConstants> constants)
 	{
 		renderList = list;
 		Camera = camera;

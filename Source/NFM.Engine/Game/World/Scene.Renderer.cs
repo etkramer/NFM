@@ -9,8 +9,8 @@ public partial class Scene
 	// This is a mostly arbitrary number chosen to be larger than most engines.
 	public const int MaxInstances = 2097152;
 
-	public GraphicsBuffer<GPUInstance> InstanceBuffer = new(MaxInstances);
-	public GraphicsBuffer<GPUTransform> TransformBuffer = new(MaxInstances);
+	public TypedBuffer<GPUInstance> InstanceBuffer = new(MaxInstances);
+	public TypedBuffer<GPUTransform> TransformBuffer = new(MaxInstances);
 }
 
 public struct GPUTransform

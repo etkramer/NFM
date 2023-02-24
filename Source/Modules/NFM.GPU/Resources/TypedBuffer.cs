@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Microsoft.CodeAnalysis;
 using NFM.GPU.Native;
 using Vortice.Direct3D12;
 
 namespace NFM.GPU;
 
-public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : unmanaged
+public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 {
 	public nint NumAllocations { get; private set; } = 0;
 	public nint FirstOffset { get; private set; } = 0;
@@ -14,7 +15,7 @@ public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : un
 	private D3D12MA.VirtualBlock virtualBlock;
 	private List<BufferAllocation<T>> allocations = new();
 
-	public GraphicsBuffer(nint elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
+	public TypedBuffer(nint elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
 	{
 		// Create block with D3D12MA
 		D3D12MA.CreateVirtualBlock(new D3D12MA.VirtualBlockDescription()
@@ -53,12 +54,7 @@ public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : un
 
 			// Create a handle from the D3D12MA allocation.
 			virtualBlock.GetAllocationInfo(allocation, out var info);
-			var alloc = new BufferAllocation<T>(this)
-			{
-				Handle = allocation,
-				Offset = (nint)info.Offset,
-				Size = (nint)info.Size
-			};
+			var alloc = new BufferAllocation<T>(this, allocation, (nint)info.Offset, (nint)info.Size);
 
 			allocations.Add(alloc);
 			UpdateStats();
@@ -105,16 +101,19 @@ public unsafe class GraphicsBuffer<T> : GraphicsBuffer, IDisposable where T : un
 
 public class BufferAllocation<T> : IDisposable where T : unmanaged
 {
-	public nint Offset = 0;
-	public nint Size = 0;
+	public nint Offset { get; } = 0;
+	public nint Size { get; } = 0;
 	public nint End => Offset + Size;
 	
 	internal D3D12MA.VirtualAllocation Handle;
-	public GraphicsBuffer<T> Buffer { get; private set; }
+	public TypedBuffer<T> Buffer { get; private set; }
 
-	public BufferAllocation(GraphicsBuffer<T> source)
+	public BufferAllocation(TypedBuffer<T> source, D3D12MA.VirtualAllocation alloc, nint offset, nint size)
 	{
 		Buffer = source;
+		Handle = alloc;
+		Offset = offset;
+		Size = size;
 	}
 
 	public void Dispose()

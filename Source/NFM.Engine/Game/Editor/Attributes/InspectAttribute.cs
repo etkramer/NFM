@@ -11,7 +11,7 @@ namespace NFM;
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
 [Injection(typeof(NotifyAspect))]
-public class InspectAttribute : SaveAttribute
+public class InspectAttribute : Attribute
 {
 	public InspectAttribute()
 	{

@@ -50,7 +50,5 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 
 	public void NewPressed() => Project.Reset();
 	public void QuitPressed(object sender) => MainWindow.Instance.Close();
-	public void UndoPressed() => Command.Undo();
-	public void RedoPressed() => Command.Redo();
 	public void DeletePressed() => Selection.Selected.OfType<Node>().ToArray().ForEach(o => o.Dispose());
 }

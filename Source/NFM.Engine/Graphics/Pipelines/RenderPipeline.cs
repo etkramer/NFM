@@ -70,7 +70,7 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 
 	#endregion
 
-	public GraphicsBuffer<ViewConstants> ViewCB { get; } = new(1, GraphicsBuffer.ConstantAlignment);
+	public TypedBuffer<ViewConstants> ViewCB { get; } = new(1, RawBuffer.ConstantAlignment);
 
 	public CommandList List { get; } = new CommandList();	
 	protected Vector2i Size { get; private set; } = default;

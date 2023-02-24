@@ -10,7 +10,7 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 	private static PipelineState cullPSO;
 	private static PipelineState visPSO;
 
-	private static GraphicsBuffer commandBuffer;
+	private static RawBuffer commandBuffer;
 	private static CommandSignature commandSignature;
 
 	public override void Init()
@@ -36,7 +36,7 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 			.AddDrawIndexedArg()
 			.Compile();
 
-		commandBuffer ??= new GraphicsBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
+		commandBuffer ??= new RawBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
 	}
 
 	public override void Run(CommandList list)

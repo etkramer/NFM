@@ -15,7 +15,7 @@ public class ConstantBufferView : IDisposable
 		ConstantBufferViewDescription desc = new()
 		{
 			BufferLocation = resource.GPUVirtualAddress,
-			SizeInBytes = (int)MathHelper.Align(capacity * stride, GraphicsBuffer.ConstantAlignment)
+			SizeInBytes = (int)MathHelper.Align(capacity * stride, RawBuffer.ConstantAlignment)
 		};
 
 		D3DContext.Device.CreateConstantBufferView(desc, Handle);

@@ -3,7 +3,7 @@ using Vortice.DXGI;
 
 namespace NFM.GPU;
 
-public unsafe partial class GraphicsBuffer : Resource, IDisposable
+public unsafe partial class RawBuffer : Resource, IDisposable
 {
 	public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
 	public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;
@@ -59,7 +59,7 @@ public unsafe partial class GraphicsBuffer : Resource, IDisposable
 		set => D3DResource.Name = value;
 	}
 
-	public GraphicsBuffer(nint sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
+	public RawBuffer(nint sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
 	{
 		Capacity = (int)(sizeBytes / stride);
 		SizeAlignment = sizeAlignment;

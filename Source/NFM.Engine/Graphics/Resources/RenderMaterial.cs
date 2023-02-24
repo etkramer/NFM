@@ -8,7 +8,7 @@ namespace NFM.Graphics;
 
 class RenderMaterial : IDisposable
 {
-	public static GraphicsBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
+	public static TypedBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
 
 	#region Permutations
 	private static List<(IEnumerable<Shader>, int)> stackIDs = new();
@@ -42,7 +42,7 @@ class RenderMaterial : IDisposable
 	public ShaderParameter[] Parameters { get; }
 	public ObservableCollection<Shader> Shaders { get; } = new();
 
-	public BufferAllocation<byte> MaterialHandle { get; private set; }= null;
+	public BufferAllocation<byte> MaterialHandle { get; private set; } = null;
 
 	public int StackID { get; private set; }
 	private static int lastID = 0;

@@ -84,7 +84,7 @@ public class CommandList : IDisposable
 		Dispatch(groupsX, groupsY, groupsZ);
 	}
 
-	public void BarrierUAV(params GraphicsBuffer[] buffers)
+	public void BarrierUAV(params RawBuffer[] buffers)
 	{
 		lock (this)
 		{
@@ -112,7 +112,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void ExecuteIndirect(CommandSignature signature, GraphicsBuffer commandBuffer, int maxCommandCount, nint commandStart = 0)
+	public void ExecuteIndirect(CommandSignature signature, RawBuffer commandBuffer, int maxCommandCount, nint commandStart = 0)
 	{
 		lock (this)
 		{
@@ -149,7 +149,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void SetPipelineCBV(int slot, int space, GraphicsBuffer target)
+	public void SetPipelineCBV(int slot, int space, RawBuffer target)
 	{
 		lock (this)
 		{
@@ -194,7 +194,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void SetPipelineUAV(int slot, int space, GraphicsBuffer target)
+	public void SetPipelineUAV(int slot, int space, RawBuffer target)
 	{
 		lock (this)
 		{
@@ -238,7 +238,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void SetPipelineSRV(int slot, int space, GraphicsBuffer target)
+	public void SetPipelineSRV(int slot, int space, RawBuffer target)
 	{
 		lock (this)
 		{
@@ -260,7 +260,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void SeIndexBuffer(GraphicsBuffer target)
+	public void SeIndexBuffer(RawBuffer target)
 	{
 		RequestState(target, ResourceStates.IndexBuffer);
 
@@ -297,7 +297,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void ResetCounter(GraphicsBuffer buffer)
+	public void ResetCounter(RawBuffer buffer)
 	{
 		if (buffer.HasCounter)
 		{
@@ -314,7 +314,7 @@ public class CommandList : IDisposable
 		UploadBuffer(handle.Buffer, data, handle.Offset);
 	}
 
-	public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, T data, nint start = 0) where T : unmanaged
+	public unsafe void UploadBuffer<T>(RawBuffer buffer, T data, nint start = 0) where T : unmanaged
 	{
 		UploadBuffer(buffer, &data, sizeof(T), start * sizeof(T));
 	}
@@ -324,7 +324,7 @@ public class CommandList : IDisposable
 		UploadBuffer(handle.Buffer, data, handle.Offset);
 	}
 
-	public unsafe void UploadBuffer<T>(GraphicsBuffer buffer, ReadOnlySpan<T> data, nint start = 0) where T : unmanaged
+	public unsafe void UploadBuffer<T>(RawBuffer buffer, ReadOnlySpan<T> data, nint start = 0) where T : unmanaged
 	{
 		fixed (T* dataPtr = data)
 		{
@@ -332,7 +332,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public unsafe void UploadBuffer(GraphicsBuffer buffer, void* data, nint dataSize, nint offset = 0)
+	public unsafe void UploadBuffer(RawBuffer buffer, void* data, nint dataSize, nint offset = 0)
 	{
 		Debug.Assert(buffer.IsAlive);
 
@@ -389,7 +389,7 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest, nint startOffset = 0, nint destOffset = 0, nint numBytes = -1)
+	public void CopyBuffer(RawBuffer source, RawBuffer dest, nint startOffset = 0, nint destOffset = 0, nint numBytes = -1)
 	{
 		lock (this)
 		{
@@ -405,8 +405,8 @@ public class CommandList : IDisposable
 		}
 	}
 
-	private static GraphicsBuffer intermediateCopyBuffer = new GraphicsBuffer(8 * 1024 * 1024, 1); // ~8MB
-	public void CopyBuffer(GraphicsBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
+	private static RawBuffer intermediateCopyBuffer = new RawBuffer(8 * 1024 * 1024, 1); // ~8MB
+	public void CopyBuffer(RawBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 	{
 		lock (this)
 		{

@@ -26,8 +26,8 @@
 						<MenuItem Header="Quit" Command="{Binding QuitPressed}" CommandParameter="{Binding ElementName=$self}"/>
 					</MenuItem>
 					<MenuItem Header="Edit" VerticalAlignment="Stretch" Padding="5, 0, 5, 0">
-						<MenuItem Header="Undo" Command="{Binding UndoPressed}" InputGesture="Ctrl+Z" HotKey="Ctrl+Z"/>
-						<MenuItem Header="Redo" Command="{Binding RedoPressed}" InputGesture="Ctrl+Shift+Z" HotKey="Ctrl+Shift+Z"/>
+						<MenuItem Header="Undo" InputGesture="Ctrl+Z" HotKey="Ctrl+Z"/>
+						<MenuItem Header="Redo" InputGesture="Ctrl+Shift+Z" HotKey="Ctrl+Shift+Z"/>
 						<Separator/>
 						<MenuItem Header="Delete" Command="{Binding DeletePressed}" InputGesture="Delete" HotKey="Delete"/>
 					</MenuItem>
