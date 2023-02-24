@@ -17,21 +17,21 @@ public struct DockRelationship
 {
 	public DockRelationship() {}
 
-	public TabGroup Parent = null;
+	public DockGroup Parent = null;
 	public DockPosition Direction = DockPosition.Right;
 	public float Split = 0.5f; 
 }
 
-public class Dockspace : Panel
+public class DockSpace : Panel
 {
 	const int groupPadding = 6;
 
-	public Dockspace()
+	public DockSpace()
 	{
 		Margin = new(groupPadding, 0, groupPadding, groupPadding);
 	}
 
-	public void Dock(TabGroup group, TabGroup parent, DockPosition direction = DockPosition.Right, float split = 0.5f)
+	public void Dock(DockGroup group, DockGroup parent, DockPosition direction = DockPosition.Right, float split = 0.5f)
 	{
 		// First child must be the central node (null parent).
 		if (Children.Count == 0)
@@ -62,7 +62,7 @@ public class Dockspace : Panel
 		ArrangeRecursive(null, FinalSize.ToArea());
 
 		// Apply calculated sizes.
-		foreach (TabGroup Child in Children)
+		foreach (DockGroup Child in Children)
 		{
 			Child.Width = Child.CalculatedSize.Width;
 			Child.Height = Child.CalculatedSize.Height;
@@ -72,10 +72,10 @@ public class Dockspace : Panel
 		return FinalSize;
 	}
 
-	private void ArrangeRecursive(TabGroup parent, Box2D parentSize)
+	private void ArrangeRecursive(DockGroup parent, Box2D parentSize)
 	{
 		// Loop through potential groups.
-		foreach (TabGroup child in Children)
+		foreach (DockGroup child in Children)
 		{
 			// This group is a child of the parent.
 			if (child.Relationship.Parent == parent)
@@ -116,8 +116,8 @@ public class Dockspace : Panel
 			parent.CalculatedSize = parentSize;
 	}
 
-	private static List<TabGroup> childGroups = new();
-	public void CloseGroup(TabGroup target)
+	private static List<DockGroup> childGroups = new();
+	public void CloseGroup(DockGroup target)
 	{
 		// Unless it's the only one present in the view.
 		if (Children.Count == 1)
@@ -128,7 +128,7 @@ public class Dockspace : Panel
 
 		// Gather list of child groups.
 		childGroups.Clear();
-		foreach (TabGroup Group in Children)
+		foreach (DockGroup Group in Children)
 		{
 			if (Group.Relationship.Parent == target)
 			{
@@ -136,7 +136,7 @@ public class Dockspace : Panel
 			}
 		}
 
-		TabGroup newParent = null;
+		DockGroup newParent = null;
 		if (childGroups.Count > 0)
 		{
 			// Select new parent based on how visually jarring the change would be.
@@ -153,7 +153,7 @@ public class Dockspace : Panel
 			}
 
 			// Loop through orphans.
-			foreach (TabGroup orphan in childGroups)
+			foreach (DockGroup orphan in childGroups)
 			{
 				if (orphan == newParent)
 				{

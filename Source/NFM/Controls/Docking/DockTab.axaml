@@ -3,7 +3,7 @@
         xmlns:controls="using:NFM">
 
 	<!--Base state-->
-	<Style Selector="controls|Tab">
+	<Style Selector="controls|DockTab">
 		<Setter Property="Height" Value="23"/>
 		<Setter Property="Focusable" Value="True"/>
 		<Setter Property="Padding" Value="20, 1"/>
@@ -25,17 +25,17 @@
 		</Setter>
 	</Style>
 
-	<Style Selector="controls|Tab:not(:active)">
+	<Style Selector="controls|DockTab:not(:active)">
 		<Setter Property="Foreground" Value="#777"/>
 		<Setter Property="Background" Value="Transparent"/>
 	</Style>
 
-	<Style Selector="controls|Tab:not(:active):pointerover">
+	<Style Selector="controls|DockTab:not(:active):pointerover">
 		<Setter Property="Foreground" Value="#999"/>
 	</Style>
 	
 	<!--Button style-->
-	<Style Selector="controls|Tab /template/ Button">
+	<Style Selector="controls|DockTab /template/ Button">
 		<Setter Property="BorderThickness" Value="0"/>
 		<Setter Property="Cursor" Value="Arrow"/>
 		<Setter Property="ClickMode" Value="Press"/>

@@ -41,22 +41,22 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 	public void RestorePanels()
 	{
 		// Create group (viewport 1).
-		TabGroup group1 = new TabGroup();
+		DockGroup group1 = new DockGroup();
 		group1.Add(new ViewportPanel());
 		dockspace.Dock(group1, null);
 
 		// Create group (outliner panel).
-		TabGroup group2 = new TabGroup();
+		DockGroup group2 = new DockGroup();
 		group2.Add(new OutlinerPanel());
 		dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
 
 		// Create group (inspector panel).
-		TabGroup group3 = new TabGroup();
+		DockGroup group3 = new DockGroup();
 		group3.Add(new InspectorPanel());
 		dockspace.Dock(group3, group1, DockPosition.Right, 0.13f);
 
 		// Create group (library).
-		TabGroup group4 = new TabGroup();
+		DockGroup group4 = new DockGroup();
 		group4.Add(new ProfilerPanel());
 		group4.Add(new LibraryPanel());
 		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);

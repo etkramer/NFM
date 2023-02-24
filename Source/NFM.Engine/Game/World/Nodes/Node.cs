@@ -94,7 +94,7 @@ public class Node : ISelectable, IDisposable
 		// Remove self from scene tree.
 		Parent = null;
 
-		foreach (var child in children)
+		foreach (var child in children.Reverse())
 		{
 			child.Dispose();
 		}

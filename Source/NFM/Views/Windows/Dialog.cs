@@ -70,12 +70,9 @@ public class Dialog
 							.Text(nameof(win.Title), BindingMode.Default)
 							.Size(13)
 							.Weight(FontWeight.SemiBold)
-							.With(o => o.IsHitTestVisible = false),
-						new WindowButtons()
-							.Column(2)
-							.HorizontalAlignment(HorizontalAlignment.Right)
-							.Style("dialog")
-					),
+							.With(o => o.IsHitTestVisible = false)
+					)
+					.Height(38),
 				new Grid()
 					.Rows("*, 1, 60")
 					.Row(1)

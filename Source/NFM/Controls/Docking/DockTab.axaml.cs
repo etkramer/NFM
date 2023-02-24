@@ -8,12 +8,12 @@ using Avalonia.Metadata;
 namespace NFM;
 
 [PseudoClasses(":active")]
-public class Tab : TemplatedControl
+public class DockTab : TemplatedControl
 {
-	public static readonly StyledProperty<ToolPanel> PanelProperty = AvaloniaProperty.Register<Tab, ToolPanel>(nameof(Panel));
-	public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<Tab, bool>(nameof(IsSelected), false);
+	public static readonly StyledProperty<ToolPanel> PanelProperty = AvaloniaProperty.Register<DockTab, ToolPanel>(nameof(Panel));
+	public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<DockTab, bool>(nameof(IsSelected), false);
 
-	private TabGroup group;
+	private DockGroup group;
 
 	[Content]
 	public ToolPanel Panel
@@ -28,7 +28,7 @@ public class Tab : TemplatedControl
 		set { SetValue(IsSelectedProperty, value); PseudoClasses.Set(":active", value); }
 	}
 
-	public Tab(ToolPanel panel, TabGroup group)
+	public DockTab(ToolPanel panel, DockGroup group)
 	{
 		this.group = group;
 		Panel = panel;

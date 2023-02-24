@@ -41,6 +41,6 @@
 		</Grid>
 		
 		<!--Main dockspace-->
-		<local:Dockspace Grid.Row="2" x:Name="dockspace"/>
+		<local:DockSpace Grid.Row="2" x:Name="dockspace"/>
 	</Grid>
 </Window>

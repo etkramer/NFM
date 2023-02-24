@@ -8,34 +8,35 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Metadata;
+using DynamicData;
 
 namespace NFM;
 
-public class TabGroup : TemplatedControl
+public class DockGroup : TemplatedControl
 {
-	public static readonly StyledProperty<ObservableCollection<Tab>> TabsProperty = AvaloniaProperty.Register<TabGroup, ObservableCollection<Tab>>(nameof(Tabs));
-	public static readonly StyledProperty<Tab> SelectedTabProperty = AvaloniaProperty.Register<TabGroup, Tab>(nameof(SelectedTab));
+	public static readonly StyledProperty<ObservableCollection<DockTab>> TabsProperty = AvaloniaProperty.Register<DockGroup, ObservableCollection<DockTab>>(nameof(Tabs));
+	public static readonly StyledProperty<DockTab> SelectedTabProperty = AvaloniaProperty.Register<DockGroup, DockTab>(nameof(SelectedTab));
 
 	public DockRelationship Relationship;
 	public Box2D CalculatedSize;
-	public Dockspace Dockspace;
+	public DockSpace Dockspace;
 
 	private int selectedIndex = -1;
 
 	[Content]
-	public ObservableCollection<Tab> Tabs
+	public ObservableCollection<DockTab> Tabs
 	{
 		get { return GetValue(TabsProperty); }
 		internal set { SetValue(TabsProperty, value); }
 	}
 
-	public Tab SelectedTab
+	public DockTab SelectedTab
 	{
 		get { return GetValue(SelectedTabProperty); }
 		private set { SetValue(SelectedTabProperty, value); }
 	}
 
-	public TabGroup()
+	public DockGroup()
 	{
 		Tabs = new();
 	}
@@ -62,10 +63,10 @@ public class TabGroup : TemplatedControl
 
 	public void Add<T>(T control) where T : ToolPanel
 	{
-		Tabs.Add(new Tab(control, this));
+		Tabs.Add(new DockTab(control, this));
 	}
 
-	public void CloseTab(Tab tab)
+	public void CloseTab(DockTab tab)
 	{
 		// Remove single tab.
 		if (Tabs.Count > 1)

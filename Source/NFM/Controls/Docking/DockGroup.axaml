@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:NFM">
 
-	<Style Selector="controls|TabGroup">
+	<Style Selector="controls|DockGroup">
 		<Setter Property="Template">
 			<ControlTemplate>
 				<DockPanel>
