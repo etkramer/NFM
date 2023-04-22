@@ -62,7 +62,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
 
 		// Create group (viewport 2).
-		/*TabGroup group5 = new TabGroup();
+		/*DockGroup group5 = new DockGroup();
 		group5.Add(new ViewportPanel());
 		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}

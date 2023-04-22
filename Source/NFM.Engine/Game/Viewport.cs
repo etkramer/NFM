@@ -45,11 +45,11 @@ public unsafe class Viewport : IDisposable
 	public void OnTick(double deltaTime)
 	{
 		const float lookSens = 0.15f;
-		const float dampingCoefficient = 5;
-		const float acceleration = 10;
+		const float dampingCoefficient = 15;
+		const float acceleration = 30;
 		const float sprintMult = 2.5f;
 
-		// Process input only if right click is down.
+		// WASD Camera (RMB)
 		if (Input.IsDown(MouseButton.Right) && Input.InputSource == HostControl)
 		{
 			// Mouse look
@@ -92,6 +92,18 @@ public unsafe class Viewport : IDisposable
 
 			// Apply acceleration to velocity.
 			flyVelocity += (accelVector * acceleration * (Input.IsDown(Key.LeftShift) ? sprintMult : 1)) * (float)deltaTime;
+		}
+		// Pan Camera (Alt+Shift+LMB)
+		else if (Input.IsDown(MouseButton.Left) && Input.IsDown(Key.LeftAlt) && Input.IsDown(Key.LeftShift))
+		{
+			Vector3 panVector = new Vector3()
+			{
+				X = -Input.MouseDelta.X * 0.002f,
+				Z = -Input.MouseDelta.Y * 0.002f
+			};
+
+			flyVelocity = Vector3.Zero;
+			Camera.Position += Vector3.TransformVector(panVector, Matrix4.CreateRotation(Camera.Rotation));
 		}
 
 		// Flycam physics.
