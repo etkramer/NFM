@@ -34,7 +34,7 @@ namespace NFM;
 [DeclarativeProperty(SetterName = "Background", PropertyName = "Background", BindingPropertyName = "BackgroundProperty", PropertyType = typeof(Brush), TargetType = typeof(TemplatedControl))]
 [DeclarativeProperty(SetterName = "BorderWidth", PropertyName = "BorderThickness", BindingPropertyName = "BorderThicknessProperty", PropertyType = typeof(Thickness), TargetType = typeof(TemplatedControl))]
 
-[DeclarativeProperty(SetterName = "Items", PropertyName = "Items", BindingPropertyName = "ItemsProperty", PropertyType = typeof(IEnumerable), TargetType = typeof(ItemsControl))]
+[DeclarativeProperty(SetterName = "Items", PropertyName = "Items", BindingPropertyName = "ItemsProperty", PropertyType = typeof(IList), TargetType = typeof(ItemsControl))]
 [DeclarativeProperty(SetterName = "ItemTemplate", PropertyName = "ItemTemplate", BindingPropertyName = "ItemTemplateProperty", PropertyType = typeof(IDataTemplate), TargetType = typeof(ItemsControl))]
 
 // ContentControl
