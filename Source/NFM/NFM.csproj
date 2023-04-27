@@ -30,7 +30,6 @@
 		<PackageReference Include="Avalonia.Native" Version="11.0.0-preview6" />
 		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview6" />
 		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.0-preview6" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview6" />
 		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
 	</ItemGroup>
 

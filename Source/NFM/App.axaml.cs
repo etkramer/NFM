@@ -9,7 +9,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 
@@ -27,7 +26,12 @@ public partial class App : Application
 			UseWgl = true,
 		};
 
-		AppBuilder.Configure<App>().UseWin32().With(opts).UseSkia().UseReactiveUI().StartWithClassicDesktopLifetime(new string[0]);
+		AppBuilder.Configure<App>()
+			.UseWin32().With(opts)
+			.UseSkia()
+			.UseReactiveUI()
+			.StartWithClassicDesktopLifetime(new string[0]);
+
 		Engine.Cleanup();
 	}
 
