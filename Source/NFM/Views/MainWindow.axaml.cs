@@ -48,21 +48,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		// Create group (outliner panel).
 		DockGroup group2 = new DockGroup();
 		group2.Add(new OutlinerPanel());
-		dockspace.Dock(group2, group1, DockPosition.Left, 0.11f);
+		dockspace.Dock(group2, group1, DockPosition.Right, 0.13f);
 
 		// Create group (inspector panel).
 		DockGroup group3 = new DockGroup();
 		group3.Add(new InspectorPanel());
-		dockspace.Dock(group3, group1, DockPosition.Right, 0.13f);
+		dockspace.Dock(group3, group2, DockPosition.Bottom, 0.75f);
 
 		// Create group (library).
-		DockGroup group4 = new DockGroup();
+		/*DockGroup group4 = new DockGroup();
 		group4.Add(new ProfilerPanel());
 		group4.Add(new LibraryPanel());
 		dockspace.Dock(group4, group1, DockPosition.Bottom, 0.30f);
 
 		// Create group (viewport 2).
-		/*DockGroup group5 = new DockGroup();
+		DockGroup group5 = new DockGroup();
 		group5.Add(new ViewportPanel());
 		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}
