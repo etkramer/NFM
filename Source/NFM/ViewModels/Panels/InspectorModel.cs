@@ -78,7 +78,7 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 		// Filter and bucket properties by category
 		var buckets = type.GetProperties()
 			.Where(o => o.HasAttribute<InspectAttribute>())
-			.Bucket(o => o.DeclaringType);
+			.GroupBy(o => o.DeclaringType);
 
 		var contents = new List<Control>();
 

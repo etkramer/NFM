@@ -57,7 +57,7 @@ public static class InspectHelper
 		if (typeCandidates.Count > 0)
 		{
 			return typeCandidates
-				.Bucket(o => o.Item1)
+				.GroupBy(o => o.Item1)
 				.LastOrDefault()?
 				.Select(o => o.Item2)
 				.FirstOrDefault();
