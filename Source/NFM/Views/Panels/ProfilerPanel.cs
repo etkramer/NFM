@@ -1,7 +1,5 @@
-using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using ReactiveUI;

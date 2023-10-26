@@ -1,5 +1,4 @@
-﻿using System;
-using NFM.GPU;
+﻿using NFM.GPU;
 using NFM.Graphics;
 using DXGIFormat = Vortice.DXGI.Format;
 

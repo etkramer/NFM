@@ -1,10 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Numerics;
-using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.LogicalTree;
 using NFM.Resources;
 
 namespace NFM;

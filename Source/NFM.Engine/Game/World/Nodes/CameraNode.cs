@@ -1,8 +1,4 @@
-﻿using System;
-using NFM.Graphics;
-using NFM.Resources;
-
-namespace NFM.World;
+﻿namespace NFM.World;
 
 [Icon("photo_camera")]
 public class CameraNode : Node

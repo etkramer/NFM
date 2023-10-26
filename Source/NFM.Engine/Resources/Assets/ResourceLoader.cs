@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFM.Resources;
+﻿namespace NFM.Resources;
 
 /// <summary>
 /// Describes a loader used when an unloaded asset is requested

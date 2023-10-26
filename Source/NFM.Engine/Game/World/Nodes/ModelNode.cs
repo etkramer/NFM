@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using NFM.GPU;
+﻿using NFM.GPU;
 using NFM.Graphics;
 using NFM.Resources;
-using ReactiveUI;
 
 namespace NFM.World;
 

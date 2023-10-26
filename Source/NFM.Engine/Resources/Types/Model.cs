@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using Avalonia.Controls;
-using NFM.Graphics;
+﻿using NFM.Graphics;
 
 namespace NFM.Resources;
 

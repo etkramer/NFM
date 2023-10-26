@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia.Controls.Primitives;
+﻿using Avalonia.Controls.Primitives;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NFM.World;

@@ -1,12 +1,3 @@
-using System;
-using System.ComponentModel;
-using Avalonia.Controls;
-using Avalonia.Data;
-using Avalonia.Layout;
-using System.Reflection.Metadata;
-using System.Reflection;
-using Avalonia.ReactiveUI;
-using Avalonia.Threading;
 using ReactiveUI;
 
 namespace NFM;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFM.Resources;
+﻿namespace NFM.Resources;
 
 public sealed class Material : GameResource
 {

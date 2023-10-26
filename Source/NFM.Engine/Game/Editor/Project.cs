@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using NFM.World;
+﻿using NFM.World;
 
 namespace NFM;
 

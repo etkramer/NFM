@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-
-namespace NFM.World;
+﻿namespace NFM.World;
 
 public partial class Scene : IDisposable
 {

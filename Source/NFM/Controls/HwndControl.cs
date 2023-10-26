@@ -1,10 +1,7 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
-using WinApi.User32;
 using Avalonia.Input;
-using Avalonia.Input.Raw;
 
 namespace NFM;
 

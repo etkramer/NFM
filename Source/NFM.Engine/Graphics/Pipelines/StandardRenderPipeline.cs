@@ -1,5 +1,4 @@
-﻿using System;
-using NFM.GPU;
+﻿using NFM.GPU;
 using Vortice.DXGI;
 
 namespace NFM.Graphics;

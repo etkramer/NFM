@@ -1,9 +1,6 @@
-﻿using System;
-using Avalonia.Input;
+﻿using Avalonia.Input;
 using NFM.GPU;
 using NFM.World;
-using Vortice.Direct3D12;
-using Vortice.DXGI;
 
 namespace NFM.Graphics;
 

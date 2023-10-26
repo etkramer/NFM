@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Linq;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Shapes;
-using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using NFM.Generators;

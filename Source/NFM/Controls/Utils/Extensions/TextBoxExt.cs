@@ -1,8 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data;
+﻿using Avalonia.Controls;
 using Avalonia.Media;
 using NFM.Generators;
 

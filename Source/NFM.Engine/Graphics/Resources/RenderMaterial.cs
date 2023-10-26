@@ -1,5 +1,4 @@
-﻿using System;
-using NFM.GPU;
+﻿using NFM.GPU;
 using NFM.GPU.Native;
 using NFM.Resources;
 using NFM.World;

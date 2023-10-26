@@ -1,12 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Reactive.Linq;
-using DynamicData.Binding;
-using NFM.Common;
-using NFM.Graphics;
-using ReactiveUI;
-
-namespace NFM.World;
+﻿namespace NFM.World;
 
 [Icon("crop_free")]
 public class Node : ISelectable, IDisposable

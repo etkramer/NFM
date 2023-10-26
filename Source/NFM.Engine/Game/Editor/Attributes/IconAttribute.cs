@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFM;
+﻿namespace NFM;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class IconAttribute : Attribute

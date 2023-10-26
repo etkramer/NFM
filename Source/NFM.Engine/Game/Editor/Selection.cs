@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFM;
+﻿namespace NFM;
 
 public interface ISelectable
 {

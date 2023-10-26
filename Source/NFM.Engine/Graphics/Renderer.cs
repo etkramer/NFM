@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Avalonia.Rendering;
-using NFM.GPU;
+﻿using NFM.GPU;
 using NFM.World;
 using Vortice.Direct3D12;
 

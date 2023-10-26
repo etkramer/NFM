@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFM.World;
+﻿namespace NFM.World;
 
 [Icon("emoji_objects")]
 public class PointLightNode : Node

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
-using AspectInjector.Broker;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;

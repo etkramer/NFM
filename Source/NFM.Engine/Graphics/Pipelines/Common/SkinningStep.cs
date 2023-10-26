@@ -1,6 +1,4 @@
-﻿using System;
-using NFM.GPU;
-using NFM.World;
+﻿using NFM.GPU;
 
 namespace NFM.Graphics;
 

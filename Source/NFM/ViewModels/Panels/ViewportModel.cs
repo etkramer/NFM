@@ -1,9 +1,6 @@
-﻿using System;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using NFM.GPU;
-using NFM.Resources;
-using NFM.World;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

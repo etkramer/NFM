@@ -1,10 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows.Input;
-using Avalonia;
+﻿using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Data;
-using Avalonia.Media;
 
 namespace NFM;
 
