@@ -990,7 +990,7 @@ namespace NFM.Mathematics
         /// <param name="obj">The object to compare to.</param>
         /// <returns>True if the instances are equal; false otherwise.</returns>
         [Pure]
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Matrix3x4 && Equals((Matrix3x4)obj);
         }

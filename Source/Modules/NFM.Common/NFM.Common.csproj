@@ -2,14 +2,11 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
 	<LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <Deterministic>true</Deterministic>
     <OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-	<WarningLevel>3</WarningLevel>
     <Platforms>x64</Platforms>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <ItemGroup>

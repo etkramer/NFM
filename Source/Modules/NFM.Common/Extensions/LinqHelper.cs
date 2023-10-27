@@ -2,56 +2,55 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NFM.Common
+namespace NFM.Common;
+
+public static class LinqHelper
 {
-	public static class LinqHelper
+	/// <inheritdoc cref="List{T}.ForEach"/>
+	public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
 	{
-		/// <inheritdoc cref="List{T}.ForEach"/>
-		public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+		foreach (T element in source)
 		{
-			foreach (T element in source)
+			action.Invoke(element);
+		}
+	}
+
+	/// <summary>
+	/// Checks if there are any objects that don't share a value.
+	/// </summary>
+	public static bool HasVariation<T, T2>(this IEnumerable<T> source, Func<T, T2> getter)
+	{
+		T2? lastResult = getter(source.First());
+
+		foreach (T value in source)
+		{
+			T2? result = getter.Invoke(value);
+
+			if (result is not null && !result.Equals(lastResult))
 			{
-				action.Invoke(element);
+				return true;
+			}
+			else
+			{
+				lastResult = result;
 			}
 		}
 
-		/// <summary>
-		/// Checks if there are any objects that don't share a value.
-		/// </summary>
-		public static bool HasVariation<T, T2>(this IEnumerable<T> source, Func<T, T2> getter)
+		return false;
+	}
+
+	public static bool TryFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource? value)
+	{
+		foreach (var item in source)
 		{
-			T2 lastResult = getter(source.First());
-
-			foreach (T value in source)
+			if (predicate.Invoke(item))
 			{
-				T2 result = getter.Invoke(value);
-
-				if (!result.Equals(lastResult))
-				{
-					return true;
-				}
-				else
-				{
-					lastResult = result;
-				}
+				value = item;
+				return true;
 			}
-
-			return false;
 		}
 
-		public static bool TryFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource value)
-		{
-			foreach (var item in source)
-			{
-				if (predicate.Invoke(item))
-				{
-					value = item;
-					return true;
-				}
-			}
-
-			value = default(TSource);
-			return false;
-		}
+		value = default;
+		return false;
 	}
 }

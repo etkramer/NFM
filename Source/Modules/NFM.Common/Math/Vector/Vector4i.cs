@@ -1649,7 +1649,7 @@ namespace NFM.Mathematics
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Vector4i && Equals((Vector4i)obj);
         }

@@ -60,7 +60,7 @@ namespace NFM.Mathematics
 			return !(left == right);
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return obj is Box3D && Equals((Box3D)obj);
 		}

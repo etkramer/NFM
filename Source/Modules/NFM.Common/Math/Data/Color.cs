@@ -200,7 +200,7 @@ namespace NFM.Mathematics
                    A == other.A;
         }
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return obj is Color && Equals((Color)obj);
 		}

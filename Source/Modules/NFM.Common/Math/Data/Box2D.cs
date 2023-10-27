@@ -108,7 +108,7 @@ namespace NFM.Mathematics
 			return (left.Left != right.Left) || (left.Right != right.Right) || (left.Top != right.Top) || (left.Bottom != right.Bottom);
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return base.Equals(obj);
 		}
