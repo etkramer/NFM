@@ -4,9 +4,6 @@
 	<LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

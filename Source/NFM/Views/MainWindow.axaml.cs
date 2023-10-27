@@ -7,7 +7,6 @@ namespace NFM;
 
 public partial class MainWindow : ReactiveWindow<MainWindowModel>
 {
-	public const bool UseQuitDialog = false;
 	public static MainWindow Instance { get; private set; }
 
 	public MainWindow()
@@ -65,18 +64,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		dockspace.Dock(group5, group1, DockPosition.Right, 0.3f);*/
 	}
 
-	bool isQuitConfirmed = false;
+	//bool isQuitConfirmed = false;
 	protected override void OnClosing(WindowClosingEventArgs e)
 	{
-		if (UseQuitDialog)
-		{
-			e.Cancel = !isQuitConfirmed;
+		//if (UseQuitDialog)
+		//{
+		//	e.Cancel = !isQuitConfirmed;
 
-			new Dialog("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
-				.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
-				.Button("Cancel", (o) => o.Close())
-				.Show();
-		}
+		//	new Dialog("Quit?", "Are you sure you want to quit? All unsaved changes will be lost.")
+		//		.Button("Quit", (o) => { isQuitConfirmed = true; Close(); })
+		//		.Button("Cancel", (o) => o.Close())
+		//		.Show();
+		//}
 
 		base.OnClosing(e);
 	}

@@ -13,7 +13,7 @@ namespace NFM;
 [DeclarativeProperty(SetterName = "Margin", PropertyName = "Margin", PropertyType = typeof(Thickness), TargetType = typeof(Layoutable))]
 [DeclarativeProperty(SetterName = "Spacing", PropertyName = "Spacing", PropertyType = typeof(double), TargetType = typeof(StackPanel))]
 [DeclarativeProperty(SetterName = "Orientation", PropertyName = "Orientation", PropertyType = typeof(Orientation), TargetType = typeof(StackPanel))]
-[DeclarativeProperty(SetterName = "Header", PropertyName = "Header", PropertyType = typeof(string), TargetType = typeof(HeaderedSelectingItemsControl))]
+
 public static partial class PanelExt
 {
 	public static T Children<T>(this T subject, params Control[] items) where T : Panel => Children(subject, items as IEnumerable<Control>);

@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<LangVersion>latest</LangVersion>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>preview</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 	
 	<ItemGroup>

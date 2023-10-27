@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Avalonia.Controls;
 
@@ -16,13 +17,13 @@ public static class InspectHelper
 		{
 			// Create object, *don't* call constructor, and set base properties.
 			// This is an *extremely* hacky way to avoid using inheritance.
-			var result = FormatterServices.GetUninitializedObject(inspectorType) as Control;
-			inspectorType.GetProperty("Property", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, property);
-			inspectorType.GetProperty("Subjects", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(result, subjects);
+            var res = RuntimeHelpers.GetUninitializedObject(inspectorType) as Control;
+			inspectorType.GetProperty("Property", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(res, property);
+			inspectorType.GetProperty("Subjects", ReflectionHelper.BindingFlagsAllNonStatic).SetValue(res, subjects);
 
 			// Call constructor and return.
-			inspectorType.GetConstructor(Type.EmptyTypes).Invoke(result, null);
-			return result;
+			inspectorType.GetConstructor(Type.EmptyTypes).Invoke(res, null);
+			return res;
 		}
 		else
 		{
