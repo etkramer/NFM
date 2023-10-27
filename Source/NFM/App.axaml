@@ -8,8 +8,8 @@
 		<StyleInclude Source="avares://NFM/Assets/Theme.axaml"/>
 		
 		<!--Custom Controls (Misc)-->
-		<StyleInclude Source="avares://NFM/Controls/Docking/DockTab.axaml"/>
-		<StyleInclude Source="avares://NFM/Controls/Docking/DockGroup.axaml"/>
+		<StyleInclude Source="avares://NFM/Controls/DockTab.axaml"/>
+		<StyleInclude Source="avares://NFM/Controls/DockGroup.axaml"/>
 
 		<!--Custom Controls (Inputs)-->
 		<StyleInclude Source="avares://NFM/Controls/Inputs/BoolInput.axaml"/>

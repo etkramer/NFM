@@ -7,7 +7,6 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="FodyWeavers.xml" />
-	  <None Remove="Shaders\Standard\LightingCS.hlsl" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -37,9 +36,5 @@
 		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview5" />
 		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
 		<PackageReference Include="WinApi" Version="4.0.0" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<None Update="Plugin.targets" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>
