@@ -35,9 +35,9 @@ public class ShaderModule
 	public ShaderModule(string source) : this(source, ShaderStage.Library, GetIncludes(Assembly.GetCallingAssembly())) {}
 
 	public ShaderModule(string source, ShaderStage stage, string entry = "main") : this(source, entry, (DxcShaderStage)stage, GetIncludes(Assembly.GetCallingAssembly())) {}
-	public ShaderModule(string source, ShaderStage stage, CustomIncludeHandler handler, string entry = "main") : this(source, entry, (DxcShaderStage)stage, handler) {}
+	public ShaderModule(string source, ShaderStage stage, CustomIncludeHandler? handler, string entry = "main") : this(source, entry, (DxcShaderStage)stage, handler) {}
 
-	private ShaderModule(string source, string entry, DxcShaderStage stage, CustomIncludeHandler handler)
+	private ShaderModule(string source, string entry, DxcShaderStage stage, CustomIncludeHandler? handler)
 	{
 		Stage = (ShaderStage)stage;
 		IDxcResult moduleResult = DxcCompiler.Compile(stage, source, entry, compilerOptions, includeHandler: handler);
@@ -113,22 +113,23 @@ public class ShaderModule
 		return path.Replace("./", "");
 	}
 
-	static CustomIncludeHandler GetIncludes(Assembly embedSource)
+	static CustomIncludeHandler? GetIncludes(Assembly? embedSource)
 	{
-		Func<string, string> includeResolver = (path) =>
+        if (embedSource is null)
+        {
+            return null;
+        }
+
+		Func<string, string?> includeResolver = (path) =>
 		{
 			path = SimplifyPath(path);
 			path = $"{embedSource.GetName().Name}.{path.Replace('/', '.')}";
 
-			using (Stream stream = embedSource.GetManifestResourceStream(path))
+			using Stream? stream = embedSource.GetManifestResourceStream(path);
+			if (stream is not null)
 			{
-				if (stream != null)
-				{
-					using (StreamReader reader = new(stream))
-					{
-						return reader.ReadToEnd();
-					}
-				}
+				using StreamReader reader = new(stream);
+				return reader.ReadToEnd();
 			}
 
 			Debug.LogError($"Failed to resolve include \"{path}\"");
@@ -142,15 +143,15 @@ public class ShaderModule
 
 public sealed class CustomIncludeHandler : CallbackBase, IDxcIncludeHandler
 {
-	private Func<string, string> resolveMethod;
+	private Func<string, string?> resolveMethod;
 
-	public CustomIncludeHandler(Func<string, string> resolver) => this.resolveMethod = resolver;
+	public CustomIncludeHandler(Func<string, string?> resolver) => resolveMethod = resolver;
 
-	public Result LoadSource(string filename, out IDxcBlob includeSource)
+	public Result LoadSource(string filename, out IDxcBlob? includeSource)
 	{
-		string source = resolveMethod.Invoke(filename);
+		string? source = resolveMethod.Invoke(filename);
 
-		if (source != null)
+		if (source is not null)
 		{
 			includeSource = PipelineState.CreateBlob(Encoding.ASCII.GetBytes(source));
 			return Result.Ok;

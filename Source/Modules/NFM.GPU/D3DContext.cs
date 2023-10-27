@@ -4,6 +4,7 @@ using Vortice.DXGI;
 using Vortice.Direct3D12;
 using Vortice.Direct3D12.Debug;
 using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NFM.GPU;
 
@@ -19,17 +20,17 @@ public static class D3DContext
 	internal static Format RTFormat = Format.R8G8B8A8_UNorm;
 	internal static Format DSFormat = Format.D32_Float;
 
-	internal static ID3D12Device6 Device;
-	internal static IDXGIFactory6 DXGIFactory;
-	internal static ID3D12CommandQueue GraphicsQueue;
+	internal static ID3D12Device6? Device;
+	internal static IDXGIFactory6? DXGIFactory;
+	internal static ID3D12CommandQueue? GraphicsQueue;
 
-	private static ID3D12Fence frameFence;
-	private static ID3D12Fence flushFence;
-	private static AutoResetEvent frameFenceEvent;
+	private static ID3D12Fence? frameFence;
+	private static ID3D12Fence? flushFence;
+	private static AutoResetEvent? frameFenceEvent;
 
 	private static unsafe void DebugCallback(MessageCategory category, MessageSeverity severity, MessageId id, void* description, void* context)
 	{
-		string message = Marshal.PtrToStringAnsi((IntPtr)description);
+		string message = Guard.NotNull(Marshal.PtrToStringAnsi((IntPtr)description));
 
 		if (severity == MessageSeverity.Corruption || severity == MessageSeverity.Error)
 		{
@@ -52,8 +53,10 @@ public static class D3DContext
 		RenderLatency = MathHelper.Max(renderLatency, 2);
 
 		// Enable debug layer in debug builds.
-		if (Debug.IsDebugBuild && D3D12.D3D12GetDebugInterface(out ID3D12Debug5 debug).Success)
+		if (Debug.IsDebugBuild && D3D12.D3D12GetDebugInterface(out ID3D12Debug5? debug).Success)
 		{
+            Guard.NotNull(debug);
+
 			debug.EnableDebugLayer();
 			debug.SetEnableAutoName(true);
 			debug.Dispose();
@@ -61,6 +64,7 @@ public static class D3DContext
 
 		// Create DXGI factory.
 		DXGI.CreateDXGIFactory2(Debug.IsDebugMode, out DXGIFactory);
+        Guard.NotNull(DXGIFactory);
 
 		// Create D3D12 device.
 		if (!TryCreateDevice(out Device))
@@ -71,10 +75,10 @@ public static class D3DContext
 		// Do some extra debug setup.
 		if (Debug.IsDebugBuild)
 		{
-			ID3D12InfoQueue1 infoQueue = Device.QueryInterfaceOrNull<ID3D12InfoQueue1>();
+			var infoQueue = Device.QueryInterfaceOrNull<ID3D12InfoQueue1>();
 
 			// RenderDoc makes the query fail for whatever reason.
-			if (infoQueue != null)
+			if (infoQueue is not null)
 			{
 				unsafe
 				{
@@ -101,19 +105,23 @@ public static class D3DContext
 		frameFenceEvent = new AutoResetEvent(false);
 	}
 
-	private static bool TryCreateDevice(out ID3D12Device6 device)
+	private static bool TryCreateDevice([NotNullWhen(true)] out ID3D12Device6? device)
 	{
+        Guard.NotNull(DXGIFactory);
+
 		// Find the ideal hardware adapter.
-		for (int i = 0; DXGIFactory.EnumAdapterByGpuPreference(i, GpuPreference.HighPerformance, out IDXGIAdapter2 adapter).Success; i++)
+		for (int i = 0; DXGIFactory.EnumAdapterByGpuPreference(i, GpuPreference.HighPerformance, out IDXGIAdapter2? adapter).Success; i++)
 		{
 			// Create D3D12 device with Feature Level 12.2 (Ultimate).
 			if (D3D12.D3D12CreateDevice(adapter, Vortice.Direct3D.FeatureLevel.Level_12_2, out device).Success)
 			{
-				adapter.Dispose();
+                Guard.NotNull(device);
+
+				adapter?.Dispose();
 				return true;
 			}
 
-			adapter.Dispose();
+			adapter?.Dispose();
 		}
 
 		device = null;
@@ -122,6 +130,11 @@ public static class D3DContext
 
 	public static bool WaitFrame()
 	{
+        Guard.NotNull(GraphicsQueue);
+        Guard.NotNull(frameFence);
+        Guard.NotNull(frameFenceEvent);
+
+
 		GraphicsQueue.Signal(frameFence, Metrics.FrameCount);
 		ulong frameCountGPU = frameFence.CompletedValue;
 
@@ -161,9 +174,9 @@ public static class D3DContext
 
 	public static void Flush()
 	{
-		ulong fenceValue = flushFence.CompletedValue;
+		ulong fenceValue = Guard.NotNull(flushFence).CompletedValue;
 
-		GraphicsQueue.Signal(flushFence, fenceValue + 1);
+	    Guard.NotNull(GraphicsQueue).Signal(flushFence, fenceValue + 1);
 		flushFence.SetEventOnCompletion(fenceValue + 1);
 	}
 

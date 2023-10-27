@@ -22,7 +22,7 @@ public class RenderTargetView : IDisposable
 			ViewDimension = Target.Samples == 1 ? RenderTargetViewDimension.Texture2D : RenderTargetViewDimension.Texture2DMultisampled,
 		};
 
-		D3DContext.Device.CreateRenderTargetView(Target.D3DResource, desc, Handle);
+		Guard.NotNull(D3DContext.Device).CreateRenderTargetView(Target.D3DResource, desc, Handle);
 	}
 
 	public void Dispose()

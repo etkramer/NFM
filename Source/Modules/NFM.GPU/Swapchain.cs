@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using SharpGen.Runtime;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
@@ -43,7 +44,7 @@ public class Swapchain : IDisposable
 		};
 
 		// Create swapchain.
-		swapchain = D3DContext.DXGIFactory.CreateSwapChainForHwnd(D3DContext.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
+		swapchain = Guard.NotNull(D3DContext.DXGIFactory).CreateSwapChainForHwnd(D3DContext.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
 
 		// Update size to match actual used by swapchain.
 		var swapchainSize = swapchain.SourceSize;
@@ -66,16 +67,17 @@ public class Swapchain : IDisposable
 		swapchain.Release();
 	}
 
+    [MemberNotNull(nameof(backbuffers))]
 	private void CreateRTs()
 	{
-            // Create RTs for each backbuffer.
-            backbuffers = new Texture[D3DContext.RenderLatency];
-            for (int i = 0; i < D3DContext.RenderLatency; i++)
-            {
+        // Create RTs for each backbuffer.
+        backbuffers = new Texture[D3DContext.RenderLatency];
+        for (int i = 0; i < D3DContext.RenderLatency; i++)
+        {
 			// Create backbuffer RT.
 			backbuffers[i] = new Texture(swapchain.GetBuffer<ID3D12Resource>(i), Size.X, Size.Y);
 			backbuffers[i].State = ResourceStates.Present;
-            }
+        }
 	}
 
 	/// <summary>

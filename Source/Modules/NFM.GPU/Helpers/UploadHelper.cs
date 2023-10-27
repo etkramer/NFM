@@ -37,10 +37,11 @@ internal unsafe static class UploadHelper
 		MappedRings = new void*[D3DContext.RenderLatency];
 		for (int i = 0; i < D3DContext.RenderLatency; i++)
 		{
-			D3DContext.Device.CreateCommittedResource(HeapProperties.UploadHeapProperties, HeapFlags.None, copyBufferDescription, ResourceStates.GenericRead, out Rings[i]);
+			Guard.NotNull(D3DContext.Device).CreateCommittedResource(HeapProperties.UploadHeapProperties, HeapFlags.None, copyBufferDescription, ResourceStates.GenericRead, out var ring);
+            Rings[i] = Guard.NotNull(ring);
 
 			void* mapPtr = null;
-			Rings[i].Map(0, &mapPtr);
+			ring.Map(0, &mapPtr);
 			MappedRings[i] = mapPtr;
 		}
 

@@ -50,8 +50,8 @@ public sealed class PipelineState : IDisposable
 	};
 
 	// Compiled program
-	internal ID3D12PipelineState PSO = null;
-	internal ID3D12RootSignature RootSignature = null;
+	internal ID3D12PipelineState? PSO = null;
+	internal ID3D12RootSignature? RootSignature = null;
 
 	// RootParameter <-> register mappings. TODO: Doesn't account for register spaces.
 	internal Dictionary<BindPoint, int> tRegisterMapping = new();
@@ -60,10 +60,10 @@ public sealed class PipelineState : IDisposable
 
 	// Parameters
 	private List<RootParameter1> rootParams = new();
-	private ShaderModule compiledCompute;
-	private ShaderModule compiledVertex;
-	private ShaderModule compiledMesh;
-	private ShaderModule compiledPixel;
+	private ShaderModule? compiledCompute;
+	private ShaderModule? compiledVertex;
+	private ShaderModule? compiledMesh;
+	private ShaderModule? compiledPixel;
 	private CullMode cullMode = CullMode.None;
 	private DepthMode depthMode = DepthMode.None;
 	private bool depthRead = false;
@@ -75,8 +75,8 @@ public sealed class PipelineState : IDisposable
 
 	public void Dispose()
 	{
-		PSO.Dispose();
-		RootSignature.Dispose();
+		PSO?.Dispose();
+		RootSignature?.Dispose();
 	}
 
 	public PipelineState SetRTSamples(int samples)
@@ -166,64 +166,66 @@ public sealed class PipelineState : IDisposable
 		return this;
 	}
 
-	private RootParameter1[] BuildRootParameters(params ShaderModule[] shaders)
+	private RootParameter1[] BuildRootParameters(params ShaderModule?[] shaders)
 	{
 		// Loop through all participating shaders.
-		foreach (ShaderModule shader in shaders)
+		foreach (ShaderModule? shader in shaders)
 		{
-			if (shader != null)
+            if (shader is null)
+            {
+                continue;
+            }
+
+			// Build reflection data.
+			if (!DxcCompiler.Utils.CreateReflection(CreateBlob(shader.Bytecode.ToArray()), out ID3D12ShaderReflection? reflection).Success)
 			{
-				// Build reflection data.
-				if (!DxcCompiler.Utils.CreateReflection(CreateBlob(shader.Bytecode.ToArray()), out ID3D12ShaderReflection reflection).Success)
+				// Failed to build reflection data - shader is probably invalid.
+				return Array.Empty<RootParameter1>();
+			}
+
+			for (int i = 0; i < reflection?.Description.BoundResources; i++)
+			{
+				var binding = reflection.GetResourceBindingDescription(i);
+
+				// Check if resource is UAV.
+				bool UAV = binding.Type == ShaderInputType.UnorderedAccessViewAppendStructured;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewConsumeStructured;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewFeedbacktexture;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWByteAddress;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWStructured;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWStructuredWithCounter;
+				UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWTyped;
+				bool CBV = binding.Type == ShaderInputType.ConstantBuffer;
+				bool SRV = !UAV && !CBV;
+
+				if (SRV)
 				{
-					// Failed to build reflection data - shader is probably invalid.
-					return new RootParameter1[0];
-				}
-
-				for (int i = 0; i < reflection.Description.BoundResources; i++)
-				{
-					var binding = reflection.GetResourceBindingDescription(i);
-
-					// Check if resource is UAV.
-					bool UAV = binding.Type == ShaderInputType.UnorderedAccessViewAppendStructured;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewConsumeStructured;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewFeedbacktexture;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWByteAddress;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWStructured;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWStructuredWithCounter;
-					UAV |= binding.Type == ShaderInputType.UnorderedAccessViewRWTyped;
-					bool CBV = binding.Type == ShaderInputType.ConstantBuffer;
-					bool SRV = !UAV && !CBV;
-
-					if (SRV)
+					if (!tRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
 					{
-						if (!tRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
-						{
-							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ShaderResourceView, 1, binding.BindPoint, binding.Space);
-							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+						var range = new DescriptorRange1(DescriptorRangeType.ShaderResourceView, 1, binding.BindPoint, binding.Space);
+						rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 						
-							tRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
-						}
+						tRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
 					}
-					else if (UAV)
+				}
+				else if (UAV)
+				{
+					if (!uRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
 					{
-						if (!uRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
-						{
-							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.UnorderedAccessView, 1, binding.BindPoint, binding.Space);
-							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+						var range = new DescriptorRange1(DescriptorRangeType.UnorderedAccessView, 1, binding.BindPoint, binding.Space);
+						rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
-							uRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
-						}
+						uRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
 					}
-					else if (CBV)
+				}
+				else if (CBV)
+				{
+					if (!cRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
 					{
-						if (!cRegisterMapping.ContainsKey(new(binding.BindPoint, binding.Space)))
-						{
-							DescriptorRange1 range = new DescriptorRange1(DescriptorRangeType.ConstantBufferView, 1, binding.BindPoint, binding.Space);
-							rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
+						var range = new DescriptorRange1(DescriptorRangeType.ConstantBufferView, 1, binding.BindPoint, binding.Space);
+						rootParams.Add(new RootParameter1(new RootDescriptorTable1(range), ShaderVisibility.All));
 
-							cRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
-						}
+						cRegisterMapping.Add(new(binding.BindPoint, binding.Space), rootParams.Count - 1);
 					}
 				}
 			}
@@ -232,7 +234,7 @@ public sealed class PipelineState : IDisposable
 		return rootParams.ToArray();
 	}
 
-	private unsafe Result CreatePipelineState<T, TData>(TData data, out T result) where T : ID3D12PipelineState where TData : unmanaged
+	private unsafe Result CreatePipelineState<T, TData>(TData data, out T? result) where T : ID3D12PipelineState where TData : unmanaged
 	{
 		PipelineStateStreamDescription description = new()
 		{
@@ -240,7 +242,7 @@ public sealed class PipelineState : IDisposable
 			SubObjectStream = new IntPtr(&data)
 		};
 
-		return D3DContext.Device.CreatePipelineState(description, out result);
+		return Guard.NotNull(D3DContext.Device).CreatePipelineState(description, out result);
 	}
 
 	/// <summary>
@@ -272,7 +274,7 @@ public sealed class PipelineState : IDisposable
 			};
 
 			// Create root signature.
-			RootSignature = D3DContext.Device.CreateRootSignature(new RootSignatureDescription1(
+			RootSignature = Guard.NotNull(D3DContext.Device).CreateRootSignature(new RootSignatureDescription1(
 				RootSignatureFlags.ConstantBufferViewShaderResourceViewUnorderedAccessViewHeapDirectlyIndexed, rootParameters, staticSamplers));
 
 			bool useDepth = depthWrite || (depthRead && depthMode != DepthMode.None);
@@ -281,6 +283,8 @@ public sealed class PipelineState : IDisposable
 			Result result = default;
 			if (IsGraphics)
 			{
+                Guard.NotNull(compiledPixel);
+
 				BlendDescription disabledBlend = BlendDescription.Opaque;
 				for (int i = 0; i < D3D12.SimultaneousRenderTargetCount; i++)
 				{
@@ -289,6 +293,8 @@ public sealed class PipelineState : IDisposable
 
 				if (compiledVertex == null)
 				{
+                    Guard.NotNull(compiledMesh);
+
 					result = CreatePipelineState(new MeshPipelineStateStream()
 					{
 						RootSignature = RootSignature,
@@ -311,6 +317,8 @@ public sealed class PipelineState : IDisposable
 				}
 				else
 				{
+                    Guard.NotNull(compiledVertex);
+
 					result = CreatePipelineState(new VertexPipelineStateStream()
 					{
 						RootSignature = RootSignature,
@@ -334,6 +342,8 @@ public sealed class PipelineState : IDisposable
 			}
 			else if (IsCompute)
 			{
+                Guard.NotNull(compiledCompute);
+
 				result = CreatePipelineState(new ComputePipelineStateStream()
 				{
 					RootSignature = RootSignature,

@@ -9,9 +9,9 @@ public sealed class CommandSignature : IDisposable
 	public int Stride { get; private set; } = 0;
 
 	private List<IndirectArgumentDescription> arguments = new();
-	internal ID3D12CommandSignature Handle;
+	internal ID3D12CommandSignature? Handle;
 
-	private PipelineState program = null;
+	private PipelineState? program = null;
 
 	public CommandSignature AddDrawIndexedArg()
 	{
@@ -75,13 +75,13 @@ public sealed class CommandSignature : IDisposable
 			IndirectArguments = arguments.ToArray(),
 		};
 
-		D3DContext.Device.CreateCommandSignature(desc, program?.RootSignature, out Handle);
+		Guard.NotNull(D3DContext.Device).CreateCommandSignature(desc, program?.RootSignature, out Handle);
 		
 		return this;
 	}
 
 	public void Dispose()
 	{
-		Handle.Dispose();
+		Handle?.Dispose();
 	}
 }

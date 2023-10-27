@@ -23,7 +23,7 @@ public class DepthStencilView : IDisposable
 			Flags = DepthStencilViewFlags.None
 		};
 
-		D3DContext.Device.CreateDepthStencilView(Target.D3DResource, desc, Handle);
+		Guard.NotNull(D3DContext.Device).CreateDepthStencilView(Target.D3DResource, desc, Handle);
 	}
 
 	public void Dispose()

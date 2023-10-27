@@ -26,7 +26,7 @@ public class UnorderedAccessView : IDisposable
 			}
 		};
 
-		D3DContext.Device.CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
+		Guard.NotNull(D3DContext.Device).CreateUnorderedAccessView(resource, hasCounter ? resource : null, desc, Handle);
 	}
 
 	public UnorderedAccessView(Texture texture, int mipLevel)
@@ -44,7 +44,7 @@ public class UnorderedAccessView : IDisposable
 			}
 		};
 
-		D3DContext.Device.CreateUnorderedAccessView(texture, null, desc, Handle);
+		Guard.NotNull(D3DContext.Device).CreateUnorderedAccessView(texture, null, desc, Handle);
 	}
 
 	public void Dispose()

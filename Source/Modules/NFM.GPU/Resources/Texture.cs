@@ -13,8 +13,8 @@ public unsafe class Texture : Resource, IDisposable
 
 	private UnorderedAccessView[] uavs;
 	private ShaderResourceView[] srvs;
-	private RenderTargetView rtv;
-	private DepthStencilView dsv;
+	private RenderTargetView? rtv;
+	private DepthStencilView? dsv;
 
 	internal override ID3D12Resource D3DResource { get; private protected set; }
 
@@ -99,9 +99,9 @@ public unsafe class Texture : Resource, IDisposable
 		};
 
 		// Create D3D resource.
-		D3DContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
+		Guard.NotNull(D3DContext.Device).CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, Description, ResourceStates.CopyDest, ClearValue, out var resource);
 
-		D3DResource = resource;
+		D3DResource = Guard.NotNull(resource);
 		State = ResourceStates.CopyDest;
 
 		uavs = new UnorderedAccessView[mipmapCount];
@@ -121,6 +121,9 @@ public unsafe class Texture : Resource, IDisposable
 		Format = D3DContext.RTFormat;
 		MipmapCount = 1;
 		State = ResourceStates.CopyDest;
+
+        uavs = new UnorderedAccessView[1];
+        srvs = new ShaderResourceView[2]; // Extra index for "all mips"
 
 		D3DResource.Name = "Resource texture";
 	}

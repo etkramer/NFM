@@ -18,7 +18,7 @@ public class ConstantBufferView : IDisposable
 			SizeInBytes = (int)MathHelper.Align(capacity * stride, RawBuffer.ConstantAlignment)
 		};
 
-		D3DContext.Device.CreateConstantBufferView(desc, Handle);
+		Guard.NotNull(D3DContext.Device).CreateConstantBufferView(desc, Handle);
 	}
 
 	public void Dispose()

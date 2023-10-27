@@ -52,8 +52,11 @@ public class DescriptorHeap : IDisposable
 			NodeMask = 0,
 		};
 
-		D3DContext.Device.CreateDescriptorHeap(heapDesc, out handle);
+		Guard.NotNull(D3DContext.Device).CreateDescriptorHeap(heapDesc, out var handle);
+        this.handle = Guard.NotNull(handle);
+
 		handle.Name = $"DescriptorHeap ({type})";
+
 		stride = D3DContext.Device.GetDescriptorHandleIncrementSize((DescriptorHeapType)type);
 
 		// Create block with D3D12MA

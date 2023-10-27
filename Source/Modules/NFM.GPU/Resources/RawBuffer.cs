@@ -18,13 +18,13 @@ public unsafe partial class RawBuffer : Resource, IDisposable
 
 	internal override ID3D12Resource D3DResource { get; private protected set; }
 
-	private ShaderResourceView srv;
-	private UnorderedAccessView uav;
-	private ConstantBufferView cbv;
+	private ShaderResourceView? srv;
+	private UnorderedAccessView? uav;
+	private ConstantBufferView? cbv;
 
 	public ShaderResourceView GetSRV()
 	{
-		if (srv == null)
+		if (srv is null)
 		{
 			srv = new ShaderResourceView(D3DResource, Stride, Capacity, IsRaw && Stride == 1);
 		}
@@ -34,7 +34,7 @@ public unsafe partial class RawBuffer : Resource, IDisposable
 
 	public UnorderedAccessView GetUAV()
 	{
-		if (uav == null)
+		if (uav is null)
 		{
 			uav = new UnorderedAccessView(D3DResource, Stride, Capacity, HasCounter, CounterOffset);
 		}
@@ -44,7 +44,7 @@ public unsafe partial class RawBuffer : Resource, IDisposable
 
 	public ConstantBufferView GetCBV()
 	{
-		if (cbv == null)
+		if (cbv is null)
 		{
 			Debug.Assert((Capacity * Stride % ConstantAlignment == 0) || (SizeAlignment % ConstantAlignment == 0), "Buffers must be aligned to 256b to be used as program constants");
 			cbv = new ConstantBufferView(D3DResource, Stride, Capacity);
@@ -94,8 +94,8 @@ public unsafe partial class RawBuffer : Resource, IDisposable
 		};
 
 		// Create buffer.
-		D3DContext.Device.CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.Common, out ID3D12Resource resource);
-		D3DResource = resource;
+		Guard.NotNull(D3DContext.Device).CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.Common, out var resource);
+		D3DResource = Guard.NotNull(resource);
 		State = ResourceStates.Common;
 
 		// Set debug name.

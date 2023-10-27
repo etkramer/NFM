@@ -14,7 +14,7 @@ public class CommandList : IDisposable
 	private ID3D12CommandAllocator[] commandAllocators;
 	private ID3D12GraphicsCommandList6 list;
 
-	internal PipelineState CurrentPSO { get; private set; } = null;
+	internal PipelineState? CurrentPSO { get; private set; } = null;
 	public bool IsOpen { get; private set; } = false;
 
 	public string Name
@@ -35,10 +35,10 @@ public class CommandList : IDisposable
 		commandAllocators = new ID3D12CommandAllocator[D3DContext.RenderLatency];
 		for (int i = 0; i < D3DContext.RenderLatency; i++)
 		{
-			commandAllocators[i] = D3DContext.Device.CreateCommandAllocator(CommandListType.Direct);
+			commandAllocators[i] = Guard.NotNull(D3DContext.Device).CreateCommandAllocator(CommandListType.Direct);
 		}
 
-		list = D3DContext.Device.CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, commandAllocators[D3DContext.FrameIndex]);
+		list = Guard.NotNull(D3DContext.Device).CreateCommandList<ID3D12GraphicsCommandList6>(CommandListType.Direct, commandAllocators[D3DContext.FrameIndex]);
 		list.Close();
 	}
 
@@ -119,7 +119,9 @@ public class CommandList : IDisposable
 			RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
 			ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, commandBuffer.HasCounter ? commandBuffer : null, (ulong)commandBuffer.CounterOffset);
+            var countBuffer = commandBuffer.HasCounter ? commandBuffer : null;
+
+			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, (commandBuffer.HasCounter ? commandBuffer : null)! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
 		}
 	}
 
@@ -127,7 +129,7 @@ public class CommandList : IDisposable
 	{
 		lock (this)
 		{
-			if (!CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 			{
 				return;
 			}
@@ -155,7 +157,7 @@ public class CommandList : IDisposable
 		{
 			RequestState(target, ResourceStates.VertexAndConstantBuffer);
 
-			if (!CurrentPSO.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
@@ -178,7 +180,7 @@ public class CommandList : IDisposable
 			Debug.Assert(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
 			RequestState(target, ResourceStates.UnorderedAccess);
 
-			if (!CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
@@ -200,7 +202,7 @@ public class CommandList : IDisposable
 		{
 			RequestState(target, ResourceStates.UnorderedAccess);
 
-			if (!CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
@@ -222,7 +224,7 @@ public class CommandList : IDisposable
 		{
 			RequestState(target, ResourceStates.AllShaderResource);
 
-			if (!CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
@@ -244,7 +246,7 @@ public class CommandList : IDisposable
 		{
 			RequestState(target, ResourceStates.AllShaderResource);
 
-			if (!CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
+			if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 			{
 				return;
 			}
@@ -380,7 +382,7 @@ public class CommandList : IDisposable
 
 			// Calculate subresource info.
 			var footprints = new PlacedSubresourceFootPrint[1];
-			D3DContext.Device.GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
+			Guard.NotNull(D3DContext.Device).GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
 
 			TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
 			TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
@@ -446,25 +448,16 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void SetRenderTarget(Texture renderTarget, Texture depthStencil = null)
+	public void SetRenderTarget(Texture renderTarget, Texture? depthStencil = null)
 	{
 		lock (this)
 		{
 			RequestState(renderTarget, ResourceStates.RenderTarget);
 			RequestState(depthStencil, ResourceStates.DepthWrite);
 
-			if (renderTarget == null)
-			{
-				list.OMSetRenderTargets(0, new CpuDescriptorHandle[0], depthStencil.GetDSV().Handle);
-				list.RSSetViewport(0, 0, depthStencil.Width, depthStencil.Height);
-				list.RSSetScissorRect(depthStencil.Width, depthStencil.Height);
-			}
-			else
-			{
-				list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
-				list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
-				list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
-			}
+			list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
+			list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
+			list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
 		}
 	}
 
@@ -507,7 +500,10 @@ public class CommandList : IDisposable
 		{
 			RequestState(target, ResourceStates.DepthWrite);
 
-			list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, target.ClearValue.Value.DepthStencil.Depth, target.ClearValue.Value.DepthStencil.Stencil);
+            var depth = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Depth : 0;
+            var stencil = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Stencil : (byte)0;
+
+			list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, depth, stencil);
 		}
 	}
 
@@ -546,11 +542,11 @@ public class CommandList : IDisposable
 		}
 	}
 
-	public void RequestState(Resource resource, ResourceStates state)
+	public void RequestState(Resource? resource, ResourceStates state)
 	{
 		lock (this)
 		{
-			if (resource == null)
+			if (resource is null)
 			{
 				return;
 			}
@@ -614,7 +610,7 @@ public class CommandList : IDisposable
 		lock (this)
 		{
 			// Execute D3D command list.
-			D3DContext.GraphicsQueue.ExecuteCommandList(list);
+			Guard.NotNull(D3DContext.GraphicsQueue).ExecuteCommandList(list);
 		}
 	}
 }
