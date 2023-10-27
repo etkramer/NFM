@@ -51,12 +51,10 @@ public sealed class Mesh
 	/// </summary>
 	public bool IsVisible { get; private set; } = true;
 
-	public int NumLODs { get; private set; } = 0;
-
 	public Box3D Bounds { get; set; } = Box3D.Infinity;
-	public uint[][] Indices { get; private set; } = new uint[0][];
-	public Vertex[][] Vertices { get; private set; } = new Vertex[0][];
-	public Material[] Materials { get; private set; } = new Material[0];
+	public uint[]? Indices { get; private set; } = null;
+	public Vertex[]? Vertices { get; private set; } = null;
+	public Material? Material { get; private set; } = null;
 
 	internal RenderMesh? RenderData = null;
 
@@ -65,45 +63,22 @@ public sealed class Mesh
 		Name = name;
 	}
 
-	public void SetIndices(uint[] indices, int lod = 0)
+	public void SetIndices(uint[] indices)
 	{
-		CheckLODIndex(lod);
-		Indices[lod] = indices;
+		Indices = indices;
 		IsCommitted = false;
 	}
 
-	public void SetVertices(Vertex[] vertices, int lod = 0)
+	public void SetVertices(Vertex[] vertices)
 	{
-		CheckLODIndex(lod);
-		Vertices[lod] = vertices;
+		Vertices = vertices;
 		IsCommitted = false;
 	}
 
-	public void SetMaterial(Material material, int lod = 0)
+	public void SetMaterial(Material material)
 	{
-		CheckLODIndex(lod);
-		Materials[lod] = material;
+		Material = material;
 		IsCommitted = false;
-	}
-
-	private void CheckLODIndex(int lod)
-	{
-		Debug.Assert(lod <= 3, "Meshes may not contain more than four LOD levels (up to LOD3)");
-
-		if (lod >= NumLODs)
-		{
-			NumLODs = lod + 1;
-			
-			var vertices = Vertices;
-			var indices = Indices;
-			var material = Materials;
-			Array.Resize(ref vertices, NumLODs);
-			Array.Resize(ref indices, NumLODs);
-			Array.Resize(ref material, NumLODs);
-			Vertices = vertices;
-			Indices = indices;
-			Materials = material;
-		}
 	}
 
 	public void Commit()
@@ -134,6 +109,11 @@ public sealed class Mesh
 	/// </summary>
 	void PopulateBounds()
 	{
+        if (Vertices is null)
+        {
+            return;
+        }
+
 		Vector3 min = Vector3.PositiveInfinity;
 		Vector3 max = Vector3.NegativeInfinity;
 
@@ -141,7 +121,7 @@ public sealed class Mesh
 		// compare to the current min/max values.
 		for (int i = 0; i < Vertices.Length; i++)
 		{
-			var vert = Vertices[0][i];
+			var vert = Vertices[i];
 
 			// Update minimums.
 			if (vert.Position.X < min.X)

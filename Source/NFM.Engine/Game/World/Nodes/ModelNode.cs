@@ -88,8 +88,10 @@ public partial class ModelNode : Node
 
 			if (mesh.IsVisible)
 			{
+                Guard.NotNull(mesh.Material);
+
 				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
-				MaterialInstances[mesh] = new RenderMaterial(mesh.Materials[0]);
+				MaterialInstances[mesh] = new RenderMaterial(mesh.Material);
 
 				// Build instance data
 				GPUInstance instanceData = new()
