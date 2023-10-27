@@ -12,7 +12,7 @@ public enum ButtonState
 public static class Input
 {
 	public static Vector2 MouseDelta { get; private set; }
-	public static object InputSource { get; private set; }
+	public static object? InputSource { get; private set; }
 
 	// Store button states.
 	private static Dictionary<MouseButton, ButtonState> mouseStates = new();

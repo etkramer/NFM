@@ -13,11 +13,11 @@ abstract class RenderStep : IDisposable
 
 abstract class SceneStep : RenderStep
 {
-	public Scene Scene { get; set; }
+	public Scene? Scene { get; set; }
 }
 
 abstract class CameraStep<T> : RenderStep where T : RenderPipeline<T>, new()
 {
-	public T RP { get; set; }
-	public CameraNode Camera { get; set; }
+	public T? RP { get; set; }
+	public CameraNode? Camera { get; set; }
 }

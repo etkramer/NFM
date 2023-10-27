@@ -8,13 +8,13 @@ public class Gizmos
 	private CommandList renderList;
 	public CameraNode Camera { get; private set; }
 
-	private static PipelineState linePSO = null;
-	private static PipelineState geometryPSO = null;
+	private static readonly PipelineState linePSO;
+	private static readonly PipelineState geometryPSO;
 
-	private static TypedBuffer<uint> gizmosIndexBuffer = new TypedBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
-	private static TypedBuffer<Vector3> gizmosVertexBuffer = new TypedBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
+	private static readonly TypedBuffer<uint> gizmosIndexBuffer = new TypedBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
+	private static readonly TypedBuffer<Vector3> gizmosVertexBuffer = new TypedBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
 
-	public static event EventHandler<Gizmos> OnDrawGizmos;
+	public static event EventHandler<Gizmos> OnDrawGizmos = delegate {};
 
 	unsafe static Gizmos()
 	{

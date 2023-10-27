@@ -36,10 +36,10 @@ public static class PluginSystem
 
 					// Find the plugin type...
 					var pluginType = assembly.GetTypes().FirstOrDefault(o => o.IsAssignableTo(typeof(Plugin)));
-					if (pluginType != null)
+					if (pluginType is not null)
 					{
-						var pluginInstance = (Plugin)Activator.CreateInstance(pluginType);
-						Plugins.Add(pluginInstance);
+						var pluginInstance = Activator.CreateInstance(pluginType) as Plugin;
+						Plugins.Add(Guard.NotNull(pluginInstance));
 					}
 				}
 			}

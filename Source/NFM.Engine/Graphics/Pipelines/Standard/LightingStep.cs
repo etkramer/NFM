@@ -4,7 +4,7 @@ namespace NFM.Graphics;
 
 class LightingStep : CameraStep<StandardRenderPipeline>
 {
-	private static PipelineState lightingPSO;
+	private static PipelineState? lightingPSO;
 
 	public override void Init()
 	{
@@ -16,14 +16,14 @@ class LightingStep : CameraStep<StandardRenderPipeline>
 
 	public override void Run(CommandList list)
 	{
-		list.SetPipelineState(lightingPSO);
+		list.SetPipelineState(lightingPSO!);
 	
-		list.SetPipelineUAV(0, 0, RP.ColorTarget);
-		list.SetPipelineSRV(0, 0, RP.MatBuffer0);
-		list.SetPipelineSRV(1, 0, RP.MatBuffer1);
-		list.SetPipelineSRV(2, 0, RP.MatBuffer2);
-		list.SetPipelineSRV(3, 0, RP.DepthBuffer);
+		list.SetPipelineUAV(0, 0, RP!.ColorTarget!);
+		list.SetPipelineSRV(0, 0, RP.MatBuffer0!);
+		list.SetPipelineSRV(1, 0, RP.MatBuffer1!);
+		list.SetPipelineSRV(2, 0, RP.MatBuffer2!);
+		list.SetPipelineSRV(3, 0, RP.DepthBuffer!);
 
-		list.DispatchThreads(RP.ColorTarget.Width, 32, RP.ColorTarget.Height, 32);
+		list.DispatchThreads(RP.ColorTarget!.Width, 32, RP.ColorTarget.Height, 32);
 	}
 }

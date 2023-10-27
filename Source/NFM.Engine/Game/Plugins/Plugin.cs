@@ -6,15 +6,12 @@ public abstract class Plugin
 {
 	public virtual void OnStart() {}
 
-	protected bool TryLoadConfig(out JsonDocument document, string configName = null)
+	protected bool TryLoadConfig(out JsonDocument? document, string? configName = null)
 	{
-		if (configName == null)
-		{
-			configName = GetType().Name;
-		}
+		configName ??= GetType().Name;
 
 		// Get full config path from name.
-		string runtimeDir = Directory.GetParent(typeof(Plugin).Assembly.Location).Parent.FullName;
+		string? runtimeDir = Directory.GetParent(typeof(Plugin).Assembly.Location)?.Parent?.FullName;
 		string configPath = $"{runtimeDir}/Config/{configName}.json";
 
 		// Check if config actually exists.

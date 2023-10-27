@@ -1,4 +1,5 @@
-﻿using NFM.GPU;
+﻿using System.Diagnostics.CodeAnalysis;
+using NFM.GPU;
 using NFM.GPU.Native;
 using NFM.Resources;
 using NFM.World;
@@ -41,7 +42,7 @@ class RenderMaterial : IDisposable
 	public ShaderParameter[] Parameters { get; }
 	public ObservableCollection<Shader> Shaders { get; } = new();
 
-	public BufferAllocation<byte> MaterialHandle { get; private set; } = null;
+	public BufferAllocation<byte> MaterialHandle { get; private set; }
 
 	public int StackID { get; private set; }
 	private static int lastID = 0;
@@ -89,6 +90,7 @@ class RenderMaterial : IDisposable
 		}
 	}
 
+    [MemberNotNull(nameof(MaterialHandle))]
 	private void UpdateMaterialData()
 	{
 		MaterialHandle?.Dispose();
@@ -101,7 +103,7 @@ class RenderMaterial : IDisposable
 		foreach (var param in Parameters)
 		{
 			// Grab the default value
-			object value = param.Value;
+			object? value = param.Value;
 
 			// Is parameter overriden by material?
 			if (Source.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
@@ -109,18 +111,18 @@ class RenderMaterial : IDisposable
 				value = overrideParam.Value;
 			}
 
-			if (param.Type == typeof(bool))
+			if (param.Type == typeof(bool) && value is bool boolValue)
 			{
 				// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
-				materialData.AddRange(StructureToByteArray(typeof(int), (bool)value ? 1 : 0));
+				materialData.AddRange(StructureToByteArray(typeof(int), boolValue ? 1 : 0));
 			}
-			else if (param.Type == typeof(Texture2D))
+			else if (param.Type == typeof(Texture2D) && value is Texture2D textureValue)
 			{
-				materialData.AddRange(StructureToByteArray(typeof(int), (value as Texture2D).D3DResource.GetSRV().GetDescriptorIndex()));
+				materialData.AddRange(StructureToByteArray(typeof(int), textureValue.D3DResource.GetSRV().GetDescriptorIndex()));
 			}
 			else
 			{
-				materialData.AddRange(StructureToByteArray(param.Type, value));
+				materialData.AddRange(StructureToByteArray(param.Type, Guard.NotNull(value)));
 			}
 		}
 

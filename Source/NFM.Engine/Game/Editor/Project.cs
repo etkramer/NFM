@@ -4,8 +4,8 @@ namespace NFM;
 
 public static class Project
 {
-	public static string Path { get; set; }
-	public static string Name => Path == null ? "Untitled" : System.IO.Path.GetFileNameWithoutExtension(Path);
+	public static string? Path { get; set; }
+	public static string Name => Path is null ? "Untitled" : System.IO.Path.GetFileNameWithoutExtension(Path);
 
 	public static event Action OnProjectCreated = delegate {};
 

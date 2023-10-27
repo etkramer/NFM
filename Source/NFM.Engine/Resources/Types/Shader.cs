@@ -10,7 +10,7 @@ public enum BlendMode
 public struct ShaderParameter
 {
 	public string Name;
-	public object Value;
+	public object? Value;
 	public Type Type;
 }
 
@@ -36,7 +36,7 @@ public sealed class Shader : GameResource
 		});
 	}
 
-	public void AddTexture(string param, Texture2D defaultValue = default)
+	public void AddTexture(string param, Texture2D? defaultValue = default)
 	{
 		Parameters.Add(new ShaderParameter()
 		{

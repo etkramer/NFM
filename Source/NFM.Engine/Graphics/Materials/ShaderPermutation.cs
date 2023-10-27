@@ -6,11 +6,9 @@ namespace NFM.Graphics;
 abstract class ShaderPermutation : IDisposable
 {
 	public IEnumerable<Shader> Shaders => shaders;
-	private Shader[] shaders;
+	private Shader[] shaders = Array.Empty<Shader>();
 
 	public int StackID { get; private set; }
-
-	protected ShaderPermutation() {}
 
 	public abstract void Init(ShaderModule module);
 	public abstract void Dispose();
@@ -37,7 +35,7 @@ abstract class ShaderPermutation : IDisposable
 		}
 
 		// Create a new permutation instance
-		var result = Activator.CreateInstance(type) as ShaderPermutation;
+		var result = Guard.NotNull(Activator.CreateInstance(type) as ShaderPermutation);
 		result.StackID = source.StackID;
 		result.shaders = source.Shaders.ToArray();	
 
@@ -45,7 +43,8 @@ abstract class ShaderPermutation : IDisposable
 		result.Init(new ShaderModule(BuildSource(source.Shaders), ShaderStage.Library));
 
 		//... and return it
-		(all[type] as IList<ShaderPermutation>).Add(result);
+        var typeList = all[type] as IList<ShaderPermutation>;
+		Guard.NotNull(typeList).Add(result);
 		return result;
 	}
 

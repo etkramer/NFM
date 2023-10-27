@@ -1,4 +1,5 @@
-﻿using NFM.GPU;
+﻿using System.Diagnostics.CodeAnalysis;
+using NFM.GPU;
 using NFM.Graphics;
 using NFM.Resources;
 
@@ -8,7 +9,7 @@ namespace NFM.World;
 public partial class ModelNode : Node
 {
 	[Inspect]
-	public Model Model { get; set; } = null;
+	public Model? Model { get; set; } = null;
 
 	[Inspect]
 	public bool IsVisible { get; set; } = true;
@@ -20,7 +21,7 @@ public partial class ModelNode : Node
 	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
 	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = new();
 	
-	public ModelNode(Scene scene) : base(scene)
+	public ModelNode(Scene? scene) : base(scene)
 	{
 		Name = "Model";
 
@@ -30,19 +31,20 @@ public partial class ModelNode : Node
 			UpdateInstances(Renderer.DefaultCommandList);
 		});
 
-		Action updateTransform = () =>
-		{
-			TransformHandle ??= Scene.TransformBuffer.Allocate(1);
-			Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
-			{
-				ObjectToWorld = WorldTransform,
-				WorldToObject = WorldTransform.Inverse()
-			});
-		};
-
-		this.SubscribeFast(nameof(WorldTransform), updateTransform);
-		updateTransform.Invoke();
+		this.SubscribeFast(nameof(WorldTransform), UpdateTransform);
+		UpdateTransform();
 	}
+
+    [MemberNotNull(nameof(TransformHandle))]
+    void UpdateTransform()
+    {
+		TransformHandle ??= Scene.TransformBuffer.Allocate(1);
+		Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
+		{
+			ObjectToWorld = WorldTransform,
+			WorldToObject = WorldTransform.Inverse()
+		});
+    }
 
 	public override void Dispose()
 	{
@@ -82,6 +84,8 @@ public partial class ModelNode : Node
 		// (Re)build the array of instance handles
 		foreach (var mesh in Model.Meshes)
 		{
+            Guard.NotNull(mesh.RenderData);
+
 			if (mesh.IsVisible)
 			{
 				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
@@ -113,20 +117,22 @@ public partial class ModelNode : Node
 		base.OnDeselect();
 	}
 
-	public void OnDrawGizmos(object sender, Gizmos context)
+	public void OnDrawGizmos(object? sender, Gizmos context)
 	{
-		if (Model != null && IsVisible)
-		{
-			Box3D modelBounds = Box3D.Zero;
-			foreach (var mesh in Model.Meshes)
-			{
-				if (mesh.IsVisible)
-				{
-					modelBounds += mesh.Bounds;
-				}
-			}
+        if (Model is null || !IsVisible)
+        {
+            return;
+        }
 
-			context.DrawBox(modelBounds, Color.White, Color.Invisible);
+		Box3D modelBounds = Box3D.Zero;
+		foreach (var mesh in Model.Meshes)
+		{
+			if (mesh.IsVisible)
+			{
+				modelBounds += mesh.Bounds;
+			}
 		}
+
+		context.DrawBox(modelBounds, Color.White, Color.Invisible);
 	}
 }

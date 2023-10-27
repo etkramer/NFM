@@ -5,14 +5,14 @@ namespace NFM.Graphics;
 
 class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 {
-	public Texture ColorTarget;
+	public Texture? ColorTarget;
 
-	public Texture VisBuffer;
-	public Texture DepthBuffer;
+	public Texture? VisBuffer;
+	public Texture? DepthBuffer;
 
-	public Texture MatBuffer0; // RGB: Albedo
-	public Texture MatBuffer1; // RGB: Normal
-	public Texture MatBuffer2; // R: Metallic, G: Specular, B: Roughness
+	public Texture? MatBuffer0; // RGB: Albedo
+	public Texture? MatBuffer1; // RGB: Normal
+	public Texture? MatBuffer2; // R: Metallic, G: Specular, B: Roughness
 
 	protected override void Init(Vector2i size)
 	{
@@ -32,23 +32,23 @@ class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 
 	protected override void BeginRender(CommandList list, Texture rt)
 	{
-		list.ClearDepth(DepthBuffer);
+		list.ClearDepth(Guard.NotNull(DepthBuffer));
 	}
 
 	protected override void EndRender(CommandList list, Texture	rt)
 	{
-		list.ResolveTexture(ColorTarget, rt);
+		list.ResolveTexture(Guard.NotNull(ColorTarget), rt);
 	}
 
 	public override void Dispose()
 	{
-		ColorTarget.Dispose();
-		VisBuffer.Dispose();
-		DepthBuffer.Dispose();
+		ColorTarget?.Dispose();
+		VisBuffer?.Dispose();
+		DepthBuffer?.Dispose();
 
-		MatBuffer0.Dispose();
-		MatBuffer1.Dispose();
-		MatBuffer2.Dispose();
+		MatBuffer0?.Dispose();
+		MatBuffer1?.Dispose();
+		MatBuffer2?.Dispose();
 
 		base.Dispose();
 	}

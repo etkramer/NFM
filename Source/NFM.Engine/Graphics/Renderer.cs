@@ -73,8 +73,8 @@ static class Renderer
 		swapchain.Present();
 	}
 	
-	public static void RenderCamera<T>(CameraNode camera, Texture texture) where T : RenderPipeline<T>, new()  => RenderCamera<T>(camera, texture, null);
-	private static void RenderCamera<T>(CameraNode camera, Texture texture, Action<CommandList> beforeExecute) where T : RenderPipeline<T>, new()
+	public static void RenderCamera<T>(CameraNode camera, Texture texture) where T : RenderPipeline<T>, new() => RenderCamera<T>(camera, texture, null);
+	private static void RenderCamera<T>(CameraNode camera, Texture texture, Action<CommandList>? beforeExecute) where T : RenderPipeline<T>, new()
 	{
 		// Grab an RP instance and open it's command list
 		var rp = RenderPipeline<T>.Get(texture);

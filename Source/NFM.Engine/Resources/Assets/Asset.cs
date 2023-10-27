@@ -9,10 +9,12 @@ public abstract class Asset
 
 	// TODO: Should try to get thumbnail from loader, and generate (or load from cache) a new one if it returns null.
 	// This is for i.e. a cloud-based asset provider might want to send along just the thumbnail without needing the asset to be (down)loaded.
-	public Texture2D Thumbnail => null;
+	public Texture2D? Thumbnail => null;
 
 	public string Path { get; set; }
-	public string Name { get; protected set;}
+	public string Name => Path.Split('/').Last();
+
+    protected internal Asset(string path) { Path = path; }
 
 	/// <summary>
 	/// Submits the given asset to the asset system
@@ -31,41 +33,37 @@ public abstract class Asset
 	/// <summary>
 	/// Asynchronously retrieves the asset at the given path
 	/// </summary>
-	public static Task<T> LoadAsync<T>(string path) where T : GameResource
+	public static async Task<T?> LoadAsync<T>(string path) where T : GameResource
 	{
-		if (Assets.TryGetValue(path, out Asset foundAsset))
+		if (Assets.TryGetValue(path, out Asset? foundAsset))
 		{
 			if (foundAsset is Asset<T> asset)
 			{
-				return asset.GetAsync();
+				return await asset.GetAsync();
 			}
 		}
 
-		return Task.FromResult<T>(null);
+		return null;
 	}
 }
 
 public sealed class Asset<T> : Asset where T : GameResource
 {
 	private object loadingLock = new();
-	private Task<T> loadingTask;
+	private Task<T>? loadingTask;
 
-	private readonly ResourceLoader<T> loader;
-	private T cache;
+	private readonly ResourceLoader<T>? loader;
+	private T? cache;
 
 	public bool IsLoaded => cache != null;
 
-	public Asset(string path, MountPoint mount, ResourceLoader<T> loader)
+	public Asset(string path, MountPoint mount, ResourceLoader<T> loader) : base(mount.MakeFullPath(path))
 	{
-		Path = mount.MakeFullPath(path);
-		Name = Path.Split('/').Last();
 		this.loader = loader;
 	}
 
-	public Asset(string path, MountPoint mount, T cachedValue)
+	public Asset(string path, MountPoint mount, T cachedValue) : base(mount.MakeFullPath(path))
 	{
-		Path = mount.MakeFullPath(path);
-		Name = Path.Split('/').Last();
 		cache = cachedValue;
 		cache.Source = this;
 		loader = null;
@@ -76,14 +74,14 @@ public sealed class Asset<T> : Asset where T : GameResource
 		lock (loadingLock)
 		{
 			// Don't start a new task if we've already started (or finished) loading it.
-			if (loadingTask == null)
+			if (loadingTask is null)
 			{
 				// Resource is not loaded, so we need to load it.
-				if (cache == null)
+				if (cache is null)
 				{
 					loadingTask = Task.Run(async () =>
 					{
-						cache = await loader.Load();
+						cache = await Guard.NotNull(loader).Load();
 						cache.Source = this;
 
 						return cache;

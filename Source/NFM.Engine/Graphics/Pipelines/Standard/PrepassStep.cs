@@ -5,11 +5,11 @@ namespace NFM.Graphics;
 
 class PrepassStep : CameraStep<StandardRenderPipeline>
 {
-	private static PipelineState cullPSO;
-	private static PipelineState visPSO;
+	private static PipelineState? cullPSO;
+	private static PipelineState? visPSO;
 
-	private static RawBuffer commandBuffer;
-	private static CommandSignature commandSignature;
+	private static RawBuffer? commandBuffer;
+	private static CommandSignature? commandSignature;
 
 	public override void Init()
 	{
@@ -39,6 +39,13 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 
 	public override void Run(CommandList list)
 	{
+        Guard.NotNull(visPSO);
+        Guard.NotNull(commandBuffer);
+        Guard.NotNull(commandSignature);
+        Guard.NotNull(RP?.VisBuffer);
+        Guard.NotNull(RP?.DepthBuffer);
+        Guard.NotNull(Camera);
+
 		// Perform culling/build indirect draw commands
 		BuildIndirectCommands(list);
 
@@ -63,13 +70,13 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 	private void BuildIndirectCommands(CommandList list)
 	{
 		// Reset command count
-		list.ResetCounter(commandBuffer);
+		list.ResetCounter(commandBuffer!);
 
 		// Switch to indirect culling PSO
-		list.SetPipelineState(cullPSO);
+		list.SetPipelineState(cullPSO!);
 		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
-		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
-		list.SetPipelineUAV(0, 0, commandBuffer);
+		list.SetPipelineSRV(5, 1, Camera!.Scene.InstanceBuffer);
+		list.SetPipelineUAV(0, 0, commandBuffer!);
 
 		// Compute dispatch
 		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)

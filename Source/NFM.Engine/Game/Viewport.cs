@@ -16,14 +16,14 @@ public unsafe class Viewport : IDisposable
 	public object HostControl { get; }
 
 	// Work camera settings
-	private CameraNode workCamera = null;
+	private CameraNode workCamera;
 	public CameraNode Camera => workCamera;
 	public Scene Scene => workCamera.Scene;
 
 	/// <summary>
 	/// Constructs a viewport from a given UI host
 	/// </summary>
-	public Viewport(Swapchain swapchain, object hostControl = null)
+	public Viewport(Swapchain swapchain, object hostControl)
 	{
 		Swapchain = swapchain;
 		HostControl = hostControl;

@@ -16,8 +16,8 @@ public class Node : ISelectable, IDisposable
 	public IEnumerable<Node> Children => children;
 	private ObservableCollection<Node> children = new();
 
-	private Node parent;
-	public Node Parent
+	private Node? parent;
+	public Node? Parent
 	{
 		get => parent;
 		set
@@ -44,7 +44,7 @@ public class Node : ISelectable, IDisposable
 		}
 	}
 
-	public Node(Scene scene)
+	public Node(Scene? scene)
 	{
 		Name = "Node";
 		Scene = scene ?? Scene.Main;

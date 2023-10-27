@@ -58,7 +58,7 @@ public sealed class Mesh
 	public Vertex[][] Vertices { get; private set; } = new Vertex[0][];
 	public Material[] Materials { get; private set; } = new Material[0];
 
-	internal RenderMesh RenderData = null;
+	internal RenderMesh? RenderData = null;
 
 	public Mesh(string name)
 	{
@@ -113,10 +113,7 @@ public sealed class Mesh
 			return;
 		}
 
-		if (RenderData != null)
-		{
-			RenderData.Dispose();
-		}
+        RenderData?.Dispose();
 
 		if (Bounds == Box3D.Infinity)
 		{
@@ -129,7 +126,7 @@ public sealed class Mesh
 
 	public void Dispose()
 	{
-		RenderData.Dispose();
+		RenderData?.Dispose();
 	}
 
 	/// <summary>

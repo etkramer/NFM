@@ -14,7 +14,7 @@ public class CameraNode : Node
 
 	public float FOV => (2 * (float)Math.Atan(SensorSize / 2f / FocalLength)).ToDegrees();
 
-	public CameraNode(Scene scene) : base(scene)
+	public CameraNode(Scene? scene) : base(scene)
 	{
 		Name = "Camera";
 	}

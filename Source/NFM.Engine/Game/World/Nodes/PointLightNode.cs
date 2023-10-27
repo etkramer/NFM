@@ -15,7 +15,7 @@ public class PointLightNode : Node
 	[Inspect]
 	public float Radius { get; set; } = 0.2f;
 
-	public PointLightNode(Scene scene) : base(scene)
+	public PointLightNode(Scene? scene) : base(scene)
 	{
 		Name = "Point Light";
 	}

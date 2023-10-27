@@ -88,7 +88,7 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 		}
 	}
 
-	protected T GetStep<T>() where T : CameraStep<TSelf>
+	protected T? GetStep<T>() where T : CameraStep<TSelf>
 	{
 		return renderSteps.FirstOrDefault(o => o.GetType() == typeof(T)) as T;
 	}
@@ -107,7 +107,7 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 			List.BeginEvent(step.GetType().Name);
 			step.Camera = camera;
 
-			step.Run(step.RP.List);
+			step.Run(Guard.NotNull(step.RP).List);
 			List.EndEvent();
 		}
 
