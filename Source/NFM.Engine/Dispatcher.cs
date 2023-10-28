@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using NFM.GPU;
 
 namespace NFM.Threading;
@@ -6,7 +6,7 @@ namespace NFM.Threading;
 public static class Dispatcher
 {
     public static Thread MainThread { get; private set; } = Thread.CurrentThread;
-    public static event Action<double> OnTick = delegate {};
+    public static event Action<double> OnTick = delegate { };
 
     static Queue<Action> dispatcherQueue = new();
 
@@ -40,7 +40,7 @@ public static class Dispatcher
             while (dispatcherQueue.TryDequeue(out var action))
             {
                 action.Invoke();
-            };
+            }
         }
 
         OnTick.Invoke(Metrics.FrameTime);
