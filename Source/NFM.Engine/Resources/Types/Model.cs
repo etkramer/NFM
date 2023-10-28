@@ -23,6 +23,8 @@ public sealed class Model : GameResource
 
     public bool AddMesh(Mesh mesh)
 	{
+        Guard.Require(!IsFullyLoaded, "Cannot modify an already-loaded model");
+
 		if (mesh is not null)
 		{
 			meshes.Add(mesh);
