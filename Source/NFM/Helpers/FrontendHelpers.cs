@@ -38,7 +38,7 @@ public static class FrontendHelpers
 
 	private static Exception GetInnermost(Exception ex)
 	{
-		if (ex.InnerException == null || ex.InnerException == ex)
+		if (ex.InnerException is null || ex.InnerException == ex)
 		{
 			return ex;
 		}

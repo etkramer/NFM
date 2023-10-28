@@ -50,7 +50,7 @@ public class DockGroup : TemplatedControl
 	{
 		if (index != -1)
 		{
-			if (SelectedTab != null)
+			if (SelectedTab is not null)
 			{
 				SelectedTab.IsSelected = false;
 			}

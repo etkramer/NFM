@@ -24,7 +24,7 @@ abstract class ShaderPermutation : IDisposable
 		{
 			var match = typedList.FirstOrDefault(o => o.shaders.SequenceEqual(source.Shaders));
 			
-			if (match != null)
+			if (match is not null)
 			{
 				return match;
 			}

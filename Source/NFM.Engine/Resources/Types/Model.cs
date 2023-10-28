@@ -14,7 +14,7 @@ public sealed class Model : GameResource
 
 	public bool AddMesh(Mesh mesh)
 	{
-		if (mesh != null)
+		if (mesh is not null)
 		{
 			meshes.Add(mesh);
 			mesh.Commit();

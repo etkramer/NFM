@@ -19,7 +19,7 @@ public static partial class PanelExt
 	public static T Children<T>(this T subject, params Control[] items) where T : Panel => Children(subject, items as IEnumerable<Control>);
 	public static T Children<T>(this T subject, IEnumerable<Control> items) where T : Panel
 	{
-		if (items != null)
+		if (items is not null)
 		{
 			subject.Children.Clear();
 			subject.Children.AddRange(items);

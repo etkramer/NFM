@@ -47,7 +47,7 @@ public sealed class NotifyAspect : INotify
 		// Invoke PropertyChanged.
 		PropertyChanged?.Invoke(source, new PropertyChangedEventArgs(propertyName));
 
-		if (source == null)
+		if (source is null)
 		{
 			StaticNotify.Raise(type, propertyName);
 		}

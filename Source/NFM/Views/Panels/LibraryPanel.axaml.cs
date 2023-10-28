@@ -27,7 +27,7 @@ public partial class LibraryPanel : ToolPanel
 		// Update results with folder selection.
 		folderTreeView.SelectionChanged += (o, e) =>
 		{
-			var newSelection = e.AddedItems == null ? null : e.AddedItems[e.AddedItems.Count - 1];
+			var newSelection = e.AddedItems is null ? null : e.AddedItems[e.AddedItems.Count - 1];
 			RefreshSearch(searchBox.Text, newSelection as Folder);
 		};
 
@@ -45,9 +45,9 @@ public partial class LibraryPanel : ToolPanel
 		var folder = folderOverride ?? (folderTreeView.SelectedItem ??= FolderTree.FirstOrDefault()) as Folder;
 		const StringComparison comparisonMode = StringComparison.OrdinalIgnoreCase;
 
-		if (search == null || search?.Length == 0)
+		if (search is null || search?.Length == 0)
 		{
-			if (folder == null)
+			if (folder is null)
 			{
 				return;
 			}

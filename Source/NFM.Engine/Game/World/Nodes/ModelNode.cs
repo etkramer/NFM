@@ -76,7 +76,7 @@ public partial class ModelNode : Node
 		InstanceHandles.Clear();
 		MaterialInstances.Clear();
 
-		if (!IsVisible || Model == null)
+		if (!IsVisible || Model is null)
 		{
 			return;
 		}

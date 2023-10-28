@@ -48,7 +48,7 @@ public abstract class ReactiveToolPanel<TViewModel> : ToolPanel, IViewFor<TViewM
 
         private void OnViewModelChanged(object value)
         {
-            if (value == null)
+            if (value is null)
             {
                 ClearValue(DataContextProperty);
             }

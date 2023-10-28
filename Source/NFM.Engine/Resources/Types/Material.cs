@@ -22,7 +22,7 @@ public sealed class Material : GameResource
 
 	public void SetTexture(string param, Texture2D value)
 	{
-		if (value == null)
+		if (value is null)
 		{
 			return;
 		}

@@ -12,7 +12,7 @@ public interface INotify : INotifyPropertyChanged
 	{
 		PropertyChanged += (o, e) =>
 		{
-			if (e.PropertyName == propertyName || propertyName == null)
+			if (e.PropertyName == propertyName || propertyName is null)
 			{
 				callback?.Invoke();
 			}
@@ -22,7 +22,7 @@ public interface INotify : INotifyPropertyChanged
 	public void Raise(string propertyName)
 	{
 		FieldInfo? eventField = GetType().GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.Public  | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-		if (eventField == null)
+		if (eventField is null)
 		{
 			return;
 		}
@@ -40,7 +40,7 @@ public static class NotifyExtensions
 		{
 			changable.PropertyChanged += (o, e) =>
 			{
-				if (e.PropertyName == propertyName || propertyName == null)
+				if (e.PropertyName == propertyName || propertyName is null)
 				{
 					callback?.Invoke();
 				}

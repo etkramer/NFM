@@ -6,8 +6,8 @@ namespace NFM.GPU;
 
 public unsafe class Texture : Resource, IDisposable
 {
-	public bool IsRT => rtv != null;
-	public bool IsDS => dsv != null;
+	public bool IsRT => rtv is not null;
+	public bool IsDS => dsv is not null;
 
 	internal ResourceDescription Description { get; set; }
 
@@ -130,7 +130,7 @@ public unsafe class Texture : Resource, IDisposable
 
 	public UnorderedAccessView GetUAV(int mipLevel = 0)
 	{
-		if (uavs[mipLevel] == null)
+		if (uavs[mipLevel] is null)
 		{
 			uavs[mipLevel] = new UnorderedAccessView(this, mipLevel);
 		}
@@ -140,7 +140,7 @@ public unsafe class Texture : Resource, IDisposable
 
 	public ShaderResourceView GetSRV(int mipLevel = -1)
 	{
-		if (srvs[mipLevel + 1] == null)
+		if (srvs[mipLevel + 1] is null)
 		{
 			srvs[mipLevel + 1] = new ShaderResourceView(this, mipLevel);
 		}
@@ -150,9 +150,9 @@ public unsafe class Texture : Resource, IDisposable
 
 	public RenderTargetView GetRTV()
 	{
-		if (rtv == null)
+		if (rtv is null)
 		{
-			Guard.Require(dsv == null, "Cannot use one texture for both depth/stencil and render target");
+			Guard.Require(dsv is null, "Cannot use one texture for both depth/stencil and render target");
 			Guard.Require(!Format.IsDepthStencil(), $"{Format} is not a supported render target format");
 
 			rtv = new RenderTargetView(this);
@@ -163,9 +163,9 @@ public unsafe class Texture : Resource, IDisposable
 
 	public DepthStencilView GetDSV()
 	{
-		if (dsv == null)
+		if (dsv is null)
 		{
-			Guard.Require(rtv == null, "Cannot use one texture for both depth/stencil and render target");
+			Guard.Require(rtv is null, "Cannot use one texture for both depth/stencil and render target");
 			Guard.Require(Format.IsDepthStencil() || DSFormat.IsDepthStencil(), $"{Format} is not a supported depth/stencil format");
 
 			dsv = new DepthStencilView(this);

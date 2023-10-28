@@ -20,7 +20,7 @@ public static class Guard
     public static T NotNull<T>([NotNull] T? obj, string? message = null)
         where T : class
     {
-        if (obj == null)
+        if (obj is null)
         {
             throw new GuardException(message ?? "Got unexpected null");
         }
@@ -31,7 +31,7 @@ public static class Guard
     [DebuggerHidden]
     public static string NotNullOrWhitespace([NotNull] string? obj, string? message = null)
     {
-        if (obj == null)
+        if (obj is null)
         {
             throw new GuardException(message ?? "Got unexpected null");
         }

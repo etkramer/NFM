@@ -44,7 +44,7 @@ public static class ReflectionHelper
 	public static bool TryGetAttribute<T>(this Type type, out T? result) where T : Attribute
 	{
 		result = type.GetCustomAttribute<T>();
-		return result != null;
+		return result is not null;
 	}
 
 	public static bool HasPropertiesWithAttribute<T>(this Type type) where T : Attribute
@@ -75,12 +75,12 @@ public static class ReflectionHelper
 
 	public static bool HasAttribute<T>(this PropertyInfo property) where T : Attribute
 	{
-		return property.GetCustomAttribute<T>() != null;
+		return property.GetCustomAttribute<T>() is not null;
 	}
 
 	public static bool HasAttribute<T>(this Type type) where T : Attribute
 	{
-		return type.GetCustomAttribute<T>() != null;
+		return type.GetCustomAttribute<T>() is not null;
 	}
 
 	public static PropertyInfo[] GetAllProperties(this Type type)
@@ -100,7 +100,7 @@ public static class ReflectionHelper
 			return true;
 		}
 
-		if (a.BaseType == null)
+		if (a.BaseType is null)
 		{
 			return false;
 		}
@@ -126,7 +126,7 @@ public static class ReflectionHelper
 		{
 			return baseCandidate;
 		}
-		else if (baseCandidate.BaseType != null)
+		else if (baseCandidate.BaseType is not null)
 		{
 			return FindCommonAncestorRecurse(types, baseCandidate.BaseType);
 		}

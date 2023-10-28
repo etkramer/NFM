@@ -19,7 +19,7 @@ public static partial class ButtonExt
 
 		bool ICommand.CanExecute(object parameter)
 		{
-			return commandAction != null;
+			return commandAction is not null;
 		}
 
 		void ICommand.Execute(object parameter)

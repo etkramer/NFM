@@ -13,7 +13,7 @@ public static class InspectHelper
 	{
 		var inspectorType = FindInspectorType(typeOverride ?? property.PropertyType);
 
-		if (inspectorType != null)
+		if (inspectorType is not null)
 		{
 			// Create object, *don't* call constructor, and set base properties.
 			// This is an *extremely* hacky way to avoid using inheritance.

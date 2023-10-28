@@ -56,7 +56,7 @@ class RenderMaterial : IDisposable
 
 		// Calculate StackID
 		var matchingStack = stackIDs.FirstOrDefault(o => o.Item1.SequenceEqual(Shaders));
-		if (matchingStack.Item1 == null)
+		if (matchingStack.Item1 is null)
 		{
 			StackID = lastID++;
 			stackIDs.Add((Shaders.ToArray(), StackID));
@@ -71,7 +71,7 @@ class RenderMaterial : IDisposable
 		for (int i = 0; i < Parameters.Length; i++)
 		{
 			var materialOverride = Source.MaterialOverrides.FirstOrDefault(o => o.Name == Parameters[i].Name);
-			if (materialOverride.Name != null)
+			if (materialOverride.Name is not null)
 			{
 				Parameters[i].Value = materialOverride.Value;
 			}

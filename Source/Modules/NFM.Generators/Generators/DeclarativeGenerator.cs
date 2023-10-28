@@ -45,7 +45,7 @@ public class DeclarativeGenerator : ISourceGenerator
 					if (!types.ContainsKey(declaringType))
 					{
 						AttributeData[] data = declaringType.GetAttributes().Where(o => o.AttributeClass.GetFullName() == "NFM.Generators.DeclarativePropertyAttribute")?.ToArray();
-						if (data != null)
+						if (data is not null)
 						{
 							types.Add(declaringType, data);
 						}
@@ -95,7 +95,7 @@ public class DeclarativeGenerator : ISourceGenerator
 				}}");
 
 			// Direct set (supports binding).
-			if (bindingPropertyName != null)
+			if (bindingPropertyName is not null)
 			{
 				methods.Add($@"
 					public static T {setterName}<T>(this T subject, {propertyType.GetFullName()} value) where T : {targetType.GetFullName()}
@@ -116,7 +116,7 @@ public class DeclarativeGenerator : ISourceGenerator
 			}
 
 			// Binding set.
-			if (bindingPropertyName != null)
+			if (bindingPropertyName is not null)
 			{
 				methods.Add($@"
 					public static T {setterName}<T>(this T subject, string bindingPath, Avalonia.Data.BindingMode mode) where T : {targetType.GetFullName()}
@@ -137,7 +137,7 @@ public class DeclarativeGenerator : ISourceGenerator
 			}
 
 			// Binding set (manual).
-			if (bindingPropertyName != null)
+			if (bindingPropertyName is not null)
 			{
 				methods.Add($@"
 					public static T {setterName}<T>(this T subject, Avalonia.Data.Binding binding) where T : {targetType.GetFullName()}

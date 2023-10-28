@@ -23,16 +23,16 @@ public class Node : ISelectable, IDisposable
 		set
 		{
 			Guard.Require(value != this, "Nodes cannot be parented to themselves.");
-			Guard.Require(value == null || value.Scene == Scene,
+			Guard.Require(value is null || value.Scene == Scene,
 				"Nodes can only be parented to other nodes from the same scene.");
 
-			if (parent != value || value == null /*Could be initial setup...*/)
+			if (parent != value || value is null /*Could be initial setup...*/)
 			{
-				if (parent == null)
+				if (parent is null)
 				{
 					Scene.RemoveRootNode(this);
 				}
-				if (value == null)
+				if (value is null)
 				{
 					Scene.AddRootNode(this);
 				}
@@ -62,7 +62,7 @@ public class Node : ISelectable, IDisposable
 		Matrix4 localTransform = Matrix4.CreateTransform(Position, Rotation, Scale);
 
 		// Apply parent transforms.
-		if (parent == null)
+		if (parent is null)
 		{
 			WorldTransform = localTransform;
 		}

@@ -48,7 +48,7 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 		var rp = rpCache.FirstOrDefault(o => o.Size == rt.Size && o.lastFrame != Metrics.FrameCount);
 
 		// Create a new RT if necessary.
-		if (rp == null)
+		if (rp is null)
 		{
 			rp = new TSelf()
 			{

@@ -120,7 +120,7 @@ public class Dialog
 			FileTypeChoices = filters.Select(o => new FilePickerFileType(o.Name) { Patterns = o.Extensions.Select(o => $".{o}").ToArray() }).ToArray(),
 		});
 
-		if (result == null)
+		if (result is null)
 		{
 			return null;
 		}
@@ -140,7 +140,7 @@ public class Dialog
 		List<string> resultPaths = new();
 		foreach (var path in result)
 		{
-			if (path != null)
+			if (path is not null)
 			{
 				resultPaths.Add(path.Path.AbsolutePath);
 			}

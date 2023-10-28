@@ -41,7 +41,7 @@ public class DockSpace : Panel
 		// ONLY first child can be central node.
 		else
 		{
-			Guard.Require(parent != null);
+			Guard.Require(parent is not null);
 		}
 
 		DockRelationship relationship = new()
@@ -82,7 +82,7 @@ public class DockSpace : Panel
 			{
 				Box2D childSize = parentSize;
 
-				if (parent != null)
+				if (parent is not null)
 				{
 					switch (child.Relationship.Direction)
 					{
@@ -112,7 +112,7 @@ public class DockSpace : Panel
 			}
 		}
 
-		if (parent != null)
+		if (parent is not null)
 			parent.CalculatedSize = parentSize;
 	}
 
@@ -165,7 +165,7 @@ public class DockSpace : Panel
 			}
 		}
 
-		if (newParent != null)
+		if (newParent is not null)
 		{
 			newParent.Relationship = target.Relationship;
 			Children.Move(Children.IndexOf(newParent), targetIndex);

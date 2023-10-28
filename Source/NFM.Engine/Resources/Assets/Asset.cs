@@ -55,7 +55,7 @@ public sealed class Asset<T> : Asset where T : GameResource
 	private readonly ResourceLoader<T>? loader;
 	private T? cache;
 
-	public bool IsLoaded => cache != null;
+	public bool IsLoaded => cache is not null;
 
 	public Asset(string path, MountPoint mount, ResourceLoader<T> loader) : base(mount.MakeFullPath(path))
 	{

@@ -96,7 +96,7 @@ public class NumInput : TemplatedControl, IActivatableView
 
 	void OnLostFocus(object sender, RoutedEventArgs args)
 	{
-		if (Value == null)
+		if (Value is null)
 		{
 			return;
 		}

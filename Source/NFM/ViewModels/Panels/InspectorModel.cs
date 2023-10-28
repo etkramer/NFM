@@ -36,13 +36,13 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 		{
 			// Type icon behavior
 			this.WhenAnyValue(o => o.ObjectType)
-				.Select(o => o == null ? "question_mark" : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : "question_mark")
+				.Select(o => o is null ? "question_mark" : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : "question_mark")
 				.ToPropertyEx(this, o => o.TypeIcon)
 				.DisposeWith(disposables);
 
 			// Type name behavior
 			this.WhenAnyValue(o => o.ObjectType)
-				.Select(o => o == null ? "None" : ObjectType.Name)
+				.Select(o => o is null ? "None" : ObjectType.Name)
 				.ToPropertyEx(this, o => o.TypeName)
 				.DisposeWith(disposables);
 

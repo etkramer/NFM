@@ -252,7 +252,7 @@ public sealed class PipelineState : IDisposable
 	{
 		return Task.Run(() =>
 		{
-			if (IsGraphics && (compiledPixel == null || (compiledVertex == null && compiledMesh == null)))
+			if (IsGraphics && (compiledPixel is null || (compiledVertex is null && compiledMesh is null)))
 			{
 				throw new NotSupportedException("Cannot use a pixel shader without a vertex/mesh shader, or vice versa");
 			}
@@ -291,7 +291,7 @@ public sealed class PipelineState : IDisposable
 					disabledBlend.RenderTarget[i].BlendEnable = false;
 				}
 
-				if (compiledVertex == null)
+				if (compiledVertex is null)
 				{
                     Guard.NotNull(compiledMesh);
 

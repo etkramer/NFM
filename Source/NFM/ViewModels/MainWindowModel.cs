@@ -16,7 +16,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 	{
 		var openPath = (await Dialog.ShowOpenDialog(MainWindow.Instance, new Dialog.FileFilter("NFM Project", "json"))).FirstOrDefault();
 
-		if (openPath != null)
+		if (openPath is not null)
 		{
 			Project.Load(openPath);
 		}
@@ -24,7 +24,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 
 	public void SavePressed(object sender)
 	{
-		if (Project.Path == null)
+		if (Project.Path is null)
 		{
 			SaveAsPressed(sender);
 			return;
@@ -37,7 +37,7 @@ public class MainWindowModel : ReactiveObject, IActivatableViewModel
 	{
 		var savePath = await Dialog.ShowSaveDialog(MainWindow.Instance, new Dialog.FileFilter("NFM Project", "json"));
 
-		if (savePath != null)
+		if (savePath is not null)
 		{
 			Project.Save(savePath);
 		}

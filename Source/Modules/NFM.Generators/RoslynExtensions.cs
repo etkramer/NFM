@@ -23,11 +23,11 @@ public static class RoslynExtensions
 
 	private static void GetFullNameRecurse(INamespaceOrTypeSymbol symbol, ref string output)
 	{
-		if (symbol.ContainingNamespace != null)
+		if (symbol.ContainingNamespace is not null)
 		{
 			if (!string.IsNullOrWhiteSpace(symbol.ContainingNamespace.Name))
 			{
-				output = (output == null) ? symbol.ContainingNamespace.Name : $"{symbol.ContainingNamespace.Name}.{output}";
+				output = (output is null) ? symbol.ContainingNamespace.Name : $"{symbol.ContainingNamespace.Name}.{output}";
 			}
 			
 			GetFullNameRecurse(symbol.ContainingNamespace, ref output);

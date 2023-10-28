@@ -53,11 +53,11 @@ public class OutlinerModel : ReactiveObject, IActivatableViewModel
 
 	void OnSelectionChanged(object sender, SelectionChangedEventArgs args)
 	{
-		if (args.RemovedItems != null)
+		if (args.RemovedItems is not null)
 		{
 			Selection.Deselect(args.RemovedItems.Cast<ISelectable>());
 		}
-		if (args.AddedItems != null)
+		if (args.AddedItems is not null)
 		{
 			Selection.Select(args.RemovedItems.Cast<ISelectable>());
 		}

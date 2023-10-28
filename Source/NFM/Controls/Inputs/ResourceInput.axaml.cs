@@ -26,13 +26,13 @@ public class ResourceValueConverter : IValueConverter
 {
 	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 	{
-		if (value == null)
+		if (value is null)
 		{
 			return null;
 		}
 		else if (value is GameResource resource)
 		{
-			if (resource.Source != null)
+			if (resource.Source is not null)
 			{
 				return $"{resource.Source.Path.Split('/').Last()} ({resource.GetType().Name})";
 			}
