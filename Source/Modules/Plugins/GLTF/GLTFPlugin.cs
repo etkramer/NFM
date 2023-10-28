@@ -54,7 +54,7 @@ public class GLTFPlugin : Plugin
 		transparent.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 		//...and submit both.
-		Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, opaque));
-		Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", mount, transparent));
+		Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, new CachedResourceLoader<Shader>(opaque)));
+		Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", mount, new CachedResourceLoader<Shader>(transparent)));
 	}
 }

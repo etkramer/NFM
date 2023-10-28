@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using NFM.Threading;
 
 namespace NFM.Resources;
 
@@ -52,7 +53,7 @@ public sealed class Asset<T> : Asset where T : GameResource
 	private object loadingLock = new();
 	private Task<T>? loadingTask;
 
-	private readonly ResourceLoader<T>? loader;
+	private readonly ResourceLoader<T> loader;
 	private T? cache;
 
 	public bool IsLoaded => cache is not null;
@@ -60,13 +61,6 @@ public sealed class Asset<T> : Asset where T : GameResource
 	public Asset(string path, MountPoint mount, ResourceLoader<T> loader) : base(mount.MakeFullPath(path))
 	{
 		this.loader = loader;
-	}
-
-	public Asset(string path, MountPoint mount, T cachedValue) : base(mount.MakeFullPath(path))
-	{
-		cache = cachedValue;
-		cache.Source = this;
-		loader = null;
 	}
 
 	public Task<T> GetAsync()
@@ -81,8 +75,13 @@ public sealed class Asset<T> : Asset where T : GameResource
 				{
 					loadingTask = Task.Run(async () =>
 					{
+                        // Run loader function
 						cache = await Guard.NotNull(loader).Load();
-						cache.Source = this;
+                        cache.Source = this;
+
+                        // Schedule upload to occur on the main thread
+                        await Dispatcher.InvokeAsync(cache.PostLoad);
+                        cache.IsFullyLoaded = true;
 
 						return cache;
 					});

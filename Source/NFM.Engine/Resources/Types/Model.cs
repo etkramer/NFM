@@ -1,4 +1,5 @@
 ﻿using NFM.Graphics;
+using NFM.Threading;
 
 namespace NFM.Resources;
 
@@ -7,17 +8,24 @@ namespace NFM.Resources;
 /// </summary>
 public sealed class Model : GameResource
 {
-	public IEnumerable<Mesh> Meshes => meshes;
+	public IReadOnlyCollection<Mesh> Meshes => meshes;
 	private List<Mesh> meshes = new();
 
-	public bool IsCommitted => meshes.All(o => o.IsCommitted);
+    protected internal override void PostLoad()
+    {
+        foreach (var mesh in meshes)
+        {
+            mesh.Commit();
+        }
 
-	public bool AddMesh(Mesh mesh)
+        base.PostLoad();
+    }
+
+    public bool AddMesh(Mesh mesh)
 	{
 		if (mesh is not null)
 		{
 			meshes.Add(mesh);
-			mesh.Commit();
 		}
 
 		return true;
@@ -25,7 +33,7 @@ public sealed class Model : GameResource
 
 	public override void Dispose()
 	{
-		foreach (var  mesh in Meshes)
+		foreach (var mesh in Meshes)
 		{
 			mesh.Dispose();
 		}
@@ -65,20 +73,20 @@ public sealed class Mesh
 
 	public void SetIndices(uint[] indices)
 	{
+        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
 		Indices = indices;
-		IsCommitted = false;
 	}
 
 	public void SetVertices(Vertex[] vertices)
 	{
+        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
 		Vertices = vertices;
-		IsCommitted = false;
 	}
 
 	public void SetMaterial(Material material)
 	{
+        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
 		Material = material;
-		IsCommitted = false;
 	}
 
 	public void Commit()
