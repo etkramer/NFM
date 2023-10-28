@@ -15,7 +15,7 @@ public static class Dispatcher
     /// </summary>
     public static Task InvokeAsync(Action action)
     {
-        lock(dispatcherQueue)
+        lock (dispatcherQueue)
         {
             TaskCompletionSource completionSource = new();
             dispatcherQueue.Enqueue(() =>
@@ -35,7 +35,7 @@ public static class Dispatcher
             MainThread = Thread.CurrentThread;
         }
 
-        lock(dispatcherQueue)
+        lock (dispatcherQueue)
         {
             while (dispatcherQueue.TryDequeue(out var action))
             {
