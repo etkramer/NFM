@@ -1,5 +1,6 @@
 ﻿using NFM.GPU;
 using NFM.World;
+using NFM.Threading;
 
 namespace NFM.Graphics;
 
@@ -26,7 +27,7 @@ abstract class RenderPipeline<TSelf> : IDisposable where TSelf : RenderPipeline<
 
 	static RenderPipeline()
 	{
-		Engine.OnTick += (t) =>
+		Dispatcher.OnTick += (t) =>
 		{
 			for (int i = rpCache.Count - 1; i >= 0; i--)
 			{
