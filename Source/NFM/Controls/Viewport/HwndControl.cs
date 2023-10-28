@@ -70,10 +70,4 @@ public unsafe class HwndControl : NativeControlHost
 
 		return arrangeResult;
 	}
-
-	protected override void OnKeyDown(KeyEventArgs e)
-	{
-		Debug.Log("Key down");
-		base.OnKeyDown(e);
-	}
 }

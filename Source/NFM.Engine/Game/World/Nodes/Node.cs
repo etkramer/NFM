@@ -22,8 +22,8 @@ public class Node : ISelectable, IDisposable
 		get => parent;
 		set
 		{
-			Debug.Assert(value != this, "Nodes cannot be parented to themselves.");
-			Debug.Assert(value == null || value.Scene == Scene,
+			Guard.Require(value != this, "Nodes cannot be parented to themselves.");
+			Guard.Require(value == null || value.Scene == Scene,
 				"Nodes can only be parented to other nodes from the same scene.");
 
 			if (parent != value || value == null /*Could be initial setup...*/)

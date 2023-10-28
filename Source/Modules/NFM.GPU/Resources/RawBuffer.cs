@@ -46,7 +46,7 @@ public unsafe partial class RawBuffer : Resource, IDisposable
 	{
 		if (cbv is null)
 		{
-			Debug.Assert((Capacity * Stride % ConstantAlignment == 0) || (SizeAlignment % ConstantAlignment == 0), "Buffers must be aligned to 256b to be used as program constants");
+			Guard.Require((Capacity * Stride % ConstantAlignment == 0) || (SizeAlignment % ConstantAlignment == 0), "Buffers must be aligned to 256b to be used as program constants");
 			cbv = new ConstantBufferView(D3DResource, Stride, Capacity);
 		}
 

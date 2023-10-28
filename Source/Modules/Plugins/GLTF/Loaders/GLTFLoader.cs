@@ -35,7 +35,7 @@ public class GLTFLoader : ResourceLoader<Model>
 		Parallel.For(0, sourceModel.TextureCount, (i) =>
 		{
 			var sourceTexture = sourceModel.Textures[i];
-			Debug.Assert(sourceTexture.HasCompressedData);
+			Guard.Require(sourceTexture.HasCompressedData);
 
 			using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.CompressedData.AsSpan(), 4))
 			{

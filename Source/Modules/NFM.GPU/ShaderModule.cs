@@ -132,7 +132,7 @@ public class ShaderModule
 				return reader.ReadToEnd();
 			}
 
-			Debug.LogError($"Failed to resolve include \"{path}\"");
+			Log.Error($"Failed to resolve include \"{path}\"");
 			return null;
 		};
 

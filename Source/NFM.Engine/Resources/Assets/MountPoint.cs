@@ -10,7 +10,7 @@ public sealed class MountPoint
 	private MountPoint(string name, string id)
 	{
 		id = id.Trim().ToUpper();
-		Debug.Assert(!string.IsNullOrWhiteSpace(id) && !id.Any(x => char.IsWhiteSpace(x)), "Mount ID must not contain whitespace!");
+		Guard.Require(!string.IsNullOrWhiteSpace(id) && !id.Any(x => char.IsWhiteSpace(x)), "Mount ID must not contain whitespace!");
 
 		Name = name;
 		ID = id;

@@ -32,7 +32,7 @@ public abstract class Plugin
 				}
 				catch (Exception e)
 				{
-					Debug.LogError(e);
+					Log.Error(e);
 				}
 			}
 		}

@@ -192,7 +192,7 @@ public class Gizmos
 
 	private Vector4 ToClipSpace(Vector3 world)
 	{
-		Vector4 clip = new Vector4(world, 1);
+		var clip = new Vector4(world, 1);
 		clip *= viewMatrix;
 		clip *= projectionMatrix;
 
@@ -201,7 +201,7 @@ public class Gizmos
 
 	private void DrawGeometry(ReadOnlySpan<Vector4> vertices, ReadOnlySpan<uint> indices, Color color)
 	{
-		Debug.Assert(indices.Length % 3 == 0, "Indices passed to DrawGeometry() must be triangles.");
+		Guard.Require(indices.Length % 3 == 0, "Indices passed to DrawGeometry() must be triangles.");
 
 		renderList.UploadBuffer(gizmosIndexBuffer, indices);
 		renderList.UploadBuffer(gizmosVertexBuffer, vertices);

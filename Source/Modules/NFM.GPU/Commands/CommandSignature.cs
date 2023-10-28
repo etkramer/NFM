@@ -47,7 +47,7 @@ public sealed class CommandSignature : IDisposable
 	{
 		if (!program.cRegisterMapping.TryGetValue(new(register, 0), out var rootParam))
 		{
-			Debug.LogWarning($"Program does not contain cbuffer at register b{register}");
+			Log.Warn($"Program does not contain cbuffer at register b{register}");
 			return this;
 		}
 

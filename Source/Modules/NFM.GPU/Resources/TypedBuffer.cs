@@ -45,7 +45,7 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 			}
 
 			// Allocate space with D3D12MA
-			Debug.Assert(virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
+			Guard.Require(virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
 			{
 				Size = (ulong)count,
 				Alignment = 0,

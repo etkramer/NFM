@@ -90,7 +90,7 @@ public class Swapchain : IDisposable
 			throw new InvalidOperationException("Resource is in wrong state for present!");
 		}
 
-		Debug.Assert(swapchain.Present(PresentInterval, (PresentInterval == 0 && D3DContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
+		Guard.Require(swapchain.Present(PresentInterval, (PresentInterval == 0 && D3DContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
 	}
 
 	public void Resize(Vector2i size)

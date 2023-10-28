@@ -41,7 +41,7 @@ public class DockSpace : Panel
 		// ONLY first child can be central node.
 		else
 		{
-			Debug.Assert(parent != null);
+			Guard.Require(parent != null);
 		}
 
 		DockRelationship relationship = new()

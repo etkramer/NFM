@@ -126,7 +126,7 @@ class RenderMaterial : IDisposable
 			}
 		}
 
-		Debug.Assert(materialData.Count % 4 == 0, "The size of all material parameters must be divisible by 4.");
+		Guard.Require(materialData.Count % 4 == 0, "The size of all material parameters must be divisible by 4.");
 
 		// Upload data to GPU.
 		MaterialHandle = MaterialBuffer.Allocate(materialData.Count);

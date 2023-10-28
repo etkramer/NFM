@@ -1,10 +1,11 @@
-using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace NFM.Common;
 
 public static class Guard
 {
+    [DebuggerHidden]
     public static bool Require(bool value, string? message = null)
     {
         if (!value)
@@ -15,6 +16,7 @@ public static class Guard
         return value;
     }
 
+    [DebuggerHidden]
     public static T NotNull<T>([NotNull] T? obj, string? message = null)
         where T : class
     {
@@ -26,6 +28,7 @@ public static class Guard
         return obj;
     }
 
+    [DebuggerHidden]
     public static string NotNullOrWhitespace([NotNull] string? obj, string? message = null)
     {
         if (obj == null)

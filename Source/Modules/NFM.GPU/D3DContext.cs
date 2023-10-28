@@ -34,16 +34,16 @@ public static class D3DContext
 
 		if (severity == MessageSeverity.Corruption || severity == MessageSeverity.Error)
 		{
-			Debug.LogError(message);
+			Log.Error(message);
 			throw new Exception(message);
 		}
 		else if (severity == MessageSeverity.Warning)
 		{
-			Debug.LogWarning(message);
+			Log.Warn(message);
 		}
 		else
 		{
-			Debug.Log(message);
+			Log.Info(message);
 		}
 	}
 

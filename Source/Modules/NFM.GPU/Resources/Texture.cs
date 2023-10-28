@@ -152,8 +152,8 @@ public unsafe class Texture : Resource, IDisposable
 	{
 		if (rtv == null)
 		{
-			Debug.Assert(dsv == null, "Cannot use one texture for both depth/stencil and render target");
-			Debug.Assert(!Format.IsDepthStencil(), $"{Format} is not a supported render target format");
+			Guard.Require(dsv == null, "Cannot use one texture for both depth/stencil and render target");
+			Guard.Require(!Format.IsDepthStencil(), $"{Format} is not a supported render target format");
 
 			rtv = new RenderTargetView(this);
 		}
@@ -165,8 +165,8 @@ public unsafe class Texture : Resource, IDisposable
 	{
 		if (dsv == null)
 		{
-			Debug.Assert(rtv == null, "Cannot use one texture for both depth/stencil and render target");
-			Debug.Assert(Format.IsDepthStencil() || DSFormat.IsDepthStencil(), $"{Format} is not a supported depth/stencil format");
+			Guard.Require(rtv == null, "Cannot use one texture for both depth/stencil and render target");
+			Guard.Require(Format.IsDepthStencil() || DSFormat.IsDepthStencil(), $"{Format} is not a supported depth/stencil format");
 
 			dsv = new DepthStencilView(this);
 		}

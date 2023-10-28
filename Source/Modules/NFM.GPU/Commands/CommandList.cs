@@ -177,7 +177,7 @@ public class CommandList : IDisposable
 	{
 		lock (this)
 		{
-			Debug.Assert(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
+			Guard.Require(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
 			RequestState(target, ResourceStates.UnorderedAccess);
 
 			if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
@@ -336,7 +336,7 @@ public class CommandList : IDisposable
 
 	public unsafe void UploadBuffer(RawBuffer buffer, void* data, nint dataSize, nint offset = 0)
 	{
-		Debug.Assert(buffer.IsAlive);
+		Guard.Require(buffer.IsAlive);
 
 		lock (this)
 		lock (UploadHelper.Lock)
@@ -365,7 +365,7 @@ public class CommandList : IDisposable
 
 	public unsafe void UploadTexture(Texture texture, void* data, nint dataSize, int mipLevel = 0)
 	{
-		Debug.Assert(texture.IsAlive);
+		Guard.Require(texture.IsAlive);
 
 		lock (this)
 		lock (UploadHelper.Lock)
@@ -439,7 +439,7 @@ public class CommandList : IDisposable
 				return;
 			}
 
-			Debug.Assert(dest.Samples <= 1, "Cannot resolve to a multisampled texture");
+			Guard.Require(dest.Samples <= 1, "Cannot resolve to a multisampled texture");
 
 			RequestState(source, ResourceStates.ResolveSource);
 			RequestState(dest, ResourceStates.ResolveDest);
@@ -605,7 +605,7 @@ public class CommandList : IDisposable
 
 	public void Execute()
 	{
-		Debug.Assert(!IsOpen, "Cannot execute open command list.");
+		Guard.Require(!IsOpen, "Cannot execute already-open command list.");
 
 		lock (this)
 		{
