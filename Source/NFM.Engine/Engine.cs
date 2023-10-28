@@ -7,7 +7,7 @@ global using System.IO;
 global using System.Linq;
 global using NFM.Common;
 global using NFM.Mathematics;
-using NFM.GPU;
+using NFM.Threading;
 using NFM.Plugins;
 using NFM.Resources;
 using NFM.Graphics;
@@ -20,8 +20,6 @@ namespace NFM;
 
 public static class Engine
 {
-	public static event Action<double> OnTick = delegate {};
-
 	internal static void Init()
 	{
 		// Boot up renderer and load plugins.
@@ -52,8 +50,8 @@ public static class Engine
 
 	internal static void Update()
 	{
-		// Begin the new frame.
-		OnTick.Invoke(Metrics.FrameTime);
+		// Dispatch any pending tasks.
+        Dispatcher.Tick();
 
 		// Render the frame.
 		Renderer.RenderFrame();

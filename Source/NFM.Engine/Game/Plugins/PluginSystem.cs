@@ -46,6 +46,6 @@ public static class PluginSystem
 		}
 
 		// Start up loaded plugins.
-		Parallel.ForEach(Plugins, (o) => o.OnStart());
+		Parallel.ForEach(Plugins, o => o.OnStart());
 	}
 }

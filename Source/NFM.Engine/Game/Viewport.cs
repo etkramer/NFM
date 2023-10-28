@@ -1,6 +1,7 @@
 ﻿using Avalonia.Input;
 using NFM.GPU;
 using NFM.World;
+using NFM.Threading;
 
 namespace NFM.Graphics;
 
@@ -32,7 +33,7 @@ public unsafe class Viewport : IDisposable
 		workCamera = new CameraNode(null);
 		workCamera.Name = "Work Camera";
 
-		Engine.OnTick += OnTick;
+		Dispatcher.OnTick += OnTick;
 
 		All.Add(this);
 	}
@@ -110,7 +111,7 @@ public unsafe class Viewport : IDisposable
 
 	public void Dispose()
 	{
-		Engine.OnTick -= OnTick;
+		Dispatcher.OnTick -= OnTick;
 		All.Remove(this);
 	}
 }
