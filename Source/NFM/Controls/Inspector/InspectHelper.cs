@@ -39,16 +39,16 @@ public static class InspectHelper
 		{
 			var supportedTypes = inspectorType.GetCustomAttribute<CustomInspectorAttribute>().PropertyTypes;
 
-			// Exact match.
+			// Exact match
 			if (supportedTypes.Any(o => o == subjectType))
 			{
 				typeCandidates.Add((0, inspectorType));
 			}
-			// Is descended from this type.
-			else if (supportedTypes.Any(o => subjectType.IsAssignableTo(o)))
-			{
-				typeCandidates.Add((1, inspectorType));
-			}
+			// Is assignable to this type
+            else if (supportedTypes.Any(o => IsAssignableToGenericType(subjectType, o)))
+            {
+                typeCandidates.Add((1, inspectorType));
+            }
 		}
 
 		// Found a match.
@@ -73,6 +73,35 @@ public static class InspectHelper
 			}
 		}
 	}
+
+    static bool IsAssignableToGenericType(Type givenType, Type otherType)
+    {
+        if (!otherType.IsGenericType)
+        {
+            return givenType.IsAssignableTo(otherType);
+        }
+
+        var interfaces = givenType.GetInterfaces();
+        foreach (var type in interfaces)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == otherType)
+            {
+                return true;
+            }
+        }
+
+        if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == otherType)
+        {
+            return true;
+        }
+
+        if (givenType.BaseType is null)
+        {
+            return false;
+        }
+
+        return IsAssignableToGenericType(givenType.BaseType, otherType);
+    }
 
 	private static List<Type> inspectorTypes = new();
 	static InspectHelper()
