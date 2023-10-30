@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using NFM.GPU;
 
@@ -25,6 +27,20 @@ public static class Dispatcher
             });
 
             return completionSource.Task;
+        }
+    }
+
+    /// <summary>
+    /// Throws if called anywhere except on the main thread.
+    /// </summary>
+    /// <param name="methodName"></param>
+    /// <exception cref="Exception"></exception>
+    [DebuggerHidden]
+    public static void EnsureMainThread()
+    {
+        if (Thread.CurrentThread != MainThread)
+        {
+            throw new Exception($"Method called from wrong thread");
         }
     }
 

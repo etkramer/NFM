@@ -28,6 +28,7 @@ public partial class ModelNode : Node
 		// Track changes in model/visibility
 		this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
 		{
+            Model?.EnsureFullyLoaded();
 			UpdateInstances(Renderer.DefaultCommandList);
 		});
 

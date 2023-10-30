@@ -11,9 +11,22 @@ public abstract class GameResource : IDisposable
 
     /// <summary>
     /// Called by the asset system when the resource has finished loading, guaranteed to run on the main thread.
-    /// NOTE: If resource is not created by the asset system, this will NOT currently be called. May want to merge resources and assets?
     /// </summary>
-    protected internal virtual void PostLoad() { }
+    protected virtual void PostLoad() { }
+
+    /// <summary>
+    /// Fully loads a resource if it hasn't been already, otherwise does nothing.
+    /// </summary>
+    public void EnsureFullyLoaded()
+    {
+        Dispatcher.EnsureMainThread();
+
+        if (!IsFullyLoaded)
+        {
+            PostLoad();
+            IsFullyLoaded = true;
+        }
+    }
 
 	public virtual void Dispose() { }
 }

@@ -11,7 +11,7 @@ public sealed class Model : GameResource
 	public IReadOnlyCollection<Mesh> Meshes => meshes;
 	private List<Mesh> meshes = new();
 
-    protected internal override void PostLoad()
+    protected override void PostLoad()
     {
         foreach (var mesh in meshes)
         {
@@ -44,7 +44,7 @@ public sealed class Model : GameResource
 	}
 }
 
-public sealed class Mesh
+public sealed class Mesh : IDisposable
 {
 	/// <summary>
 	/// The name of this mesh, displayed when choosing mesh groups.

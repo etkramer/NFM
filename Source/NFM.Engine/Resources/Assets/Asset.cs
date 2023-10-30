@@ -80,8 +80,7 @@ public sealed class Asset<T> : Asset where T : GameResource
                         cache.Source = this;
 
                         // Schedule upload to occur on the main thread
-                        await Dispatcher.InvokeAsync(cache.PostLoad);
-                        cache.IsFullyLoaded = true;
+                        await Dispatcher.InvokeAsync(cache.EnsureFullyLoaded);
 
 						return cache;
 					});

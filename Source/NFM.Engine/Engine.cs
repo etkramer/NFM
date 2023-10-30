@@ -7,7 +7,7 @@ global using System.IO;
 global using System.Linq;
 global using NFM.Common;
 global using NFM.Mathematics;
-using NFM.Threading;
+global using NFM.Threading;
 using NFM.Plugins;
 using NFM.Resources;
 using NFM.Graphics;
