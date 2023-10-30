@@ -16,10 +16,10 @@ public struct ShaderParameter
 
 public sealed class Shader : GameResource
 {
-	public string ShaderSource { get; set; }
+	public string ShaderSource { get; init; }
 
 	public List<ShaderParameter> Parameters { get; } = new();
-	public BlendMode BlendMode = BlendMode.Opaque;
+	public BlendMode BlendMode { get; set; } = BlendMode.Opaque;
 
 	public Shader(string source)
 	{

@@ -27,7 +27,7 @@ public class GLTFLoader : ResourceLoader<Model>
 	public override async Task<Model> Load()
 	{
 		// Load GLTF model from file.
-		AssimpContext importer = new AssimpContext();
+		var importer = new AssimpContext();
 		var sourceModel = importer.ImportFile(Path, PostProcessSteps.None);
 
 		// Load textures from GLTF
@@ -39,7 +39,7 @@ public class GLTFLoader : ResourceLoader<Model>
 
 			using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.CompressedData.AsSpan(), 4))
 			{
-				Texture2D texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
+				var texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
 				texture.SetPixelData(sourceImage.Data, 0, true);
 
 				textures[i] = texture;
@@ -53,7 +53,7 @@ public class GLTFLoader : ResourceLoader<Model>
 			var sourceMaterial = sourceModel.Materials[i];
 
 			// Determine shader
-			Shader shader = await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl");
+			var shader = await Asset.LoadAsync<Shader>("USER:/Shaders/Opaque.hlsl");
 
 			// Load textures
 			sourceMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var baseColor);
@@ -111,10 +111,13 @@ public class GLTFLoader : ResourceLoader<Model>
 				}
 
 				// Create mesh
-				var mesh = new Mesh(sourceMesh.Name ?? "unnamed");
-				mesh.SetVertices(vertices);
-				mesh.SetIndices(sourceMesh.GetUnsignedIndices());
-				mesh.SetMaterial(materials[sourceMesh.MaterialIndex]);
+                var mesh = new Mesh()
+                {
+                    Name = sourceMesh.Name ?? "unnamed",
+                    Vertices = vertices,
+                    Indices = sourceMesh.GetUnsignedIndices(),
+                    Material = materials[sourceMesh.MaterialIndex]
+                };
 
 				// Add to new mesh (body) group
 				model.AddMesh(mesh);

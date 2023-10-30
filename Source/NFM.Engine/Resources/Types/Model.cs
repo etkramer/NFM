@@ -15,7 +15,12 @@ public sealed class Model : GameResource
     {
         foreach (var mesh in meshes)
         {
-            mesh.Commit();
+		    if (mesh.Bounds == Box3D.Infinity)
+		    {
+			    mesh.PopulateBounds();
+		    }
+
+		    mesh.RenderData = new RenderMesh(mesh);
         }
 
         base.PostLoad();
@@ -49,65 +54,34 @@ public sealed class Mesh : IDisposable
 	/// <summary>
 	/// The name of this mesh, displayed when choosing mesh groups.
 	/// </summary>
-	public string Name { get; }
-
-	/// <summary>
-	/// Does this mesh need to be reuploaded?
-	/// </summary>
-	public bool IsCommitted { get; private set; } = false;
+	public required string Name { get; init; }
 
 	/// <summary>
 	/// Should this mesh be visible by default?
 	/// </summary>
-	public bool IsVisible { get; private set; } = true;
+	public bool IsVisible { get; init; } = true;
 
+    /// <summary>
+    /// This mesh's bounding box as displayed in the editor.
+    /// </summary>
 	public Box3D Bounds { get; set; } = Box3D.Infinity;
-	public uint[]? Indices { get; private set; } = null;
-	public Vertex[]? Vertices { get; private set; } = null;
-	public Material? Material { get; private set; } = null;
+
+    /// <summary>
+    /// Triangle indices to be used by the renderer.
+    /// </summary>
+	public required uint[]? Indices { get; init; } = null;
+
+    /// <summary>
+    /// Vertex information to be used by the renderer.
+    /// </summary>
+	public required Vertex[]? Vertices { get; init; } = null;
+
+    /// <summary>
+    /// Material to be used by default (can be overriden in editor).
+    /// </summary>
+	public required Material? Material { get; init; } = null;
 
 	internal RenderMesh? RenderData = null;
-
-	public Mesh(string name)
-	{
-		Name = name;
-	}
-
-	public void SetIndices(uint[] indices)
-	{
-        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
-		Indices = indices;
-	}
-
-	public void SetVertices(Vertex[] vertices)
-	{
-        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
-		Vertices = vertices;
-	}
-
-	public void SetMaterial(Material material)
-	{
-        Guard.Require(!IsCommitted, "Cannot modify an already-loaded mesh");
-		Material = material;
-	}
-
-	public void Commit()
-	{
-		if (IsCommitted)
-		{
-			return;
-		}
-
-        RenderData?.Dispose();
-
-		if (Bounds == Box3D.Infinity)
-		{
-			PopulateBounds();
-		}
-
-		RenderData = new RenderMesh(this);
-		IsCommitted = true;
-	}
 
 	public void Dispose()
 	{
@@ -117,7 +91,7 @@ public sealed class Mesh : IDisposable
 	/// <summary>
 	/// Automatically generates 3D bounds
 	/// </summary>
-	void PopulateBounds()
+	internal void PopulateBounds()
 	{
         if (Vertices is null)
         {
