@@ -45,26 +45,22 @@ static class Renderer
 			}
 		}
 
-		// We don't want other threads submitting uploads while the list is closed.
-		lock (DefaultCommandList)
+		// Execute default command list and wait for it on the GPU.
+		DefaultCommandList.EndEvent();
+		DefaultCommandList.Close();
+		DefaultCommandList.Execute();
+
+		// Render to each viewport.
+		foreach (var viewport in Viewport.All)
 		{
-			// Execute default command list and wait for it on the GPU.
-			DefaultCommandList.EndEvent();
-			DefaultCommandList.Close();
-			DefaultCommandList.Execute();
-
-			// Render to each viewport.
-			foreach (var viewport in Viewport.All)
-			{
-				RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
-			}
-
-			// Wait for completion.
-			D3DContext.WaitFrame();
-
-			// Reopen default command list
-			DefaultCommandList.Open();
+			RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
 		}
+
+		// Wait for completion.
+		D3DContext.WaitFrame();
+
+		// Reopen default command list
+		DefaultCommandList.Open();
 	}
 
 	public static void RenderCamera<T>(CameraNode camera, Swapchain swapchain) where T : RenderPipeline<T>, new()
@@ -79,31 +75,28 @@ static class Renderer
 		// Grab an RP instance and open it's command list
 		var rp = RenderPipeline<T>.Get(texture);
 
-		lock (rp)
-		{
-			// Execute the render pipeline
-			rp.List.Open();
-			rp.List.BeginEvent($"{typeof(T).Name} for {camera.Name}");
-			rp.Render(texture, camera);
+		// Execute the render pipeline
+		rp.List.Open();
+		rp.List.BeginEvent($"{typeof(T).Name} for {camera.Name}");
+		rp.Render(texture, camera);
 
-			// Setup gizmos context
-			var context = new Gizmos(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
-			rp.List.SetRenderTarget(texture);
+		// Setup gizmos context
+		var context = new Gizmos(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
+		rp.List.SetRenderTarget(texture);
 
-			// Draw gizmos for any subscribers
-			context.FireGizmosEvent();
+		// Draw gizmos for any subscribers
+		context.FireGizmosEvent();
 
-			// Draw axis lines
-			context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
-			context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
-			context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
+		// Draw axis lines
+		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
+		context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
+		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
 
-			// Close/execute the command list
-			beforeExecute?.Invoke(rp.List);
-			rp.List.EndEvent();
-			rp.List.Close();
-			rp.List.Execute();
-		}
+		// Close/execute the command list
+		beforeExecute?.Invoke(rp.List);
+		rp.List.EndEvent();
+		rp.List.Close();
+		rp.List.Execute();
 	}
 
 	public static void Cleanup()

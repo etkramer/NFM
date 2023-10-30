@@ -17,17 +17,13 @@ class RenderMaterial : IDisposable
 	private static List<Type> requestedPermutationTypes = new();
 	public static void RequestPermutation<T>() where T : ShaderPermutation, new()
 	{
-		lock (requestedPermutationTypes)
-		lock (all)
+		if (!requestedPermutationTypes.Contains(typeof(T)))
 		{
-			if (!requestedPermutationTypes.Contains(typeof(T)))
-			{
-				requestedPermutationTypes.Add(typeof(T));
+			requestedPermutationTypes.Add(typeof(T));
 
-				foreach (var instance in all)
-				{
-					instance.permutations.Add(ShaderPermutation.FindOrCreate<T>(instance));
-				}
+			foreach (var instance in all)
+			{
+				instance.permutations.Add(ShaderPermutation.FindOrCreate<T>(instance));
 			}
 		}
 	}
@@ -81,12 +77,9 @@ class RenderMaterial : IDisposable
 		UpdateMaterialData();
 
 		// Create requested permutations
-		lock (requestedPermutationTypes)
+		foreach (var type in requestedPermutationTypes)
 		{
-			foreach (var type in requestedPermutationTypes)
-			{
-				permutations.Add(ShaderPermutation.FindOrCreate(type, this));
-			}
+			permutations.Add(ShaderPermutation.FindOrCreate(type, this));
 		}
 	}
 

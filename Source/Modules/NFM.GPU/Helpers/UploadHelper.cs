@@ -1,5 +1,4 @@
-﻿using System;
-using Vortice.DXGI;
+﻿using Vortice.DXGI;
 using Vortice.Direct3D12;
 
 namespace NFM.GPU;
@@ -13,8 +12,6 @@ internal unsafe static class UploadHelper
 	public static int Ring => D3DContext.FrameIndex;
 	public static ID3D12Resource[] Rings;
 	public static void*[] MappedRings;
-
-	public static object Lock { get; } = new();
 
 	static UploadHelper()
 	{
@@ -48,10 +45,7 @@ internal unsafe static class UploadHelper
 		// Reset the upload offset at the beginning of every frame.
 		D3DContext.OnFrameStart += () =>
 		{
-			lock (Lock)
-			{
-				UploadOffset = 0;
-			}
+		    UploadOffset = 0;
 		};
 	}
 }

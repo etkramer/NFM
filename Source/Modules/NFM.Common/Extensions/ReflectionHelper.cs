@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
-using System.Collections.ObjectModel;
+﻿using System.Reflection;
 using System.Collections.Concurrent;
 
 namespace NFM.Common;
@@ -13,7 +9,8 @@ public static class ReflectionHelper
 	public const BindingFlags BindingFlagsAllStatic = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 	public const BindingFlags BindingFlagsAllNonStatic = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
 
-	public static ConcurrentBag<Assembly> LoadedAssemblies { get; } = new();
+	public static IReadOnlyCollection<Assembly> LoadedAssemblies => loadedAssemblies;
+    private static List<Assembly> loadedAssemblies { get; } = new();
 
 	static ReflectionHelper()
 	{
@@ -28,7 +25,7 @@ public static class ReflectionHelper
 
 	public static void RegisterAssembly(Assembly assembly)
 	{
-		LoadedAssemblies.Add(assembly);
+		loadedAssemblies.Add(assembly);
 	}
 
 	public static bool IsStatic(this Type type)

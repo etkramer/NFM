@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using Microsoft.CodeAnalysis;
-using NFM.GPU.Native;
-using Vortice.Direct3D12;
+﻿using NFM.GPU.Native;
 
 namespace NFM.GPU;
 
@@ -36,42 +32,35 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 	/// </summary>
 	public BufferAllocation<T> Allocate(nint count, bool preferMinOffset = false)
 	{
-		lock (virtualBlock)
+		var flags = D3D12MA.VirtualAllocationFlags.None;
+		if (preferMinOffset)
 		{
-			var flags = D3D12MA.VirtualAllocationFlags.None;
-			if (preferMinOffset)
-			{
-				flags |= D3D12MA.VirtualAllocationFlags.MinOffset;
-			}
-
-			// Allocate space with D3D12MA
-			Guard.Require(virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
-			{
-				Size = (ulong)count,
-				Alignment = 0,
-				Flags = flags
-			}, out var allocation, out _).Success, "Failed to allocate space from buffer");
-
-			// Create a handle from the D3D12MA allocation.
-			virtualBlock.GetAllocationInfo(allocation, out var info);
-			var alloc = new BufferAllocation<T>(this, allocation, (nint)info.Offset, (nint)info.Size);
-
-			allocations.Add(alloc);
-			UpdateStats();
-
-			return alloc;
+			flags |= D3D12MA.VirtualAllocationFlags.MinOffset;
 		}
+
+		// Allocate space with D3D12MA
+		Guard.Require(virtualBlock.Allocate(new D3D12MA.VirtualAllocationDescription()
+		{
+			Size = (ulong)count,
+			Alignment = 0,
+			Flags = flags
+		}, out var allocation, out var offset).Success, "Failed to allocate space from buffer");
+
+		// Create a handle from the D3D12MA allocation.
+		var alloc = new BufferAllocation<T>(this, allocation, (nint)offset, count);
+
+		allocations.Add(alloc);
+		UpdateStats();
+
+		return alloc;
 	}
 
 	public void Free(BufferAllocation<T> alloc)
 	{
-		lock (virtualBlock)
-		{
-			virtualBlock.FreeAllocation(alloc.Handle);
+		virtualBlock.FreeAllocation(alloc.Handle);
 
-			allocations.Remove(alloc);
-			UpdateStats();
-		}
+		allocations.Remove(alloc);
+		UpdateStats();
 	}
 
 	private void UpdateStats()
@@ -92,10 +81,7 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 
 	public void Clear()
 	{
-		lock (virtualBlock)
-		{
-			virtualBlock.Clear();
-		}
+	    virtualBlock.Clear();
 	}
 }
 

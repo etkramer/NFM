@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Vortice.Direct3D;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
@@ -30,7 +26,6 @@ public class CommandList : IDisposable
 
 	public CommandList()
 	{
-		
 		// Create command allocators.
 		commandAllocators = new ID3D12CommandAllocator[D3DContext.RenderLatency];
 		for (int i = 0; i < D3DContext.RenderLatency; i++)
@@ -53,10 +48,7 @@ public class CommandList : IDisposable
 
 	public void DispatchMesh(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 	{
-		lock (this)
-		{
-			list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
-		}
+	    list.DispatchMesh(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 	}
 
 	public void DispatchMeshThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
@@ -70,10 +62,7 @@ public class CommandList : IDisposable
 
 	public void Dispatch(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 	{
-		lock (this)
-		{
-			list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
-		}
+	    list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 	}
 
 	public void DispatchThreads(int threadCountX, int groupSizeX, int threadCountY = 1, int groupSizeY = 1, int threadCountZ = 1, int groupSizeZ = 1)
@@ -86,183 +75,156 @@ public class CommandList : IDisposable
 
 	public void BarrierUAV(params RawBuffer[] buffers)
 	{
-		lock (this)
+		Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[buffers.Length];
+		for (int i = 0; i < buffers.Length; i++)
 		{
-			Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[buffers.Length];
-			for (int i = 0; i < buffers.Length; i++)
-			{
-				barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
-			}
-
-			list.ResourceBarrier(barriers);
+			barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(buffers[i].D3DResource));
 		}
+
+		list.ResourceBarrier(barriers);
 	}
 
 	public void BarrierUAV(params Texture[] textures)
 	{
-		lock (this)
+		Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[textures.Length];
+		for (int i = 0; i < textures.Length; i++)
 		{
-			Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[textures.Length];
-			for (int i = 0; i < textures.Length; i++)
-			{
-				barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));
-			}
-
-			list.ResourceBarrier(barriers);
+			barriers[i] = new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(textures[i].D3DResource));
 		}
+
+		list.ResourceBarrier(barriers);
 	}
 
 	public void ExecuteIndirect(CommandSignature signature, RawBuffer commandBuffer, int maxCommandCount, nint commandStart = 0)
 	{
-		lock (this)
-		{
-			RequestState(commandBuffer, ResourceStates.IndirectArgument);
+		RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
-			ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-            var countBuffer = commandBuffer.HasCounter ? commandBuffer : null;
+		ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+        var countBuffer = commandBuffer.HasCounter ? commandBuffer : null;
 
-			list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, (commandBuffer.HasCounter ? commandBuffer : null)! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
-		}
+		list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, (commandBuffer.HasCounter ? commandBuffer : null)! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
 	}
 
 	public unsafe void SetPipelineConstants(BindPoint point, int start, params int[] constants)
 	{
-		lock (this)
+		if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
 		{
-			if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(point, out int parameterIndex))
-			{
-				return;
-			}
+			return;
+		}
 
-			if (CurrentPSO.IsGraphics)
+		if (CurrentPSO.IsGraphics)
+		{
+			fixed (int* constantsPtr = constants)
 			{
-				fixed (int* constantsPtr = constants)
-				{
-					list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
-				}
+				list.SetGraphicsRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 			}
-			if (CurrentPSO.IsCompute)
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			fixed (int* constantsPtr = constants)
 			{
-				fixed (int* constantsPtr = constants)
-				{
-					list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
-				}
+				list.SetComputeRoot32BitConstants(parameterIndex, constants.Length, constantsPtr, start);
 			}
 		}
 	}
 
 	public void SetPipelineCBV(int slot, int space, RawBuffer target)
 	{
-		lock (this)
+		RequestState(target, ResourceStates.VertexAndConstantBuffer);
+
+		if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 		{
-			RequestState(target, ResourceStates.VertexAndConstantBuffer);
+			return;
+		}
 
-			if (CurrentPSO is null || !CurrentPSO.cRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-			{
-				return;
-			}
-
-			if (CurrentPSO.IsGraphics)
-			{
-				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
-			}
-			if (CurrentPSO.IsCompute)
-			{
-				list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
-			}
+		if (CurrentPSO.IsGraphics)
+		{
+			list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			list.SetComputeRootDescriptorTable(parameterIndex, target.GetCBV().Handle);
 		}
 	}
 
 	public void SetPipelineUAV(int slot, int space, Texture target, int mipLevel = 0)
 	{
-		lock (this)
+		Guard.Require(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
+		RequestState(target, ResourceStates.UnorderedAccess);
+
+		if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 		{
-			Guard.Require(target.Samples <= 1, "Can't use a multisampled texture as a UAV");
-			RequestState(target, ResourceStates.UnorderedAccess);
+			return;
+		}
 
-			if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-			{
-				return;
-			}
-
-			if (CurrentPSO.IsGraphics)
-			{
-				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
-			}
-			if (CurrentPSO.IsCompute)
-			{
-				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
-			}
+		if (CurrentPSO.IsGraphics)
+		{
+			list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV(mipLevel).Handle);
 		}
 	}
 
 	public void SetPipelineUAV(int slot, int space, RawBuffer target)
 	{
-		lock (this)
+		RequestState(target, ResourceStates.UnorderedAccess);
+
+		if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 		{
-			RequestState(target, ResourceStates.UnorderedAccess);
+			return;
+		}
 
-			if (CurrentPSO is null || !CurrentPSO.uRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-			{
-				return;
-			}
-
-			if (CurrentPSO.IsGraphics)
-			{
-				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
-			}
-			if (CurrentPSO.IsCompute)
-			{
-				list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
-			}
+		if (CurrentPSO.IsGraphics)
+		{
+			list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			list.SetComputeRootDescriptorTable(parameterIndex, target.GetUAV().Handle);
 		}
 	}
 
 	public void SetPipelineSRV(int slot, int space, Texture target)
 	{
-		lock (this)
+		RequestState(target, ResourceStates.AllShaderResource);
+
+		if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 		{
-			RequestState(target, ResourceStates.AllShaderResource);
+			return;
+		}
 
-			if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-			{
-				return;
-			}
-
-			if (CurrentPSO.IsGraphics)
-			{
-				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-			}
-			if (CurrentPSO.IsCompute)
-			{
-				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-			}
+		if (CurrentPSO.IsGraphics)
+		{
+			list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 		}
 	}
 
 	public void SetPipelineSRV(int slot, int space, RawBuffer target)
 	{
-		lock (this)
+		RequestState(target, ResourceStates.AllShaderResource);
+
+		if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
 		{
-			RequestState(target, ResourceStates.AllShaderResource);
+			return;
+		}
 
-			if (CurrentPSO is null || !CurrentPSO.tRegisterMapping.TryGetValue(new(slot, space), out int parameterIndex))
-			{
-				return;
-			}
-
-			if (CurrentPSO.IsGraphics)
-			{
-				list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-			}
-			if (CurrentPSO.IsCompute)
-			{
-				list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
-			}
+		if (CurrentPSO.IsGraphics)
+		{
+			list.SetGraphicsRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
+		}
+		if (CurrentPSO.IsCompute)
+		{
+			list.SetComputeRootDescriptorTable(parameterIndex, target.GetSRV().Handle);
 		}
 	}
 
-	public void SeIndexBuffer(RawBuffer target)
+	public void SetIndexBuffer(RawBuffer target)
 	{
 		RequestState(target, ResourceStates.IndexBuffer);
 
@@ -276,26 +238,23 @@ public class CommandList : IDisposable
 
 	public void SetPipelineState(PipelineState pso)
 	{
-		lock (this)
+		// Don't switch PSOs unnecessarily.
+		if (CurrentPSO == pso)
 		{
-			// Don't switch PSOs unnecessarily.
-			if (CurrentPSO == pso)
-			{
-				return;
-			}
+			return;
+		}
 
-			list.SetPipelineState(pso.PSO);
-			CurrentPSO = pso;
+		list.SetPipelineState(pso.PSO);
+		CurrentPSO = pso;
 
-			if (pso.IsGraphics)
-			{
-				list.SetGraphicsRootSignature(pso.RootSignature);
-				list.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-			}
-			if (pso.IsCompute)
-			{
-				list.SetComputeRootSignature(pso.RootSignature);
-			}
+		if (pso.IsGraphics)
+		{
+			list.SetGraphicsRootSignature(pso.RootSignature);
+			list.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+		}
+		if (pso.IsCompute)
+		{
+			list.SetComputeRootSignature(pso.RootSignature);
 		}
 	}
 
@@ -338,21 +297,17 @@ public class CommandList : IDisposable
 	{
 		Guard.Require(buffer.IsAlive);
 
-		lock (this)
-		lock (UploadHelper.Lock)
-		{
-			int uploadRing = UploadHelper.Ring;
-			nint uploadOffset = UploadHelper.UploadOffset;
-			nint destOffset = offset;
+		int uploadRing = UploadHelper.Ring;
+		nint uploadOffset = UploadHelper.UploadOffset;
+		nint destOffset = offset;
 
-			// Copy data to upload buffer.
-			NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
-			UploadHelper.UploadOffset += dataSize;
+		// Copy data to upload buffer.
+		NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
+		UploadHelper.UploadOffset += dataSize;
 
-			// Copy from upload to dest buffer.
-			RequestState(buffer, ResourceStates.CopyDest);
-			list.CopyBufferRegion(buffer.D3DResource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
-		}
+		// Copy from upload to dest buffer.
+		RequestState(buffer, ResourceStates.CopyDest);
+		list.CopyBufferRegion(buffer.D3DResource, (ulong)destOffset, UploadHelper.Rings[uploadRing], (ulong)uploadOffset, (ulong)dataSize);
 	}
 
 	public unsafe void UploadTexture(Texture texture, ReadOnlySpan<byte> data, int mipLevel = 0)
@@ -367,250 +322,194 @@ public class CommandList : IDisposable
 	{
 		Guard.Require(texture.IsAlive);
 
-		lock (this)
-		lock (UploadHelper.Lock)
-		{
-			int uploadRing = UploadHelper.Ring;
-			nint uploadOffset = UploadHelper.UploadOffset;
+		int uploadRing = UploadHelper.Ring;
+		nint uploadOffset = UploadHelper.UploadOffset;
 
-			// Realign upload offset for 512b alignment requirement.
-			UploadHelper.UploadOffset = uploadOffset = MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
+		// Realign upload offset for 512b alignment requirement.
+		UploadHelper.UploadOffset = uploadOffset = MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
 
-			// Copy data to upload buffer.
-			NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
-			UploadHelper.UploadOffset += dataSize;
+		// Copy data to upload buffer.
+		NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
+		UploadHelper.UploadOffset += dataSize;
 
-			// Calculate subresource info.
-			var footprints = new PlacedSubresourceFootPrint[1];
-			Guard.NotNull(D3DContext.Device).GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
+		// Calculate subresource info.
+		var footprints = new PlacedSubresourceFootPrint[1];
+		Guard.NotNull(D3DContext.Device).GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
 
-			TextureCopyLocation sourceLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
-			TextureCopyLocation destLocation = new TextureCopyLocation(texture, mipLevel);
-			RequestState(texture, ResourceStates.CopyDest);
-			list.CopyTextureRegion(destLocation, 0, 0, 0, sourceLocation);
-		}
+        RequestState(texture, ResourceStates.CopyDest);
+
+		var srcLocation = new TextureCopyLocation(UploadHelper.Rings[uploadRing], footprints[0]);
+		var destLocation = new TextureCopyLocation(texture, mipLevel);
+		list.CopyTextureRegion(destLocation, 0, 0, 0, srcLocation);
 	}
 
 	public void CopyBuffer(RawBuffer source, RawBuffer dest, nint startOffset = 0, nint destOffset = 0, nint numBytes = -1)
 	{
-		lock (this)
+		RequestState(source, ResourceStates.CopySource);
+		RequestState(dest, ResourceStates.CopyDest);
+
+		if (numBytes == -1)
 		{
-			RequestState(source, ResourceStates.CopySource);
-			RequestState(dest, ResourceStates.CopyDest);
-
-			if (numBytes == -1)
-			{
-				numBytes = Math.Min(source.Capacity * source.Stride, dest.Capacity * dest.Stride);
-			}
-
-			list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
+			numBytes = Math.Min(source.Capacity * source.Stride, dest.Capacity * dest.Stride);
 		}
+
+		list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
 	}
 
-	private static RawBuffer intermediateCopyBuffer = new RawBuffer(8 * 1024 * 1024, 1); // ~8MB
+	static RawBuffer intermediateCopyBuffer = new RawBuffer(8 * 1024 * 1024, 1); // ~8MB
 	public void CopyBuffer(RawBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 	{
-		lock (this)
-		{
-			CopyBuffer(buffer, intermediateCopyBuffer, startOffset, 0, numBytes);
-			CopyBuffer(intermediateCopyBuffer, buffer, 0, destOffset, numBytes);
-		}
+		CopyBuffer(buffer, intermediateCopyBuffer, startOffset, 0, numBytes);
+		CopyBuffer(intermediateCopyBuffer, buffer, 0, destOffset, numBytes);
 	}
 
 	public void CopyTexture(Texture source, Texture dest)
 	{
-		lock (this)
-		{
-			RequestState(source, ResourceStates.CopySource);
-			RequestState(dest, ResourceStates.CopyDest);
+		RequestState(source, ResourceStates.CopySource);
+		RequestState(dest, ResourceStates.CopyDest);
 
-			list.CopyTextureRegion(new TextureCopyLocation(dest.D3DResource), 0, 0, 0, new TextureCopyLocation(source.D3DResource));
-		}
+		list.CopyTextureRegion(new TextureCopyLocation(dest.D3DResource), 0, 0, 0, new TextureCopyLocation(source.D3DResource));
 	}
 
 	public void ResolveTexture(Texture source, Texture dest)
 	{
-		lock (this)
+		// If neither texture is multisampled, perform a regular copy instead.
+		if (source.Samples <= 1 && dest.Samples <= 1)
 		{
-			// If neither texture is multisampled, perform a regular copy instead.
-			if (source.Samples <= 1 && dest.Samples <= 1)
-			{
-				CopyTexture(source, dest);
-				return;
-			}
-
-			Guard.Require(dest.Samples <= 1, "Cannot resolve to a multisampled texture");
-
-			RequestState(source, ResourceStates.ResolveSource);
-			RequestState(dest, ResourceStates.ResolveDest);
-
-			list.ResolveSubresource(dest, 0, source, 0, dest.Format);
+			CopyTexture(source, dest);
+			return;
 		}
+
+		Guard.Require(dest.Samples <= 1, "Cannot resolve to a multisampled texture");
+
+		RequestState(source, ResourceStates.ResolveSource);
+		RequestState(dest, ResourceStates.ResolveDest);
+
+		list.ResolveSubresource(dest, 0, source, 0, dest.Format);
 	}
 
 	public void SetRenderTarget(Texture renderTarget, Texture? depthStencil = null)
 	{
-		lock (this)
-		{
-			RequestState(renderTarget, ResourceStates.RenderTarget);
-			RequestState(depthStencil, ResourceStates.DepthWrite);
+		RequestState(renderTarget, ResourceStates.RenderTarget);
+		RequestState(depthStencil, ResourceStates.DepthWrite);
 
-			list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
-			list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
-			list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
-		}
+		list.OMSetRenderTargets(renderTarget.GetRTV().Handle, depthStencil?.GetDSV().Handle);
+		list.RSSetViewport(0, 0, renderTarget.Width, renderTarget.Height);
+		list.RSSetScissorRect(renderTarget.Width, renderTarget.Height);
 	}
 
 	public void SetRenderTargets(Texture depthStencil, params Texture[] renderTargets)
 	{
-		lock (this)
-		{
-			RequestState(depthStencil, ResourceStates.DepthWrite);
-			renderTargets.ForEach(o => RequestState(o, ResourceStates.RenderTarget));
+		RequestState(depthStencil, ResourceStates.DepthWrite);
+		renderTargets.ForEach(o => RequestState(o, ResourceStates.RenderTarget));
 
-			list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
-			list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
-			list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
-		}
+		list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
+		list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
+		list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
 	}
 
 	public void ClearRenderTarget(Texture target, Color color = default)
 	{
-		lock (this)
-		{
-			RequestState(target, ResourceStates.RenderTarget);
+		RequestState(target, ResourceStates.RenderTarget);
 
-			ClearValue value;
-			if (color == default && target.ClearValue.HasValue)
-			{
-				value = target.ClearValue.Value;
-			}
-			else
-			{
-				value = new ClearValue(target.Format, new Vortice.Mathematics.Color(color.R, color.G, color.B, color.A));
-			}
+        var value = (color == default && target.ClearValue.HasValue) ?
+            target.ClearValue.Value
+            : new ClearValue(target.Format, new Vortice.Mathematics.Color(color.R, color.G, color.B, color.A));
 
-			list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
-		}
+		list.ClearRenderTargetView(target.GetRTV().Handle, value.Color);
 	}
 
 	public void ClearDepth(Texture target)
 	{
-		lock (this)
-		{
-			RequestState(target, ResourceStates.DepthWrite);
+		RequestState(target, ResourceStates.DepthWrite);
 
-            var depth = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Depth : 0;
-            var stencil = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Stencil : (byte)0;
+        var depth = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Depth : 0;
+        var stencil = target.ClearValue.HasValue ? target.ClearValue.Value.DepthStencil.Stencil : (byte)0;
 
-			list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, depth, stencil);
-		}
+		list.ClearDepthStencilView(target.GetDSV().Handle, ClearFlags.Depth, depth, stencil);
 	}
 
 	public void GenerateMips(Texture texture)
 	{
-		lock (this)
+		if (texture.MipmapCount <= 1)
 		{
-			if (texture.MipmapCount <= 1)
+			return;
+		}
+
+		SetPipelineState(mipGenPSO);
+
+		for (int i = 1; i < texture.MipmapCount; i++)
+		{
+			uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
+			uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
+
+			unsafe
 			{
-				return;
+				Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
+				SetPipelineConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
 			}
-			else
-			{
-				SetPipelineState(mipGenPSO);
 
-				for (int i = 1; i < texture.MipmapCount; i++)
-				{
-					uint dstWidth = (uint)Math.Max(texture.Width >> i, 1);
-					uint dstHeight = (uint)Math.Max(texture.Height >> i, 1);
+			RequestState(texture, ResourceStates.AllShaderResource);
 
-					unsafe
-					{
-						Vector2 texelSize = new(1.0f / dstWidth, 1.0f / dstHeight);
-						SetPipelineConstants(0, 0, *(int*)&texelSize.X, *(int*)&texelSize.Y);
-					}
-
-					RequestState(texture, ResourceStates.AllShaderResource);
-
-					list.SetComputeRootDescriptorTable(mipGenPSO.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
-					list.SetComputeRootDescriptorTable(mipGenPSO.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
+			list.SetComputeRootDescriptorTable(mipGenPSO.tRegisterMapping[new BindPoint(0, 0)], texture.GetSRV(i - 1).Handle);
+			list.SetComputeRootDescriptorTable(mipGenPSO.uRegisterMapping[new BindPoint(0, 0)], texture.GetUAV(i).Handle);
 				
-					Dispatch((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
-					BarrierUAV(texture);
-				}
-			}
+			Dispatch((int)Math.Max(dstWidth / 8, 1), (int)Math.Max(dstHeight / 8, 1));
+			BarrierUAV(texture);
 		}
 	}
 
 	public void RequestState(Resource? resource, ResourceStates state)
 	{
-		lock (this)
+		if (resource is null)
 		{
-			if (resource is null)
-			{
-				return;
-			}
+			return;
+		}
 
-			if ((resource.State & state) == 0)
-			{
-				list.ResourceBarrierTransition(resource, resource.State, state);
-				resource.State = state;
-			}
+		if ((resource.State & state) == 0)
+		{
+			list.ResourceBarrierTransition(resource, resource.State, state);
+			resource.State = state;
 		}
 	}
 
 	public void BeginEvent(string name)
 	{
-		lock (this)
-		{
-			list.BeginEvent(name);
-		}
+	    list.BeginEvent(name);
 	}
 
 	public void EndEvent()
 	{
-		lock (this)
-		{
-			list.EndEvent();
-		}
+	    list.EndEvent();
 	}
 
 	public void Open()
 	{
-		lock (this)
+		commandAllocators[D3DContext.FrameIndex].Reset();
+		list.Reset(commandAllocators[D3DContext.FrameIndex]);
+
+		// Setup common state.
+		list.SetDescriptorHeaps(1, new[]
 		{
-			commandAllocators[D3DContext.FrameIndex].Reset();
-			list.Reset(commandAllocators[D3DContext.FrameIndex]);
+			ShaderResourceView.Heap.handle,
+		});
 
-			// Setup common state.
-			list.SetDescriptorHeaps(1, new[]
-			{
-				ShaderResourceView.Heap.handle,
-			});
-
-			IsOpen = true;
-		}
+		IsOpen = true;
 	}
 
 	public void Close()
 	{
-		lock (this)
-		{
-			list.Close();
-			CurrentPSO = null;
+		list.Close();
+		CurrentPSO = null;
 
-			IsOpen = false;
-		}
+		IsOpen = false;
 	}
 
 	public void Execute()
 	{
 		Guard.Require(!IsOpen, "Cannot execute already-open command list.");
 
-		lock (this)
-		{
-			// Execute D3D command list.
-			Guard.NotNull(D3DContext.GraphicsQueue).ExecuteCommandList(list);
-		}
+		// Execute D3D command list.
+		Guard.NotNull(D3DContext.GraphicsQueue).ExecuteCommandList(list);
 	}
 }

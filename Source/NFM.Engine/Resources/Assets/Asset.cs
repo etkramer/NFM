@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using NFM.Threading;
 
 namespace NFM.Resources;
 
@@ -36,12 +35,9 @@ public abstract class Asset
 	/// </summary>
 	public static async Task<T?> LoadAsync<T>(string path) where T : GameResource
 	{
-		if (Assets.TryGetValue(path, out Asset? foundAsset))
+		if (Assets.TryGetValue(path, out Asset? foundAsset) && foundAsset is Asset<T> asset)
 		{
-			if (foundAsset is Asset<T> asset)
-			{
-				return await asset.GetAsync();
-			}
+		    return await asset.GetAsync();
 		}
 
 		return null;
@@ -50,13 +46,13 @@ public abstract class Asset
 
 public sealed class Asset<T> : Asset where T : GameResource
 {
-	private object loadingLock = new();
-	private Task<T>? loadingTask;
+    public bool IsLoaded => cache is not null;
+    public bool IsFullyLoaded => cache is not null && cache.IsFullyLoaded;
 
-	private readonly ResourceLoader<T> loader;
-	private T? cache;
+	readonly ResourceLoader<T> loader;
 
-	public bool IsLoaded => cache is not null;
+    Task<T>? loadingTask;
+	T? cache;
 
 	public Asset(string path, MountPoint mount, ResourceLoader<T> loader) : base(mount.MakeFullPath(path))
 	{
@@ -65,31 +61,28 @@ public sealed class Asset<T> : Asset where T : GameResource
 
 	public Task<T> GetAsync()
 	{
-		lock (loadingLock)
+		// Don't start a new task if we've already started (or finished) loading it.
+		if (loadingTask is null)
 		{
-			// Don't start a new task if we've already started (or finished) loading it.
-			if (loadingTask is null)
+			// Resource is not loaded, so we need to load it.
+			if (cache is null)
 			{
-				// Resource is not loaded, so we need to load it.
-				if (cache is null)
+				loadingTask = Task.Run(async () =>
 				{
-					loadingTask = Task.Run(async () =>
-					{
-                        // Run loader function
-						cache = await Guard.NotNull(loader).Load();
-                        cache.Source = this;
+                    // Run loader function
+					cache = await Guard.NotNull(loader).Load();
+                    cache.Source = this;
 
-                        // Schedule upload to occur on the main thread
-                        await Dispatcher.InvokeAsync(cache.EnsureFullyLoaded);
+                    // Schedule upload to occur on the main thread
+                    await Dispatcher.InvokeAsync(cache.EnsureFullyLoaded);
 
-						return cache;
-					});
-				}
-				// Resource is already loaded, so we can just return it.
-				else
-				{
-					loadingTask = Task.FromResult(cache);
-				}
+					return cache;
+				});
+			}
+			// Resource is already loaded, so we can just return it.
+			else
+			{
+				loadingTask = Task.FromResult(cache);
 			}
 		}
 

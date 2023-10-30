@@ -19,7 +19,7 @@ public static class Dispatcher
     {
         lock (dispatcherQueue)
         {
-            TaskCompletionSource completionSource = new();
+            var completionSource = new TaskCompletionSource();
             dispatcherQueue.Enqueue(() =>
             {
                 action.Invoke();

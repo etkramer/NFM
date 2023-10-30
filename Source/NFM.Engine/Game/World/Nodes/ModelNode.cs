@@ -14,10 +14,8 @@ public partial class ModelNode : Node
 	[Inspect]
 	public bool IsVisible { get; set; } = true;
 
-	// Transforms
 	internal BufferAllocation<GPUTransform> TransformHandle;
 
-	// Mesh data
 	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
 	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = new();
 	

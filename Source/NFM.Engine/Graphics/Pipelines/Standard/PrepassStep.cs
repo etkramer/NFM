@@ -60,7 +60,7 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 		// Output to vis/depth buffers
 		list.SetRenderTarget(RP.VisBuffer, RP.DepthBuffer);
 
-		list.SeIndexBuffer(RenderMesh.IndexBuffer);
+		list.SetIndexBuffer(RenderMesh.IndexBuffer);
 
 		// Indirect dispatch
 		list.BarrierUAV(commandBuffer);
