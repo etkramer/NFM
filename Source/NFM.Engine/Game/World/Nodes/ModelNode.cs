@@ -80,17 +80,27 @@ public partial class ModelNode : Node
 			return;
 		}
 
-		// (Re)build the array of instance handles
-		foreach (var mesh in Model.Meshes)
-		{
-            Guard.NotNull(mesh.RenderData);
+        // (Re)build the array of instance handles
+        foreach (var group in Model.MeshGroups)
+        {
+            // Don't show hidden mesh groups. TODO: override on a per-ModelNode basis.
+            if (!group.IsVisible)
+            {
+                continue;
+            }
 
-			if (mesh.IsVisible)
-			{
-                Guard.NotNull(mesh.Material);
+            foreach (var mesh in group.Meshes)
+            {
+                // Only show LOD0 for now.
+                if ((mesh.LODMask & LODLevel.LOD0) == 0)
+                {
+                    continue;
+                }
+
+                Guard.NotNull(mesh.RenderData);
 
 				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
-				MaterialInstances[mesh] = new RenderMaterial(mesh.Material);
+				MaterialInstances[mesh] = new RenderMaterial(Guard.NotNull(mesh.Material));
 
 				// Build instance data
 				GPUInstance instanceData = new()
@@ -102,8 +112,8 @@ public partial class ModelNode : Node
 
 				// Upload instance to buffer
 				list.UploadBuffer(InstanceHandles[mesh], instanceData);
-			}
-		}
+            }
+        }
 	}
 
 	public override void OnSelect()
@@ -125,14 +135,13 @@ public partial class ModelNode : Node
             return;
         }
 
-		Box3D modelBounds = Box3D.Zero;
-		foreach (var mesh in Model.Meshes)
-		{
-			if (mesh.IsVisible)
-			{
-				modelBounds += mesh.Bounds;
-			}
-		}
+        Box3D modelBounds = Model.Meshes
+            .Select(mesh => mesh.Bounds)
+            .Aggregate((a, c) => a + c);
+
+        // TODO: Use final transform matrix instead.
+        modelBounds.Min *= Scale;
+        modelBounds.Max *= Scale;
 
 		context.DrawBox(modelBounds, Color.White, Color.Invisible);
 	}

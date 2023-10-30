@@ -113,14 +113,13 @@ public class GLTFLoader : ResourceLoader<Model>
 				// Create mesh
                 var mesh = new Mesh()
                 {
-                    Name = sourceMesh.Name ?? "unnamed",
                     Vertices = vertices,
                     Indices = sourceMesh.GetUnsignedIndices(),
                     Material = materials[sourceMesh.MaterialIndex]
                 };
 
 				// Add to new mesh (body) group
-				model.AddMesh(mesh);
+				model.AddMeshGroup(mesh, sourceMesh.Name ?? "unnamed");
 			}
 		});
 

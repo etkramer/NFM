@@ -1,5 +1,4 @@
 ﻿using NFM.Graphics;
-using NFM.Threading;
 
 namespace NFM.Resources;
 
@@ -8,12 +7,20 @@ namespace NFM.Resources;
 /// </summary>
 public sealed class Model : GameResource
 {
-	public IReadOnlyCollection<Mesh> Meshes => meshes;
-	private List<Mesh> meshes = new();
+    /// <summary>
+    /// Enumerates all meshes owned by the model.
+    /// </summary>
+	public IEnumerable<Mesh> Meshes => MeshGroups.SelectMany(group => group.Meshes);
+
+    /// <summary>
+    /// Collection of all mesh groups in the model.
+    /// </summary>
+    public IReadOnlyCollection<MeshGroup> MeshGroups => meshGroups;
+    private readonly List<MeshGroup> meshGroups = new();
 
     protected override void PostLoad()
     {
-        foreach (var mesh in meshes)
+        foreach (var mesh in Meshes)
         {
 		    if (mesh.Bounds == Box3D.Infinity)
 		    {
@@ -26,16 +33,16 @@ public sealed class Model : GameResource
         base.PostLoad();
     }
 
-    public bool AddMesh(Mesh mesh)
+    public void AddMeshGroup(Mesh mesh, string groupName) => AddMeshGroup(new MeshGroup()
+    {
+        Name = groupName,
+        Meshes = [mesh]
+    });
+
+    public void AddMeshGroup(MeshGroup meshGroup)
 	{
         Guard.Require(!IsFullyLoaded, "Cannot modify an already-loaded model");
-
-		if (mesh is not null)
-		{
-			meshes.Add(mesh);
-		}
-
-		return true;
+		meshGroups.Add(meshGroup);
 	}
 
 	public override void Dispose()
@@ -49,23 +56,28 @@ public sealed class Model : GameResource
 	}
 }
 
-public sealed class Mesh : IDisposable
+public sealed class MeshGroup : IDisposable
 {
 	/// <summary>
-	/// The name of this mesh, displayed when choosing mesh groups.
+	/// The name of this group, displayed in the editor.
 	/// </summary>
 	public required string Name { get; init; }
 
+    /// <summary>
+    /// Collection of meshes to include in this group
+    /// </summary>
+    public required Mesh[] Meshes { get; init; }
+
 	/// <summary>
-	/// Should this mesh be visible by default?
+	/// Should this group be visible by default?
 	/// </summary>
 	public bool IsVisible { get; init; } = true;
 
-    /// <summary>
-    /// This mesh's bounding box as displayed in the editor.
-    /// </summary>
-	public Box3D Bounds { get; set; } = Box3D.Infinity;
+    public void Dispose() => Meshes.ForEach(o => o.Dispose());
+}
 
+public sealed class Mesh : IDisposable
+{
     /// <summary>
     /// Triangle indices to be used by the renderer.
     /// </summary>
@@ -80,6 +92,16 @@ public sealed class Mesh : IDisposable
     /// Material to be used by default (can be overriden in editor).
     /// </summary>
 	public required Material? Material { get; init; } = null;
+
+    /// <summary>
+    /// Mask of LOD levels at which this mesh should be visible.
+    /// </summary>
+    public LODLevel LODMask { get; init; } = LODLevel.LOD0;
+
+    /// <summary>
+    /// This mesh's bounding box as displayed in the editor.
+    /// </summary>
+	public Box3D Bounds { get; set; } = Box3D.Infinity;
 
 	internal RenderMesh? RenderData = null;
 
@@ -138,6 +160,15 @@ public sealed class Mesh : IDisposable
 
 		Bounds = new Box3D(min, max);
 	}
+}
+
+[Flags]
+public enum LODLevel
+{
+    LOD0 = 1 << 0,
+    LOD1 = 1 << 1,
+    LOD2 = 1 << 2,
+    LOD3 = 1 << 3,
 }
 
 [StructLayout(LayoutKind.Sequential)]
