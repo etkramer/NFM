@@ -13,14 +13,11 @@ public class GLTFPlugin : Plugin
 	{
 		MountPoint mount = MountPoint.Create("User Content", "USER");
 
-		string[] searchPaths = new[]
-		{
-			"../Content/"
-		};
+		string[] searchPaths = ["../Content/"];
 
-		foreach (string searchPath in searchPaths)
+		foreach (var searchPath in searchPaths)
 		{
-			foreach (string path in Directory.GetFiles(searchPath, "*", SearchOption.AllDirectories))
+			foreach (var path in Directory.GetFiles(searchPath, "*", SearchOption.AllDirectories))
 			{
 				string fullPath = Path.GetFullPath(path);
 				string extension = Path.GetExtension(fullPath);
@@ -37,21 +34,25 @@ public class GLTFPlugin : Plugin
 		LoadShaders(mount);
 	}
 
-	private void LoadShaders(MountPoint mount)
+	void LoadShaders(MountPoint mount)
 	{
 		// Create Opaque shader
-		Shader opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl"));
-		opaque.SetBlendMode(BlendMode.Opaque);
-		opaque.AddTexture("BaseColor", Texture2D.Purple);
-		opaque.AddTexture("Normal", Texture2D.Normal);
-		opaque.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+		var opaque = new Shader(Embed.GetString("Shaders/Opaque.hlsl"))
+        {
+            BlendMode = BlendMode.Opaque
+        };
+		opaque.AddTextureParam("BaseColor", Texture2D.Purple);
+		opaque.AddTextureParam("Normal", Texture2D.Normal);
+		opaque.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 		// Create Transparent shader
-		Shader transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl"));
-		transparent.SetBlendMode(BlendMode.Transparent);
-		transparent.AddTexture("BaseColor", Texture2D.Purple);
-		transparent.AddTexture("Normal", Texture2D.Normal);
-		transparent.AddTexture("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+		var transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl"))
+        {
+            BlendMode = BlendMode.Transparent
+        };
+		transparent.AddTextureParam("BaseColor", Texture2D.Purple);
+		transparent.AddTextureParam("Normal", Texture2D.Normal);
+		transparent.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
 
 		//...and submit both.
 		Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, new CachedResourceLoader<Shader>(opaque)));

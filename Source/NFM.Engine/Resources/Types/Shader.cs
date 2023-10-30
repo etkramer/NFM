@@ -16,38 +16,33 @@ public struct ShaderParameter
 
 public sealed class Shader : GameResource
 {
-	public string ShaderSource { get; init; }
+	public string ShaderSource { get; }
 
 	public List<ShaderParameter> Parameters { get; } = new();
-	public BlendMode BlendMode { get; set; } = BlendMode.Opaque;
+	public required BlendMode BlendMode { get; init; } = BlendMode.Opaque;
 
 	public Shader(string source)
 	{
 		ShaderSource = source;
 	}
 
-	public void AddColor(string param, Color defaultValue = default)
+	public void AddColorParam(string paramName, Color defaultValue = default)
 	{
 		Parameters.Add(new ShaderParameter()
 		{
-			Name = param,
+			Name = paramName,
 			Value = defaultValue,
 			Type = typeof(Color)
 		});
 	}
 
-	public void AddTexture(string param, Texture2D? defaultValue = default)
+	public void AddTextureParam(string paramName, Texture2D? defaultValue = default)
 	{
 		Parameters.Add(new ShaderParameter()
 		{
-			Name = param,
+			Name = paramName,
 			Value = defaultValue,
 			Type = typeof(Texture2D)
 		});
-	}
-
-	public void SetBlendMode(BlendMode mode)
-	{
-		BlendMode = mode;
 	}
 }
