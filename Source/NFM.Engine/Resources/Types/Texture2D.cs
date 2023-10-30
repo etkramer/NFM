@@ -54,12 +54,14 @@ public enum TextureFormat
 
 public sealed class Texture2D : GameResource
 {
-	public Texture D3DResource { get; private set; }
+	public Texture? D3DResource { get; private set; }
 
 	public int Width { get; }
 	public int Height { get; }
-	public byte MipCount => D3DResource.MipmapCount;
+	public byte MipCount { get; }
 	public TextureFormat Format { get; }
+
+    private byte[]?[] pixelData;
 
 	/// <summary>
 	/// Creates a new Texture2D object.
@@ -69,9 +71,17 @@ public sealed class Texture2D : GameResource
 		Width = width;
 		Height = height;
 		Format = format;
+        MipCount = mipCount;
 
-		// Select the format to use GPU-side.
-		DXGIFormat resourceFormat = format switch
+        pixelData = new byte[mipCount][];
+	}
+
+    protected override void PostLoad()
+    {
+        Guard.Require(pixelData[0] != null, "Texture must have at least mip 0 defined");
+
+        // Select the format to use GPU-side.
+		var resourceFormat = Format switch
 		{
 			TextureFormat.RGB8 => DXGIFormat.R8G8B8A8_UNorm,
 			TextureFormat.RGBA8 => DXGIFormat.R8G8B8A8_UNorm,
@@ -85,8 +95,27 @@ public sealed class Texture2D : GameResource
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
-		D3DResource = new Texture(Width, Height, mipCount, resourceFormat);
-	}
+        // Create GPU resource and upload mip0.
+        D3DResource = new Texture(Width, Height, MipCount, resourceFormat);
+		Renderer.DefaultCommandList.UploadTexture(D3DResource, pixelData[0], 0);
+
+        // We should generate new mipmaps if the user hasn't defined all of them.
+        if (pixelData.Any(o => o == null) && Format == TextureFormat.RGBA8 || Format == TextureFormat.RGB8)
+        {
+            // Generate the rest of the mips.
+            Renderer.DefaultCommandList.GenerateMips(D3DResource);
+        }
+        else
+        {
+            // Upload the rest of the mips.
+            for (int i = 1; i < pixelData.Length; i++)
+            {
+                Renderer.DefaultCommandList.UploadTexture(D3DResource, pixelData[i], i);
+            }
+        }
+
+        base.PostLoad();
+    }
 
 	/// <summary>
 	/// Loads raw image data into the texture.
@@ -113,19 +142,13 @@ public sealed class Texture2D : GameResource
 			data = convertedData.AsSpan();
 		}
 
-		// Create resource and upload texture data.
-		Renderer.DefaultCommandList.UploadTexture(D3DResource, data, mipLevel);
-
-		// Generate mipmaps if requested.
-		if (generateMips && Format == TextureFormat.RGBA8 || Format == TextureFormat.RGB8)
-		{
-			Renderer.DefaultCommandList.GenerateMips(D3DResource);
-		}
+        // Store pixel data.
+        pixelData[mipLevel] = data.ToArray();
 	}
 
 	public override void Dispose()
 	{
-		D3DResource.Dispose();
+		D3DResource?.Dispose();
 	}
 
 	/// <summary>

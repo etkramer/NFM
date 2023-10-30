@@ -10,7 +10,7 @@ public abstract class GameResource : IDisposable
     public bool IsFullyLoaded { get; internal set; } = false;
 
     /// <summary>
-    /// Called by the asset system when the resource has finished loading, guaranteed to run on the main thread.
+    /// Called by the engine when the resource is first used, guaranteed to run on the main thread.
     /// </summary>
     protected virtual void PostLoad() { }
 

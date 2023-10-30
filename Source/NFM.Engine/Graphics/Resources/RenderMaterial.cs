@@ -111,6 +111,12 @@ class RenderMaterial : IDisposable
 				value = overrideParam.Value;
 			}
 
+            // Before we do anything, make sure the value is loaded (if applicable).
+            if (value is GameResource resource)
+            {
+                resource.EnsureFullyLoaded();
+            }
+
 			if (param.Type == typeof(bool) && value is bool boolValue)
 			{
 				// Interpret bools as integers due to size mismatch (8-bit in C#, 32-bit in HLSL)
@@ -118,6 +124,7 @@ class RenderMaterial : IDisposable
 			}
 			else if (param.Type == typeof(Texture2D) && value is Texture2D textureValue)
 			{
+                Guard.NotNull(textureValue.D3DResource);
 				materialData.AddRange(StructureToByteArray(typeof(int), textureValue.D3DResource.GetSRV().GetDescriptorIndex()));
 			}
 			else
