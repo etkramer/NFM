@@ -40,7 +40,7 @@ public class GLTFLoader : ResourceLoader<Model>
 			using (StbiImage sourceImage = Stbi.LoadFromMemory(sourceTexture.CompressedData.AsSpan(), 4))
 			{
 				Texture2D texture = new Texture2D(sourceImage.Width, sourceImage.Height, TextureFormat.RGBA8, 4);
-				texture.SetPixelData(ToReadWriteSpan(sourceImage.Data), 0, true);
+				texture.SetPixelData(sourceImage.Data, 0, true);
 
 				textures[i] = texture;
 			}
@@ -137,14 +137,6 @@ public class GLTFLoader : ResourceLoader<Model>
 		foreach (var node in baseNode.Children)
 		{
 			VisitMeshNodes(node, baseTransform, visit);
-		}
-	}
-
-	private unsafe Span<T> ToReadWriteSpan<T>(ReadOnlySpan<T> source) where T : unmanaged
-	{
-		fixed (T* dataPtr = source)
-		{
-			return new Span<T>(dataPtr, source.Length);
 		}
 	}
 }
