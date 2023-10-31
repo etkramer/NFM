@@ -26,16 +26,20 @@ public static class Engine
 		Renderer.Init();
 		PluginSystem.Init();
 
-		// Kick off model loading early.
-		_ = Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
-
-		// Create default nodes with new project.
 		Project.OnProjectCreated += async () =>
 		{
-			// Create example model
-			var model = new ModelNode(null);
-			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
-			model.Scale = new Vector3(0.01f, 0.01f, 0.01f);
+            // Populate scene with nodes for testing...
+
+            var model = new ModelNode(null);
+			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
+            model.Scale = new Vector3(0.5f);
+
+            await Task.Delay(1000);
+			
+			var model2 = new ModelNode(null);
+			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
+			model2.Scale = new Vector3(0.001f);
+            model2.Position = new Vector3(1, -1.5f, 1);
 		};
 	}
 
