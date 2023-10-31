@@ -135,13 +135,14 @@ public partial class ModelNode : Node
             return;
         }
 
+        // Combine mesh bounds to represent model.
         Box3D modelBounds = Model.Meshes
             .Select(mesh => mesh.Bounds)
             .Aggregate((a, c) => a + c);
 
-        // TODO: Use final transform matrix instead.
-        modelBounds.Min *= Scale;
-        modelBounds.Max *= Scale;
+        // Bring bounds into world space.
+        modelBounds.Min = (new Vector4(modelBounds.Min, 1) * WorldTransform).Xyz;
+        modelBounds.Max = (new Vector4(modelBounds.Max, 1) * WorldTransform).Xyz;
 
 		context.DrawBox(modelBounds, Color.White, Color.Invisible);
 	}
