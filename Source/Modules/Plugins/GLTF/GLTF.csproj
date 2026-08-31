@@ -4,7 +4,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<OutputPath>$(SolutionDir)..\Runtime\Plugins\$(MSBuildProjectName)\</OutputPath>
+		<OutputPath>$(RuntimeDir)Plugins\$(MSBuildProjectName)\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,6 +29,6 @@
 		<PackageReference Include="StbiSharp" Version="1.2.1" />
 	</ItemGroup>
 
-	<Import Project="$(SolutionDir)..\Runtime\Binaries\Plugin.targets" />
+	<Import Project="$(RuntimeDir)Binaries\Plugin.targets" />
 
 </Project>

@@ -1,0 +1,5 @@
+﻿<Project>
+	<PropertyGroup>
+		<RuntimeDir>$(MSBuildThisFileDirectory)Runtime\</RuntimeDir>
+	</PropertyGroup>
+</Project>

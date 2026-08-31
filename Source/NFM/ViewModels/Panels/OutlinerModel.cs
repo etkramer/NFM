@@ -15,6 +15,9 @@ public class OutlinerModel : IActivatableViewModel
 
 	public IEnumerable<Node> SelectedNodes { get; }
 
+	// Guards against the tree and Selection echoing changes back at each other.
+	private bool isSyncing;
+
 	public OutlinerModel()
 	{
 		NodesSource = Scene.Main.RootNodes;
@@ -22,22 +25,62 @@ public class OutlinerModel : IActivatableViewModel
 		SelectedNodes = new ObservableCollection<Node>();
 		(SelectedNodes as INotifyCollectionChanged).CollectionChanged += (o, e) =>
 		{
-			if (e.Action == NotifyCollectionChangedAction.Add)
+			if (isSyncing)
 			{
-				Selection.Select(e.NewItems.Cast<ISelectable>());
+				return;
 			}
-			else if (e.Action == NotifyCollectionChangedAction.Remove)
+
+			isSyncing = true;
+
+			try
 			{
-				Selection.Deselect(e.OldItems.Cast<ISelectable>());
+				if (e.Action == NotifyCollectionChangedAction.Add)
+				{
+					Selection.Select(e.NewItems.Cast<ISelectable>());
+				}
+				else if (e.Action == NotifyCollectionChangedAction.Remove)
+				{
+					Selection.Deselect(e.OldItems.Cast<ISelectable>());
+				}
+				else if (e.Action == NotifyCollectionChangedAction.Reset)
+				{
+					Selection.DeselectAll();
+				}
+				else if (e.Action == NotifyCollectionChangedAction.Replace)
+				{
+					Selection.Deselect(e.OldItems.Cast<ISelectable>());
+					Selection.Select(e.NewItems.Cast<ISelectable>());
+				}
 			}
-			else if (e.Action == NotifyCollectionChangedAction.Reset)
+			finally
 			{
-				Selection.DeselectAll();
+				isSyncing = false;
 			}
-			else if (e.Action == NotifyCollectionChangedAction.Replace)
+		};
+
+		// Mirror selections made elsewhere (i.e. the viewport) back into the tree.
+		(Selection.Selected as INotifyCollectionChanged).CollectionChanged += (o, e) =>
+		{
+			if (isSyncing)
 			{
-				Selection.Deselect(e.OldItems.Cast<ISelectable>());
-				Selection.Select(e.NewItems.Cast<ISelectable>());
+				return;
+			}
+
+			isSyncing = true;
+
+			try
+			{
+				IList<Node> selectedNodes = SelectedNodes as IList<Node>;
+				selectedNodes.Clear();
+
+				foreach (Node node in Selection.Selected.OfType<Node>())
+				{
+					selectedNodes.Add(node);
+				}
+			}
+			finally
+			{
+				isSyncing = false;
 			}
 		};
 

@@ -5,7 +5,7 @@
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<PlatformTarget>x64</PlatformTarget>
-		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
+		<OutputPath>$(RuntimeDir)Binaries\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<!-- Avalonia 12 defaults to compiled bindings, which need x:DataType on every view -->
 		<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>

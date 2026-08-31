@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using NFM.GPU;
 using NFM.Graphics;
+using NFM.World;
 using ReactiveUI.Reactive;
 
 namespace NFM;
@@ -23,9 +25,15 @@ public partial class ViewportPanel : ReactiveToolPanel<ViewportModel>
 
 public partial class ViewportHost : Panel
 {
+	// How far the pointer may travel before a click counts as a drag instead.
+	private const double ClickThreshold = 3;
+
 	public Swapchain Swapchain { get; private set; }
 	private Viewport viewport;
-	private HwndControl nativeControl;
+	private readonly HwndControl nativeControl;
+
+	private Point? pressOrigin;
+	private ModelNode pressedNode;
 
 	public ViewportHost()
 	{
@@ -64,6 +72,13 @@ public partial class ViewportHost : Panel
 		PointerPoint point = e.GetCurrentPoint(null);
 		Input.UpdateMouse(point);
 
+		// Feed the viewport-local position to the renderer, which samples the visbuffer there every frame.
+		if (viewport is not null)
+		{
+			Point local = e.GetPosition(this);
+			viewport.CursorPosition = new Vector2i((int)local.X, (int)local.Y);
+		}
+
 		// Capture when held.
 		if (props.IsLeftButtonPressed || props.IsRightButtonPressed)
 		{
@@ -87,14 +102,76 @@ public partial class ViewportHost : Panel
 		// It wouldn't happen automatically with right click, which would mean no keyboard input.
 		Focus();
 
+		PointerPointProperties props = e.GetCurrentPoint(this).Properties;
+		if (props.IsLeftButtonPressed && !props.IsRightButtonPressed)
+		{
+			pressOrigin = e.GetPosition(this);
+
+			// What the press landed on, resolved before the pointer has had a chance to move off it.
+			pressedNode = viewport?.HoveredNode;
+		}
+		else
+		{
+			pressOrigin = null;
+		}
+
 		UpdatePointer(e);
 		base.OnPointerPressed(e);
 	}
 
 	protected override void OnPointerReleased(PointerReleasedEventArgs e)
 	{
+		if (pressOrigin is Point origin && e.InitialPressMouseButton == MouseButton.Left)
+		{
+			Point position = e.GetPosition(this);
+			bool isDrag = Math.Abs(position.X - origin.X) > ClickThreshold || Math.Abs(position.Y - origin.Y) > ClickThreshold;
+
+			// Alt+Shift+LMB belongs to the camera pan gesture.
+			bool isPanning = e.KeyModifiers.HasFlag(KeyModifiers.Alt) && e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+			if (!isDrag && !isPanning)
+			{
+				Select(pressedNode, e.KeyModifiers.HasFlag(KeyModifiers.Control));
+			}
+		}
+
+		pressOrigin = null;
+		pressedNode = null;
+
 		UpdatePointer(e);
 		base.OnPointerReleased(e);
+	}
+
+	protected override void OnPointerExited(PointerEventArgs e)
+	{
+		if (viewport is not null)
+		{
+			viewport.CursorPosition = null;
+		}
+
+		base.OnPointerExited(e);
+	}
+
+	private static void Select(ModelNode node, bool additive)
+	{
+		if (!additive)
+		{
+			Selection.DeselectAll();
+		}
+
+		if (node is null)
+		{
+			return;
+		}
+
+		if (Selection.Selected.Contains(node))
+		{
+			Selection.Deselect(node);
+		}
+		else
+		{
+			Selection.Select(node);
+		}
 	}
 
 	protected override void OnKeyDown(KeyEventArgs e)

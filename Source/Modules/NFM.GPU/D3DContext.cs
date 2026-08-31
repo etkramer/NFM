@@ -128,6 +128,11 @@ public static class D3DContext
 		return false;
 	}
 
+	/// <summary>
+	/// The most recent frame whose GPU work has fully retired.
+	/// </summary>
+	public static ulong CompletedFrame => frameFence?.CompletedValue ?? 0;
+
 	public static bool WaitFrame()
 	{
         Guard.NotNull(GraphicsQueue);

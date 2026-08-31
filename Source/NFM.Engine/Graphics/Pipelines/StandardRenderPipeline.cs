@@ -17,6 +17,7 @@ class StandardRenderPipeline : RenderPipeline<StandardRenderPipeline>
 	protected override void Init(Vector2i size)
 	{
 		AddStep<PrepassStep>();
+		AddStep<PickingStep>();
 		AddStep<MaterialStep>();
 		AddStep<LightingStep>();
 	

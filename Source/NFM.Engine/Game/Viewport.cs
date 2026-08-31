@@ -8,7 +8,7 @@ namespace NFM.Graphics;
 /// <summary>
 /// Contains the game logic for a UI viewport
 /// </summary>
-public unsafe class Viewport : IDisposable
+public class Viewport : IDisposable
 {
 	public static List<Viewport> All { get; } = new();
 
@@ -38,10 +38,25 @@ public unsafe class Viewport : IDisposable
 		All.Add(this);
 	}
 
+	/// <summary>
+	/// Cursor position in viewport pixels, or null when the cursor is elsewhere.
+	/// </summary>
+	public Vector2i? CursorPosition { get; set; }
+
+	/// <summary>
+	/// The node under the cursor, or null for empty space.
+	/// Trails the cursor by a frame or two, since it's resolved by reading back the visbuffer.
+	/// </summary>
+	public ModelNode? HoveredNode { get; private set; }
+
 	private Vector3 flyVelocity = Vector3.Zero;
 
 	public void OnTick(double deltaTime)
 	{
+		// Hand this frame's cursor to the renderer, and pick up the result of the last one.
+		Camera.PickCoords = CursorPosition;
+		HoveredNode = Camera.HoveredInstance < 0 ? null : Scene.GetInstanceOwner(Camera.HoveredInstance);
+
 		const float lookSens = 0.15f;
 		const float dampingCoefficient = 15;
 		const float acceleration = 30;

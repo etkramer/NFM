@@ -54,7 +54,7 @@ public partial class ModelNode : Node
 			MaterialInstances[mesh].Dispose();
 
 			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
-			InstanceHandles[mesh].Dispose();
+			Scene.FreeInstance(InstanceHandles[mesh]);
 		}
 
 		base.Dispose();
@@ -68,7 +68,7 @@ public partial class ModelNode : Node
 			// Zero out instance data
 			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
 
-			InstanceHandles[mesh].Dispose();
+			Scene.FreeInstance(InstanceHandles[mesh]);
 			MaterialInstances[mesh].Dispose();
 		}
 
@@ -99,7 +99,7 @@ public partial class ModelNode : Node
 
                 Guard.NotNull(mesh.RenderData);
 
-				InstanceHandles[mesh] = Scene.InstanceBuffer.Allocate(1, true);
+				InstanceHandles[mesh] = Scene.AllocateInstance(this);
 				MaterialInstances[mesh] = new RenderMaterial(Guard.NotNull(mesh.Material));
 
 				// Build instance data

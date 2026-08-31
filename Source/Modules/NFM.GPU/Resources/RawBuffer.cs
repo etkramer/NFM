@@ -3,7 +3,7 @@ using Vortice.DXGI;
 
 namespace NFM.GPU;
 
-public unsafe partial class RawBuffer : Resource, IDisposable
+public partial class RawBuffer : Resource, IDisposable
 {
 	public const int ConstantAlignment = D3D12.ConstantBufferDataPlacementAlignment;
 	public const int CounterAlignment = D3D12.UnorderedAccessViewCounterPlacementAlignment;

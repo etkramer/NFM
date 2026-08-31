@@ -350,6 +350,12 @@ public class CommandList : IDisposable
 		list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)startOffset, (ulong)numBytes);
 	}
 
+	public void CopyToReadback(RawBuffer source, ReadbackBuffer dest, nint numBytes, nint sourceOffset = 0, nint destOffset = 0)
+	{
+		RequestState(source, ResourceStates.CopySource);
+		list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)sourceOffset, (ulong)numBytes);
+	}
+
 	static RawBuffer intermediateCopyBuffer = new RawBuffer(8 * 1024 * 1024, 1); // ~8MB
 	public void CopyBuffer(RawBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 	{
