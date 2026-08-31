@@ -11,7 +11,7 @@ static class Renderer
 	/// </summary>
 	public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
-	private static List<SceneStep> sceneSteps= new();
+	private static readonly List<SceneStep> sceneSteps = new();
 
 	public static void AddStep(SceneStep step)
 	{
