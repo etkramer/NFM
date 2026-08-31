@@ -24,8 +24,5 @@ public static class Log
         Console.ForegroundColor = color;
         Console.WriteLine(line);
         Console.ResetColor();
-
-        // Routes to OutputDebugString, so messages reach the VS output window with no console attached.
-        System.Diagnostics.Trace.WriteLine(line);
     }
 }

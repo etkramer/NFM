@@ -139,7 +139,12 @@ public unsafe class HwndControl : NativeControlHost
 				}
 			}
 
-			RequestFrame();
+			// Once the app has faulted, stop self-invalidating - the error dialog needs the message queue.
+			if (!FrontendHelpers.HasFaulted)
+			{
+				RequestFrame();
+			}
+
 			return new LRESULT(0);
 		}
 

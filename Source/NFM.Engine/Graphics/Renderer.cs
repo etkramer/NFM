@@ -1,4 +1,4 @@
-﻿using NFM.GPU;
+using NFM.GPU;
 using NFM.World;
 using Vortice.Direct3D12;
 
@@ -11,12 +11,15 @@ static class Renderer
 	/// </summary>
 	public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
-	private static readonly List<SceneStep> sceneSteps = new();
+	private static readonly List<ScenePass> scenePasses = new();
 
-	public static void AddStep(SceneStep step)
+	// One pipeline per camera, so passes can safely keep per-view history between frames.
+	private static readonly Dictionary<CameraNode, RenderPipeline> pipelines = new();
+
+	public static void AddPass(ScenePass pass)
 	{
-		sceneSteps.Add(step);
-		step.Init();
+		scenePasses.Add(pass);
+		pass.Init();
 	}
 
 	public static void Init()
@@ -25,22 +28,29 @@ static class Renderer
 		DefaultCommandList.Name = "Default List";
 		DefaultCommandList.Open();
 
-		AddStep(new SkinningStep());
+		AddPass(new SkinningStep());
 	}
 
 	public static void RenderFrame()
 	{
-		// Run scene render steps.
+		// Run scene render passes.
 		DefaultCommandList.BeginEvent("Update scenes");
 		foreach (Scene scene in Scene.All)
 		{
-			// Execute per-scene render steps.
-			foreach (var step in sceneSteps)
+			// Flush pending node changes to the GPU.
+			scene.RenderData.Sync(DefaultCommandList);
+
+			ScenePassContext ctx = new()
 			{
-				step.Scene = scene;
-				
-				DefaultCommandList.BeginEvent($"{step.GetType().Name} (scene)");
-				step.Run(DefaultCommandList);
+				List = DefaultCommandList,
+				Scene = scene
+			};
+
+			// Execute per-scene render passes.
+			foreach (var pass in scenePasses)
+			{
+				DefaultCommandList.BeginEvent($"{pass.GetType().Name} (scene)");
+				pass.Run(ctx);
 				DefaultCommandList.EndEvent();
 			}
 		}
@@ -68,17 +78,17 @@ static class Renderer
 		}
 	}
 
-	public static void RenderCamera<T>(CameraNode camera, Swapchain swapchain) where T : RenderPipeline<T>, new()
+	public static void RenderCamera<T>(CameraNode camera, Swapchain swapchain) where T : RenderPipeline, new()
 	{
 		RenderCamera<T>(camera, swapchain.RT, (o) => o.RequestState(swapchain.RT, ResourceStates.Present));
 		swapchain.Present();
 	}
-	
-	public static void RenderCamera<T>(CameraNode camera, Texture texture) where T : RenderPipeline<T>, new() => RenderCamera<T>(camera, texture, null);
-	private static void RenderCamera<T>(CameraNode camera, Texture texture, Action<CommandList>? beforeExecute) where T : RenderPipeline<T>, new()
+
+	public static void RenderCamera<T>(CameraNode camera, Texture texture) where T : RenderPipeline, new() => RenderCamera<T>(camera, texture, null);
+	private static void RenderCamera<T>(CameraNode camera, Texture texture, Action<CommandList>? beforeExecute) where T : RenderPipeline, new()
 	{
-		// Grab an RP instance and open it's command list
-		var rp = RenderPipeline<T>.Get(texture);
+		// Grab this camera's RP and open it's command list
+		var rp = GetPipeline<T>(camera, texture.Size);
 
 		// Execute the render pipeline
 		rp.List.Open();
@@ -102,6 +112,38 @@ static class Renderer
 		rp.List.EndEvent();
 		rp.List.Close();
 		rp.List.Execute();
+	}
+
+	private static T GetPipeline<T>(CameraNode camera, Vector2i size) where T : RenderPipeline, new()
+	{
+		if (pipelines.TryGetValue(camera, out var existing))
+		{
+			if (existing is T match && existing.Size == size)
+			{
+				return match;
+			}
+
+			// Wrong type or stale size - rebuild from scratch.
+			existing.Dispose();
+			pipelines.Remove(camera);
+		}
+
+		T pipeline = new();
+		pipeline.Build(size);
+		pipelines[camera] = pipeline;
+
+		return pipeline;
+	}
+
+	/// <summary>
+	/// Drops the render pipeline belonging to a camera that's going away.
+	/// </summary>
+	public static void ReleasePipeline(CameraNode camera)
+	{
+		if (pipelines.Remove(camera, out var pipeline))
+		{
+			pipeline.Dispose();
+		}
 	}
 
 	public static void Cleanup()

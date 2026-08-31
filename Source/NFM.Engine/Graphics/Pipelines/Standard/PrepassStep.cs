@@ -1,9 +1,8 @@
-﻿using NFM.GPU;
-using NFM.World;
+using NFM.GPU;
 
 namespace NFM.Graphics;
 
-class PrepassStep : CameraStep<StandardRenderPipeline>
+class PrepassStep : ViewPass
 {
 	private static PipelineState? cullPSO;
 	private static PipelineState? visPSO;
@@ -11,7 +10,19 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 	private static RawBuffer? commandBuffer;
 	private static CommandSignature? commandSignature;
 
-	public override void Init()
+	private readonly StandardResources resources;
+
+	public PrepassStep(StandardResources resources)
+	{
+		this.resources = resources;
+	}
+
+	public override void Setup(RenderGraphBuilder builder)
+	{
+		builder.Write(resources.VisBuffer, resources.DepthBuffer);
+	}
+
+	public override void Init(RenderGraph graph)
 	{
 		// Compile indirect compute program.
 		cullPSO ??= new PipelineState()
@@ -34,43 +45,43 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 			.AddDrawIndexedArg()
 			.Compile();
 
-		commandBuffer ??= new RawBuffer(commandSignature.Stride * Scene.MaxInstances, commandSignature.Stride, hasCounter: true);
+		commandBuffer ??= new RawBuffer(commandSignature.Stride * RenderScene.MaxInstances, commandSignature.Stride, hasCounter: true);
 	}
 
-	public override void Run(CommandList list)
+	public override void Run(in ViewPassContext ctx)
 	{
         Guard.NotNull(visPSO);
         Guard.NotNull(commandBuffer);
         Guard.NotNull(commandSignature);
-        Guard.NotNull(RP?.VisBuffer);
-        Guard.NotNull(RP?.DepthBuffer);
-        Guard.NotNull(Camera);
+
+		var list = ctx.List;
+		var scene = ctx.RenderScene;
 
 		// Perform culling/build indirect draw commands
-		BuildIndirectCommands(list);
+		BuildIndirectCommands(list, scene);
 
 		// Switch to prepass PSO
 		list.SetPipelineState(visPSO);
 		list.SetPipelineSRV(0, 1, RenderMesh.VertexBuffer);
 		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
-		list.SetPipelineSRV(4, 1, Camera.Scene.TransformBuffer);
-		list.SetPipelineSRV(5, 1, Camera.Scene.InstanceBuffer);
-		list.SetPipelineCBV(0, 1, RP.ViewCB);
+		list.SetPipelineSRV(4, 1, scene.TransformBuffer);
+		list.SetPipelineSRV(5, 1, scene.InstanceBuffer);
+		list.SetPipelineCBV(0, 1, ctx.ViewCB);
 
 		// Output to vis/depth buffers
-		list.SetRenderTarget(RP.VisBuffer, RP.DepthBuffer);
+		list.SetRenderTarget(ctx.Get(resources.VisBuffer), ctx.Get(resources.DepthBuffer));
 
 		list.SetIndexBuffer(RenderMesh.IndexBuffer);
 
 		// Indirect dispatch
-		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
+		if (scene.InstanceBuffer.NumAllocations > 0)
 		{
 			list.BarrierUAV(commandBuffer);
-			list.ExecuteIndirect(commandSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+			list.ExecuteIndirect(commandSignature, commandBuffer, (int)scene.InstanceBuffer.NumAllocations);
 		}
 	}
 
-	private void BuildIndirectCommands(CommandList list)
+	private void BuildIndirectCommands(CommandList list, RenderScene scene)
 	{
 		// Reset command count
 		list.ResetCounter(commandBuffer!);
@@ -78,13 +89,13 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 		// Switch to indirect culling PSO
 		list.SetPipelineState(cullPSO!);
 		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
-		list.SetPipelineSRV(5, 1, Camera!.Scene.InstanceBuffer);
+		list.SetPipelineSRV(5, 1, scene.InstanceBuffer);
 		list.SetPipelineUAV(0, 0, commandBuffer!);
 
 		// Compute dispatch
-		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
+		if (scene.InstanceBuffer.NumAllocations > 0)
 		{
-			list.Dispatch((int)(Camera.Scene.InstanceBuffer.LastOffset + 1));
+			list.Dispatch((int)(scene.InstanceBuffer.LastOffset + 1));
 		}
 	}
 }

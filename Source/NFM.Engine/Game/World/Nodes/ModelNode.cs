@@ -1,4 +1,3 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using NFM.GPU;
 using NFM.Graphics;
 using NFM.Resources;
@@ -18,102 +17,137 @@ public partial class ModelNode : Node
 
 	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
 	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = new();
-	
+
+	private Dictionary<Mesh, List<ShaderParameter>> materialOverrides = new();
+
+	private RenderScene RenderScene => Scene.RenderData;
+
 	public ModelNode(Scene? scene) : base(scene)
 	{
 		Name = "Model";
 
-		// Track changes in model/visibility
-		this.SubscribeFast(nameof(Model), nameof(IsVisible), () =>
-		{
-            Model?.EnsureFullyLoaded();
-			UpdateInstances(Renderer.DefaultCommandList);
-		});
+		TransformHandle = RenderScene.TransformBuffer.Allocate(1);
 
-		this.SubscribeFast(nameof(WorldTransform), UpdateTransform);
-		UpdateTransform();
+		// Track changes in model/visibility
+		this.SubscribeFast(nameof(Model), nameof(IsVisible), () => RenderScene.MarkInstancesDirty(this));
+		this.SubscribeFast(nameof(WorldTransform), () => RenderScene.MarkTransformDirty(this));
+
+		RenderScene.MarkInstancesDirty(this);
+		RenderScene.MarkTransformDirty(this);
 	}
 
-    [MemberNotNull(nameof(TransformHandle))]
-    void UpdateTransform()
-    {
-		TransformHandle ??= Scene.TransformBuffer.Allocate(1);
-		Renderer.DefaultCommandList.UploadBuffer(TransformHandle, new GPUTransform()
+	/// <summary>
+	/// Overrides a shader parameter for one of this node's meshes, on top of the mesh's own material.
+	/// </summary>
+	public void SetMaterialOverride(Mesh mesh, string param, object? value)
+	{
+		if (!materialOverrides.TryGetValue(mesh, out var overrides))
+		{
+			overrides = materialOverrides[mesh] = new();
+		}
+
+		overrides.RemoveAll(o => o.Name == param);
+		overrides.Add(new ShaderParameter()
+		{
+			Name = param,
+			Value = value,
+			Type = value?.GetType() ?? typeof(object)
+		});
+
+		RenderScene.MarkInstancesDirty(this);
+	}
+
+	public void ClearMaterialOverrides(Mesh mesh)
+	{
+		if (materialOverrides.Remove(mesh))
+		{
+			RenderScene.MarkInstancesDirty(this);
+		}
+	}
+
+	internal void UploadTransform(CommandList list)
+	{
+		list.UploadBuffer(TransformHandle, new GPUTransform()
 		{
 			ObjectToWorld = WorldTransform,
 			WorldToObject = WorldTransform.Inverse()
 		});
-    }
-
-	public override void Dispose()
-	{
-		TransformHandle?.Dispose();
-
-		foreach (var mesh in InstanceHandles.Keys)
-		{
-			MaterialInstances[mesh].Dispose();
-
-			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
-			Scene.FreeInstance(InstanceHandles[mesh]);
-		}
-
-		base.Dispose();
 	}
 
-	void UpdateInstances(CommandList list)
+	internal void RebuildInstances(CommandList list)
 	{
-		// Clear existing instances
+		Model?.EnsureFullyLoaded();
+
+		// Acquire the new materials before releasing the old ones, so anything shared between the
+		// two isn't dropped to zero references and immediately rebuilt.
+		Dictionary<Mesh, RenderMaterial> newMaterials = new();
+
+		if (IsVisible && Model is not null)
+		{
+			foreach (var group in Model.MeshGroups)
+			{
+				// Don't show hidden mesh groups. TODO: override on a per-ModelNode basis.
+				if (!group.IsVisible)
+				{
+					continue;
+				}
+
+				foreach (var mesh in group.Meshes)
+				{
+					// Only show LOD0 for now.
+					if ((mesh.LODMask & LODLevel.LOD0) == 0)
+					{
+						continue;
+					}
+
+					newMaterials[mesh] = RenderMaterial.Get(Guard.NotNull(mesh.Material), materialOverrides.GetValueOrDefault(mesh));
+				}
+			}
+		}
+
+		ReleaseInstances(list);
+
+		// (Re)build the array of instance handles
+		foreach (var (mesh, material) in newMaterials)
+		{
+			Guard.NotNull(mesh.RenderData);
+
+			InstanceHandles[mesh] = RenderScene.AllocateInstance(this);
+			MaterialInstances[mesh] = material;
+
+			// Upload instance to buffer
+			list.UploadBuffer(InstanceHandles[mesh], new GPUInstance()
+			{
+				MeshID = (int)mesh.RenderData.MeshHandle.Offset,
+				TransformID = (int)TransformHandle.Offset,
+				MaterialID = (int)material.MaterialHandle.Offset,
+			});
+		}
+	}
+
+	private void ReleaseInstances(CommandList list)
+	{
 		foreach (var mesh in InstanceHandles.Keys)
 		{
 			// Zero out instance data
-			Renderer.DefaultCommandList.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
+			list.UploadBuffer(InstanceHandles[mesh], default(GPUInstance));
 
-			Scene.FreeInstance(InstanceHandles[mesh]);
+			RenderScene.FreeInstance(InstanceHandles[mesh]);
 			MaterialInstances[mesh].Dispose();
 		}
 
 		InstanceHandles.Clear();
 		MaterialInstances.Clear();
+	}
 
-		if (!IsVisible || Model is null)
-		{
-			return;
-		}
+	public override void Dispose()
+	{
+		RenderScene.Forget(this);
 
-        // (Re)build the array of instance handles
-        foreach (var group in Model.MeshGroups)
-        {
-            // Don't show hidden mesh groups. TODO: override on a per-ModelNode basis.
-            if (!group.IsVisible)
-            {
-                continue;
-            }
+		ReleaseInstances(Renderer.DefaultCommandList);
+		TransformHandle.Dispose();
 
-            foreach (var mesh in group.Meshes)
-            {
-                // Only show LOD0 for now.
-                if ((mesh.LODMask & LODLevel.LOD0) == 0)
-                {
-                    continue;
-                }
-
-                Guard.NotNull(mesh.RenderData);
-
-				InstanceHandles[mesh] = Scene.AllocateInstance(this);
-				MaterialInstances[mesh] = new RenderMaterial(Guard.NotNull(mesh.Material));
-
-				// Build instance data
-				GPUInstance instanceData = new()
-				{
-					MeshID = (int)mesh.RenderData.MeshHandle.Offset,
-					TransformID = (int)TransformHandle.Offset,
-					MaterialID = (int)MaterialInstances[mesh].MaterialHandle.Offset,
-				};
-
-				// Upload instance to buffer
-				list.UploadBuffer(InstanceHandles[mesh], instanceData);
-            }
-        }
+		base.Dispose();
 	}
 
 	public override void OnSelect()

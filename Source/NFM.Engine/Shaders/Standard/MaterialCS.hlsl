@@ -8,6 +8,11 @@ RWTexture2D<float4> MatBuffer2 : register(u2);
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
+// Pixels bucketed by shader stack, produced by the binning passes.
+StructuredBuffer<uint> BinPixels : register(t2);
+StructuredBuffer<uint> BinCounts : register(t3);
+StructuredBuffer<uint> BinOffsets : register(t4);
+
 ByteAddressBuffer MaterialParams : register(t0, space2);
 int ShaderID : register(b0);
 
@@ -117,24 +122,21 @@ struct SurfaceModel
 
 SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 ddy);
 
-[numthreads(32, 32, 1)]
-void main(uint2 id : SV_DispatchThreadID)
+[numthreads(64, 1, 1)]
+void main(uint threadID : SV_DispatchThreadID)
 {
+	// This dispatch only covers pixels the binning pass assigned to this shader.
+	if (threadID >= BinCounts[ShaderID])
+	{
+		return;
+	}
+
+	uint packed = BinPixels[BinOffsets[ShaderID] + threadID];
+	uint2 id = uint2(packed & 0xFFFF, packed >> 16);
+
 	// Grab the frame width/height
 	int2 frameSize;
 	DepthBuffer.GetDimensions(frameSize.x, frameSize.y);
-
-	// Don't try to process out of bounds pixels
-	if (id.x >= frameSize.x || id.y >= frameSize.y)
-	{
-		return;
-	}
-
-	// Early out if this pixel is empty
-	if (DepthBuffer[id] == 0)
-	{
-		return;
-	}
 
 	// Unpack visbuffer
 	uint instanceID = VisBuffer[id].x;
@@ -142,13 +144,6 @@ void main(uint2 id : SV_DispatchThreadID)
 
 	// Fetch instance data
 	Instance instance = Instances[instanceID];
-	
-	// Early out for mismatching shaders
-	if (MaterialParams.Load(instance.MaterialID) != ShaderID)
-	{
-		return;
-	}
-	
 	Mesh mesh = Meshes[instance.MeshID];
 	Transform transform = Transforms[instance.TransformID];
 

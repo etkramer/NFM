@@ -1,12 +1,25 @@
-﻿using NFM.GPU;
+using NFM.GPU;
 
 namespace NFM.Graphics;
 
-class LightingStep : CameraStep<StandardRenderPipeline>
+class LightingStep : ViewPass
 {
 	private static PipelineState? lightingPSO;
 
-	public override void Init()
+	private readonly StandardResources resources;
+
+	public LightingStep(StandardResources resources)
+	{
+		this.resources = resources;
+	}
+
+	public override void Setup(RenderGraphBuilder builder)
+	{
+		builder.Read(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2, resources.DepthBuffer);
+		builder.Write(resources.ColorTarget);
+	}
+
+	public override void Init(RenderGraph graph)
 	{
 		// Compile indirect compute program.
 		lightingPSO ??= new PipelineState()
@@ -14,16 +27,19 @@ class LightingStep : CameraStep<StandardRenderPipeline>
 			.Compile().Result;
 	}
 
-	public override void Run(CommandList list)
+	public override void Run(in ViewPassContext ctx)
 	{
-		list.SetPipelineState(lightingPSO!);
-	
-		list.SetPipelineUAV(0, 0, RP!.ColorTarget!);
-		list.SetPipelineSRV(0, 0, RP.MatBuffer0!);
-		list.SetPipelineSRV(1, 0, RP.MatBuffer1!);
-		list.SetPipelineSRV(2, 0, RP.MatBuffer2!);
-		list.SetPipelineSRV(3, 0, RP.DepthBuffer!);
+		var list = ctx.List;
+		var colorTarget = ctx.Get(resources.ColorTarget);
 
-		list.DispatchThreads(RP.ColorTarget!.Width, 32, RP.ColorTarget.Height, 32);
+		list.SetPipelineState(Guard.NotNull(lightingPSO));
+
+		list.SetPipelineUAV(0, 0, colorTarget);
+		list.SetPipelineSRV(0, 0, ctx.Get(resources.MatBuffer0));
+		list.SetPipelineSRV(1, 0, ctx.Get(resources.MatBuffer1));
+		list.SetPipelineSRV(2, 0, ctx.Get(resources.MatBuffer2));
+		list.SetPipelineSRV(3, 0, ctx.Get(resources.DepthBuffer));
+
+		list.DispatchThreads(colorTarget.Width, 32, colorTarget.Height, 32);
 	}
 }

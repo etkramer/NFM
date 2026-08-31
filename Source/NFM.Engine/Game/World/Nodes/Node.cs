@@ -26,21 +26,23 @@ public class Node : ISelectable, IDisposable
 			Guard.Require(value is null || value.Scene == Scene,
 				"Nodes can only be parented to other nodes from the same scene.");
 
-			if (parent != value || value is null /*Could be initial setup...*/)
+			if (parent == value)
 			{
-				if (parent is null)
-				{
-					Scene.RemoveRootNode(this);
-				}
-				if (value is null)
-				{
-					Scene.AddRootNode(this);
-				}
-
-				parent?.children.Remove(this);
-				parent = value;
-				parent?.children.Add(this);
+				return;
 			}
+
+			if (parent is null)
+			{
+				Scene.RemoveRootNode(this);
+			}
+			if (value is null)
+			{
+				Scene.AddRootNode(this);
+			}
+
+			parent?.children.Remove(this);
+			parent = value;
+			parent?.children.Add(this);
 		}
 	}
 
@@ -83,8 +85,16 @@ public class Node : ISelectable, IDisposable
 		// Make sure we're not still selected.
 		Selection.Deselect(this);
 
-		// Remove self from scene tree.
-		Parent = null;
+		// Remove self from scene tree, without re-rooting the way the Parent setter would.
+		if (parent is null)
+		{
+			Scene.RemoveRootNode(this);
+		}
+		else
+		{
+			parent.children.Remove(this);
+			parent = null;
+		}
 
 		foreach (var child in children.Reverse())
 		{

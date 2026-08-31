@@ -1,4 +1,6 @@
-﻿namespace NFM.World;
+﻿using NFM.Graphics;
+
+namespace NFM.World;
 
 public partial class Scene : IDisposable
 {
@@ -9,12 +11,11 @@ public partial class Scene : IDisposable
 	[Notify] public IEnumerable<Node> RootNodes => rootNodes;
 	private ObservableCollection<Node> rootNodes { get; set; } = new();
 
+	internal RenderScene RenderData { get; } = new();
+
 	public Scene()
 	{
 		All.Add(this);
-
-		TransformBuffer.Name = "Transform Buffer";
-		InstanceBuffer.Name = "Instance Buffer";
 	}
 
 	/// <summary>
@@ -40,8 +41,7 @@ public partial class Scene : IDisposable
 			rootNodes[i].Dispose();
 		}
 
-		InstanceBuffer.Dispose();
-		TransformBuffer.Dispose();
+		RenderData.Dispose();
 
 		All.Remove(this);
 	}

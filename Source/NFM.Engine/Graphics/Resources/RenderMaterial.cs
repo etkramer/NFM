@@ -1,16 +1,45 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using NFM.GPU;
 using NFM.GPU.Native;
 using NFM.Resources;
-using NFM.World;
 
 namespace NFM.Graphics;
 
 class RenderMaterial : IDisposable
 {
-	public static TypedBuffer<byte> MaterialBuffer = new(Scene.MaxInstances * 64, isRaw: true);
+	public static TypedBuffer<byte> MaterialBuffer = new(RenderScene.MaxInstances * 64, isRaw: true);
+
+	// Must match MAX_MATERIAL_STACKS in the material binning shaders, which index their buffers by StackID.
+	public const int MaxStacks = 256;
+
+	#region Cache
+
+	private static Dictionary<MaterialKey, RenderMaterial> cache = new();
+
+	/// <summary>
+	/// Returns the shared material for a given source material and override set, creating it if needed.
+	/// Every caller must <see cref="Dispose"/> the result exactly once.
+	/// </summary>
+	public static RenderMaterial Get(Material source, IReadOnlyList<ShaderParameter>? overrides = null)
+	{
+		MaterialKey key = new(source, overrides);
+
+		if (!cache.TryGetValue(key, out var material))
+		{
+			material = cache[key] = new RenderMaterial(key);
+		}
+
+		material.refCount++;
+		return material;
+	}
+
+	private readonly MaterialKey key;
+	private int refCount = 0;
+
+	#endregion
 
 	#region Permutations
+
 	private static List<(IEnumerable<Shader>, int)> stackIDs = new();
 
 	private static List<RenderMaterial> all = new();
@@ -33,7 +62,7 @@ class RenderMaterial : IDisposable
 
 	#endregion
 
-	[Inspect] public Material Source { get; set; }
+	[Inspect] public Material Source => key.Source;
 
 	public ShaderParameter[] Parameters { get; }
 	public ObservableCollection<Shader> Shaders { get; } = new();
@@ -43,9 +72,9 @@ class RenderMaterial : IDisposable
 	public int StackID { get; private set; }
 	private static int lastID = 0;
 
-	public RenderMaterial(Material baseMaterial)
+	private RenderMaterial(MaterialKey key)
 	{
-		Source = baseMaterial;
+		this.key = key;
 		Shaders.Add(Source.Shader);
 
 		all.Add(this);
@@ -55,6 +84,8 @@ class RenderMaterial : IDisposable
 		if (matchingStack.Item1 is null)
 		{
 			StackID = lastID++;
+			Guard.Require(StackID < MaxStacks, $"Ran out of shader stacks - {MaxStacks} is the most the material binning shaders can index.");
+
 			stackIDs.Add((Shaders.ToArray(), StackID));
 		}
 		else
@@ -62,14 +93,17 @@ class RenderMaterial : IDisposable
 			StackID = matchingStack.Item2;
 		}
 
-		// Build parameters table
+		// Build parameters table, layering the material's own overrides then this instance's on top.
 		Parameters = Shaders.SelectMany(o => o.Parameters).ToArray();
 		for (int i = 0; i < Parameters.Length; i++)
 		{
-			var materialOverride = Source.MaterialOverrides.FirstOrDefault(o => o.Name == Parameters[i].Name);
-			if (materialOverride.Name is not null)
+			if (Source.MaterialOverrides.TryFirst(o => o.Name == Parameters[i].Name, out var materialOverride))
 			{
 				Parameters[i].Value = materialOverride.Value;
+			}
+			if (key.TryGetOverride(Parameters[i].Name, out var instanceOverride))
+			{
+				Parameters[i].Value = instanceOverride.Value;
 			}
 		}
 
@@ -95,14 +129,7 @@ class RenderMaterial : IDisposable
 		// Loop through all shader parameters
 		foreach (var param in Parameters)
 		{
-			// Grab the default value
 			object? value = param.Value;
-
-			// Is parameter overriden by material?
-			if (Source.MaterialOverrides.TryFirst(o => o.Name == param.Name, out var overrideParam))
-			{
-				value = overrideParam.Value;
-			}
 
             // Before we do anything, make sure the value is loaded (if applicable).
             if (value is GameResource resource)
@@ -148,8 +175,75 @@ class RenderMaterial : IDisposable
 
 	public void Dispose()
 	{
+		if (--refCount > 0)
+		{
+			return;
+		}
+
+		cache.Remove(key);
 		all.Remove(this);
-		
+
 		MaterialHandle.Dispose();
+	}
+}
+
+readonly struct MaterialKey : IEquatable<MaterialKey>
+{
+	public Material Source { get; }
+	private readonly ShaderParameter[] overrides;
+
+	public MaterialKey(Material source, IReadOnlyList<ShaderParameter>? overrides)
+	{
+		Source = source;
+		this.overrides = overrides?.ToArray() ?? Array.Empty<ShaderParameter>();
+	}
+
+	public bool TryGetOverride(string name, out ShaderParameter result)
+	{
+		for (int i = 0; i < overrides.Length; i++)
+		{
+			if (overrides[i].Name == name)
+			{
+				result = overrides[i];
+				return true;
+			}
+		}
+
+		result = default;
+		return false;
+	}
+
+	public bool Equals(MaterialKey other)
+	{
+		if (Source != other.Source || overrides.Length != other.overrides.Length)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < overrides.Length; i++)
+		{
+			if (overrides[i].Name != other.overrides[i].Name || !Equals(overrides[i].Value, other.overrides[i].Value))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public override bool Equals(object? obj) => obj is MaterialKey other && Equals(other);
+
+	public override int GetHashCode()
+	{
+		HashCode hash = new();
+		hash.Add(Source);
+
+		for (int i = 0; i < overrides.Length; i++)
+		{
+			hash.Add(overrides[i].Name);
+			hash.Add(overrides[i].Value);
+		}
+
+		return hash.ToHashCode();
 	}
 }

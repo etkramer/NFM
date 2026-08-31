@@ -100,8 +100,9 @@ public class CommandList : IDisposable
 		RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
 		ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
+		ID3D12Resource? counterResource = commandBuffer.HasCounter ? commandBuffer.D3DResource : null;
 
-		list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, (commandBuffer.HasCounter ? commandBuffer : null)! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
+		list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, counterResource! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
 	}
 
 	public unsafe void SetPipelineConstants(BindPoint point, int start, params int[] constants)

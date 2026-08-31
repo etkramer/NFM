@@ -1,10 +1,8 @@
-﻿using NFM.GPU;
-
 namespace NFM.Graphics;
 
-class SkinningStep : SceneStep
+class SkinningStep : ScenePass
 {
-	public override void Run(CommandList list)
+	public override void Run(in ScenePassContext ctx)
 	{
 		// Perform skinning, update morph targets, create motion (screen-space) and velocity (world-space) buffers.
 	}

@@ -61,6 +61,11 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 
 	public void Free(BufferAllocation<T> alloc)
 	{
+		if (!alloc.TryMarkFreed())
+		{
+			return;
+		}
+
 		virtualBlock.FreeAllocation(alloc.Handle);
 
 		allocations.Remove(alloc);
@@ -108,6 +113,19 @@ public class BufferAllocation<T> : IDisposable where T : unmanaged
 	
 	internal D3D12MA.VirtualAllocation Handle;
 	public TypedBuffer<T> Buffer { get; private set; }
+
+	private bool isFreed = false;
+
+	internal bool TryMarkFreed()
+	{
+		if (isFreed)
+		{
+			return false;
+		}
+
+		isFreed = true;
+		return true;
+	}
 
 	public BufferAllocation(TypedBuffer<T> source, D3D12MA.VirtualAllocation alloc, nint offset, nint size)
 	{

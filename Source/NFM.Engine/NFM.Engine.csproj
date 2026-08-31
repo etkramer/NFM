@@ -19,6 +19,9 @@
 		<EmbeddedResource Include="Shaders\Common.h" />
 		<EmbeddedResource Include="Shaders\World.h" />
 		<EmbeddedResource Include="Shaders\Standard\CullCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Bin\BinCountCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Bin\BinScanCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Bin\BinScatterCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\PrepassPS.hlsl" />
 		
 		<None Update="Plugin.targets" CopyToOutputDirectory="PreserveNewest" />

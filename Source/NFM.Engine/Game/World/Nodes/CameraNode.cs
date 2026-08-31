@@ -1,4 +1,6 @@
-﻿namespace NFM.World;
+﻿using NFM.Graphics;
+
+namespace NFM.World;
 
 [Icon("photo_camera")]
 public class CameraNode : Node
@@ -23,5 +25,11 @@ public class CameraNode : Node
 	public CameraNode(Scene? scene) : base(scene)
 	{
 		Name = "Camera";
+	}
+
+	public override void Dispose()
+	{
+		Renderer.ReleasePipeline(this);
+		base.Dispose();
 	}
 }

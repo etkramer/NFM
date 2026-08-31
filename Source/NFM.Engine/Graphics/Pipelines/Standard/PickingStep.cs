@@ -5,7 +5,7 @@ namespace NFM.Graphics;
 /// <summary>
 /// Samples the visbuffer under the cursor every frame, so the hovered object is always known without a stall.
 /// </summary>
-class PickingStep : CameraStep<StandardRenderPipeline>
+class PickingStep : ViewPass
 {
 	private const int ResultSize = 8; // uint2
 
@@ -18,7 +18,19 @@ class PickingStep : CameraStep<StandardRenderPipeline>
 	// Holds the frame each slot was written on, or MaxValue if it holds nothing.
 	private ulong[] slotFrames = Array.Empty<ulong>();
 
-	public override void Init()
+	private readonly StandardResources resources;
+
+	public PickingStep(StandardResources resources)
+	{
+		this.resources = resources;
+	}
+
+	public override void Setup(RenderGraphBuilder builder)
+	{
+		builder.Read(resources.VisBuffer, resources.DepthBuffer);
+	}
+
+	public override void Init(RenderGraph graph)
 	{
 		pickPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/PickCS.hlsl"), ShaderStage.Compute))
@@ -32,25 +44,27 @@ class PickingStep : CameraStep<StandardRenderPipeline>
 		Array.Fill(slotFrames, ulong.MaxValue);
 	}
 
-	public override void Run(CommandList list)
+	public override void Run(in ViewPassContext ctx)
 	{
-		Guard.NotNull(Camera);
-		Guard.NotNull(RP?.VisBuffer);
+		var camera = ctx.Camera;
+		var visBuffer = ctx.Get(resources.VisBuffer);
 
-		Vector2i size = RP.VisBuffer.Size;
-		if (Camera.PickCoords is not Vector2i coords || coords.X < 0 || coords.Y < 0 || coords.X >= size.X || coords.Y >= size.Y)
+		Vector2i size = visBuffer.Size;
+		if (camera.PickCoords is not Vector2i coords || coords.X < 0 || coords.Y < 0 || coords.X >= size.X || coords.Y >= size.Y)
 		{
 			// Nothing to sample - drop anything still in flight so it can't later be read as current.
 			Array.Fill(slotFrames, ulong.MaxValue);
-			Camera.HoveredInstance = -1;
+			camera.HoveredInstance = -1;
 			return;
 		}
 
-		ResolveRetiredSlot();
+		ResolveRetiredSlot(camera);
+
+		var list = ctx.List;
 
 		list.SetPipelineState(Guard.NotNull(pickPSO));
-		list.SetPipelineSRV(0, 0, RP.VisBuffer);
-		list.SetPipelineSRV(1, 0, Guard.NotNull(RP.DepthBuffer));
+		list.SetPipelineSRV(0, 0, visBuffer);
+		list.SetPipelineSRV(1, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineUAV(0, 0, Guard.NotNull(resultBuffer));
 		list.SetPipelineConstants(0, 0, coords.X, coords.Y);
 		list.Dispatch(1);
@@ -64,7 +78,7 @@ class PickingStep : CameraStep<StandardRenderPipeline>
 		slotFrames[slot] = Metrics.FrameCount;
 	}
 
-	private void ResolveRetiredSlot()
+	private void ResolveRetiredSlot(World.CameraNode camera)
 	{
 		ulong completed = D3DContext.CompletedFrame;
 
@@ -84,7 +98,7 @@ class PickingStep : CameraStep<StandardRenderPipeline>
 		}
 
 		ReadOnlySpan<uint> result = Guard.NotNull(readbackBuffer).Read<uint>(2, newest * ResultSize);
-		Guard.NotNull(Camera).HoveredInstance = result[0] == 0 ? -1 : (int)result[1];
+		camera.HoveredInstance = result[0] == 0 ? -1 : (int)result[1];
 	}
 
 	public override void Dispose()

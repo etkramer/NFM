@@ -55,7 +55,7 @@ public class Viewport : IDisposable
 	{
 		// Hand this frame's cursor to the renderer, and pick up the result of the last one.
 		Camera.PickCoords = CursorPosition;
-		HoveredNode = Camera.HoveredInstance < 0 ? null : Scene.GetInstanceOwner(Camera.HoveredInstance);
+		HoveredNode = Camera.HoveredInstance < 0 ? null : Scene.RenderData.GetInstanceOwner(Camera.HoveredInstance);
 
 		const float lookSens = 0.15f;
 		const float dampingCoefficient = 15;
@@ -128,5 +128,7 @@ public class Viewport : IDisposable
 	{
 		Dispatcher.OnTick -= OnTick;
 		All.Remove(this);
+
+		workCamera.Dispose();
 	}
 }
