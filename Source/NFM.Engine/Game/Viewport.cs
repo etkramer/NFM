@@ -34,8 +34,26 @@ public class Viewport : IDisposable
 		workCamera.Name = "Work Camera";
 
 		Dispatcher.OnTick += OnTick;
+		Project.OnProjectCreated += OnProjectCreated;
 
 		All.Add(this);
+	}
+
+	/// <summary>
+	/// Rebuilds the work camera in the new scene - nodes are bound to a scene for life, so the old
+	/// one dies along with the project it belonged to.
+	/// </summary>
+	private void OnProjectCreated()
+	{
+		var position = workCamera.Position;
+		var rotation = workCamera.Rotation;
+
+		workCamera.Dispose();
+
+		workCamera = new CameraNode(null);
+		workCamera.Name = "Work Camera";
+		workCamera.Position = position;
+		workCamera.Rotation = rotation;
 	}
 
 	/// <summary>
@@ -127,6 +145,7 @@ public class Viewport : IDisposable
 	public void Dispose()
 	{
 		Dispatcher.OnTick -= OnTick;
+		Project.OnProjectCreated -= OnProjectCreated;
 		All.Remove(this);
 
 		workCamera.Dispose();
