@@ -29,7 +29,7 @@ public static partial class ControlExt
 {
 	public static void Bind(this Control subject, AvaloniaProperty property, string propertyName, object source = null, BindingMode mode = BindingMode.Default)
 	{
-		AvaloniaObjectExtensions.Bind(subject, property, new Binding(propertyName, mode), source);
+		subject.Bind(property, new ReflectionBinding(propertyName) { Mode = mode, Source = source });
 	}
 
 	public static Brush GetResourceBrush(this Control subject, string resourceName)
@@ -49,10 +49,7 @@ public static partial class ControlExt
 
 	public static Bitmap GetResourceBitmap(this Control subject, string uri)
 	{
-            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            var asset = assets.Open(new Uri(uri));
-
-            return new Bitmap(asset);
+		return new Bitmap(AssetLoader.Open(new Uri(uri)));
 	}
 
 	public static T With<T>(this T subject, Action<T> action) where T : Control
@@ -63,7 +60,7 @@ public static partial class ControlExt
 
 	public static T Style<T>(this T subject, params string[] styleClasses) where T : Control
 	{
-		subject.Classes = new Classes(styleClasses);
+		subject.Classes.Replace(styleClasses);
 		return subject;
 	}
 }

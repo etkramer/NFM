@@ -8,7 +8,7 @@
 				<DockPanel>
 					<!--Tab well-->
 					<Grid DockPanel.Dock="Top">
-						<ItemsControl Items="{TemplateBinding Tabs}">
+						<ItemsControl ItemsSource="{TemplateBinding Tabs}">
 							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>
 									<StackPanel Orientation="Horizontal"/>

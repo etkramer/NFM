@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using NFM.GPU;
 using NFM.Graphics;
-using ReactiveUI;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
@@ -32,6 +32,9 @@ public partial class ViewportHost : Panel
 		nativeControl = new();
 		this.Background("Transparent");
 		this.Children(nativeControl);
+
+		// Required for the viewport to receive keyboard input.
+		Focusable = true;
 
 		// Opened event.
 		nativeControl.OnOpen += () =>

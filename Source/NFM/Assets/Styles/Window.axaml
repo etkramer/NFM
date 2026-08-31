@@ -5,7 +5,6 @@
 		<Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
 		<Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>
 		<Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>
-		<Setter Property="ExtendClientAreaChromeHints" Value="NoChrome"/>
 	</Style>
 
 	<Style Selector="Window[IsActive=true]">

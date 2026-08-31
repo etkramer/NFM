@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -121,17 +121,17 @@ public class DeclarativeGenerator : ISourceGenerator
 				methods.Add($@"
 					public static T {setterName}<T>(this T subject, string bindingPath, Avalonia.Data.BindingMode mode) where T : {targetType.GetFullName()}
 					{{
-						Avalonia.AvaloniaObjectExtensions.Bind(subject, {targetType.GetFullName()}.{bindingPropertyName}, new Avalonia.Data.Binding(bindingPath, mode));
+						subject.Bind({targetType.GetFullName()}.{bindingPropertyName}, new Avalonia.Data.ReflectionBinding(bindingPath) {{ Mode = mode }});
 						return subject;
 					}}");
 
 				methods.Add($@"
 					public static T {setterName}<T>(this T subject, string bindingPath, object source) where T : {targetType.GetFullName()}
 					{{
-						Avalonia.Data.Binding binding = new(bindingPath);
+						Avalonia.Data.ReflectionBinding binding = new(bindingPath);
 						binding.Source = source;
-			
-						Avalonia.AvaloniaObjectExtensions.Bind(subject, {targetType.GetFullName()}.{bindingPropertyName}, binding);
+
+						subject.Bind({targetType.GetFullName()}.{bindingPropertyName}, binding);
 						return subject;
 					}}");
 			}
@@ -140,9 +140,9 @@ public class DeclarativeGenerator : ISourceGenerator
 			if (bindingPropertyName is not null)
 			{
 				methods.Add($@"
-					public static T {setterName}<T>(this T subject, Avalonia.Data.Binding binding) where T : {targetType.GetFullName()}
+					public static T {setterName}<T>(this T subject, Avalonia.Data.BindingBase binding) where T : {targetType.GetFullName()}
 					{{
-						Avalonia.AvaloniaObjectExtensions.Bind(subject, {targetType.GetFullName()}.{bindingPropertyName}, binding);
+						subject.Bind({targetType.GetFullName()}.{bindingPropertyName}, binding);
 						return subject;
 					}}");
 			}

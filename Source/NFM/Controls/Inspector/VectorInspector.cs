@@ -1,17 +1,15 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
 [CustomInspector(typeof(Vector2), typeof(Vector2i), typeof(Vector3), typeof(Vector3i), typeof(Vector4), typeof(Vector4i))]
 public partial class VectorInspector : UserControl
 {
-	[Reactive]
 	private object ValueX
 	{
 		set
@@ -26,7 +24,6 @@ public partial class VectorInspector : UserControl
 		}
 	}
 
-	[Reactive]
 	private object ValueY
 	{
 		set
@@ -41,7 +38,6 @@ public partial class VectorInspector : UserControl
 		}
 	}
 
-	[Reactive]
 	private object ValueZ
 	{
 		set
@@ -56,7 +52,6 @@ public partial class VectorInspector : UserControl
 		}
 	}
 
-	[Reactive]
 	private object ValueW
 	{
 		set

@@ -1,4 +1,0 @@
-[submodule "Source/Libraries/Avalonia"]
-	path = Source/Libraries/Avalonia
-	url = https://github.com/BitCrusader/NFM.Avalonia.git
-	ignore = untracked

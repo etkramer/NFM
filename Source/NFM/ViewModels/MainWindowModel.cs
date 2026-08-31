@@ -1,9 +1,9 @@
-﻿using NFM.World;
-using ReactiveUI;
+using NFM.World;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
-public class MainWindowModel : ReactiveObject, IActivatableViewModel
+public class MainWindowModel : IActivatableViewModel
 {
 	public ViewModelActivator Activator { get; } = new();
 

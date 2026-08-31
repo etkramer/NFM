@@ -1,5 +1,4 @@
 using System.Data;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,7 +9,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
@@ -21,7 +20,6 @@ public class NumInput : TemplatedControl, IActivatableView
 	public static StyledProperty<string> IconProperty = AvaloniaProperty.Register<NumInput, string>(nameof(Icon));
 	public static StyledProperty<IBrush> IconColorProperty = AvaloniaProperty.Register<NumInput, IBrush>(nameof(IconColor));
 
-	[Reactive]
 	public object Value
 	{
 		get => GetValue(ValueProperty);
@@ -31,7 +29,6 @@ public class NumInput : TemplatedControl, IActivatableView
 		}
 	}
 
-	[Reactive]
 	public string Icon
 	{
 		get => GetValue(IconProperty);
@@ -41,7 +38,6 @@ public class NumInput : TemplatedControl, IActivatableView
 		}
 	}
 
-	[Reactive]
 	public IBrush IconColor
 	{
 		get => GetValue(IconColorProperty);

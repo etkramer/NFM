@@ -12,7 +12,7 @@
 			<Setter Property="Background" Value="{x:Null}"/>
 			<Setter Property="Template">
 				<ControlTemplate>
-					<Border BorderThickness="2" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" CornerRadius="4" BorderDashArray="5, 1">
+					<Border BorderThickness="2" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" CornerRadius="4">
 						<ContentPresenter Name="PART_ContentPresenter"
 										  Background="{x:Null}"
 										  BorderBrush="{x:Null}"
@@ -40,7 +40,7 @@
 	<Grid ColumnDefinitions="240, 8, *">
 		<!--Folder View (Left)-->
 		<Panel Grid.Column="0" Background="{DynamicResource ThemeControlLowColor}">
-			<TreeView x:Name="folderTreeView" Margin="0" Padding="0" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" Items="{Binding FolderTree}">
+			<TreeView x:Name="folderTreeView" Margin="0" Padding="0" Background="Transparent" BorderThickness="0" SelectionMode="Multiple" ItemsSource="{Binding FolderTree}">
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Folders}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
@@ -62,7 +62,7 @@
 
 			<Rectangle Grid.Row="1" Fill="{DynamicResource ThemeControlLowColor}"/>
 
-			<ListBox Grid.Row="2" BorderThickness="0" Background="{x:Null}" Items="{Binding SearchResults}" Margin="4, 8">
+			<ListBox Grid.Row="2" BorderThickness="0" Background="{x:Null}" ItemsSource="{Binding SearchResults}" Margin="4, 8">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal" Background="Transparent" Spacing="8" Height="19">

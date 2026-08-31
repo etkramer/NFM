@@ -1,7 +1,7 @@
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia.Reactive;
 using Avalonia.Threading;
-using ReactiveUI;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
@@ -30,7 +30,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowModel>
 		FrontendHelpers.InvokeHandled(Project.Reset);
 
 		// Begin game loop.
-		DispatcherTimer.Run(() => { return FrontendHelpers.InvokeHandled(Engine.Update); }, TimeSpan.Zero, DispatcherPriority.Render);
+		HwndControl.OnFrame += () => FrontendHelpers.InvokeHandled(Engine.Update);
 
 		base.OnOpened(e);
 	}

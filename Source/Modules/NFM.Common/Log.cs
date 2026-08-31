@@ -4,22 +4,28 @@ public static class Log
 {
     public static void Info(object? message)
     {
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"INFO: {message}");
-        Console.ResetColor();
+        Write("INFO", message, ConsoleColor.Blue);
     }
 
     public static void Warn(object? message)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"WARN: {message}");
-        Console.ResetColor();
+        Write("WARN", message, ConsoleColor.Yellow);
     }
 
     public static void Error(object? message)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"ERROR: {message}");
+        Write("ERROR", message, ConsoleColor.Red);
+    }
+
+    private static void Write(string level, object? message, ConsoleColor color)
+    {
+        string line = $"{level}: {message}";
+
+        Console.ForegroundColor = color;
+        Console.WriteLine(line);
         Console.ResetColor();
+
+        // Routes to OutputDebugString, so messages reach the VS output window with no console attached.
+        System.Diagnostics.Trace.WriteLine(line);
     }
 }

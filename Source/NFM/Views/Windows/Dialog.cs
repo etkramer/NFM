@@ -60,7 +60,7 @@ public class Dialog
 							.HorizontalAlignment(HorizontalAlignment.Left)
 							.Width(24)
 							.Margin(10, 2, 0, 0)
-							.With(o => o.SetValue(RenderOptions.BitmapInterpolationModeProperty, BitmapInterpolationMode.HighQuality))
+							.With(o => RenderOptions.SetBitmapInterpolationMode(o, BitmapInterpolationMode.HighQuality))
 							.With(o => o.Source = win.GetResourceBitmap("avares://NFM/Assets/appicon.ico")),
 						new TextBlock()
 							.Column(1)

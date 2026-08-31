@@ -9,7 +9,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia.Reactive;
 using Avalonia.Threading;
 
 namespace NFM;
@@ -22,14 +22,15 @@ public partial class App : Application
 	{
 		Win32PlatformOptions opts = new()
 		{
-			AllowEglInitialization = false,
-			UseWgl = true,
+			RenderingMode = [Win32RenderingMode.Wgl],
+			CompositionMode = [Win32CompositionMode.RedirectionSurface],
 		};
 
 		AppBuilder.Configure<App>()
 			.UseWin32().With(opts)
 			.UseSkia()
-			.UseReactiveUI()
+			.UseHarfBuzz()
+			.UseReactiveUI(o => {})
 			.StartWithClassicDesktopLifetime(new string[0]);
 
 		Engine.Cleanup();

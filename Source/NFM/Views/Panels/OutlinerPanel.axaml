@@ -26,7 +26,7 @@
 
 		<!--Scene Tree-->
 		<Grid Grid.Row="1" Background="{DynamicResource ThemeControlLowColor}">
-			<TreeView Items="{Binding NodesSource}" SelectionMode="Multiple" SelectedItems="{Binding SelectedNodes}" BorderThickness="0" Background="{x:Null}">
+			<TreeView ItemsSource="{Binding NodesSource}" SelectionMode="Multiple" SelectedItems="{Binding SelectedNodes}" BorderThickness="0" Background="{x:Null}">
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Children}">
 						<TextBlock Text="{Binding Name}"/>

@@ -63,8 +63,11 @@ class PrepassStep : CameraStep<StandardRenderPipeline>
 		list.SetIndexBuffer(RenderMesh.IndexBuffer);
 
 		// Indirect dispatch
-		list.BarrierUAV(commandBuffer);
-		list.ExecuteIndirect(commandSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+		if (Camera.Scene.InstanceBuffer.NumAllocations > 0)
+		{
+			list.BarrierUAV(commandBuffer);
+			list.ExecuteIndirect(commandSignature, commandBuffer, (int)Camera.Scene.InstanceBuffer.NumAllocations);
+		}
 	}
 
 	private void BuildIndirectCommands(CommandList list)

@@ -1,5 +1,4 @@
 ﻿using Avalonia.Input;
-using Avalonia.Threading;
 
 namespace NFM;
 
@@ -22,15 +21,6 @@ public static class Input
 	private static bool wasMouseMoved = false;
 	private static Vector2 mousePos = Vector2.NaN;
 	private static Vector2 lastMousePos = Vector2.NaN;
-
-	static Input()
-	{
-		DispatcherTimer.Run(() =>
-		{
-			OnUpdate();
-			return true;
-		}, TimeSpan.Zero);
-	}
 
 	/// <summary>
 	/// Checks if the specified key is currently being pressed.
@@ -58,7 +48,10 @@ public static class Input
 		return false;
 	}
 
-	private static void OnUpdate()
+	/// <summary>
+	/// Recomputes per-frame input state. Called once per engine tick.
+	/// </summary>
+	internal static void Update()
 	{
 		// No update, therefore no delta.
 		if (!wasMouseMoved)

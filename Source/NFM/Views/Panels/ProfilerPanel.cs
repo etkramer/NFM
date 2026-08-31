@@ -1,8 +1,8 @@
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia.Reactive;
 using ReactiveUI;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
@@ -15,7 +15,7 @@ public partial class ProfilerPanel : ToolPanel, IActivatableView
 
 		this.WhenActivated(disposables =>
 		{
-			Observable.Interval(TimeSpan.FromSeconds(1), AvaloniaScheduler.Instance)
+			Observable.Interval(TimeSpan.FromSeconds(1), ReactiveUI.Primitives.Reactive.Concurrency.AvaloniaScheduler.Instance)
 				.StartWith(0)
 				.Subscribe(o => InvalidateVisual())
 				.DisposeWith(disposables);

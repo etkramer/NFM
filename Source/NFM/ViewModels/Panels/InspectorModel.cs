@@ -1,4 +1,3 @@
-﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia.Controls;
@@ -6,29 +5,20 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using DynamicData;
 using DynamicData.Binding;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Reactive;
 
 namespace NFM;
 
-public class InspectorModel : ReactiveObject, IActivatableViewModel
+public class InspectorModel : IActivatableViewModel
 {
 	public ViewModelActivator Activator { get; } = new();
 
-	[Reactive]
-	public Type ObjectType { get; set; }
+	[Notify] public Type ObjectType { get; set; }
+	[Notify] public Control PropertyContent { get; set; } = null;
+	[Notify] public string ObjectName { get; set; } = "None";
 
-	[Reactive]
-	public Control PropertyContent { get; set; } = null;
-
-	[Reactive]
-	public string ObjectName { get; set; } = "None";
-
-	[ObservableAsProperty]
-	public string TypeName { get; } = "None";
-
-	[ObservableAsProperty]
-	public string TypeIcon { get; } = "question_mark";
+	[Notify] public string TypeName { get; private set; } = "None";
+	[Notify] public string TypeIcon { get; private set; } = "question_mark";
 
 	public InspectorModel()
 	{
@@ -37,13 +27,13 @@ public class InspectorModel : ReactiveObject, IActivatableViewModel
 			// Type icon behavior
 			this.WhenAnyValue(o => o.ObjectType)
 				.Select(o => o is null ? "question_mark" : ObjectType.TryGetAttribute(out IconAttribute icon) ? icon.IconGlyph : "question_mark")
-				.ToPropertyEx(this, o => o.TypeIcon)
+				.Subscribe(o => TypeIcon = o)
 				.DisposeWith(disposables);
 
 			// Type name behavior
 			this.WhenAnyValue(o => o.ObjectType)
 				.Select(o => o is null ? "None" : ObjectType.Name)
-				.ToPropertyEx(this, o => o.TypeName)
+				.Subscribe(o => TypeName = o)
 				.DisposeWith(disposables);
 
 			Selection.Selected

@@ -1,0 +1,7 @@
+SetWindowLongPtr
+WNDPROC
+WM_NCHITTEST
+WM_PAINT
+HTTRANSPARENT
+InvalidateRect
+ValidateRect

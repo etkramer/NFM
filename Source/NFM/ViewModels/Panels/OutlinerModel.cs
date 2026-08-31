@@ -1,19 +1,17 @@
-﻿using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NFM.World;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Reactive;
 using System.Collections.Specialized;
 
 namespace NFM;
 
-public class OutlinerModel : ReactiveObject, IActivatableViewModel
+public class OutlinerModel : IActivatableViewModel
 {
 	public ViewModelActivator Activator { get; } = new();
 
-	[Reactive]
-	public IEnumerable<Node> NodesSource { get; private set; }
+	[Notify] public IEnumerable<Node> NodesSource { get; private set; }
 
 	public IEnumerable<Node> SelectedNodes { get; }
 

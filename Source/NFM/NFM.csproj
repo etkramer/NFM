@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
+		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputPath>$(SolutionDir)..\Runtime\Binaries\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- Avalonia 12 defaults to compiled bindings, which need x:DataType on every view -->
+		<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
 	</PropertyGroup>
     
 	<ItemGroup>
-	  <None Remove="FodyWeavers.xml" />
-	</ItemGroup>
-	
-	<ItemGroup>
+	  <AdditionalFiles Include="NativeMethods.txt" />
 	  <AvaloniaResource Include="Assets\appicon.ico" />
 	  <AvaloniaResource Include="Assets\Fonts\MaterialIcons-Regular.ttf" />
 	  <AvaloniaResource Include="Assets\Fonts\MaterialIconsOutlined-Regular.otf" />
@@ -22,15 +21,16 @@
 	<ItemGroup>
 		<ProjectReference Include="..\NFM.Engine\NFM.Engine.csproj" />
 		<ProjectReference Include="..\Modules\NFM.Generators\NFM.Generators.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="..\Libraries\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.0.0-preview6" />
-		<PackageReference Include="Avalonia.Skia" Version="11.0.0-preview6" />
-		<PackageReference Include="Avalonia.Native" Version="11.0.0-preview6" />
-		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview6" />
-		<PackageReference Include="Avalonia.Themes.Simple" Version="11.0.0-preview6" />
-		<PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
+		<PackageReference Include="Avalonia" Version="12.1.1" />
+		<PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
+		<PackageReference Include="Avalonia.Themes.Simple" Version="12.1.1" />
+		<PackageReference Include="ReactiveUI.Avalonia.Reactive" Version="12.1.1" />
+		<PackageReference Include="DynamicData" Version="9.4.33" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 </Project>

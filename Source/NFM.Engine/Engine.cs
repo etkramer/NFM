@@ -45,6 +45,9 @@ public static class Engine
 
 	internal static void Update()
 	{
+		// Refresh per-frame input state.
+		Input.Update();
+
 		// Dispatch any pending tasks.
         Dispatcher.Tick();
 
