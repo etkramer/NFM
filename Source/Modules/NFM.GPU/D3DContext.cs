@@ -149,10 +149,11 @@ public static class D3DContext
 		}
 
 		// Release pending objects
+		ulong completedFrame = frameFence.CompletedValue;
 		while (releaseQueue.Count > 0)
 		{
 			var first = releaseQueue.Peek();
-			if (first.Item1 >= frameFence.CompletedValue)
+			if (first.Item1 <= completedFrame)
 			{
 				first.Item2.Release();
 				releaseQueue.Dequeue();
@@ -186,7 +187,7 @@ public static class D3DContext
 	/// <summary>
 	/// Releases the specified object once it is no longer in use by the GPU
 	/// </summary>
-	public static void SafeRelease<T>(this T subject) where T : ID3D12Resource
+	public static void SafeRelease<T>(this T subject) where T : ID3D12Object
 	{
 		releaseQueue.Enqueue((Metrics.FrameCount, subject));
 	}

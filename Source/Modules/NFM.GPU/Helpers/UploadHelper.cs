@@ -13,6 +13,18 @@ internal unsafe static class UploadHelper
 	public static ID3D12Resource[] Rings;
 	public static void*[] MappedRings;
 
+    /// <summary>
+    /// Reserves space in this frame's upload ring and returns the offset to write at.
+    /// </summary>
+	public static nint Reserve(nint size, int alignment = 1)
+	{
+		nint offset = MathHelper.Align(UploadOffset, alignment);
+		Guard.Require(offset + size <= UploadSize, $"Upload heap exhausted - tried to reserve {size}b at offset {offset}b of {UploadSize}b. Split the upload across multiple frames or grow UploadSize.");
+
+		UploadOffset = offset + size;
+		return offset;
+	}
+
 	static UploadHelper()
 	{
 		ResourceDescription copyBufferDescription = new()

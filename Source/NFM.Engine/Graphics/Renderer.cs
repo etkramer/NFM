@@ -50,17 +50,22 @@ static class Renderer
 		DefaultCommandList.Close();
 		DefaultCommandList.Execute();
 
-		// Render to each viewport.
-		foreach (var viewport in Viewport.All)
+		try
 		{
-			RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
+			// Render to each viewport.
+			foreach (var viewport in Viewport.All)
+			{
+				RenderCamera<StandardRenderPipeline>(viewport.Camera, viewport.Swapchain);
+			}
 		}
+		finally
+		{
+			// Wait for completion.
+			D3DContext.WaitFrame();
 
-		// Wait for completion.
-		D3DContext.WaitFrame();
-
-		// Reopen default command list
-		DefaultCommandList.Open();
+			// Reopen default command list
+			DefaultCommandList.Open();
+		}
 	}
 
 	public static void RenderCamera<T>(CameraNode camera, Swapchain swapchain) where T : RenderPipeline<T>, new()

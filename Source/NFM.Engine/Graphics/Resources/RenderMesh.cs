@@ -26,14 +26,11 @@ class RenderMesh : IDisposable
         Guard.NotNull(source.Vertices);
         Guard.NotNull(source.Indices);
 
-		fixed (uint* indicesPtr = source.Indices)
-		{
-			// Upload geometry data to GPU
-			VertexHandle = VertexBuffer.Allocate(source.Vertices.Length);
-			IndexHandle = IndexBuffer.Allocate(source.Indices.Length);
-			Renderer.DefaultCommandList.UploadBuffer(VertexHandle, source.Vertices);
-			Renderer.DefaultCommandList.UploadBuffer(IndexHandle, source.Indices);
-		}
+		// Upload geometry data to GPU
+		VertexHandle = VertexBuffer.Allocate(source.Vertices.Length);
+		IndexHandle = IndexBuffer.Allocate(source.Indices.Length);
+		Renderer.DefaultCommandList.UploadBuffer(VertexHandle, source.Vertices);
+		Renderer.DefaultCommandList.UploadBuffer(IndexHandle, source.Indices);
 
 		// Upload mesh info to GPU.
 		MeshHandle = MeshBuffer.Allocate(1);

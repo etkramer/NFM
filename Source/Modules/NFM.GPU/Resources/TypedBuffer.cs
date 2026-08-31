@@ -4,9 +4,13 @@ namespace NFM.GPU;
 
 public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 {
-	public nint NumAllocations { get; private set; } = 0;
-	public nint FirstOffset { get; private set; } = 0;
-	public nint LastOffset { get; private set; } = 0;
+	public nint NumAllocations => allocations.Count;
+	public nint FirstOffset { get { RefreshStats(); return firstOffset; } }
+	public nint LastOffset { get { RefreshStats(); return lastOffset; } }
+
+	private nint firstOffset = 0;
+	private nint lastOffset = 0;
+	private bool statsDirty = false;
 
 	private D3D12MA.VirtualBlock virtualBlock;
 	private List<BufferAllocation<T>> allocations = new();
@@ -50,7 +54,7 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 		var alloc = new BufferAllocation<T>(this, allocation, (nint)offset, count);
 
 		allocations.Add(alloc);
-		UpdateStats();
+		statsDirty = true;
 
 		return alloc;
 	}
@@ -60,23 +64,34 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 		virtualBlock.FreeAllocation(alloc.Handle);
 
 		allocations.Remove(alloc);
-		UpdateStats();
+		statsDirty = true;
 	}
 
-	private void UpdateStats()
+	private void RefreshStats()
 	{
-		NumAllocations = allocations.Count;
+		if (!statsDirty)
+		{
+			return;
+		}
 
-		if (allocations.Count == 0)
+		firstOffset = 0;
+		lastOffset = 0;
+
+		for (int i = 0; i < allocations.Count; i++)
 		{
-			FirstOffset = 0;
-			LastOffset = 0;
+			nint offset = allocations[i].Offset;
+
+			if (i == 0 || offset < firstOffset)
+			{
+				firstOffset = offset;
+			}
+			if (offset > lastOffset)
+			{
+				lastOffset = offset;
+			}
 		}
-		else
-		{
-			FirstOffset = allocations.Min(o => (int)o.Offset);
-			LastOffset = allocations.Max(o => (int)o.Offset);
-		}
+
+		statsDirty = false;
 	}
 
 	public void Clear()

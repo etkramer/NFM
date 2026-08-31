@@ -39,10 +39,10 @@ public class CommandList : IDisposable
 
 	public void Dispose()
 	{
-		list.Dispose();
+		list.SafeRelease();
 		for (int i = 0; i < commandAllocators.Length; i++)
 		{
-			commandAllocators[i].Dispose();
+			commandAllocators[i].SafeRelease();
 		}
 	}
 
@@ -100,7 +100,6 @@ public class CommandList : IDisposable
 		RequestState(commandBuffer, ResourceStates.IndirectArgument);
 
 		ulong commandOffset = (ulong)commandStart * (ulong)signature.Stride;
-        var countBuffer = commandBuffer.HasCounter ? commandBuffer : null;
 
 		list.ExecuteIndirect(signature.Handle, maxCommandCount, commandBuffer.D3DResource, commandOffset, (commandBuffer.HasCounter ? commandBuffer : null)! /* Incorrect null annotations as of 2.1.26-beta */, (ulong)commandBuffer.CounterOffset);
 	}
@@ -298,12 +297,11 @@ public class CommandList : IDisposable
 		Guard.Require(buffer.IsAlive);
 
 		int uploadRing = UploadHelper.Ring;
-		nint uploadOffset = UploadHelper.UploadOffset;
+		nint uploadOffset = UploadHelper.Reserve(dataSize);
 		nint destOffset = offset;
 
 		// Copy data to upload buffer.
 		NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
-		UploadHelper.UploadOffset += dataSize;
 
 		// Copy from upload to dest buffer.
 		RequestState(buffer, ResourceStates.CopyDest);
@@ -323,14 +321,10 @@ public class CommandList : IDisposable
 		Guard.Require(texture.IsAlive);
 
 		int uploadRing = UploadHelper.Ring;
-		nint uploadOffset = UploadHelper.UploadOffset;
-
-		// Realign upload offset for 512b alignment requirement.
-		UploadHelper.UploadOffset = uploadOffset = MathHelper.Align(UploadHelper.UploadOffset, D3D12.TextureDataPlacementAlignment);
+		nint uploadOffset = UploadHelper.Reserve(dataSize, D3D12.TextureDataPlacementAlignment);
 
 		// Copy data to upload buffer.
 		NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
-		UploadHelper.UploadOffset += dataSize;
 
 		// Calculate subresource info.
 		var footprints = new PlacedSubresourceFootPrint[1];
@@ -466,7 +460,12 @@ public class CommandList : IDisposable
 			return;
 		}
 
-		if ((resource.State & state) == 0)
+		// Common and Present are both zero, so they need an exact match rather than a subset test.
+		bool satisfied = state == ResourceStates.Common
+			? resource.State == ResourceStates.Common
+			: (resource.State & state) == state;
+
+		if (!satisfied)
 		{
 			list.ResourceBarrierTransition(resource, resource.State, state);
 			resource.State = state;
