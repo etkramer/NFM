@@ -1,0 +1,21 @@
+@namespace NFM.Components
+@inherits Component
+
+<box class="field">
+    <box class="icon" style="color: #E6E62E">filter_center_focus</box>
+    <div class="value">@Display</div>
+</box>
+
+@code {
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    string Display => Target.Value switch
+    {
+        GameResource { Source: not null } resource => $"{resource.Source.Path.Split('/').Last()} ({resource.GetType().Name})",
+        GameResource resource => resource.GetType().Name,
+        _ => string.Empty
+    };
+
+    protected override int BuildHashCode() => Display.GetHashCode();
+}

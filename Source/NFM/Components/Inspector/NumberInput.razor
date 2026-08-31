@@ -1,0 +1,54 @@
+@namespace NFM.Components
+@inherits Component
+
+<box class="field">
+    <box class="icon" style="color: @IconColor">@Icon</box>
+    <input type="text" value=@text @onchange=OnChange @onkeydown=OnKeyDown />
+</box>
+
+@code {
+    [Parameter, EditorRequired]
+    public required object? Value { get; set; }
+
+    [Parameter, EditorRequired]
+    public required Type NumberType { get; set; }
+
+    [Parameter]
+    public EventCallback<object> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Icon { get; set; } = "multiple_stop";
+
+    [Parameter]
+    public string IconColor { get; set; } = "#A1C35D";
+
+    string text = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        text = Value is null ? string.Empty : string.Format("{0:0.####}", Value);
+        base.OnParametersSet();
+    }
+
+    async Task OnChange(ChangeEventArgs args)
+    {
+        if (NumberParser.TryParse(args.Value as string, NumberType, out object? parsed))
+        {
+            await ValueChanged.InvokeAsync(parsed);
+        }
+
+        // Reset the field even when the value didn't change, so a rejected edit doesn't linger.
+        text = Value is null ? string.Empty : string.Format("{0:0.####}", Value);
+        StateHasChanged();
+    }
+
+    async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await JS.InvokeVoidAsync("blurActiveElement");
+        }
+    }
+
+    [Inject] IJSRuntime JS { get; set; } = null!;
+}

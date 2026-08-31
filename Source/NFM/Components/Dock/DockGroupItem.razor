@@ -1,0 +1,28 @@
+@namespace NFM.Components
+@implements IDockGroupItem
+@typeparam TPanel where TPanel : IPanel
+
+@if (Parent?.ActiveItem == this)
+{
+    <ComponentRenderer Type=@typeof(TPanel)/>
+}
+
+@code {
+    [CascadingParameter]
+    private DockGroup? Parent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public string Name => TPanel.Name;
+    public bool IsTransparent => TPanel.IsTransparent;
+
+    protected override void OnInitialized()
+    {
+        if (Parent is null)
+            throw new ArgumentNullException(nameof(Parent), "DockGroupItem must exist within a DockGroup");
+
+        Parent.AddItem(this);
+        base.OnInitialized();
+    }
+}

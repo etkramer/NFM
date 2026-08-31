@@ -1,0 +1,94 @@
+@namespace NFM.Panels
+@inherits Component
+@implements IPanel
+
+<box class="container">
+    <box class="toolbar-container">
+        <input type="text" class="search" placeholder="Filter.." style="flex: 1" @bind=filter @bind:event="oninput" />
+        @* Focus holds the menu open - its entries aren't focusable, so clicking one keeps it here. *@
+        <box tabindex="0" @onfocusout=@(() => isAddOpen = false)>
+            <div class="add-button btn-soft" @onclick=@(() => isAddOpen = !isAddOpen)>
+                <FontIcon Glyph="add" FontSize="16" />
+            </div>
+            @if (isAddOpen)
+            {
+                <box class="add-menu">
+                    <div class="btn-soft" @onclick=@(() => Add(new ModelNode(null)))>Model</div>
+                    <div class="btn-soft" @onclick=@(() => Add(new CameraNode(null)))>Camera</div>
+                    <div class="btn-soft" @onclick=@(() => Add(new PointLightNode(null)))>Point Light</div>
+                </box>
+            }
+        </box>
+    </box>
+
+    <box class="tree-container">
+        <TreeView TItem="Node" RootItems=@RootNodes GetChildren=@(node => node.Children)
+                  GetIsSelected=@(node => Selection.Selected.Contains(node)) OnClickItem=@OnClickNode>
+            <OutlinerItem Node=@context />
+        </TreeView>
+        <div style="flex: 1" @onmousedown=@(() => Selection.DeselectAll()) />
+    </box>
+</box>
+
+@code {
+    public static string Name => "Outliner";
+
+    static Scene TargetScene => Scene.Main;
+
+    bool isAddOpen;
+
+    string filter = string.Empty;
+    string filteredOn = string.Empty;
+    ObservableCollection<Node>? filtered;
+
+    // The tree tracks its source collection by identity, so a filtered view has to outlive the render.
+    IEnumerable<Node> RootNodes
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                return TargetScene.RootNodes;
+            }
+
+            if (filtered is null || filteredOn != filter)
+            {
+                filteredOn = filter;
+                filtered = new(TargetScene.RootNodes.Where(o => o.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            return filtered;
+        }
+    }
+
+    public OutlinerPanel()
+    {
+        ShouldRenderOnEvent = true;
+    }
+
+    void Add(Node node)
+    {
+        isAddOpen = false;
+        Selection.DeselectAll();
+        Selection.Select(node);
+    }
+
+    void OnClickNode(Node node, MouseEventArgs args)
+    {
+        if (!args.CtrlKey)
+        {
+            Selection.DeselectAll();
+        }
+
+        if (Selection.Selected.Contains(node))
+        {
+            Selection.Deselect(node);
+        }
+        else
+        {
+            Selection.Select(node);
+        }
+    }
+
+    protected override int BuildHashCode() => HashCode.Combine(TargetScene, Selection.Selected.Count);
+}

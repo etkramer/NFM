@@ -1,7 +1,9 @@
-SetWindowLongPtr
-WNDPROC
-WM_NCHITTEST
-WM_PAINT
-HTTRANSPARENT
+DCompositionCreateDevice
+IDCompositionDevice
+IDCompositionTarget
+IDCompositionVisual
+DwmSetWindowAttribute
+DWMWINDOWATTRIBUTE
 InvalidateRect
 ValidateRect
+WM_PAINT

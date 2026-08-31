@@ -1,0 +1,58 @@
+@namespace NFM.Components
+@typeparam TItem where TItem : class
+
+<div>
+    <Virtualize Items=@displayNodes Context="node">
+        <TreeViewItem TItem="TItem" @key=node.Item Node=@node ChildContent=@ChildContent Indent=@Indent
+                      GetIsSelected=@GetIsSelected OnClick=@OnClickItem OnClickExpand=@OnClickExpand />
+    </Virtualize>
+</div>
+
+@code {
+    /// <summary>
+    /// Top-level items to display in the tree.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required IEnumerable<TItem> RootItems { get; set; }
+
+    /// <summary>
+    /// Function to get all children of a given item.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required Func<TItem, IEnumerable<TItem>> GetChildren { get; set; }
+
+    /// <summary>
+    /// Function to check if a given item is selected.
+    /// </summary>
+    [Parameter]
+    public Func<TItem, bool> GetIsSelected { get; set; } = o => false;
+
+    /// <summary>
+    /// Content to be rendered within each item.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment<TItem> ChildContent { get; set; }
+
+    /// <summary>
+    /// Amount of space to indent each level by.
+    /// </summary>
+    [Parameter]
+    public int Indent { get; set; } = 8;
+
+    [Parameter]
+    public Action<TItem, MouseEventArgs> OnClickItem { get; set; } = delegate {};
+
+    public void OnClickExpand(TreeNode node)
+    {
+        if (node.IsExpanded)
+        {
+            CollapseNode(node);
+        }
+        else
+        {
+            ExpandNode(node);
+        }
+
+        StateHasChanged();
+    }
+}

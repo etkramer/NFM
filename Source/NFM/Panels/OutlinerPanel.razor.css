@@ -1,0 +1,40 @@
+.container {
+    flex: 1;
+    flex-direction: column;
+}
+
+.toolbar-container {
+    height: 30px;
+    padding: 4px;
+    column-gap: 4px;
+    position: relative;
+}
+
+.tree-container {
+    flex: 1;
+    flex-direction: column;
+    overflow-y: scroll;
+    background-color: var(--color-bg-2);
+}
+
+.add-menu {
+    position: absolute;
+    right: 4px;
+    top: 28px;
+    z-index: 10;
+    flex-direction: column;
+    min-width: 120px;
+    background-color: var(--color-bg-menu);
+    box-shadow: 1px 1px 1px black;
+}
+
+.add-menu > div {
+    padding: 6px 12px;
+}
+
+::deep .add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+}

@@ -1,0 +1,24 @@
+@font-face {
+  font-family: "Material Icons";
+  src: url("./material-icons.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Material Icons Outlined";
+  src: url("./material-icons-outlined.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Material Icons Round";
+  src: url("./material-icons-round.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Material Icons Sharp";
+  src: url("./material-icons-sharp.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Material Icons Two Tone";
+  src: url("./material-icons-two-tone.woff2") format("woff2");
+}

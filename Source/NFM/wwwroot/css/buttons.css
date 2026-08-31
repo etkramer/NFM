@@ -1,0 +1,57 @@
+:root {
+    --color-btn-bg: #555;
+    --color-btn-bg-active: var(--color-bg-3);
+
+    --color-btn-fg: var(--color-fg-2);
+    --color-btn-fg-hovered: #fff;
+
+    --color-btn-border: #666;
+    --color-btn-border-hovered: #fff;
+
+    --color-btn-primary-bg: var(--color-accent);
+    --color-btn-primary-border: #4883f1;
+}
+
+button {
+    cursor: pointer;
+
+    border-width: 1px;
+    border-style: solid;
+    padding: 0 16px;
+    height: 26px;
+    color: var(--color-btn-fg);
+    background-color: var(--color-btn-bg);
+    border-color: var(--color-btn-border);
+}
+
+button.btn-primary {
+    background-color: var(--color-btn-primary-bg);
+    border-color: var(--color-btn-primary-border);
+}
+
+button:active {
+    background-color: var(--color-btn-bg-active);
+}
+
+button:hover,
+button:active {
+    color: var(--color-btn-fg-hovered);
+    border-color: var(--color-btn-border-hovered);
+}
+
+/*
+* "Soft" buttons are generally i.e. simple divs that can be
+* interacted with but aren't intended to stand out visually.
+*/
+.btn-soft {
+    cursor: pointer;
+}
+
+.btn-soft:hover, .btn-soft:active {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-soft:active {
+    background-color: var(--color-accent-2);
+}

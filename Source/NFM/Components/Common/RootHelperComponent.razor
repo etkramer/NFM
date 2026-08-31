@@ -1,0 +1,25 @@
+@namespace NFM.Components
+@using NFM.Hosting
+@typeparam TComponent where TComponent : IComponent
+@inject IJSRuntime JS
+@inject MainForm Form
+
+<box id="app-root-helper" style="width: 100%; height: 100%">
+    <ComponentRenderer Type=@(typeof(TComponent)) />
+</box>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Tell the form it's ready to appear.
+            Form.Show();
+
+            // Workaround incorrect keyboard navigation when webview is shown "late".
+            await JS.InvokeVoidAsync("blurActiveElement");
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

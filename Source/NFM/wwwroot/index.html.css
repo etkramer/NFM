@@ -1,0 +1,15 @@
+@import "css/app.css";
+
+/*
+* The 3D viewport is composited underneath the page, so everything between the window and a
+* viewport element has to stay unpainted. The window's own background stands in for the base colour.
+*/
+html, body {
+    background: transparent;
+}
+
+#app-root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}

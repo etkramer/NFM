@@ -1,0 +1,31 @@
+@namespace NFM.Components
+@inherits Component
+
+<box style="flex: 1; column-gap: 8px">
+    @for (int i = 0; i < count; i++)
+    {
+        int index = i;
+        <NumberInput Value=@Target.GetComponent(index) NumberType=@ComponentType Icon=@Names[index] IconColor=@Colors[index]
+                     ValueChanged=@(value => Target.SetComponent(index, value)) />
+    }
+</box>
+
+@code {
+    static readonly string[] Names = ["X", "Y", "Z", "W"];
+    static readonly string[] Colors = ["#E26E6E", "#A8CC60", "#84B5E6", "#6E6EE2"];
+
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    int count;
+
+    Type ComponentType => Guard.NotNull(Target.Type.GetProperty("Item")).PropertyType;
+
+    protected override void OnParametersSet()
+    {
+        count = Inspect.ComponentCount(Target.Type);
+        base.OnParametersSet();
+    }
+
+    protected override int BuildHashCode() => Target.Value?.GetHashCode() ?? 0;
+}

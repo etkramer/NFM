@@ -1,0 +1,33 @@
+.container {
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.content-container {
+    flex: 1;
+    padding: 2px;
+    background-color: var(--color-bg-3);
+}
+
+/* Panels that composite against something behind the page get a frame instead of a fill. */
+.content-container.transparent {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-bg-3);
+}
+
+.tab {
+    padding: 0 20px;
+    height: 24px;
+    align-items: center;
+    color: var(--color-fg-subtle);
+}
+
+.tab:hover {
+    color: color-mix(in srgb, var(--color-fg-subtle), var(--color-fg-1));
+}
+
+.tab.active {
+    color: var(--color-fg-2);
+    background-color: var(--color-bg-3);
+}

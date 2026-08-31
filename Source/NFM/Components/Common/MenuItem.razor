@@ -1,0 +1,70 @@
+@namespace NFM.Components
+@using System.ComponentModel
+@inject IJSRuntime JS
+
+<div class="container @(IsExpanded ? "expanded" : "")" tabindex="0" @onpointerenter=OnPointerEnter @onclick=OnClick @ref=containerElement>
+    <box class="item">
+        <p class="label-text">
+            @Label
+        </p>
+        @if (Hotkey != Keys.None && isNested)
+        {
+            <p class="hotkey-text">
+                @GetShortcutText(Hotkey)
+            </p>
+        }
+    </box>
+    <div class="child-container">
+        <CascadingValue Value="true">
+            @ChildContent
+        </CascadingValue>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public Keys Hotkey { get; set; } = Keys.None;
+
+    [Parameter]
+    public Action? OnPress { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public bool IsExpanded => (menu?.IsFocused ?? false) && menu?.LastOpenItem == this;
+
+    [CascadingParameter] MenuBar? menu { get; init; }
+    [CascadingParameter] bool isNested { get; init; }
+
+    ElementReference containerElement;
+
+    async Task OnClick()
+    {
+        if (isNested)
+        {
+            await JS.InvokeVoidAsync("HTMLElement.blur", containerElement);
+        }
+
+        if (OnPress is not null)
+        {
+            await JS.InvokeVoidAsync("setBodyCursor", "wait");
+            FrontendHelpers.InvokeHandled(OnPress);
+            await JS.InvokeVoidAsync("setBodyCursor", "auto");
+        }
+    }
+
+    void OnPointerEnter()
+    {
+        if (isNested)
+        {
+            return;
+        }
+
+        menu?.SetLastOpenItem(this);
+    }
+
+    static string? GetShortcutText(Keys keys) => TypeDescriptor.GetConverter(typeof(Keys)).ConvertToString(keys);
+}

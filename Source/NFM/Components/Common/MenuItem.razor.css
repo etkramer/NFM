@@ -1,0 +1,49 @@
+.container {
+    height: 26px;
+    color: var(--color-fg-1);
+}
+
+.container:hover,
+.container.expanded {
+    color: var(--color-fg-3);
+    background-color: var(--color-bg-menu);
+}
+
+.item {
+    height: 100%;
+    padding: 0 8px;
+    column-gap: 32px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hotkey-text {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hotkey-text {
+    margin-right: 8px;
+}
+
+.child-container {
+    position: absolute;
+    display: none;
+    min-width: 160px;
+    background-color: var(--color-bg-menu);
+    box-shadow: 1px 1px 1px black;
+}
+
+.container.expanded .child-container {
+    display: block;
+}
+
+.child-container .item {
+    padding-left: 42px;
+}
+
+.child-container .item:hover {
+    background-color: var(--color-accent-2);
+}

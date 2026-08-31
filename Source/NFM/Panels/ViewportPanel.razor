@@ -1,0 +1,75 @@
+@namespace NFM.Panels
+@inherits Component
+@implements IPanel
+@inject IJSRuntime JS
+
+<box class="container">
+    <div class="viewport" @ref=element />
+
+    <box class="statusbar">
+        <span>@memoryDisplay</span>
+        <span>@frameTimeDisplay</span>
+    </box>
+</box>
+
+@code {
+    public static string Name => "Viewport";
+
+    // The 3D is composited underneath the page, so nothing here may paint over it.
+    public static bool IsTransparent => true;
+
+    static int nextId;
+
+    readonly int id = ++nextId;
+    ElementReference element;
+
+    string frameTimeDisplay = string.Empty;
+    string memoryDisplay = string.Empty;
+
+    long lastFrameTimeUpdate;
+    long lastMemoryUpdate;
+
+    double frameTimeTotal;
+    int frameTimeCount;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("registerViewport", element, id);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override void OnDispose()
+    {
+        _ = JS.InvokeVoidAsync("unregisterViewport", id);
+    }
+
+    protected override void OnTick()
+    {
+        long now = Environment.TickCount64;
+
+        // A single frame's time is far too noisy to read, so show the mean over the display interval.
+        frameTimeTotal += Metrics.FrameTime;
+        frameTimeCount++;
+
+        if (now - lastFrameTimeUpdate >= 500)
+        {
+            lastFrameTimeUpdate = now;
+            frameTimeDisplay = $"Frametime: {frameTimeTotal / frameTimeCount * 1000:0.00}ms";
+
+            frameTimeTotal = 0;
+            frameTimeCount = 0;
+        }
+
+        if (now - lastMemoryUpdate >= 1000)
+        {
+            lastMemoryUpdate = now;
+            memoryDisplay = $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
+        }
+    }
+
+    protected override int BuildHashCode() => HashCode.Combine(frameTimeDisplay, memoryDisplay);
+}

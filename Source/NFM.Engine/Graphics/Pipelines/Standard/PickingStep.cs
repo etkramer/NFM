@@ -16,7 +16,7 @@ class PickingStep : ViewPass
 
 	// One readback slot per frame in flight, so we never read a slot the GPU could still be writing.
 	// Holds the frame each slot was written on, or MaxValue if it holds nothing.
-	private ulong[] slotFrames = Array.Empty<ulong>();
+	private ulong[] slotFrames = [];
 
 	private readonly StandardResources resources;
 

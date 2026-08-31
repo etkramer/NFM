@@ -1,5 +1,4 @@
-﻿using System.Runtime.ExceptionServices;
-using Avalonia.Threading;
+using System.Runtime.ExceptionServices;
 
 namespace NFM;
 
@@ -13,7 +12,7 @@ public static class FrontendHelpers
 	public static bool HasFaulted { get; private set; } = false;
 
 	/// <summary>
-	/// Wraps a task to support the fancy exception handling UI. Should only use when run from UI thread.
+	/// Runs an action, reporting any exception through the fault dialog. UI thread only.
 	/// </summary>
 	public static bool InvokeHandled(Action action)
 	{
@@ -24,41 +23,72 @@ public static class FrontendHelpers
 
 		try
 		{
-			action?.Invoke();
+			action.Invoke();
 			return true;
 		}
 		catch (Exception e)
 		{
-			HasFaulted = true;
-
-			// Capture stack trace.
-			ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(GetInnermost(e));
-
-			// Create exception dialog.
-			Dispatcher.UIThread.Post(() =>
-			{
-				new Dialog(
-						info.SourceException.GetType().Name,
-						$"An unhandled exception has occured and the game loop has been stopped. If you wish to debug this event further, select Break. Otherwise, select Abort to end the program.\n" +
-						$"{info.SourceException.GetType().Name}: {info.SourceException.Message}\n" +
-						$"{info.SourceException.StackTrace}")
-					.Button("Break", (o) => info.Throw())
-					.Button("Abort", (o) => Environment.Exit(-1)).Show();
-			});
-
+			Report(e);
 			return false;
-		};
+		}
 	}
 
-	private static Exception GetInnermost(Exception ex)
+	/// <summary>
+	/// Runs an asynchronous action, reporting any exception through the fault dialog. UI thread only.
+	/// </summary>
+	public static async Task<bool> InvokeHandledAsync(Func<Task> action)
 	{
-		if (ex.InnerException is null || ex.InnerException == ex)
+		if (HasFaulted)
 		{
-			return ex;
+			return false;
 		}
-		else
+
+		try
 		{
-			return GetInnermost(ex.InnerException);
+			await action.Invoke();
+			return true;
 		}
+		catch (Exception e)
+		{
+			Report(e);
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// Reports an exception through the fault dialog. UI thread only.
+	/// </summary>
+	public static void Report(Exception e)
+	{
+		HasFaulted = true;
+
+		ExceptionDispatchInfo info = ExceptionDispatchInfo.Capture(GetInnermost(e));
+		Exception source = info.SourceException;
+
+		DialogResult result = MessageBox.Show(
+			$"An unhandled exception has occured and the game loop has been stopped. Select Retry to break into the debugger, or Abort to end the program.\n\n" +
+			$"{source.GetType().Name}: {source.Message}\n\n{source.StackTrace}",
+			source.GetType().Name,
+			MessageBoxButtons.AbortRetryIgnore,
+			MessageBoxIcon.Error);
+
+		if (result == DialogResult.Retry)
+		{
+			info.Throw();
+		}
+		else if (result == DialogResult.Abort)
+		{
+			Environment.Exit(-1);
+		}
+	}
+
+	private static Exception GetInnermost(Exception e)
+	{
+		if (e.InnerException is null || e.InnerException == e)
+		{
+			return e;
+		}
+
+		return GetInnermost(e.InnerException);
 	}
 }

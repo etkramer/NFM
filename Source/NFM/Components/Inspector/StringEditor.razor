@@ -1,0 +1,14 @@
+@namespace NFM.Components
+@inherits Component
+
+<box class="field">
+    <box class="icon" style="color: #E6E62E">edit</box>
+    <input type="text" value=@(Target.Value as string) @onchange=@(e => Target.Value = e.Value as string) />
+</box>
+
+@code {
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    protected override int BuildHashCode() => Target.Value?.GetHashCode() ?? 0;
+}

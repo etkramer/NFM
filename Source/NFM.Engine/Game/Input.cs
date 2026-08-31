@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using System.Windows.Forms;
 
 namespace NFM;
 
@@ -14,8 +14,8 @@ public static class Input
 	public static object? InputSource { get; private set; }
 
 	// Store button states.
-	private static Dictionary<MouseButton, ButtonState> mouseStates = new();
-	private static Dictionary<Key, ButtonState> keyStates = new();
+	private static Dictionary<MouseButtons, ButtonState> mouseStates = new();
+	private static Dictionary<Keys, ButtonState> keyStates = new();
 
 	// Store pointer states.
 	private static bool wasMouseMoved = false;
@@ -25,7 +25,7 @@ public static class Input
 	/// <summary>
 	/// Checks if the specified key is currently being pressed.
 	/// </summary>
-	public static bool IsDown(Key key)
+	public static bool IsDown(Keys key)
 	{
 		if (keyStates.TryGetValue(key, out ButtonState state))
 		{
@@ -38,7 +38,7 @@ public static class Input
 	/// <summary>
 	/// Checks if the specified key is currently being pressed.
 	/// </summary>
-	public static bool IsDown(MouseButton button)
+	public static bool IsDown(MouseButtons button)
 	{
 		if (mouseStates.TryGetValue(button, out ButtonState state))
 		{
@@ -74,28 +74,36 @@ public static class Input
 	}
 
 	/// <summary>
-	/// Updates the input system with a new mouse event.
+	/// Updates the input system with a new mouse event. <paramref name="source"/> identifies whichever
+	/// host currently owns the pointer, and is null when it belongs to none of them.
 	/// </summary>
-	public static void UpdateMouse(PointerPoint point)
+	public static void UpdateMouse(Vector2 position, bool left, bool right, bool middle, object? source)
 	{
-		// Update mouse pointer.
-		mousePos = new Vector2((float)point.Position.X, (float)point.Position.Y);
+		mousePos = position;
 		wasMouseMoved = true;
 
-		// Update mouse buttons.
-		mouseStates[MouseButton.Left] = point.Properties.IsLeftButtonPressed ? ButtonState.Down : ButtonState.Up;
-		mouseStates[MouseButton.Right] = point.Properties.IsRightButtonPressed ? ButtonState.Down : ButtonState.Up;
-		mouseStates[MouseButton.Middle] = point.Properties.IsMiddleButtonPressed ? ButtonState.Down : ButtonState.Up;
+		mouseStates[MouseButtons.Left] = left ? ButtonState.Down : ButtonState.Up;
+		mouseStates[MouseButtons.Right] = right ? ButtonState.Down : ButtonState.Up;
+		mouseStates[MouseButtons.Middle] = middle ? ButtonState.Down : ButtonState.Up;
 
-		// Update captured input source.
-		InputSource = point.Pointer.Captured;
+		InputSource = source;
 	}
 
 	/// <summary>
 	/// Updates the input system with a new keyboard input.
 	/// </summary>
-	public static void UpdateKey(Key key, bool down)
+	public static void UpdateKey(Keys key, bool down)
 	{
 		keyStates[key] = down ? ButtonState.Down : ButtonState.Up;
+	}
+
+	/// <summary>
+	/// Drops every held key. Used when the window loses focus, which would otherwise leave
+	/// keys stuck down until they're next pressed.
+	/// </summary>
+	public static void ReleaseAll()
+	{
+		keyStates.Clear();
+		mouseStates.Clear();
 	}
 }

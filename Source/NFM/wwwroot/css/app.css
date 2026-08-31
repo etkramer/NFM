@@ -1,0 +1,44 @@
+@import "reset.css";
+@import "buttons.css";
+@import "inputs.css";
+@import "scrollbar.css";
+@import "../libs/material-design-icons/index.css";
+
+:root {
+    --color-bg-1: #1a1a1a;
+    --color-bg-2: #202020;
+    --color-bg-3: #383838;
+    --color-bg-menu: #444444;
+
+    --color-fg-1: #c0c0c0;
+    --color-fg-2: #dedede;
+    --color-fg-3: #ffffff;
+    --color-fg-subtle: #888888;
+
+    --color-accent: #3472e6;
+    --color-accent-2: #3c6cb4;
+}
+
+body {
+    color: var(--color-fg-2);
+}
+
+html {
+    font-family: Segoe UI;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+}
+
+box {
+    display: flex;
+}
+
+box > * {
+    min-height: 0;
+    min-width: 0;
+}
+
+:focus-visible {
+    outline: darkgrey dashed 1px;
+}

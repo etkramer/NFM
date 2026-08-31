@@ -14,6 +14,11 @@ public class Swapchain : IDisposable
 	public Texture RT => backbuffers[swapchain.CurrentBackBufferIndex];
 	public Vector2i Size { get; private set; }
 
+	/// <summary>
+	/// The underlying IDXGISwapChain, for use as the content of a composition visual.
+	/// </summary>
+	public IntPtr NativePointer => swapchain.NativePointer;
+
 	private IDXGISwapChain4 swapchain;
 	private Texture[] backbuffers;
 
@@ -30,21 +35,44 @@ public class Swapchain : IDisposable
 			flags |= SwapChainFlags.AllowTearing;
 		}
 
-		// Describe swapchain.
-		SwapChainDescription1 swapchainDesc = new()
-		{
-			BufferCount = D3DContext.RenderLatency,
-			Width = 0,
-			Height = 0,
-			Format = D3DContext.RTFormat,
-			BufferUsage = Usage.RenderTargetOutput,
-			SwapEffect = SwapEffect.FlipDiscard,
-			SampleDescription = new SampleDescription(1, 0),
-			Flags = flags,
-		};
+		SwapChainDescription1 swapchainDesc = Describe(0, 0, AlphaMode.Unspecified);
+		Init(Guard.NotNull(D3DContext.DXGIFactory).CreateSwapChainForHwnd(D3DContext.GraphicsQueue, hwnd, swapchainDesc));
+	}
 
-		// Create swapchain.
-		swapchain = Guard.NotNull(D3DContext.DXGIFactory).CreateSwapChainForHwnd(D3DContext.GraphicsQueue, hwnd, swapchainDesc).QueryInterface<IDXGISwapChain4>();
+	/// <summary>
+	/// Creates a swapchain for use as the content of a composition visual. Unlike the hwnd variant, this
+	/// can't infer its size from a window, and DWM composites the result - so tearing isn't available.
+	/// </summary>
+	public Swapchain(Vector2i size, int presentInterval = 0)
+	{
+		PresentInterval = presentInterval;
+
+		flags = SwapChainFlags.None;
+		flags |= SwapChainFlags.FrameLatencyWaitableObject;
+
+		SwapChainDescription1 swapchainDesc = Describe(MathHelper.Max(size.X, 1), MathHelper.Max(size.Y, 1), AlphaMode.Ignore);
+		Init(Guard.NotNull(D3DContext.DXGIFactory).CreateSwapChainForComposition(D3DContext.GraphicsQueue, swapchainDesc));
+	}
+
+	private SwapChainDescription1 Describe(int width, int height, AlphaMode alphaMode) => new()
+	{
+		BufferCount = D3DContext.RenderLatency,
+		Width = width,
+		Height = height,
+		Format = D3DContext.RTFormat,
+		BufferUsage = Usage.RenderTargetOutput,
+		SwapEffect = SwapEffect.FlipDiscard,
+		AlphaMode = alphaMode,
+		Scaling = Scaling.Stretch,
+		SampleDescription = new SampleDescription(1, 0),
+		Flags = flags,
+	};
+
+	[MemberNotNull(nameof(backbuffers), nameof(swapchain))]
+	private void Init(IDXGISwapChain1 created)
+	{
+		swapchain = created.QueryInterface<IDXGISwapChain4>();
+		created.Release();
 
 		// Update size to match actual used by swapchain.
 		var swapchainSize = swapchain.SourceSize;
@@ -90,7 +118,8 @@ public class Swapchain : IDisposable
 			throw new InvalidOperationException("Resource is in wrong state for present!");
 		}
 
-		Guard.Require(swapchain.Present(PresentInterval, (PresentInterval == 0 && D3DContext.SupportsTearing) ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
+		bool allowTearing = PresentInterval == 0 && flags.HasFlag(SwapChainFlags.AllowTearing);
+		Guard.Require(swapchain.Present(PresentInterval, allowTearing ? PresentFlags.AllowTearing : PresentFlags.None).Success, "Swapchain present failed");
 	}
 
 	public void Resize(Vector2i size)

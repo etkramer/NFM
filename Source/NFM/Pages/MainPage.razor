@@ -1,0 +1,105 @@
+@namespace NFM.Components
+
+<PageTitle>Editor</PageTitle>
+
+<box class="container">
+    <MenuBar>
+        <MenuItem Label="File">
+            <MenuItem Label="New" OnPress=@OnPressNew/>
+            <MenuItem Label="Open" OnPress=@OnPressOpen Hotkey=@(Keys.Control | Keys.O) />
+            <MenuItem Label="Save" OnPress=@OnPressSave Hotkey=@(Keys.Control | Keys.S) />
+            <MenuItem Label="Save as" OnPress=@OnPressSaveAs Hotkey=@(Keys.Control | Keys.Shift | Keys.S) />
+            <MenuSeparator/>
+            <MenuItem Label="Quit" OnPress=@Application.Exit/>
+        </MenuItem>
+        <MenuItem Label="Edit">
+            <MenuItem Label="Copy" Hotkey=@(Keys.Control | Keys.C) />
+            <MenuItem Label="Paste"/>
+            <MenuSeparator/>
+            <MenuItem Label="Delete" OnPress=@OnPressDelete Hotkey=@(Keys.Delete) />
+        </MenuItem>
+    </MenuBar>
+
+    <box class="dock-container">
+        <DockManager ConfigPath="Config/Layout.json" DefaultLayout=@(BuildDefaultDockLayout()) @ref=dock />
+    </box>
+</box>
+
+@code {
+    DockManager? dock;
+
+    void OnPressNew()
+    {
+        Project.Reset();
+    }
+
+    void OnPressSave()
+    {
+        if (Project.Path is null)
+        {
+            OnPressSaveAs();
+            return;
+        }
+
+        Project.Save(Project.Path);
+        Guard.NotNull(dock).SaveToDisk();
+    }
+
+    void OnPressSaveAs()
+    {
+        using (var fileDialog = new SaveFileDialog())
+        {
+            fileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            fileDialog.RestoreDirectory = true;
+
+            if (fileDialog.ShowDialog() is DialogResult.OK)
+            {
+                Project.Save(fileDialog.FileName);
+                Guard.NotNull(dock).SaveToDisk();
+            }
+        }
+    }
+
+    void OnPressOpen()
+    {
+        using (var fileDialog = new OpenFileDialog())
+        {
+            fileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            fileDialog.RestoreDirectory = true;
+
+            if (fileDialog.ShowDialog() is DialogResult.OK)
+            {
+                Project.Load(fileDialog.FileName);
+            }
+        }
+    }
+
+    void OnPressDelete()
+    {
+        // Delete all selected nodes
+        foreach (var node in Selection.Selected.OfType<Node>().ToArray())
+        {
+            node.Dispose();
+        }
+    }
+
+    DockManager.Layout BuildDefaultDockLayout() => new()
+    {
+        Tabs = [Guard.NotNull(typeof(ViewportPanel).FullName), Guard.NotNull(typeof(TimelinePanel).FullName)],
+        Right = new()
+        {
+            Tabs = [Guard.NotNull(typeof(InspectorPanel).FullName)],
+            Split = 0.13,
+            Top = new()
+            {
+                Tabs = [Guard.NotNull(typeof(OutlinerPanel).FullName)],
+                Split = 0.26
+            }
+        },
+        Bottom = new()
+        {
+            Tabs = [Guard.NotNull(typeof(LibraryPanel).FullName)],
+            Split = 0.26
+        }
+    };
+}

@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+﻿using System.Windows.Forms;
 using NFM.GPU;
 using NFM.World;
 using NFM.Threading;
@@ -63,7 +63,7 @@ public class Viewport : IDisposable
 		const float sprintMult = 2.5f;
 
 		// WASD Camera (RMB)
-		if (Input.IsDown(MouseButton.Right) && Input.InputSource == HostControl)
+		if (Input.IsDown(MouseButtons.Right) && Input.InputSource == HostControl)
 		{
 			// Mouse look
 			Vector3 cameraRotation = Camera.Rotation;
@@ -74,19 +74,19 @@ public class Viewport : IDisposable
 
 			// Movement
 			Vector3 accelVector = Vector3.Zero;
-			if (Input.IsDown(Key.W))
+			if (Input.IsDown(Keys.W))
 			{
 				accelVector.Y -= 1;
 			}
-			if (Input.IsDown(Key.S))
+			if (Input.IsDown(Keys.S))
 			{
 				accelVector.Y += 1;
 			}
-			if (Input.IsDown(Key.A))
+			if (Input.IsDown(Keys.A))
 			{
 				accelVector.X += 1;
 			}
-			if (Input.IsDown(Key.D))
+			if (Input.IsDown(Keys.D))
 			{
 				accelVector.X -= 1;
 			}
@@ -94,20 +94,20 @@ public class Viewport : IDisposable
 			// Transform WASD accelerations by camera direction.
 			accelVector = Vector3.TransformVector(accelVector, Matrix4.CreateRotation(Camera.Rotation));
 
-			if (Input.IsDown(Key.Space))
+			if (Input.IsDown(Keys.Space))
 			{
 				accelVector.Z += 1;
 			}
-			if (Input.IsDown(Key.C))
+			if (Input.IsDown(Keys.C))
 			{
 				accelVector.Z -= 1;
 			}
 
 			// Apply acceleration to velocity.
-			flyVelocity += (accelVector * acceleration * (Input.IsDown(Key.LeftShift) ? sprintMult : 1)) * (float)deltaTime;
+			flyVelocity += (accelVector * acceleration * (Input.IsDown(Keys.LShiftKey) ? sprintMult : 1)) * (float)deltaTime;
 		}
 		// Pan Camera (Alt+Shift+LMB)
-		else if (Input.IsDown(MouseButton.Left) && Input.IsDown(Key.LeftAlt) && Input.IsDown(Key.LeftShift))
+		else if (Input.IsDown(MouseButtons.Left) && Input.IsDown(Keys.LMenu) && Input.IsDown(Keys.LShiftKey))
 		{
 			Vector3 panVector = new Vector3()
 			{

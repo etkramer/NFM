@@ -1,0 +1,59 @@
+input, input:focus {
+    outline: none;
+}
+
+input[type=text],
+input[type=number] {
+    background-color: var(--color-bg-2);
+    color: inherit;
+    border-width: 0;
+    padding-left: 4px;
+
+    color: var(--color-fg-1);
+    min-height: 20px;
+}
+
+input[type=text].search:focus {
+    outline-color: var(--color-accent);
+    outline-width: 1px;
+    outline-style: solid;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.field {
+    flex: 1;
+    align-items: stretch;
+    background-color: var(--color-bg-2);
+    border-radius: 2px;
+    padding: 1px;
+    overflow: hidden;
+}
+
+.field > .icon {
+    flex: 0 0 20px;
+    min-height: 20px;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 14px;
+    font-family: "Material Icons", "Segoe UI";
+    font-weight: bold;
+    background-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.field > input,
+.field > .value {
+    flex: 1;
+    width: 100%;
+    align-self: center;
+    background: transparent;
+    padding: 0 4px;
+    color: var(--color-fg-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

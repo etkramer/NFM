@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
         <LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
@@ -30,11 +31,5 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Modules\NFM.Common\NFM.Common.csproj" />
 		<ProjectReference Include="..\Modules\NFM.GPU\NFM.GPU.csproj" />
-		<ProjectReference Include="..\Modules\NFM.Generators\NFM.Generators.csproj" OutputItemType="Analyzer" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="12.1.1" />
-		<PackageReference Include="WinApi" Version="4.0.0" />
 	</ItemGroup>
 </Project>

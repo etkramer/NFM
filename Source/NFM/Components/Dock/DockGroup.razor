@@ -1,0 +1,47 @@
+@namespace NFM.Components
+
+<box class="container">
+    <box>
+        @foreach (IDockGroupItem item in items)
+        {
+            <box class="tab @(ActiveItem == item ? "active" : "")" @onpointerdown=@((e) => OnTabPointerDown(e, item))>
+                @item.Name
+            </box>
+        }
+    </box>
+
+    <box class="content-container @(ActiveItem?.IsTransparent == true ? "transparent" : "")">
+        <CascadingValue Value="this">
+            @ChildContent
+        </CascadingValue>
+    </box>
+</box>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public IDockGroupItem? ActiveItem { get; private set; }
+    List<IDockGroupItem> items = new();
+
+    internal void AddItem(IDockGroupItem item)
+    {
+        items.Add(item);
+        if (items.Count == 1)
+        {
+            ActiveItem = item;
+        }
+
+        StateHasChanged();
+    }
+
+    void OnTabPointerDown(PointerEventArgs args, IDockGroupItem item)
+    {
+        if (args.Button != 0)
+        {
+            return;
+        }
+
+        ActiveItem = item;
+    }
+}

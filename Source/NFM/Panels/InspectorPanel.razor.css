@@ -1,0 +1,68 @@
+.container {
+    flex: 1;
+    flex-direction: column;
+}
+
+.toolbar {
+    height: 30px;
+    padding: 4px;
+}
+
+.header {
+    height: 50px;
+    background-color: var(--color-bg-2);
+
+    align-items: center;
+    color: #b0e24d;
+    padding-left: 8px;
+    column-gap: 8px;
+}
+
+.header-names {
+    flex-direction: column;
+}
+
+.displayname {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.typename {
+    color: #b0e24dbe;
+}
+
+.properties {
+    flex: 1;
+    flex-direction: column;
+    row-gap: 8px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.separator {
+    flex: 0 0 1px;
+    background-color: var(--color-bg-1);
+}
+
+.property {
+    align-items: center;
+}
+
+.property-name {
+    flex: 0 0 33.333%;
+    align-self: flex-start;
+    padding: 2px 0 0 14px;
+    font-size: 11px;
+    color: var(--color-fg-2);
+}
+
+.property-field {
+    flex: 1;
+    align-items: center;
+    padding-right: 10px;
+}
+
+.unsupported {
+    color: var(--color-fg-subtle);
+    font-style: italic;
+}

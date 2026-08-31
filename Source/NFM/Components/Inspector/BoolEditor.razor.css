@@ -1,0 +1,19 @@
+input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    border: 1px solid var(--color-bg-3);
+    border-radius: 2px;
+    background-color: var(--color-bg-2);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+input[type="checkbox"]:hover {
+    border-color: var(--color-fg-subtle);
+}
+
+input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%23dedede' d='M6.2 11.7 2.9 8.4 4 7.3l2.2 2.2 5.8-5.8 1.1 1.1z'/></svg>");
+}

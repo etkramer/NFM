@@ -1,0 +1,11 @@
+@namespace NFM.Components
+@inherits Component
+
+<NumberInput Value=@Target.Value NumberType=@Target.Type ValueChanged=@(value => Target.Value = value) />
+
+@code {
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    protected override int BuildHashCode() => Target.Value?.GetHashCode() ?? 0;
+}

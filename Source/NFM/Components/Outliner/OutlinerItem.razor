@@ -1,0 +1,16 @@
+@namespace NFM.Components
+@inherits Component
+
+<div style="padding: 4px 0">
+    @Node.Name
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Node Node { get; set; }
+
+    protected override int BuildHashCode()
+    {
+        return Node.Name.GetHashCode();
+    }
+}

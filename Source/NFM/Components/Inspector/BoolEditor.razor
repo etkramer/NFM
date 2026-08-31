@@ -1,0 +1,11 @@
+@namespace NFM.Components
+@inherits Component
+
+<input type="checkbox" checked=@(Target.Value as bool? == true) @onchange=@(e => Target.Value = e.Value is true) />
+
+@code {
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    protected override int BuildHashCode() => Target.Value?.GetHashCode() ?? 0;
+}

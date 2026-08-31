@@ -1,0 +1,52 @@
+@namespace NFM.Components
+@inherits Component
+@typeparam TItem where TItem : class
+
+<box class="item @(GetIsSelected(Node.Item) ? "selected" : "")" style="padding-left: @(Node.IndentLevel * Indent)px" tabindex="0">
+    <box class="item-expand-container" @onclick=@(() => OnClickExpand(Node))>
+        @if (Node.Children.Count > 0)
+        {
+            <FontIcon Glyph=@(Node.IsExpanded ? "\uE96E" : "\uE970") FontFamily="Segoe MDL2 Assets" FontSize="10" />
+        }
+    </box>
+    <div style="flex: 1" @onmousedown=@((e) => OnClick(Node.Item, e))>
+        @ChildContent.Invoke(Node.Item)
+    </div>
+</box>
+
+@code {
+    /// <summary>
+    /// Function to check if a given item is selected.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required TreeView<TItem>.TreeNode Node { get; set; }
+
+    /// <summary>
+    /// Function to check if a given item is selected.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required Func<TItem, bool> GetIsSelected { get; set; } = (o) => false;
+
+    /// <summary>
+    /// Content to be rendered within each item.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment<TItem> ChildContent { get; set; }
+
+    /// <summary>
+    /// Amount of space to indent each level by.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required int Indent { get; set; }
+
+    [Parameter, EditorRequired]
+    public required Action<TItem, MouseEventArgs> OnClick { get; set; } = delegate { };
+
+    [Parameter, EditorRequired]
+    public required Action<TreeView<TItem>.TreeNode> OnClickExpand { get; set; } = delegate { };
+
+    protected override int BuildHashCode()
+    {
+        return GetIsSelected.Invoke(Node.Item).GetHashCode();
+    }
+}

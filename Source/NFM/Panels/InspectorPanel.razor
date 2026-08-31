@@ -1,0 +1,98 @@
+@namespace NFM.Panels
+@inherits Component
+@implements IPanel
+
+<box class="container">
+    <box class="toolbar">
+        <input type="text" class="search" placeholder="Filter.." style="flex: 1" @bind=filter @bind:event="oninput" />
+    </box>
+
+    <box class="header">
+        <FontIcon Glyph=@TypeIcon FontSize="26" FontFamily="Material Icons Outlined" />
+        <box class="header-names">
+            <span class="displayname">@DisplayName</span>
+            <span class="typename">@TypeName</span>
+        </box>
+    </box>
+
+    <box class="properties">
+        @foreach ((IGrouping<Type, InspectedProperty> group, int index) in Properties.Select((o, i) => (o, i)))
+        {
+            @if (index > 0)
+            {
+                <div class="separator" />
+            }
+
+            @foreach (InspectedProperty property in group)
+            {
+                <box class="property">
+                    <span class="property-name">@property.DisplayName</span>
+                    <box class="property-field">
+                        @if (Inspect.GetEditor(property.Type) is Type editor)
+                        {
+                            <ComponentRenderer Type=@editor Target=@property />
+                        }
+                        else
+                        {
+                            <span class="unsupported">@property.Type.Name</span>
+                        }
+                    </box>
+                </box>
+            }
+        }
+    </box>
+</box>
+
+@code {
+    public static string Name => "Inspector";
+
+    string filter = string.Empty;
+
+    IReadOnlyList<ISelectable> Selected => Selection.Selected;
+
+    Type? SharedType => Selected.Count == 0 ? null : ReflectionHelper.FindCommonAncestor(Selected.Select(o => o.GetType()));
+
+    string TypeName => SharedType?.Name ?? "None";
+    string TypeIcon => SharedType?.TryGetAttribute(out IconAttribute? icon) == true ? icon!.IconGlyph : "question_mark";
+
+    string DisplayName => Selected.Count switch
+    {
+        0 => "None",
+        1 => Selected[0].Name,
+        _ => $"({Selected.Count} objects)"
+    };
+
+    // Grouped by declaring type, so inherited properties sit under their own heading.
+    IEnumerable<IGrouping<Type, InspectedProperty>> Properties
+    {
+        get
+        {
+            if (SharedType is null)
+            {
+                return [];
+            }
+
+            object[] subjects = Selected.Cast<object>().ToArray();
+
+            return SharedType.GetProperties()
+                .Where(o => o.HasAttribute<InspectAttribute>())
+                .Where(o => string.IsNullOrWhiteSpace(filter) || o.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                .Select(o => new InspectedProperty(subjects, o))
+                .GroupBy(o => o.Property.DeclaringType!)
+                .Reverse();
+        }
+    }
+
+    protected override int BuildHashCode()
+    {
+        HashCode hash = new();
+        hash.Add(filter);
+
+        foreach (ISelectable item in Selected)
+        {
+            hash.Add(item);
+        }
+
+        return hash.ToHashCode();
+    }
+}
