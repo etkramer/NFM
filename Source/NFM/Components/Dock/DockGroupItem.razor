@@ -2,10 +2,10 @@
 @implements IDockGroupItem
 @typeparam TPanel where TPanel : IPanel
 
-@if (Parent?.ActiveItem == this)
-{
+@* Inactive panels stay mounted so their state (cameras, scroll positions) survives a tab switch. *@
+<box style="display: @(Parent?.ActiveItem == this ? "contents" : "none")">
     <ComponentRenderer Type=@typeof(TPanel)/>
-}
+</box>
 
 @code {
     [CascadingParameter]
