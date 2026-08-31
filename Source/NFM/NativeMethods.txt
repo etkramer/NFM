@@ -4,6 +4,8 @@ IDCompositionTarget
 IDCompositionVisual
 DwmSetWindowAttribute
 DWMWINDOWATTRIBUTE
+SetWindowLongPtr
+WINDOW_LONG_PTR_INDEX
 InvalidateRect
 ValidateRect
 WM_PAINT

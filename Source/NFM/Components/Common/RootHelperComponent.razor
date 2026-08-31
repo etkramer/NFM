@@ -1,20 +1,41 @@
 @namespace NFM.Components
+@implements IDisposable
 @using NFM.Hosting
 @typeparam TComponent where TComponent : IComponent
 @inject IJSRuntime JS
-@inject MainForm Form
+@inject Form Form
 
-<box id="app-root-helper" style="width: 100%; height: 100%">
+<box id="app-root-helper" style="width: 100%; height: 100%" @ref=boxElement>
     <ComponentRenderer Type=@(typeof(TComponent)) />
 </box>
 
 @code {
+    ElementReference? boxElement = null;
+    readonly DotNetObjectReference<RootHelperComponent<TComponent>> objectReference;
+
+    public RootHelperComponent()
+    {
+        objectReference = DotNetObjectReference.Create(this);
+    }
+
+    public void Dispose()
+    {
+        objectReference?.Dispose();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && Form is IComponentForm componentForm)
         {
+            // If needed, create a callback to update the form size alongside the content.
+            if (componentForm.UseContentSize)
+            {
+                var child = await GetChildElement();
+                await JS.InvokeVoidAsync("addResizeCallback", child, objectReference, "OnChildSizeChanged");
+            }
+
             // Tell the form it's ready to appear.
-            Form.Show();
+            componentForm.Show();
 
             // Workaround incorrect keyboard navigation when webview is shown "late".
             await JS.InvokeVoidAsync("blurActiveElement");
@@ -22,4 +43,20 @@
 
         await base.OnAfterRenderAsync(firstRender);
     }
+
+    [JSInvokable]
+    public async Task OnChildSizeChanged()
+    {
+        if (Form is IComponentForm componentForm)
+        {
+            var child = await GetChildElement();
+            var width = await JS.InvokeAsync<double>("HTMLElement.getClientWidth", child);
+            var height = await JS.InvokeAsync<double>("HTMLElement.getClientHeight", child);
+
+            componentForm.ClientWidth = (int)width;
+            componentForm.ClientHeight = (int)height;
+        }
+    }
+
+    Task<IJSObjectReference> GetChildElement() => JS.InvokeAsync<IJSObjectReference>("HTMLElement.getChild", boxElement, 0).AsTask();
 }
