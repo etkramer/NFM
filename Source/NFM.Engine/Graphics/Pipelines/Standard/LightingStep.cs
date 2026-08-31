@@ -24,6 +24,7 @@ class LightingStep : ViewPass
 		// Compile indirect compute program.
 		lightingPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/LightingCS.hlsl"), ShaderStage.Compute))
+			.AsRootConstant(0, 1)
 			.Compile().Result;
 	}
 
@@ -39,6 +40,7 @@ class LightingStep : ViewPass
 		list.SetPipelineSRV(1, 0, ctx.Get(resources.MatBuffer1));
 		list.SetPipelineSRV(2, 0, ctx.Get(resources.MatBuffer2));
 		list.SetPipelineSRV(3, 0, ctx.Get(resources.DepthBuffer));
+		list.SetPipelineConstants(0, 0, (int)ctx.Camera.DisplayMode);
 
 		list.DispatchThreads(colorTarget.Width, 32, colorTarget.Height, 32);
 	}

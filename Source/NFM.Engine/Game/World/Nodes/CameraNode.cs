@@ -11,6 +11,9 @@ public class CameraNode : Node
 	// Instance buffer offset under PickCoords, or -1 for empty space. Trails PickCoords by a frame or two.
 	internal int HoveredInstance { get; set; } = -1;
 
+	// What the lighting pass should output for this camera.
+	public DisplayMode DisplayMode { get; set; }
+
 	[Inspect]
 	public uint FocalLength { get; set; } = 35;
 

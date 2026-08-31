@@ -8,6 +8,14 @@ Texture2D<half4> MatBuffer1 : register(t1);
 Texture2D<float4> MatBuffer2 : register(t2);
 Texture2D<float> DepthBuffer : register(t3);
 
+int DisplayMode : register(b0);
+
+#define DISPLAY_UNLIT 0
+#define DISPLAY_NORMALS 1
+#define DISPLAY_METALLIC 2
+#define DISPLAY_SPECULAR 3
+#define DISPLAY_ROUGHNESS 4
+
 [numthreads(32, 32, 1)]
 void main(uint2 id : SV_DispatchThreadID)
 {
@@ -32,6 +40,15 @@ void main(uint2 id : SV_DispatchThreadID)
 	float3 albedo = MatBuffer0[id].rgb;
 	half3 normal = MatBuffer1[id].rgb;
 	float3 msr = MatBuffer2[id].rgb;
-	
-	RT[id] = SRGBToLinear(float4(albedo, 1));
+
+	float3 color = albedo;
+	switch (DisplayMode)
+	{
+		case DISPLAY_NORMALS: color = normal * 0.5 + 0.5; break;
+		case DISPLAY_METALLIC: color = msr.r; break;
+		case DISPLAY_SPECULAR: color = msr.g; break;
+		case DISPLAY_ROUGHNESS: color = msr.b; break;
+	}
+
+	RT[id] = SRGBToLinear(float4(color, 1));
 }

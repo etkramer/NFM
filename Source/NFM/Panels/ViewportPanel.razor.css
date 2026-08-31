@@ -7,11 +7,41 @@
     flex: 1;
 }
 
+/* The dock frame's 2px inset is the same colour as the bar, so the bar has to reach under it to read as one band. */
 .statusbar {
-    flex: 0 0 26px;
+    flex: 0 0 28px;
+    margin: 0 -2px -2px;
     background-color: var(--color-bg-3);
     align-items: center;
     justify-content: flex-end;
     column-gap: 10px;
-    padding: 0 10px;
+    padding: 0 12px;
+    position: relative;
+}
+
+.mode-picker {
+    margin-right: auto;
+    margin-left: -6px;
+    align-self: stretch;
+}
+
+.mode-menu {
+    position: absolute;
+    left: 6px;
+    bottom: 100%;
+    z-index: 10;
+    flex-direction: column;
+    min-width: 140px;
+    background-color: var(--color-bg-menu);
+    box-shadow: 1px 1px 1px black;
+}
+
+.mode-menu > div {
+    padding: 6px 12px;
+}
+
+::deep .mode-button {
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
 }
