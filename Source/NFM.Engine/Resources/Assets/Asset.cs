@@ -14,6 +14,13 @@ public abstract class Asset
 	public string Path { get; set; }
 	public string Name => Path.Split('/').Last();
 
+	/// <summary>
+	/// The type of resource this asset produces.
+	/// </summary>
+	public abstract Type ResourceType { get; }
+
+	internal abstract Task<GameResource> GetResourceAsync();
+
     protected internal Asset(string path) { Path = path; }
 
 	/// <summary>
@@ -42,12 +49,27 @@ public abstract class Asset
 
 		return null;
 	}
+
+	/// <summary>
+	/// Asynchronously retrieves the asset at the given path, as a resource of the given type.
+	/// </summary>
+	public static async Task<GameResource?> LoadAsync(string path, Type resourceType)
+	{
+		if (Assets.TryGetValue(path, out Asset? asset) && resourceType.IsAssignableFrom(asset.ResourceType))
+		{
+			return await asset.GetResourceAsync();
+		}
+
+		return null;
+	}
 }
 
 public sealed class Asset<T> : Asset where T : GameResource
 {
     public bool IsLoaded => cache is not null;
     public bool IsFullyLoaded => cache is not null && cache.IsFullyLoaded;
+
+	public override Type ResourceType => typeof(T);
 
 	readonly ResourceLoader<T> loader;
 
@@ -88,4 +110,6 @@ public sealed class Asset<T> : Asset where T : GameResource
 
 		return loadingTask;
 	}
+
+	internal override async Task<GameResource> GetResourceAsync() => await GetAsync();
 }

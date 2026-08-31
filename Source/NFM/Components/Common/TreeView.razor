@@ -4,7 +4,9 @@
 <div>
     <Virtualize Items=@displayNodes Context="node">
         <TreeViewItem TItem="TItem" @key=node.Item Node=@node ChildContent=@ChildContent Indent=@Indent
-                      GetIsSelected=@GetIsSelected OnClick=@OnClickItem OnClickExpand=@OnClickExpand />
+                      GetIsSelected=@GetIsSelected OnClick=@OnClickItem OnClickExpand=@OnClickExpand
+                      GetIsDropTarget=@GetIsDropTarget OnPointerDown=@OnPointerDownItem
+                      OnPointerMove=@OnPointerMoveItem OnPointerUp=@OnPointerUpItem />
     </Virtualize>
 </div>
 
@@ -42,17 +44,29 @@
     [Parameter]
     public Action<TItem, MouseEventArgs> OnClickItem { get; set; } = delegate {};
 
+    /// <summary>
+    /// Whether items can be dragged onto each other to change their parent.
+    /// </summary>
+    [Parameter]
+    public bool IsDraggable { get; set; }
+
+    /// <summary>
+    /// Function to check whether an item may be dropped onto a target. A null target means the tree root.
+    /// </summary>
+    [Parameter]
+    public Func<TItem, TItem?, bool> CanDrop { get; set; } = (o, target) => false;
+
+    /// <summary>
+    /// Called to reparent an item onto a target. A null target means the tree root.
+    /// </summary>
+    [Parameter]
+    public Action<TItem, TItem?> OnDrop { get; set; } = delegate {};
+
     public void OnClickExpand(TreeNode node)
     {
-        if (node.IsExpanded)
-        {
-            CollapseNode(node);
-        }
-        else
-        {
-            ExpandNode(node);
-        }
+        node.IsExpanded = !node.IsExpanded;
 
+        Rebuild();
         StateHasChanged();
     }
 }

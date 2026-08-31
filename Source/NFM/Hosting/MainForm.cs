@@ -44,6 +44,7 @@ sealed class MainForm : Form
 	public MainForm()
 	{
 		Text = "NFM";
+		Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
 		BackColor = ColorTranslator.FromHtml("#1a1a1a");
 		StartPosition = FormStartPosition.CenterScreen;
 
@@ -374,6 +375,14 @@ sealed class MainForm : Form
 	{
 		controller?.SendMouseInput(CoreWebView2MouseEventKind.Leave, CoreWebView2MouseEventVirtualKeys.None, 0, Point.Empty);
 		base.OnMouseLeave(e);
+	}
+
+	protected override void OnActivated(EventArgs e)
+	{
+		// Composition hosting gives the webview no window of its own, so it only sees keyboard
+		// input while the controller holds focus - which the form doesn't hand back on its own.
+		controller?.MoveFocus(CoreWebView2MoveFocusReason.Programmatic);
+		base.OnActivated(e);
 	}
 
 	protected override void OnDeactivate(EventArgs e)

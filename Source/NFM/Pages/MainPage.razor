@@ -13,8 +13,8 @@
             <MenuItem Label="Quit" OnPress=@Application.Exit/>
         </MenuItem>
         <MenuItem Label="Edit">
-            <MenuItem Label="Copy" Hotkey=@(Keys.Control | Keys.C) />
-            <MenuItem Label="Paste"/>
+            <MenuItem Label="Copy" OnPress=@OnPressCopy Hotkey=@(Keys.Control | Keys.C) />
+            <MenuItem Label="Paste" OnPress=@OnPressPaste Hotkey=@(Keys.Control | Keys.V) />
             <MenuSeparator/>
             <MenuItem Label="Delete" OnPress=@OnPressDelete Hotkey=@(Keys.Delete) />
         </MenuItem>
@@ -71,6 +71,32 @@
             {
                 Project.Load(fileDialog.FileName);
             }
+        }
+    }
+
+    void OnPressCopy()
+    {
+        Node[] nodes = Selection.Selected.OfType<Node>().ToArray();
+
+        if (nodes.Length > 0)
+        {
+            Clipboard.SetText(NodeSerializer.Serialize(nodes));
+        }
+    }
+
+    void OnPressPaste()
+    {
+        if (!Clipboard.ContainsText())
+        {
+            return;
+        }
+
+        List<Node> nodes = NodeSerializer.Deserialize(Clipboard.GetText(), null);
+
+        if (nodes.Count > 0)
+        {
+            Selection.DeselectAll();
+            Selection.Select(nodes);
         }
     }
 

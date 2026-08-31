@@ -22,11 +22,14 @@
     </box>
 
     <box class="tree-container">
-        <TreeView TItem="Node" RootItems=@RootNodes GetChildren=@(node => node.Children)
-                  GetIsSelected=@(node => Selection.Selected.Contains(node)) OnClickItem=@OnClickNode>
+        <TreeView TItem="Node" @ref=tree RootItems=@RootNodes GetChildren=@(node => node.Children)
+                  GetIsSelected=@(node => Selection.Selected.Contains(node)) OnClickItem=@OnClickNode
+                  IsDraggable=true CanDrop=@CanDropNode OnDrop=@OnDropNode>
             <OutlinerItem Node=@context />
         </TreeView>
-        <div style="flex: 1" @onmousedown=@(() => Selection.DeselectAll()) />
+        <div style="flex: 1" @onmousedown=@(() => Selection.DeselectAll())
+             @onpointermove=@(e => tree?.OnPointerMoveItem(null, e))
+             @onpointerup=@(() => tree?.OnDropOnItem(null)) />
     </box>
 </box>
 
@@ -36,6 +39,7 @@
     static Scene TargetScene => Scene.Main;
 
     bool isAddOpen;
+    TreeView<Node>? tree;
 
     string filter = string.Empty;
     string filteredOn = string.Empty;
@@ -88,6 +92,60 @@
         {
             Selection.Select(node);
         }
+    }
+
+    bool CanDropNode(Node node, Node? target)
+    {
+        if (node == target || node.Parent == target)
+        {
+            return false;
+        }
+
+        for (Node? ancestor = target; ancestor is not null; ancestor = ancestor.Parent)
+        {
+            if (ancestor == node)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void OnDropNode(Node node, Node? target)
+    {
+        foreach (Node dragged in GetDraggedNodes(node))
+        {
+            if (CanDropNode(dragged, target))
+            {
+                dragged.Parent = target;
+            }
+        }
+    }
+
+    // Dragging a selected node brings the rest of the selection along, minus any that a dragged ancestor already carries.
+    Node[] GetDraggedNodes(Node node)
+    {
+        if (!Selection.Selected.Contains(node))
+        {
+            return new[] { node };
+        }
+
+        Node[] selected = Selection.Selected.OfType<Node>().ToArray();
+        return selected.Where(o => !HasSelectedAncestor(o, selected)).ToArray();
+    }
+
+    static bool HasSelectedAncestor(Node node, Node[] selected)
+    {
+        for (Node? ancestor = node.Parent; ancestor is not null; ancestor = ancestor.Parent)
+        {
+            if (selected.Contains(ancestor))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected override int BuildHashCode() => HashCode.Combine(TargetScene, Selection.Selected.Count);

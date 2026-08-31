@@ -2,7 +2,11 @@
 @inherits Component
 @typeparam TItem where TItem : class
 
-<box class="item @(GetIsSelected(Node.Item) ? "selected" : "")" style="padding-left: @(Node.IndentLevel * Indent)px" tabindex="0">
+<box class="item @(GetIsSelected(Node.Item) ? "selected" : "") @(GetIsDropTarget(Node.Item) ? "drop-target" : "")"
+     style="padding-left: @(Node.IndentLevel * Indent)px" tabindex="0"
+     @onpointerdown=@(e => OnPointerDown(Node.Item, e))
+     @onpointermove=@(e => OnPointerMove(Node.Item, e))
+     @onpointerup=@(e => OnPointerUp(Node.Item, e))>
     <box class="item-expand-container" @onclick=@(() => OnClickExpand(Node))>
         @if (Node.Children.Count > 0)
         {
@@ -45,8 +49,24 @@
     [Parameter, EditorRequired]
     public required Action<TreeView<TItem>.TreeNode> OnClickExpand { get; set; } = delegate { };
 
+    /// <summary>
+    /// Function to check if this item is the current drop target of a drag.
+    /// </summary>
+    [Parameter]
+    public Func<TItem, bool> GetIsDropTarget { get; set; } = (o) => false;
+
+    [Parameter]
+    public Action<TItem, PointerEventArgs> OnPointerDown { get; set; } = delegate { };
+
+    [Parameter]
+    public Action<TItem, PointerEventArgs> OnPointerMove { get; set; } = delegate { };
+
+    [Parameter]
+    public Action<TItem, PointerEventArgs> OnPointerUp { get; set; } = delegate { };
+
+    // Pointermove fires constantly, so the highlight is picked up by the tick poll rather than re-rendering per event.
     protected override int BuildHashCode()
     {
-        return GetIsSelected.Invoke(Node.Item).GetHashCode();
+        return HashCode.Combine(GetIsSelected.Invoke(Node.Item), GetIsDropTarget.Invoke(Node.Item));
     }
 }

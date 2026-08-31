@@ -1,4 +1,5 @@
 @namespace NFM.Components
+@implements IDisposable
 
 <box class="container" @onfocusin=OnFocusIn @onfocusout=OnFocusOut>
     <CascadingValue Value=@this>
@@ -13,10 +14,34 @@
     public MenuItem? LastOpenItem { get; private set; }
     public bool IsFocused { get; private set; }
 
+    readonly List<MenuItem> items = new();
+
+    protected override void OnInitialized() => Input.OnKeyPressed += OnKeyPressed;
+    public void Dispose() => Input.OnKeyPressed -= OnKeyPressed;
+
+    public void Register(MenuItem item) => items.Add(item);
+    public void Unregister(MenuItem item) => items.Remove(item);
+
     public void SetLastOpenItem(MenuItem item)
     {
         LastOpenItem = item;
         StateHasChanged();
+    }
+
+    void OnKeyPressed(Keys keys)
+    {
+        MenuItem[] matches = items.Where(o => o.Hotkey == keys && o.OnPress is not null).ToArray();
+
+        if (matches.Length > 0)
+        {
+            _ = InvokeAsync(() =>
+            {
+                foreach (MenuItem item in matches)
+                {
+                    FrontendHelpers.InvokeHandled(Guard.NotNull(item.OnPress));
+                }
+            });
+        }
     }
 
     void OnFocusIn() => IsFocused = true;

@@ -1,5 +1,6 @@
 @namespace NFM.Components
 @using System.ComponentModel
+@implements IDisposable
 @inject IJSRuntime JS
 
 <div class="container @(IsExpanded ? "expanded" : "")" tabindex="0" @onpointerenter=OnPointerEnter @onclick=OnClick @ref=containerElement>
@@ -40,6 +41,9 @@
     [CascadingParameter] bool isNested { get; init; }
 
     ElementReference containerElement;
+
+    protected override void OnInitialized() => menu?.Register(this);
+    public void Dispose() => menu?.Unregister(this);
 
     async Task OnClick()
     {

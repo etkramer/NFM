@@ -22,9 +22,13 @@ public class Node : ISelectable, IDisposable
 		get => parent;
 		set
 		{
-			Guard.Require(value != this, "Nodes cannot be parented to themselves.");
 			Guard.Require(value is null || value.Scene == Scene,
 				"Nodes can only be parented to other nodes from the same scene.");
+
+			for (Node? ancestor = value; ancestor is not null; ancestor = ancestor.parent)
+			{
+				Guard.Require(ancestor != this, "Nodes cannot be parented to themselves or their own descendants.");
+			}
 
 			if (parent == value)
 			{
@@ -43,6 +47,8 @@ public class Node : ISelectable, IDisposable
 			parent?.children.Remove(this);
 			parent = value;
 			parent?.children.Add(this);
+
+			UpdateTransform();
 		}
 	}
 

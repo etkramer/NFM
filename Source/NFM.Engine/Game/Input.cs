@@ -13,6 +13,19 @@ public static class Input
 	public static Vector2 MouseDelta { get; private set; }
 	public static object? InputSource { get; private set; }
 
+	/// <summary>
+	/// Fired when a key first goes down, with the modifier flags held at that moment.
+	/// </summary>
+	public static event Action<Keys> OnKeyPressed = delegate {};
+
+	/// <summary>
+	/// The modifier flags (<see cref="Keys.Control"/> and friends) for whichever modifiers are held.
+	/// </summary>
+	public static Keys Modifiers =>
+		(IsDown(Keys.LControlKey) || IsDown(Keys.RControlKey) ? Keys.Control : Keys.None) |
+		(IsDown(Keys.LShiftKey) || IsDown(Keys.RShiftKey) ? Keys.Shift : Keys.None) |
+		(IsDown(Keys.LMenu) || IsDown(Keys.RMenu) ? Keys.Alt : Keys.None);
+
 	// Store button states.
 	private static Dictionary<MouseButtons, ButtonState> mouseStates = new();
 	private static Dictionary<Keys, ButtonState> keyStates = new();
@@ -94,7 +107,13 @@ public static class Input
 	/// </summary>
 	public static void UpdateKey(Keys key, bool down)
 	{
+		bool wasDown = IsDown(key);
 		keyStates[key] = down ? ButtonState.Down : ButtonState.Up;
+
+		if (down && !wasDown)
+		{
+			OnKeyPressed.Invoke(key | Modifiers);
+		}
 	}
 
 	/// <summary>
