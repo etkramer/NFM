@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using NFM.Common;
 using NFM.Resources;
 using NFM.Threading;
@@ -15,6 +17,7 @@ public static class NodeSerializer
 	private static readonly JsonSerializerOptions options = new()
 	{
 		WriteIndented = true,
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 		Converters =
 		{
 			new Vector2Converter(),
@@ -39,14 +42,18 @@ public static class NodeSerializer
 
 	private class NodeData
 	{
-		public string Type { get; set; } = string.Empty;
-		public Dictionary<string, JsonElement> Properties { get; set; } = [];
-		public List<NodeData> Children { get; set; } = [];
+		/// <summary>
+		/// The node's type, or null for an owned node - its owner decides what to spawn.
+		/// </summary>
+		public string? Type { get; set; }
 
 		/// <summary>
-		/// Properties of each node this one owns, keyed by owner path.
+		/// Set for an owned node, addressing it within its parent rather than creating it.
 		/// </summary>
-		public Dictionary<string, Dictionary<string, JsonElement>> OwnedProperties { get; set; } = [];
+		public string? Key { get; set; }
+
+		public Dictionary<string, JsonElement>? Properties { get; set; }
+		public List<NodeData>? Children { get; set; }
 	}
 
 	/// <summary>
@@ -56,7 +63,7 @@ public static class NodeSerializer
 	public static string Serialize(IEnumerable<Node> nodes)
 	{
 		HashSet<Node> roots = [.. nodes];
-		List<NodeData> data = [.. roots.Where(node => !HasAncestorIn(node, roots)).Select(Pack)];
+		List<NodeData> data = [.. roots.Where(node => !HasAncestorIn(node, roots)).Select(Pack).OfType<NodeData>()];
 
 		return JsonSerializer.Serialize(data, options);
 	}
@@ -97,7 +104,7 @@ public static class NodeSerializer
 	{
 		ProjectData data = new()
 		{
-			Nodes = [.. scene.RootNodes.Where(node => !node.IsTransient).Select(Pack)],
+			Nodes = [.. scene.RootNodes.Where(node => !node.IsTransient).Select(Pack).OfType<NodeData>()],
 			Camera = camera is null ? null : Pack(camera)
 		};
 
@@ -157,82 +164,113 @@ public static class NodeSerializer
 
 		if (data is not null)
 		{
-			await UnpackProperties(camera, camera.GetType(), data.Properties, data.Type);
+			await UnpackProperties(camera, camera.GetType(), data.Properties, camera.GetType().Name);
 		}
 	}
 
-	private static NodeData Pack(Node node)
+	private static NodeData? Pack(Node node)
 	{
-		NodeData data = new() { Type = Guard.NotNull(node.GetType().FullName) };
-		PackProperties(node, data.Properties);
-
-		foreach (Node owned in node.OwnedNodes)
+		NodeData data = new()
 		{
-			data.OwnedProperties[Guard.NotNull(owned.OwnerPath)] = PackProperties(owned, []);
+			Type = node.IsOwned ? null : Guard.NotNull(node.GetType().FullName),
+			Key = node.OwnerKey,
+			Properties = PackProperties(node)
+		};
+
+		foreach (Node child in node.Children)
+		{
+			if (Pack(child) is NodeData childData)
+			{
+				(data.Children ??= []).Add(childData);
+			}
 		}
 
-		foreach (Node child in node.Children.Where(child => child.Owner is null))
-		{
-			data.Children.Add(Pack(child));
-		}
-
-		return data;
+		// An owned node the user hasn't touched is respawned as-is, so there's nothing to write.
+		return node.IsOwned && data.Properties is null && data.Children is null ? null : data;
 	}
 
-	private static Dictionary<string, JsonElement> PackProperties(Node node, Dictionary<string, JsonElement> into)
+	private static Dictionary<string, JsonElement>? PackProperties(Node node)
 	{
-		string type = Guard.NotNull(node.GetType().FullName);
+		Type type = node.GetType();
+		PropertyInfo[] properties = GetSavedProperties(type);
+		object?[]? defaults = node.SavedDefaults;
 
-		foreach (PropertyInfo property in GetSavedProperties(node.GetType()))
+		Dictionary<string, JsonElement>? into = null;
+
+		for (int i = 0; i < properties.Length; i++)
 		{
+			PropertyInfo property = properties[i];
 			object? value = property.GetValue(node);
+
+			if (defaults is not null && Equals(value, defaults[i]))
+			{
+				continue;
+			}
 
 			try
 			{
-				into[property.Name] = value is GameResource resource
+				(into ??= [])[property.Name] = value is GameResource resource
 					? JsonSerializer.SerializeToElement(resource.Source?.Path, options)
 					: JsonSerializer.SerializeToElement(value, property.PropertyType, options);
 			}
 			catch (Exception e) when (e is JsonException or NotSupportedException)
 			{
-				Log.Warn($"Couldn't serialize {type}.{property.Name} ({property.PropertyType.Name})");
+				Log.Warn($"Couldn't serialize {type.FullName}.{property.Name} ({property.PropertyType.Name})");
 			}
 		}
 
 		return into;
 	}
 
+	/// <summary>
+	/// Records a spawned node's property values, so a save can leave out anything still untouched.
+	/// </summary>
+	internal static void CaptureDefaults(Node node)
+	{
+		PropertyInfo[] properties = GetSavedProperties(node.GetType());
+		object?[] defaults = new object?[properties.Length];
+
+		for (int i = 0; i < properties.Length; i++)
+		{
+			defaults[i] = properties[i].GetValue(node);
+		}
+
+		node.SavedDefaults = defaults;
+	}
+
 	private static async Task<Node?> Unpack(NodeData data, Scene? scene, Node? parent)
 	{
-		if (ResolveType(data.Type) is not Type type)
+		Node node;
+
+		if (data.Key is not null)
 		{
-			return null;
-		}
-
-		Node node = (Node)Guard.NotNull(Activator.CreateInstance(type, parent?.Scene ?? scene));
-
-		if (parent is not null)
-		{
-			node.Parent = parent;
-		}
-
-		// Resources have to land before owned state is applied - they're what spawns the nodes it
-		// addresses by path.
-		await UnpackProperties(node, type, data.Properties, data.Type);
-
-		foreach ((string path, var properties) in data.OwnedProperties)
-		{
-			if (node.FindOwned(path) is Node owned)
+			if (parent?.FindOwned(data.Key) is not Node owned)
 			{
-				await UnpackProperties(owned, owned.GetType(), properties, data.Type);
+				Log.Warn($"Dropping saved state for '{data.Key}', which {parent?.GetType().Name} no longer owns");
+				return null;
 			}
-			else
+
+			node = owned;
+		}
+		else
+		{
+			if (ResolveType(data.Type) is not Type type)
 			{
-				Log.Warn($"Dropping saved state for '{path}', which {data.Type} no longer owns");
+				return null;
+			}
+
+			node = (Node)Guard.NotNull(Activator.CreateInstance(type, parent?.Scene ?? scene));
+
+			if (parent is not null)
+			{
+				node.Parent = parent;
 			}
 		}
 
-		foreach (NodeData child in data.Children)
+		// Resources have to land before children are unpacked - they're what spawns the owned ones.
+		await UnpackProperties(node, node.GetType(), data.Properties, node.GetType().Name);
+
+		foreach (NodeData child in data.Children ?? [])
 		{
 			await Unpack(child, scene, node);
 		}
@@ -240,8 +278,13 @@ public static class NodeSerializer
 		return node;
 	}
 
-	private static async Task UnpackProperties(Node node, Type type, Dictionary<string, JsonElement> properties, string typeName)
+	private static async Task UnpackProperties(Node node, Type type, Dictionary<string, JsonElement>? properties, string typeName)
 	{
+		if (properties is null)
+		{
+			return;
+		}
+
 		foreach (PropertyInfo property in GetSavedProperties(type))
 		{
 			if (!property.CanWrite || !properties.TryGetValue(property.Name, out JsonElement element))
@@ -294,11 +337,13 @@ public static class NodeSerializer
 		return false;
 	}
 
-	private static IEnumerable<PropertyInfo> GetSavedProperties(Type type) => type
-		.GetProperties(ReflectionHelper.BindingFlagsAllNonStatic)
-		.Where(property => property.HasAttribute<InspectAttribute>() && property.CanRead);
+	private static readonly ConcurrentDictionary<Type, PropertyInfo[]> savedProperties = [];
 
-	private static Type? ResolveType(string name) => string.IsNullOrEmpty(name) ? null : ReflectionHelper.LoadedAssemblies
+	private static PropertyInfo[] GetSavedProperties(Type type) => savedProperties.GetOrAdd(type, key => [.. key
+		.GetProperties(ReflectionHelper.BindingFlagsAllNonStatic)
+		.Where(property => property.HasAttribute<InspectAttribute>() && property.CanRead)]);
+
+	private static Type? ResolveType(string? name) => string.IsNullOrEmpty(name) ? null : ReflectionHelper.LoadedAssemblies
 		.Append(typeof(Node).Assembly)
 		.Distinct()
 		.Select(assembly => assembly.GetType(name))

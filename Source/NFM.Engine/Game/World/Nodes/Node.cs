@@ -36,48 +36,10 @@ public class Node : ISelectable, IDisposable
 	private readonly ObservableCollection<Node> children = [];
 
 	/// <summary>
-	/// Every node spawned by this one, depth-first.
+	/// Property values captured when this node was spawned. Anything still equal to them is left out
+	/// of saves.
 	/// </summary>
-	public IEnumerable<Node> OwnedNodes
-	{
-		get
-		{
-			Stack<Node> pending = new(children.Where(child => child.Owner == this));
-
-			while (pending.TryPop(out Node? node))
-			{
-				yield return node;
-
-				foreach (Node child in node.Children.Where(child => child.Owner == this))
-				{
-					pending.Push(child);
-				}
-			}
-		}
-	}
-
-	/// <summary>
-	/// This node's key path relative to its owner, e.g. "Spine/Neck/Head".
-	/// </summary>
-	public string? OwnerPath
-	{
-		get
-		{
-			if (!IsOwned)
-			{
-				return null;
-			}
-
-			List<string> keys = [];
-			for (Node? node = this; node is not null && node.Owner == Owner; node = node.Parent)
-			{
-				keys.Add(Guard.NotNull(node.OwnerKey));
-			}
-
-			keys.Reverse();
-			return string.Join('/', keys);
-		}
-	}
+	internal object?[]? SavedDefaults { get; set; }
 
 	private bool isDespawning;
 
@@ -167,6 +129,8 @@ public class Node : ISelectable, IDisposable
 		node.OwnerKey = key;
 		node.Parent = parent;
 
+		NodeSerializer.CaptureDefaults(node);
+
 		return node;
 	}
 
@@ -186,18 +150,12 @@ public class Node : ISelectable, IDisposable
 	}
 
 	/// <summary>
-	/// Resolves a key path produced by <see cref="OwnerPath"/> against this node's owned subtree.
+	/// Finds the child under the given key that shares this node's owned subtree.
 	/// </summary>
-	public Node? FindOwned(string path)
+	public Node? FindOwned(string key)
 	{
-		Node? node = this;
-
-		foreach (string key in path.Split('/'))
-		{
-			node = node?.children.FirstOrDefault(child => child.Owner == this && child.OwnerKey == key);
-		}
-
-		return node;
+		Node? owner = Owner ?? this;
+		return children.FirstOrDefault(child => child.Owner == owner && child.OwnerKey == key);
 	}
 
 	public virtual void Dispose()
