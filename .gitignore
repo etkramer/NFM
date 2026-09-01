@@ -40,6 +40,9 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+
+# Shader source, not build output.
+!Source/NFM.Engine/Shaders/Standard/Bin/
 [Ll]og/
 [Ll]ogs/
 
