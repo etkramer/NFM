@@ -1,8 +1,188 @@
 @namespace NFM.Panels
+@inherits Component
 @implements IPanel
 
-<div style="flex: 1; background-color: var(--color-bg-2)" />
+<SplitView InitialSize=@DefaultSidebar Min=@MinSidebar Max=@MaxSidebar>
+    <First>
+        <box class="sidebar">
+            <box class="section btn-soft" @onclick=@(() => isSpecialOpen = !isSpecialOpen)>
+                <FontIcon Glyph=@Chevron(isSpecialOpen) FontFamily="Segoe MDL2 Assets" FontSize="10" />
+                <span>Special</span>
+            </box>
+            @if (isSpecialOpen)
+            {
+                <box class="tree">
+                    <TreeView TItem="LibraryFolder" RootItems=@specialRoots GetChildren=@(o => o.Children)
+                              GetIsSelected=@(o => o == Current) OnClickItem=@((folder, e) => Navigate(folder))
+                              ChildContent=@FolderRow />
+                </box>
+            }
+
+            <box class="section btn-soft" @onclick=@(() => isContentOpen = !isContentOpen)>
+                <FontIcon Glyph=@Chevron(isContentOpen) FontFamily="Segoe MDL2 Assets" FontSize="10" />
+                <span>Content</span>
+            </box>
+            @if (isContentOpen)
+            {
+                <box class="tree">
+                    <TreeView TItem="LibraryFolder" RootItems=@AssetTree.Roots GetChildren=@(o => o.Children)
+                              GetIsSelected=@(o => o == Current) OnClickItem=@((folder, e) => Navigate(folder))
+                              ChildContent=@FolderRow />
+                </box>
+            }
+        </box>
+    </First>
+
+    <Second>
+        <box class="content">
+            <box class="toolbar">
+                <div class="nav btn-soft @(historyIndex > 0 ? "" : "disabled")" @onclick=@Back>
+                    <FontIcon Glyph="arrow_back" FontSize="16" />
+                </div>
+                <div class="nav btn-soft @(historyIndex < history.Count - 1 ? "" : "disabled")" @onclick=@Forward>
+                    <FontIcon Glyph="arrow_forward" FontSize="16" />
+                </div>
+
+                <box style="flex: 0 0 120px">
+                    <Dropdown Options=@TypeOptions Value=@typeFilter Icon="filter_list" IconColor="var(--color-fg-subtle)"
+                              ValueChanged=@(o => { typeFilter = (string)o!; }) />
+                </box>
+
+                <box class="field" style="flex: 1">
+                    <div class="value">@Current.Path</div>
+                </box>
+
+                <input type="text" class="search" placeholder="Filter.." style="flex: 0 0 130px"
+                       @bind=filter @bind:event="oninput" />
+            </box>
+
+            <div class="items">
+                <Virtualize Items=@VisibleAssets Context="asset">
+                    <box class="entry @(asset == selected ? "selected" : "")" @key=asset
+                         @onpointerdown=@(() => selected = asset)>
+                        <FontIcon Glyph=@GlyphOf(asset) Color=@ColorOf(asset) FontSize="16" />
+                        <span class="entry-name">@asset.Name</span>
+                    </box>
+                </Virtualize>
+            </div>
+        </box>
+    </Second>
+</SplitView>
 
 @code {
     public static string Name => "Library";
+
+    const string AllTypes = "All";
+    const int DefaultSidebar = 200;
+    const int MinSidebar = 120;
+    const int MaxSidebar = 420;
+
+    bool isSpecialOpen = true;
+    bool isContentOpen = true;
+
+    // Stands in for every mount at once, so the special section is just another tree.
+    static readonly LibraryFolder Everything = new("Everything", "Everything", null);
+
+    readonly LibraryFolder[] specialRoots = [Everything];
+    readonly List<LibraryFolder> history = [Everything];
+    int historyIndex;
+
+    Asset? selected;
+    string typeFilter = AllTypes;
+    string filter = string.Empty;
+
+    LibraryFolder Current => history[historyIndex];
+
+    IEnumerable<Asset> Source => Current == Everything ? AssetTree.AllAssets : Current.Assets;
+
+    RenderFragment<LibraryFolder>? folderRow;
+
+    RenderFragment<LibraryFolder> FolderRow => folderRow ??= folder =>
+        @<box class="entry-content">
+            <FontIcon Glyph=@(folder == Everything ? "public" : "folder") FontSize="14"
+                      Color=@(folder == Everything ? "#7ab0e6" : "#e6c05c") />
+            <span class="entry-name">@folder.Name</span>
+            <span class="count">@(folder == Everything ? AssetTree.AllAssets.Count() : folder.TotalCount)</span>
+        </box>;
+
+    IEnumerable<string> TypeOptions => Source.Select(o => o.ResourceType.Name).Distinct().Order().Prepend(AllTypes);
+
+    List<Asset> visible = [];
+    int visibleKey = -1;
+
+    // Virtualize needs a materialised collection, so the filtered view is cached until something moves.
+    List<Asset> VisibleAssets
+    {
+        get
+        {
+            int key = HashCode.Combine(AssetTree.Version, Current, typeFilter, filter);
+
+            if (key != visibleKey)
+            {
+                visibleKey = key;
+                visible = Source
+                    .Where(o => typeFilter == AllTypes || o.ResourceType.Name == typeFilter)
+                    .Where(o => string.IsNullOrWhiteSpace(filter) || o.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            return visible;
+        }
+    }
+
+    static string Chevron(bool isOpen) => isOpen ? "\uE96E" : "\uE970";
+
+    static IconAttribute? IconOf(Asset asset) =>
+        asset.ResourceType.TryGetAttribute(out IconAttribute? icon) ? icon : null;
+
+    static string GlyphOf(Asset asset) => IconOf(asset)?.IconGlyph ?? "description";
+    static string ColorOf(Asset asset) => IconOf(asset)?.IconColor ?? "var(--color-fg-subtle)";
+
+    void Navigate(LibraryFolder folder)
+    {
+        if (folder == Current)
+        {
+            return;
+        }
+
+        history.RemoveRange(historyIndex + 1, history.Count - historyIndex - 1);
+        history.Add(folder);
+        historyIndex = history.Count - 1;
+        selected = null;
+    }
+
+    void Back()
+    {
+        if (historyIndex > 0)
+        {
+            historyIndex--;
+            selected = null;
+        }
+    }
+
+    void Forward()
+    {
+        if (historyIndex < history.Count - 1)
+        {
+            historyIndex++;
+            selected = null;
+        }
+    }
+
+    protected override void OnTick() => AssetTree.Refresh();
+
+    protected override int BuildHashCode()
+    {
+        HashCode hash = new();
+        hash.Add(AssetTree.Version);
+        hash.Add(Current);
+        hash.Add(selected);
+        hash.Add(typeFilter);
+        hash.Add(filter);
+        hash.Add(isSpecialOpen);
+        hash.Add(isContentOpen);
+        hash.Add(historyIndex);
+
+        return hash.ToHashCode();
+    }
 }

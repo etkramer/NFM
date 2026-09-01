@@ -1,0 +1,91 @@
+.sidebar {
+    flex: 1;
+    flex-direction: column;
+    overflow-y: auto;
+    background-color: var(--color-bg-1);
+}
+
+.content {
+    flex: 1;
+    flex-direction: column;
+}
+
+.section {
+    flex: none;
+    align-items: center;
+    column-gap: 6px;
+    padding: 6px 8px;
+    color: var(--color-fg-subtle);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.tree {
+    flex: none;
+    flex-direction: column;
+}
+
+.entry,
+.entry-content {
+    flex: none;
+    align-items: center;
+    column-gap: 6px;
+    overflow: hidden;
+}
+
+.entry {
+    padding: 4px 8px;
+}
+
+/* Tree rows carry their own padding from the item chrome. */
+.entry-content {
+    padding: 4px 0;
+}
+
+.entry-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.count {
+    color: var(--color-fg-subtle);
+}
+
+.entry:hover:not(.selected) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.entry.selected {
+    background-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    outline: 1px solid var(--color-accent);
+    outline-offset: -1px;
+}
+
+.toolbar {
+    height: 30px;
+    padding: 4px;
+    column-gap: 4px;
+    align-items: stretch;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+}
+
+.nav.disabled {
+    pointer-events: none;
+    color: var(--color-fg-subtle);
+    opacity: 0.4;
+}
+
+.items {
+    flex: 1;
+    overflow-y: scroll;
+    padding: 0 4px;
+    background-color: var(--color-bg-2);
+}

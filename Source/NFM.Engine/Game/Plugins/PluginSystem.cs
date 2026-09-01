@@ -10,7 +10,7 @@ public static class PluginSystem
 	{
 		string[] searchPaths =
         [
-            "../Plugins/"
+            FileUtils.GetPluginsPath()
 		];
 
 		// Load plugins from assemblies.

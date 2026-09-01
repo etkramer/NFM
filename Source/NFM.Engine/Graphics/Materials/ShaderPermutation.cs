@@ -39,8 +39,9 @@ abstract class ShaderPermutation : IDisposable
 		result.StackID = source.StackID;
 		result.shaders = [.. source.Shaders];	
 
-		// Set it up (can't use a parameterized constructor here)
-		result.Init(new ShaderModule(BuildSource(source.Shaders), ShaderStage.Library));
+		// Set it up (can't use a parameterized constructor here).
+		using ShaderModule module = new(BuildSource(source.Shaders), ShaderStage.Library);
+		result.Init(module);
 
 		//... and return it
         var typeList = all[type] as IList<ShaderPermutation>;

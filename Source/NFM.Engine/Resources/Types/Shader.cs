@@ -14,6 +14,7 @@ public struct ShaderParameter
 	public Type Type;
 }
 
+[Icon("gradient", IconColor = "#b98ce0")]
 public sealed class Shader : GameResource
 {
 	public string ShaderSource { get; }

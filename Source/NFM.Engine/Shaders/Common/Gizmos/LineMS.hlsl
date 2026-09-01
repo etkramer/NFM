@@ -20,8 +20,8 @@ void main(uint groupID : SV_GroupID, out vertices GizmoVertex outVerts[4], out i
 	float4 clip1 = ToClipSpace(segment.P1);
 
 	// Drop the segment when it's behind the eye entirely, and clip it when it straddles the near plane.
-	bool visible = clip0.w >= NearW || clip1.w >= NearW;
-	SetMeshOutputCounts(visible ? 4 : 0, visible ? 2 : 0);
+	uint visible = (clip0.w >= NearW || clip1.w >= NearW) ? 1 : 0;
+	SetMeshOutputCounts(visible * 4, visible * 2);
 
 	if (!visible)
 	{

@@ -67,7 +67,7 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 		SetDarkTitleBar();
 		InitComposition();
 
-		_ = FrontendHelpers.InvokeHandledAsync(InitWebview);
+		_ = InitWebview();
 	}
 
 	protected override void OnLoad(EventArgs e)

@@ -17,7 +17,7 @@ public enum ShaderStage : uint
 	Library = DxcShaderStage.Library,
 }
 
-public class ShaderModule
+public class ShaderModule : IDisposable
 {
 	static readonly DxcCompilerOptions compilerOptions = new()
 	{
@@ -59,10 +59,10 @@ public class ShaderModule
 		Bytecode = bytecode;
 	}
 
-	~ShaderModule()
+	public void Dispose()
 	{
-		linker.Release();
-		Bytecode.Release();
+		linker.Dispose();
+		Bytecode.Dispose();
 	}
 
 	public ShaderModule Link(string entryName, ShaderStage stage, params ShaderModule[] others)

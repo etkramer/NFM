@@ -55,7 +55,7 @@
         if (OnPress is not null)
         {
             await JS.InvokeVoidAsync("setBodyCursor", "wait");
-            FrontendHelpers.InvokeHandled(OnPress);
+            OnPress.Invoke();
             await JS.InvokeVoidAsync("setBodyCursor", "auto");
         }
     }

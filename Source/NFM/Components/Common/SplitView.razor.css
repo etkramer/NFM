@@ -1,0 +1,36 @@
+.split {
+    flex: 1;
+    align-items: stretch;
+}
+
+.split.vertical {
+    flex-direction: column;
+}
+
+.first,
+.second {
+    overflow: hidden;
+}
+
+.second {
+    flex: 1;
+}
+
+.handle {
+    flex: 0 0 4px;
+    z-index: 1;
+    background-color: var(--color-bg-1);
+}
+
+.split.horizontal > .handle {
+    cursor: ew-resize;
+}
+
+.split.vertical > .handle {
+    cursor: ns-resize;
+}
+
+.handle:hover,
+.handle:active {
+    background-color: var(--color-accent-2);
+}

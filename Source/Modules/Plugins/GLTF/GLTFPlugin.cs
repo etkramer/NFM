@@ -1,5 +1,6 @@
 ﻿using System;
 using GLTF.Loaders;
+using NFM;
 using NFM.Common;
 using NFM.Resources;
 using NFM.Plugins;
@@ -13,9 +14,9 @@ public class GLTFPlugin : Plugin
 	{
 		MountPoint mount = MountPoint.Create("User Content", "USER");
 
-		string[] searchPaths = ["../Content/"];
+		string[] searchPaths = [FileUtils.GetContentPath()];
 
-		foreach (var searchPath in searchPaths)
+		foreach (var searchPath in searchPaths.Where(Directory.Exists))
 		{
 			foreach (var path in Directory.GetFiles(searchPath, "*", SearchOption.AllDirectories))
 			{

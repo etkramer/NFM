@@ -1,5 +1,6 @@
 ﻿namespace NFM.Resources;
 
+[Icon("palette", IconColor = "#e6c05c")]
 public sealed class Material : GameResource
 {
 	public Shader Shader { get; }

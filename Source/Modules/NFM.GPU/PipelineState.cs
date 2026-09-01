@@ -77,6 +77,11 @@ public sealed class PipelineState : IDisposable
 	{
 		PSO?.Dispose();
 		RootSignature?.Dispose();
+
+		compiledCompute?.Dispose();
+		compiledVertex?.Dispose();
+		compiledMesh?.Dispose();
+		compiledPixel?.Dispose();
 	}
 
 	public PipelineState SetRTSamples(int samples)

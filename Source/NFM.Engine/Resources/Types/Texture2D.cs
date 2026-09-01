@@ -52,6 +52,7 @@ public enum TextureFormat
 	DXT5 = BC3,
 }
 
+[Icon("image", IconColor = "#5cb8e6")]
 public sealed class Texture2D : GameResource
 {
 	public Texture? D3DResource { get; private set; }

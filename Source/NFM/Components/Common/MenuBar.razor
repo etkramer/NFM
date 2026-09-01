@@ -38,7 +38,7 @@
             {
                 foreach (MenuItem item in matches)
                 {
-                    FrontendHelpers.InvokeHandled(Guard.NotNull(item.OnPress));
+                    Guard.NotNull(item.OnPress).Invoke();
                 }
             });
         }

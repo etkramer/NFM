@@ -5,6 +5,7 @@ namespace NFM.Resources;
 /// <summary>
 /// A 3D model, composed of one or multiple parts and optionally a skeleton.
 /// </summary>
+[Icon("view_in_ar", IconColor = "#7ec97e")]
 public sealed class Model : GameResource
 {
     /// <summary>

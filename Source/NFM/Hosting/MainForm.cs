@@ -37,12 +37,12 @@ sealed class MainForm : ComponentForm<MainPage>
 
 	private void Frame()
 	{
-		FrontendHelpers.InvokeHandled(Engine.Update);
+		Engine.Update();
 
 		if (clock.Elapsed - lastTick >= TickInterval)
 		{
 			lastTick = clock.Elapsed;
-			FrontendHelpers.InvokeHandled(Component.Tick);
+			Component.Tick();
 		}
 	}
 
@@ -66,12 +66,7 @@ sealed class MainForm : ComponentForm<MainPage>
 			}
 
 			base.WndProc(ref m);
-
-			// Once the app has faulted, stop self-invalidating - the error dialog needs the message queue.
-			if (!FrontendHelpers.HasFaulted)
-			{
-				RequestFrame();
-			}
+			RequestFrame();
 
 			return;
 		}

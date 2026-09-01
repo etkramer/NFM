@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Components;
 
 namespace NFM.Hosting;
@@ -39,9 +40,9 @@ sealed class FormDispatcher(Control control) : Dispatcher
 
 	/// <summary>
 	/// The renderer hands its unhandled exceptions back through here and discards the resulting task,
-	/// so anything that faults would otherwise leave the page dead without a word.
+	/// so a fault is rethrown on the message loop where nothing will catch it.
 	/// </summary>
-	private static async Task<TResult> Run<TResult>(Func<Task<TResult>> workItem)
+	private async Task<TResult> Run<TResult>(Func<Task<TResult>> workItem)
 	{
 		try
 		{
@@ -49,7 +50,7 @@ sealed class FormDispatcher(Control control) : Dispatcher
 		}
 		catch (Exception e)
 		{
-			FrontendHelpers.Report(e);
+			control.BeginInvoke(ExceptionDispatchInfo.Capture(e).Throw);
 			throw;
 		}
 	}

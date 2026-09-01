@@ -1,0 +1,49 @@
+@namespace NFM.Components
+@inherits Component
+@inject IJSRuntime JS
+
+<box class="split @(IsVertical ? "vertical" : "horizontal")">
+    <box class="first" style="flex: 0 0 @(size)px">
+        @First
+    </box>
+
+    <div class="handle" @ref=element
+         @onpointerdown=@OnPointerDown @onpointermove=@OnPointerMove
+         @onpointerup=@OnPointerUp @onlostpointercapture=@OnLostCapture />
+
+    <box class="second">
+        @Second
+    </box>
+</box>
+
+@code {
+    /// <summary>
+    /// Pane on the left or top, whose size the handle controls.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment First { get; set; }
+
+    /// <summary>
+    /// Pane on the right or bottom, which takes whatever space is left.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment Second { get; set; }
+
+    /// <summary>
+    /// Size of the first pane in pixels, before the handle is ever dragged.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required int InitialSize { get; set; }
+
+    [Parameter]
+    public int Min { get; set; }
+
+    [Parameter]
+    public int Max { get; set; } = int.MaxValue;
+
+    /// <summary>
+    /// Axis the handle moves along.
+    /// </summary>
+    [Parameter]
+    public SplitOrientation Orientation { get; set; }
+}

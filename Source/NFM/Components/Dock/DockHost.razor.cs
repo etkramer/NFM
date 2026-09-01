@@ -31,7 +31,7 @@ public sealed partial class DockHost : IAsyncDisposable
         ShouldRenderOnEvent = true;
     }
 
-    string ResolvedConfigPath => Path.Combine(AppContext.BaseDirectory, "..", ConfigPath);
+    string ResolvedConfigPath => Path.Combine(FileUtils.GetBasePath(), ConfigPath);
 
     DockLayout Load()
     {
