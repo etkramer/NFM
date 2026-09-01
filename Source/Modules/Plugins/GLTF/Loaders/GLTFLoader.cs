@@ -28,7 +28,7 @@ public class GLTFLoader : ResourceLoader<Model>
 	{
 		// Load GLTF model from file.
 		var importer = new AssimpContext();
-		var sourceModel = importer.ImportFile(Path, PostProcessSteps.None);
+		var sourceModel = importer.ImportFile(Path, PostProcessSteps.CalculateTangentSpace);
 
 		// Load textures from GLTF
 		var textures = new Texture2D[sourceModel.TextureCount];
@@ -92,20 +92,27 @@ public class GLTFLoader : ResourceLoader<Model>
 			for (int i = 0; i < node.Item1.MeshCount; i++)
 			{
 				var sourceMesh = sourceModel.Meshes[node.Item1.MeshIndices[i]];
+				Guard.Require(sourceMesh.HasNormals && sourceMesh.HasTangentBasis);
 
 				// Reformat vertices
 				Vertex[] vertices = new Vertex[sourceMesh.Vertices.Count];
 				for (int j = 0; j < sourceMesh.Vertices.Count; j++)
 				{
 					var position = (new Vector4(sourceMesh.Vertices[j].X, sourceMesh.Vertices[j].Y, sourceMesh.Vertices[j].Z, 1) * worldTransform).Xyz;
-					var normal = (new Vector4(sourceMesh.Normals[j].X, sourceMesh.Normals[j].Y, sourceMesh.Normals[j].Z, 1) * worldTransform).Xyz;
+					var normal = TransformDirection(sourceMesh.Normals[j], worldTransform);
+					var tangent = TransformDirection(sourceMesh.Tangents[j], worldTransform);
+					var bitangent = TransformDirection(sourceMesh.BiTangents[j], worldTransform);
 					var uv0 = sourceMesh.TextureCoordinateChannels[0][j];
+
+					// V is flipped below, which flips the bitangent along with it.
+					float handedness = -MathF.Sign(Vector3.Dot(Vector3.Cross(normal, tangent), bitangent));
 
 					unsafe
 					{
 						vertices[j] = new Vertex();
 						vertices[j].Position = position;
 						vertices[j].Normal = normal;
+						vertices[j].Tangent = new Vector4(tangent, handedness);
 						vertices[j].UV0 = (*(Vector2*)&uv0) * new Vector2(1, -1);
 					}
 				}
@@ -124,6 +131,12 @@ public class GLTFLoader : ResourceLoader<Model>
 		});
 
 		return model;
+	}
+
+	// Directions carry no translation, so W stays zero.
+	private static Vector3 TransformDirection(AI.Vector3D direction, Matrix4 transform)
+	{
+		return (new Vector4(direction.X, direction.Y, direction.Z, 0) * transform).Xyz.Normalized();
 	}
 
 	private unsafe void VisitMeshNodes(AI.Node baseNode, Matrix4 baseTransform, Action<(AI.Node, Matrix4)> visit)

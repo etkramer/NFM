@@ -322,15 +322,25 @@ public class CommandList : IDisposable
 	{
 		Guard.Require(texture.IsAlive);
 
-		int uploadRing = UploadHelper.Ring;
-		nint uploadOffset = UploadHelper.Reserve(dataSize, D3D12.TextureDataPlacementAlignment);
-
-		// Copy data to upload buffer.
-		NativeMemory.Copy(data, (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset, (nuint)dataSize);
-
 		// Calculate subresource info.
 		var footprints = new PlacedSubresourceFootPrint[1];
-		Guard.NotNull(D3DContext.Device).GetCopyableFootprints(texture.Description, mipLevel, 1, (ulong)uploadOffset, footprints, stackalloc int[1], stackalloc ulong[1], out _);
+		Span<int> rowCounts = stackalloc int[1];
+		Span<ulong> rowSizes = stackalloc ulong[1];
+		Guard.NotNull(D3DContext.Device).GetCopyableFootprints(texture.Description, mipLevel, 1, 0, footprints, rowCounts, rowSizes, out ulong uploadSize);
+
+		int uploadRing = UploadHelper.Ring;
+		nint uploadOffset = UploadHelper.Reserve((nint)uploadSize, D3D12.TextureDataPlacementAlignment);
+		footprints[0].Offset = (ulong)uploadOffset;
+
+		// Source rows are tightly packed, but the copy source needs them at the footprint's aligned pitch.
+		nint rowSize = (nint)rowSizes[0];
+		Guard.Require(dataSize >= rowSize * rowCounts[0], "Texture data is too small for the requested mip level.");
+
+		byte* uploadStart = (byte*)UploadHelper.MappedRings[uploadRing] + uploadOffset;
+		for (int row = 0; row < rowCounts[0]; row++)
+		{
+			NativeMemory.Copy((byte*)data + (row * rowSize), uploadStart + (row * footprints[0].Footprint.RowPitch), (nuint)rowSize);
+		}
 
         RequestState(texture, ResourceStates.CopyDest);
 

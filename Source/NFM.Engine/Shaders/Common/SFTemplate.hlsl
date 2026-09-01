@@ -2,7 +2,7 @@
 
 struct SurfaceModel
 {
-	// Geoemtry
+	// Geoemtry (tangent space)
 	float3 Normal;
 
 	// PBR
@@ -36,7 +36,7 @@ export SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 
 	// Setup defaults
 	SurfaceModel model;
 	model.Albedo = float3(0, 0, 0);
-	model.Normal = float3(0.5, 0.5, 1);
+	model.Normal = float3(0, 0, 1);
 	model.Metallic = 0;
 	model.Roughness = 0.5;
 	model.Specular = 0.5;

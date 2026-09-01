@@ -41,9 +41,6 @@ public static class Engine
 			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
 			model2.Scale = new Vector3(0.001f);
             model2.Position = new Vector3(1, -1.5f, 1);
-
-			var model3 = new ModelNode(null);
-			model3.Model = await Asset.LoadAsync<Model>("USER:/Objects/UnitySponza.glb");
 		};
 	}
 

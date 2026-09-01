@@ -111,7 +111,7 @@ float3 InterpolateWithDeriv(BarycentricDeriv deriv, float v0, float v1, float v2
 
 struct SurfaceModel
 {
-	// Geoemtry
+	// Geoemtry (tangent space)
 	float3 Normal;
 
 	// PBR
@@ -175,9 +175,19 @@ void main(uint threadID : SV_DispatchThreadID)
 	float3 norm1 = normalize(mul(v1.Normal, (float3x3)transform.WorldToObject));
 	float3 norm2 = normalize(mul(v2.Normal, (float3x3)transform.WorldToObject));
 
+	float3 tan0 = normalize(mul((float3x3)transform.ObjectToWorld, v0.Tangent.xyz));
+	float3 tan1 = normalize(mul((float3x3)transform.ObjectToWorld, v1.Tangent.xyz));
+	float3 tan2 = normalize(mul((float3x3)transform.ObjectToWorld, v2.Tangent.xyz));
+
 	// Interp vertex data
-	float3 normal = BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda);
+	float3 normal = normalize(BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda));
+	float3 tangent = BarycentricLerp(tan0, tan1, tan2, deriv.m_lambda);
 	float2 uv0 = BarycentricLerp(v0.UV0, v1.UV0, v2.UV0, deriv.m_lambda);
+
+	// Build an orthonormal tangent frame, handedness from the vertex data
+	tangent = normalize(tangent - normal * dot(normal, tangent));
+	float3 bitangent = cross(normal, tangent) * v0.Tangent.w;
+	float3x3 tangentToWorld = float3x3(tangent, bitangent, normal);
 	
 	// Calculate UV derivs
 	float2 ddx = InterpolateWithDeriv(deriv, v0.UV0.x, v1.UV0.x, v2.UV0.x).yz;
@@ -188,6 +198,6 @@ void main(uint threadID : SV_DispatchThreadID)
 	
 	// Write to g-buffer
 	MatBuffer0[id] = float4(surface.Albedo, 1);
-	MatBuffer1[id] = float4(normal, 1);
+	MatBuffer1[id] = float4(normalize(mul(surface.Normal, tangentToWorld)), 1);
 	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, 1);
 }
