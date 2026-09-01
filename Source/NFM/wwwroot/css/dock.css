@@ -84,8 +84,7 @@
 .dock-tab {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 0 8px 0 14px;
+    padding: 0 20px;
     height: 24px;
     color: var(--color-fg-subtle);
     white-space: nowrap;
@@ -98,23 +97,6 @@
 .dock-tab.active {
     color: var(--color-fg-2);
     background-color: var(--color-bg-3);
-}
-
-.dock-tab-close {
-    display: flex;
-    align-items: center;
-    border-radius: 2px;
-    opacity: 0;
-}
-
-.dock-tab:hover .dock-tab-close,
-.dock-tab.active .dock-tab-close {
-    opacity: 0.6;
-}
-
-.dock-tab-close:hover {
-    opacity: 1;
-    background-color: var(--color-bg-menu);
 }
 
 .dock-slot {

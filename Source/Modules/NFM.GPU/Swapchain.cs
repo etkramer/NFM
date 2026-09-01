@@ -22,7 +22,7 @@ public class Swapchain : IDisposable
 	private IDXGISwapChain4 swapchain;
 	private Texture[] backbuffers;
 
-	private SwapChainFlags flags;
+	private readonly SwapChainFlags flags;
 
 	public Swapchain(IntPtr hwnd, int presentInterval = 0)
 	{

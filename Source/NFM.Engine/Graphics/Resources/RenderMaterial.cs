@@ -14,7 +14,7 @@ class RenderMaterial : IDisposable
 
 	#region Cache
 
-	private static Dictionary<MaterialKey, RenderMaterial> cache = new();
+	private static readonly Dictionary<MaterialKey, RenderMaterial> cache = [];
 
 	/// <summary>
 	/// Returns the shared material for a given source material and override set, creating it if needed.
@@ -40,10 +40,10 @@ class RenderMaterial : IDisposable
 
 	#region Permutations
 
-	private static List<(IEnumerable<Shader>, int)> stackIDs = new();
+	private static readonly List<(IEnumerable<Shader>, int)> stackIDs = [];
 
-	private static List<RenderMaterial> all = new();
-	private static List<Type> requestedPermutationTypes = new();
+	private static readonly List<RenderMaterial> all = [];
+	private static readonly List<Type> requestedPermutationTypes = [];
 	public static void RequestPermutation<T>() where T : ShaderPermutation, new()
 	{
 		if (!requestedPermutationTypes.Contains(typeof(T)))
@@ -58,14 +58,14 @@ class RenderMaterial : IDisposable
 	}
 
 	public IEnumerable<ShaderPermutation> Permutations => permutations;
-	private List<ShaderPermutation> permutations = new();
+	private readonly List<ShaderPermutation> permutations = [];
 
 	#endregion
 
 	[Inspect] public Material Source => key.Source;
 
 	public ShaderParameter[] Parameters { get; }
-	public ObservableCollection<Shader> Shaders { get; } = new();
+	public ObservableCollection<Shader> Shaders { get; } = [];
 
 	public BufferAllocation<byte> MaterialHandle { get; private set; }
 
@@ -94,7 +94,7 @@ class RenderMaterial : IDisposable
 		}
 
 		// Build parameters table, layering the material's own overrides then this instance's on top.
-		Parameters = Shaders.SelectMany(o => o.Parameters).ToArray();
+		Parameters = [.. Shaders.SelectMany(o => o.Parameters)];
 		for (int i = 0; i < Parameters.Length; i++)
 		{
 			if (Source.MaterialOverrides.TryFirst(o => o.Name == Parameters[i].Name, out var materialOverride))
@@ -121,10 +121,11 @@ class RenderMaterial : IDisposable
 	private void UpdateMaterialData()
 	{
 		MaterialHandle?.Dispose();
-		List<byte> materialData = new();
-
-		// Add shader ID to material data.
-		materialData.AddRange(StructureToByteArray(typeof(int), StackID));
+		List<byte> materialData =
+        [
+            // Add shader ID to material data.
+            .. StructureToByteArray(typeof(int), StackID),
+        ];
 
 		// Loop through all shader parameters
 		foreach (var param in Parameters)
@@ -195,7 +196,7 @@ readonly struct MaterialKey : IEquatable<MaterialKey>
 	public MaterialKey(Material source, IReadOnlyList<ShaderParameter>? overrides)
 	{
 		Source = source;
-		this.overrides = overrides?.ToArray() ?? Array.Empty<ShaderParameter>();
+		this.overrides = overrides?.ToArray() ?? [];
 	}
 
 	public bool TryGetOverride(string name, out ShaderParameter result)

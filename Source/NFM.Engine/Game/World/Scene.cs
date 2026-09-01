@@ -4,12 +4,12 @@ namespace NFM.World;
 
 public partial class Scene : IDisposable
 {
-	public static List<Scene> All { get; } = new();
+	public static List<Scene> All { get; } = [];
 
 	[Notify] public static Scene Main { get; set; } = new();
 
 	[Notify] public IEnumerable<Node> RootNodes => rootNodes;
-	private ObservableCollection<Node> rootNodes { get; set; } = new();
+	private ObservableCollection<Node> rootNodes { get; set; } = [];
 
 	internal RenderScene RenderData { get; } = new();
 

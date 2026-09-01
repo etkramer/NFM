@@ -27,8 +27,8 @@ public static class NodeSerializer
 	private class NodeData
 	{
 		public string Type { get; set; } = string.Empty;
-		public Dictionary<string, JsonElement> Properties { get; set; } = new();
-		public List<NodeData> Children { get; set; } = new();
+		public Dictionary<string, JsonElement> Properties { get; set; } = [];
+		public List<NodeData> Children { get; set; } = [];
 	}
 
 	/// <summary>
@@ -37,8 +37,8 @@ public static class NodeSerializer
 	/// </summary>
 	public static string Serialize(IEnumerable<Node> nodes)
 	{
-		HashSet<Node> roots = nodes.ToHashSet();
-		List<NodeData> data = roots.Where(node => !HasAncestorIn(node, roots)).Select(Pack).ToList();
+		HashSet<Node> roots = [.. nodes];
+		List<NodeData> data = [.. roots.Where(node => !HasAncestorIn(node, roots)).Select(Pack)];
 
 		return JsonSerializer.Serialize(data, options);
 	}
@@ -61,7 +61,7 @@ public static class NodeSerializer
 		}
 
 		List<Node> nodes = [];
-		foreach (NodeData item in data ?? new())
+		foreach (NodeData item in data ?? [])
 		{
 			if (Unpack(item, scene, null) is Node node)
 			{

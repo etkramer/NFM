@@ -11,7 +11,7 @@ public interface ISelectable
 public static class Selection
 {
 	public static ReadOnlyObservableCollection<ISelectable> Selected { get; }
-	private static ObservableCollection<ISelectable> selected { get; } = new();
+	private static ObservableCollection<ISelectable> selected { get; } = [];
 
 	static Selection()
 	{

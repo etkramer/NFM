@@ -18,7 +18,7 @@ public sealed class Shader : GameResource
 {
 	public string ShaderSource { get; }
 
-	public List<ShaderParameter> Parameters { get; } = new();
+	public List<ShaderParameter> Parameters { get; } = [];
 	public required BlendMode BlendMode { get; init; } = BlendMode.Opaque;
 
 	public Shader(string source)

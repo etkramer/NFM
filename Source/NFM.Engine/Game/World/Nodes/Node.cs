@@ -14,7 +14,7 @@ public class Node : ISelectable, IDisposable
 	public Scene Scene { get; }
 
 	public IEnumerable<Node> Children => children;
-	private ObservableCollection<Node> children = new();
+	private readonly ObservableCollection<Node> children = [];
 
 	private Node? parent;
 	public Node? Parent

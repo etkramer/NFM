@@ -11,10 +11,10 @@ static class Renderer
 	/// </summary>
 	public static CommandList DefaultCommandList { get; private set; } = new CommandList();
 
-	private static readonly List<ScenePass> scenePasses = new();
+	private static readonly List<ScenePass> scenePasses = [];
 
 	// One pipeline per camera, so passes can safely keep per-view history between frames.
-	private static readonly Dictionary<CameraNode, RenderPipeline> pipelines = new();
+	private static readonly Dictionary<CameraNode, RenderPipeline> pipelines = [];
 
 	public static void AddPass(ScenePass pass)
 	{

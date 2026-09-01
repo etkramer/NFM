@@ -17,12 +17,12 @@ readonly struct TextureHandle
 /// </summary>
 class RenderGraph : IDisposable
 {
-	private List<string> names = new();
-	private List<TextureDesc> descs = new();
-	private Texture[] textures = Array.Empty<Texture>();
+	private readonly List<string> names = [];
+	private readonly List<TextureDesc> descs = [];
+	private Texture[] textures = [];
 
-	private List<ViewPass> passes = new();
-	private List<(HashSet<int> Reads, HashSet<int> Writes)> usage = new();
+	private readonly List<ViewPass> passes = [];
+	private readonly List<(HashSet<int> Reads, HashSet<int> Writes)> usage = [];
 
 	private bool isBuilt = false;
 
@@ -81,7 +81,7 @@ class RenderGraph : IDisposable
 
 	private void Validate()
 	{
-		HashSet<int> written = new();
+		HashSet<int> written = [];
 
 		for (int i = 0; i < passes.Count; i++)
 		{
@@ -130,8 +130,8 @@ class RenderGraph : IDisposable
 
 class RenderGraphBuilder
 {
-	internal HashSet<int> Reads { get; } = new();
-	internal HashSet<int> Writes { get; } = new();
+	internal HashSet<int> Reads { get; } = [];
+	internal HashSet<int> Writes { get; } = [];
 
 	public void Read(params TextureHandle[] handles) => handles.ForEach(o => Reads.Add(o.Index));
 	public void Write(params TextureHandle[] handles) => handles.ForEach(o => Writes.Add(o.Index));

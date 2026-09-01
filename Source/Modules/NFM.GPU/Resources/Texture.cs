@@ -1,6 +1,6 @@
 ﻿using System;
-using Vortice.DXGI;
 using Vortice.Direct3D12;
+using Vortice.DXGI;
 
 namespace NFM.GPU;
 
@@ -11,8 +11,8 @@ public unsafe class Texture : Resource, IDisposable
 
 	internal ResourceDescription Description { get; set; }
 
-	private UnorderedAccessView[] uavs;
-	private ShaderResourceView[] srvs;
+	private readonly UnorderedAccessView[] uavs;
+	private readonly ShaderResourceView[] srvs;
 	private RenderTargetView? rtv;
 	private DepthStencilView? dsv;
 

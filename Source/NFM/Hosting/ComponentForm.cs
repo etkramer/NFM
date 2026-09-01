@@ -46,7 +46,7 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 	private CompositionWebViewManager? manager;
 	private ServiceProvider? services;
 
-	private readonly Dictionary<int, ViewportHost> viewports = new();
+	private readonly Dictionary<int, ViewportHost> viewports = [];
 	private ViewportHost? hovered;
 	private ViewportHost? captured;
 

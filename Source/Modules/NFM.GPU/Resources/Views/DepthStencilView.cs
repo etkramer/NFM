@@ -6,7 +6,7 @@ namespace NFM.GPU;
 
 public class DepthStencilView : IDisposable
 {
-	public static DescriptorHeap Heap = new DescriptorHeap(HeapType.DSV, 4096, false);
+	public static DescriptorHeap Heap = new(HeapType.DSV, 4096, false);
 
 	public Texture Target;
 	public DescriptorHandle Handle;

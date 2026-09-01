@@ -92,6 +92,15 @@ public sealed partial class DockHost : IAsyncDisposable
     public void Open(Type panelType) => Layout.Open(panelType);
 
     [JSInvokable]
+    public void OnClosed(string tabId)
+    {
+        if (Layout.FindTab(tabId) is DockTab tab)
+        {
+            Layout.Close(tab);
+        }
+    }
+
+    [JSInvokable]
     public void OnResized(string nodeId, double ratio)
     {
         if (Layout.FindNode(nodeId) is DockSplit split)

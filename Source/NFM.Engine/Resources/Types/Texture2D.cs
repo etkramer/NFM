@@ -61,7 +61,7 @@ public sealed class Texture2D : GameResource
 	public byte MipCount { get; }
 	public TextureFormat Format { get; }
 
-    private byte[]?[] pixelData;
+    private readonly byte[]?[] pixelData;
 
 	/// <summary>
 	/// Creates a new Texture2D object.
@@ -165,7 +165,7 @@ public sealed class Texture2D : GameResource
 			}
 		};
 
-		Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA8, 1);
+		Texture2D texture = new(1, 1, TextureFormat.RGBA8, 1);
 		texture.SetPixelData(data);
 		return texture;
 	}

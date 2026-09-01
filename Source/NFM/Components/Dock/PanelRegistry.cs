@@ -9,8 +9,8 @@ public static class PanelRegistry
 {
     public sealed record Entry(Type Type, string Key, string Name, bool IsTransparent);
 
-    static readonly Dictionary<string, Entry> byKey = new(StringComparer.Ordinal);
-    static readonly Dictionary<Type, Entry> byType = new();
+    static readonly Dictionary<string, Entry> byKey = [with(StringComparer.Ordinal)];
+    static readonly Dictionary<Type, Entry> byType = [];
 
     static PanelRegistry()
     {

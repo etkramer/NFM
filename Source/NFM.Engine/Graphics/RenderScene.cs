@@ -16,10 +16,10 @@ class RenderScene : IDisposable
 	public TypedBuffer<GPUInstance> InstanceBuffer { get; } = new(MaxInstances) { Name = "Instance Buffer" };
 	public TypedBuffer<GPUTransform> TransformBuffer { get; } = new(MaxInstances) { Name = "Transform Buffer" };
 
-	private Dictionary<nint, ModelNode> instanceOwners = new();
+	private readonly Dictionary<nint, ModelNode> instanceOwners = [];
 
-	private HashSet<ModelNode> dirtyTransforms = new();
-	private HashSet<ModelNode> dirtyInstances = new();
+	private readonly HashSet<ModelNode> dirtyTransforms = [];
+	private readonly HashSet<ModelNode> dirtyInstances = [];
 
 	public void MarkTransformDirty(ModelNode node) => dirtyTransforms.Add(node);
 	public void MarkInstancesDirty(ModelNode node) => dirtyInstances.Add(node);

@@ -8,7 +8,7 @@ namespace NFM.Components;
 /// </summary>
 public abstract class Component : ComponentBase, IDisposable, IHandleEvent
 {
-	private static readonly List<Component> components = new();
+	private static readonly List<Component> components = [];
 
 	internal static void Tick()
 	{

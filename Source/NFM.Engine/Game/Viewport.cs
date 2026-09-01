@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using NFM.GPU;
-using NFM.World;
 using NFM.Threading;
+using NFM.World;
 
 namespace NFM.Graphics;
 
@@ -10,7 +10,7 @@ namespace NFM.Graphics;
 /// </summary>
 public class Viewport : IDisposable
 {
-	public static List<Viewport> All { get; } = new();
+	public static List<Viewport> All { get; } = [];
 
 	// Basic properties
 	public Swapchain Swapchain { get; }
@@ -127,7 +127,7 @@ public class Viewport : IDisposable
 		// Pan Camera (Alt+Shift+LMB)
 		else if (Input.IsDown(MouseButtons.Left) && Input.IsDown(Keys.LMenu) && Input.IsDown(Keys.LShiftKey))
 		{
-			Vector3 panVector = new Vector3()
+			Vector3 panVector = new()
 			{
 				X = -Input.MouseDelta.X * 0.002f,
 				Z = -Input.MouseDelta.Y * 0.002f

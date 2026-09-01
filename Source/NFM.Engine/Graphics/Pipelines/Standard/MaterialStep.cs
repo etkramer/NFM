@@ -174,7 +174,7 @@ class MaterialStep : ViewPass
 
 class MaterialShaderPermutation : ShaderPermutation
 {
-	private static ShaderModule materialModule = new ShaderModule(Embed.GetString("Shaders/Standard/MaterialCS.hlsl"));
+	private static readonly ShaderModule materialModule = new(Embed.GetString("Shaders/Standard/MaterialCS.hlsl"));
 
 	public PipelineState? PSO { get; private set; }
 

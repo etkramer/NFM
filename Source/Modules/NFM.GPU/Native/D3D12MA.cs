@@ -34,7 +34,7 @@ public static partial class D3D12MA
 
 	public class VirtualBlock : IDisposable
 	{
-		private IntPtr handle;
+		private readonly IntPtr handle;
 
 		public VirtualBlock(IntPtr nativePtr)
 		{

@@ -16,7 +16,7 @@ public sealed class Model : GameResource
     /// Collection of all mesh groups in the model.
     /// </summary>
     public IReadOnlyCollection<MeshGroup> MeshGroups => meshGroups;
-    private readonly List<MeshGroup> meshGroups = new();
+    private readonly List<MeshGroup> meshGroups = [];
 
     protected override void PostLoad()
     {

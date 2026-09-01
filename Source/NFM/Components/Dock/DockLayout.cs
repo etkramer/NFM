@@ -20,7 +20,7 @@ public sealed class DockLayout
     /// </summary>
     public IReadOnlyList<DockTab> Tabs => tabs;
 
-    readonly List<DockTab> tabs = new();
+    readonly List<DockTab> tabs = [];
 
     public event Action? Changed;
 
@@ -58,14 +58,6 @@ public sealed class DockLayout
     public DockTab? FindTab(string id) => tabs.FirstOrDefault(o => o.Id == id);
 
     public DockTabs? OwnerOf(DockTab tab) => Groups().FirstOrDefault(o => o.Tabs.Contains(tab));
-
-    public void NotifyChanged() => Changed?.Invoke();
-
-    public void SetRatio(DockSplit split, double ratio)
-    {
-        split.Ratio = Math.Clamp(ratio, MinRatio, 1 - MinRatio);
-        Changed?.Invoke();
-    }
 
     public void Activate(DockTab tab)
     {
@@ -269,7 +261,7 @@ public sealed class DockLayout
             DockTabs group
                 => new NodeDto
                 {
-                    Tabs = group.Tabs.Select(o => PanelRegistry.KeyOf(o.PanelType)).ToArray(),
+                    Tabs = [.. group.Tabs.Select(o => PanelRegistry.KeyOf(o.PanelType))],
                     Active = group.ActiveIndex
                 },
             _ => throw new NotSupportedException(node.GetType().Name)
@@ -291,11 +283,10 @@ public sealed class DockLayout
             return new DockSplit(orientation, first, second, Math.Clamp(dto.Ratio, MinRatio, 1 - MinRatio));
         }
 
-        DockTab[] resolved = (dto.Tabs ?? [])
+        DockTab[] resolved = [.. (dto.Tabs ?? [])
             .Select(PanelRegistry.Resolve)
             .OfType<Type>()
-            .Select(o => new DockTab { PanelType = o })
-            .ToArray();
+            .Select(o => new DockTab { PanelType = o })];
 
         if (resolved.Length is 0)
         {

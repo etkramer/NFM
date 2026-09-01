@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using SharpGen.Runtime;
+using Vortice.Direct3D;
 using Vortice.Direct3D12;
+using Vortice.Direct3D12.Shader;
 using Vortice.Dxc;
 using Vortice.DXGI;
-using Vortice.Direct3D12.Shader;
-using Vortice.Direct3D;
 
 namespace NFM.GPU;
 
@@ -54,12 +54,12 @@ public sealed class PipelineState : IDisposable
 	internal ID3D12RootSignature? RootSignature = null;
 
 	// RootParameter <-> register mappings. TODO: Doesn't account for register spaces.
-	internal Dictionary<BindPoint, int> tRegisterMapping = new();
-	internal Dictionary<BindPoint, int> uRegisterMapping = new();
-	internal Dictionary<BindPoint, int> cRegisterMapping = new();
+	internal Dictionary<BindPoint, int> tRegisterMapping = [];
+	internal Dictionary<BindPoint, int> uRegisterMapping = [];
+	internal Dictionary<BindPoint, int> cRegisterMapping = [];
 
 	// Parameters
-	private List<RootParameter1> rootParams = new();
+	private readonly List<RootParameter1> rootParams = [];
 	private ShaderModule? compiledCompute;
 	private ShaderModule? compiledVertex;
 	private ShaderModule? compiledMesh;
@@ -68,7 +68,7 @@ public sealed class PipelineState : IDisposable
 	private DepthMode depthMode = DepthMode.None;
 	private bool depthRead = false;
 	private bool depthWrite = false;
-	private Format[] rtFormats = { D3DContext.RTFormat };
+	private Format[] rtFormats = [D3DContext.RTFormat];
 	private int rtSamples = 1;
 	private TopologyType topologyType = TopologyType.Triangle;
 	private bool isBlendEnabled = false;
@@ -180,7 +180,7 @@ public sealed class PipelineState : IDisposable
 			if (!DxcCompiler.Utils.CreateReflection(CreateBlob(shader.Bytecode.ToArray()), out ID3D12ShaderReflection? reflection).Success)
 			{
 				// Failed to build reflection data - shader is probably invalid.
-				return Array.Empty<RootParameter1>();
+				return [];
 			}
 
 			for (int i = 0; i < reflection?.Description.BoundResources; i++)
@@ -231,7 +231,7 @@ public sealed class PipelineState : IDisposable
 			}
 		}
 
-		return rootParams.ToArray();
+		return [.. rootParams];
 	}
 
 	private unsafe Result CreatePipelineState<T, TData>(TData data, out T? result) where T : ID3D12PipelineState where TData : unmanaged
@@ -266,12 +266,12 @@ public sealed class PipelineState : IDisposable
 			RootParameter1[] rootParameters = BuildRootParameters(compiledVertex, compiledMesh, compiledPixel, compiledCompute);
 
 			// Create static samplers.
-			StaticSamplerDescription[] staticSamplers = new[]
-			{
-				new StaticSamplerDescription(SamplerDescription.AnisotropicWrap, ShaderVisibility.All, 0, 1) { MaxAnisotropy = 16 },
+			StaticSamplerDescription[] staticSamplers =
+            [
+                new StaticSamplerDescription(SamplerDescription.AnisotropicWrap, ShaderVisibility.All, 0, 1) { MaxAnisotropy = 16 },
 				new StaticSamplerDescription(SamplerDescription.LinearWrap, ShaderVisibility.All, 1, 1),
 				new StaticSamplerDescription(SamplerDescription.PointWrap, ShaderVisibility.All, 2, 1)
-			};
+			];
 
 			// Create root signature.
 			RootSignature = Guard.NotNull(D3DContext.Device).CreateRootSignature(new RootSignatureDescription1(
@@ -440,7 +440,7 @@ public struct BindPoint
 
 	public static implicit operator BindPoint(int slot) => new(slot, 0);
 
-	public override string ToString()
+	public override readonly string ToString()
 	{
 		return $"{Slot}, space{Space}";
 	}

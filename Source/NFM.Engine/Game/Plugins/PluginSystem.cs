@@ -4,14 +4,14 @@ namespace NFM.Plugins;
 
 public static class PluginSystem
 {
-	public static readonly List<Plugin> Plugins = new();
+	public static readonly List<Plugin> Plugins = [];
 
 	public static void Init()
 	{
-		string[] searchPaths = new[]
-		{
-			"../Plugins/"
-		};
+		string[] searchPaths =
+        [
+            "../Plugins/"
+		];
 
 		// Load plugins from assemblies.
 		foreach (string searchPath in searchPaths)

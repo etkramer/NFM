@@ -6,7 +6,7 @@ namespace NFM.GPU;
 
 public class RenderTargetView : IDisposable
 {
-	public static DescriptorHeap Heap = new DescriptorHeap(HeapType.RTV, 4096, false);
+	public static DescriptorHeap Heap = new(HeapType.RTV, 4096, false);
 
 	public Texture Target;
 	public DescriptorHandle Handle;

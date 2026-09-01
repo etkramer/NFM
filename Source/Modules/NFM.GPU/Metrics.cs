@@ -23,7 +23,7 @@ public static class Metrics
 	/// </summary>
 	public static ulong FrameCount = 1;
 
-	private static System.Diagnostics.Stopwatch frameTimer = new();
+	private static readonly System.Diagnostics.Stopwatch frameTimer = new();
 
 	internal static void BeginFrame()
 	{

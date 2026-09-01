@@ -5,14 +5,14 @@ namespace NFM.Graphics;
 
 public class Gizmos
 {
-	private CommandList renderList;
+	private readonly CommandList renderList;
 	public CameraNode Camera { get; private set; }
 
 	private static readonly PipelineState linePSO;
 	private static readonly PipelineState geometryPSO;
 
-	private static readonly TypedBuffer<uint> gizmosIndexBuffer = new TypedBuffer<uint>(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
-	private static readonly TypedBuffer<Vector3> gizmosVertexBuffer = new TypedBuffer<Vector3>(2048); // Support up to 2048 verts per DrawGeometry() call
+	private static readonly TypedBuffer<uint> gizmosIndexBuffer = new(2048 * 3); // Support up to 2048 tris per DrawGeometry() call
+	private static readonly TypedBuffer<Vector3> gizmosVertexBuffer = new(2048); // Support up to 2048 verts per DrawGeometry() call
 
 	public static event EventHandler<Gizmos> OnDrawGizmos = delegate {};
 
@@ -36,7 +36,7 @@ public class Gizmos
 
 	private Matrix4 viewMatrix;
 	private Matrix4 projectionMatrix;
-	private TypedBuffer<ViewConstants> viewConstants;
+	private readonly TypedBuffer<ViewConstants> viewConstants;
 
 	public Gizmos(CommandList list, CameraNode camera, Matrix4 view, Matrix4 projection, TypedBuffer<ViewConstants> constants)
 	{
@@ -63,9 +63,9 @@ public class Gizmos
 		if (fillColor.A != 0)
 		{
 			// Draw fill
-			Vector4[] vertices = new Vector4[]
-			{
-				ToClipSpace(box.BottomLeftNear), // 0
+			Vector4[] vertices =
+            [
+                ToClipSpace(box.BottomLeftNear), // 0
 				ToClipSpace(box.BottomRightNear), // 1
 				ToClipSpace(box.TopLeftNear), // 2
 				ToClipSpace(box.TopRightNear), // 3
@@ -73,10 +73,10 @@ public class Gizmos
 				ToClipSpace(box.BottomRightFar), // 5
 				ToClipSpace(box.TopLeftFar), // 6
 				ToClipSpace(box.TopRightFar), // 7
-			};
+			];
 
-			uint[] indices = new uint[]
-			{
+			uint[] indices =
+            [
 				// Front
 				0, 2, 1,
 				2, 3, 1,
@@ -95,7 +95,7 @@ public class Gizmos
 				// Bottom
 				0, 4, 1,
 				4, 5, 1,
-			};
+			];
 
 			DrawGeometry(vertices, indices, fillColor);
 		}
@@ -170,7 +170,7 @@ public class Gizmos
 			var vertex = new Vector3(0 + MathF.Cos(a) * radius, 0 + MathF.Sin(a) * radius, 0);
 
 			// Rotate vertex
-			Vector3 fromDirection = new Vector3(0, 0, -1);
+			Vector3 fromDirection = new(0, 0, -1);
 			Vector3 toDirection = (p1 - p0).Normalized();
 			float angleRadians = MathF.Acos(Vector3.Dot(fromDirection, toDirection));
 			Vector3 axis = Vector3.Cross(fromDirection, toDirection);
@@ -230,11 +230,11 @@ public class Gizmos
 
 	private unsafe int[] AsInt(Vector3 value)
 	{
-		return new int[] { AsInt(value.X), AsInt(value.Y), AsInt(value.Z) };
+		return [AsInt(value.X), AsInt(value.Y), AsInt(value.Z)];
 	}
 
 	private unsafe int[] AsInt(Vector4 value)
 	{
-		return new int[] { AsInt(value.X), AsInt(value.Y), AsInt(value.Z), AsInt(value.W) };
+		return [AsInt(value.X), AsInt(value.Y), AsInt(value.Z), AsInt(value.W)];
 	}
 }

@@ -29,12 +29,8 @@ else if (Node is DockTabs group)
                 <div class="dock-tab @(group.Active == tab ? "active" : "")"
                      data-tab=@tab.Id
                      @key=tab
-                     @onpointerdown=@(() => Host.Activate(tab))>
+                     @onpointerdown=@((PointerEventArgs e) => { if (e.Button is 0) Host.Activate(tab); })>
                     <span class="dock-tab-name">@tab.Name</span>
-
-                    <div class="dock-tab-close" @onclick=@(() => Host.Close(tab))>
-                        <FontIcon Glyph="close" FontSize="12" />
-                    </div>
                 </div>
             }
         </div>

@@ -14,7 +14,7 @@ public abstract class ResourceLoader<T> : ResourceLoader where T : GameResource
 
 public sealed class CachedResourceLoader<T> : ResourceLoader<T> where T : GameResource
 {
-    private T cachedValue;
+    private readonly T cachedValue;
 
     public CachedResourceLoader(T cachedValue)
     {

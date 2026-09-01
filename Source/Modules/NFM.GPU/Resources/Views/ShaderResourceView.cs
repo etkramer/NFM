@@ -6,7 +6,7 @@ namespace NFM.GPU;
 
 public class ShaderResourceView : IDisposable
 {
-	internal static DescriptorHeap Heap = new DescriptorHeap(HeapType.SRV, 4096, true);
+	internal static DescriptorHeap Heap = new(HeapType.SRV, 4096, true);
 	internal DescriptorHandle Handle;
 
 	public ShaderResourceView(ID3D12Resource resource, int stride, int capacity, bool isRaw)

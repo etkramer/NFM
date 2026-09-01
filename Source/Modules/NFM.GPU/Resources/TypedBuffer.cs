@@ -12,8 +12,8 @@ public unsafe class TypedBuffer<T> : RawBuffer, IDisposable where T : unmanaged
 	private nint lastOffset = 0;
 	private bool statsDirty = false;
 
-	private D3D12MA.VirtualBlock virtualBlock;
-	private List<BufferAllocation<T>> allocations = new();
+	private readonly D3D12MA.VirtualBlock virtualBlock;
+	private readonly List<BufferAllocation<T>> allocations = [];
 
 	public TypedBuffer(nint elementCount, int alignment = 1, bool hasCounter = false, bool isRaw = false) : base(elementCount * sizeof(T), sizeof(T), alignment, hasCounter, isRaw)
 	{

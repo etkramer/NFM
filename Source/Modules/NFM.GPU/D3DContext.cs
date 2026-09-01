@@ -1,10 +1,10 @@
 ﻿global using NFM.Common;
 global using NFM.Mathematics;
-using Vortice.DXGI;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Vortice.Direct3D12;
 using Vortice.Direct3D12.Debug;
-using System.Runtime.InteropServices;
-using System.Diagnostics.CodeAnalysis;
+using Vortice.DXGI;
 
 namespace NFM.GPU;
 
@@ -187,7 +187,7 @@ public static class D3DContext
 	}
 
 	// Always in order
-	private static Queue<(ulong, ID3D12Object)> releaseQueue = new();
+	private static readonly Queue<(ulong, ID3D12Object)> releaseQueue = new();
 
 	/// <summary>
 	/// Releases the specified object once it is no longer in use by the GPU

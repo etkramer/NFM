@@ -15,10 +15,10 @@ public partial class ModelNode : Node
 
 	internal BufferAllocation<GPUTransform> TransformHandle;
 
-	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = new();
-	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = new();
+	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = [];
+	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = [];
 
-	private Dictionary<Mesh, List<ShaderParameter>> materialOverrides = new();
+	private readonly Dictionary<Mesh, List<ShaderParameter>> materialOverrides = [];
 
 	private RenderScene RenderScene => Scene.RenderData;
 
@@ -43,7 +43,7 @@ public partial class ModelNode : Node
 	{
 		if (!materialOverrides.TryGetValue(mesh, out var overrides))
 		{
-			overrides = materialOverrides[mesh] = new();
+			overrides = materialOverrides[mesh] = [];
 		}
 
 		overrides.RemoveAll(o => o.Name == param);
@@ -80,7 +80,7 @@ public partial class ModelNode : Node
 
 		// Acquire the new materials before releasing the old ones, so anything shared between the
 		// two isn't dropped to zero references and immediately rebuilt.
-		Dictionary<Mesh, RenderMaterial> newMaterials = new();
+		Dictionary<Mesh, RenderMaterial> newMaterials = [];
 
 		if (IsVisible && Model is not null)
 		{

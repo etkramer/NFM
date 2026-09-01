@@ -2,7 +2,7 @@
 
 public sealed class MountPoint
 {
-	public static List<MountPoint> All = new();
+	public static List<MountPoint> All = [];
 
 	public readonly string Name;
 	public readonly string ID;

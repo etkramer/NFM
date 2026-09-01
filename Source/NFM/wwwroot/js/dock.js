@@ -89,13 +89,26 @@ function sync() {
 
         placements.set(id, rect);
         panel.style.display = "flex";
-        panel.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
+        panel.style.left = `${rect.x}px`;
+        panel.style.top = `${rect.y}px`;
         panel.style.width = `${rect.w}px`;
         panel.style.height = `${rect.h}px`;
     }
 }
 
 function onPointerDown(event) {
+    // Middle click closes a tab, and would otherwise start Chromium's autoscroll.
+    if (event.button === 1) {
+        const tab = event.target.closest(".dock-tab");
+
+        if (tab !== null) {
+            event.preventDefault();
+            host.invokeMethodAsync("OnClosed", tab.dataset.tab);
+        }
+
+        return;
+    }
+
     if (event.button !== 0) {
         return;
     }
@@ -107,7 +120,7 @@ function onPointerDown(event) {
     }
 
     const tab = event.target.closest(".dock-tab");
-    if (tab !== null && event.target.closest(".dock-tab-close") === null) {
+    if (tab !== null) {
         beginTabDrag(event, tab);
     }
 }

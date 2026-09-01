@@ -77,7 +77,7 @@ public class ShaderModule
 			libNames[i + 1] = $"other{i}";
 		}
 
-		var result = linker.Link(entryName, DxcCompiler.GetShaderProfile((DxcShaderStage)stage, DxcShaderModel.Model6_6), libNames, new string[] { });
+		var result = linker.Link(entryName, DxcCompiler.GetShaderProfile((DxcShaderStage)stage, DxcShaderModel.Model6_6), libNames, []);
 		
 		// Check for errors.
 		if (result.GetStatus().Success)
@@ -95,7 +95,7 @@ public class ShaderModule
 
 	static string SimplifyPath(string path)
 	{
-		Regex simplifyRegex = new Regex(@"[^\\/]+(?<!\.\.)[\\/]\.\.[\\/]");
+		Regex simplifyRegex = new(@"[^\\/]+(?<!\.\.)[\\/]\.\.[\\/]");
 
 		while (true)
 		{
@@ -143,7 +143,7 @@ public class ShaderModule
 
 public sealed class CustomIncludeHandler : CallbackBase, IDxcIncludeHandler
 {
-	private Func<string, string?> resolveMethod;
+	private readonly Func<string, string?> resolveMethod;
 
 	public CustomIncludeHandler(Func<string, string?> resolver) => resolveMethod = resolver;
 

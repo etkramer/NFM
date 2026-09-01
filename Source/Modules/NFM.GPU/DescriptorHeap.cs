@@ -23,10 +23,10 @@ public struct DescriptorHandle : IDisposable
 	public static implicit operator CpuDescriptorHandle(DescriptorHandle handle) => handle.CPUHandle;
 	public static implicit operator GpuDescriptorHandle(DescriptorHandle handle) => handle.GPUHandle;
 
-	public CpuDescriptorHandle CPUHandle => Heap.GetCPUHandle(Index);
-	public GpuDescriptorHandle GPUHandle => Heap.GetGPUHandle(Index);
+	public readonly CpuDescriptorHandle CPUHandle => Heap.GetCPUHandle(Index);
+	public readonly GpuDescriptorHandle GPUHandle => Heap.GetGPUHandle(Index);
 
-	public void Dispose()
+	public readonly void Dispose()
 	{
 		Heap.Free(this);
 	}
@@ -35,8 +35,8 @@ public struct DescriptorHandle : IDisposable
 public class DescriptorHeap : IDisposable
 {
 	internal ID3D12DescriptorHeap handle;
-	private D3D12MA.VirtualBlock virtualBlock;
-	private int stride;
+	private readonly D3D12MA.VirtualBlock virtualBlock;
+	private readonly int stride;
 
 	public HeapType Type { get; }
 

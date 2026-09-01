@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+
 using Vortice.Direct3D;
 using Vortice.Direct3D12;
 using Vortice.DXGI;
@@ -7,8 +8,8 @@ namespace NFM.GPU;
 
 public class CommandList : IDisposable
 {
-	private ID3D12CommandAllocator[] commandAllocators;
-	private ID3D12GraphicsCommandList6 list;
+	private readonly ID3D12CommandAllocator[] commandAllocators;
+	private readonly ID3D12GraphicsCommandList6 list;
 
 	internal PipelineState? CurrentPSO { get; private set; } = null;
 	public bool IsOpen { get; private set; } = false;
@@ -19,7 +20,7 @@ public class CommandList : IDisposable
 		set => list.Name = value;
 	}
 
-	private static PipelineState mipGenPSO = new PipelineState()
+	private static readonly PipelineState mipGenPSO = new PipelineState()
 		.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/MipGenCS.hlsl"), ShaderStage.Compute))
 		.AsRootConstant(0, 2)
 		.Compile().Result;
@@ -357,7 +358,7 @@ public class CommandList : IDisposable
 		list.CopyBufferRegion(dest, (ulong)destOffset, source, (ulong)sourceOffset, (ulong)numBytes);
 	}
 
-	static RawBuffer intermediateCopyBuffer = new RawBuffer(8 * 1024 * 1024, 1); // ~8MB
+	static readonly RawBuffer intermediateCopyBuffer = new(8 * 1024 * 1024, 1); // ~8MB
 	public void CopyBuffer(RawBuffer buffer, nint startOffset, nint destOffset, nint numBytes)
 	{
 		CopyBuffer(buffer, intermediateCopyBuffer, startOffset, 0, numBytes);
@@ -404,7 +405,7 @@ public class CommandList : IDisposable
 		RequestState(depthStencil, ResourceStates.DepthWrite);
 		renderTargets.ForEach(o => RequestState(o, ResourceStates.RenderTarget));
 
-		list.OMSetRenderTargets(renderTargets.Length, renderTargets.Select(o => o.GetRTV().Handle.CPUHandle).ToArray(), depthStencil?.GetDSV().Handle);
+		list.OMSetRenderTargets(renderTargets.Length, [.. renderTargets.Select(o => o.GetRTV().Handle.CPUHandle)], depthStencil?.GetDSV().Handle);
 		list.RSSetViewport(0, 0, renderTargets.First().Width, renderTargets.First().Height);
 		list.RSSetScissorRect(renderTargets.First().Width, renderTargets.First().Height);
 	}
@@ -495,10 +496,10 @@ public class CommandList : IDisposable
 		list.Reset(commandAllocators[D3DContext.FrameIndex]);
 
 		// Setup common state.
-		list.SetDescriptorHeaps(1, new[]
-		{
-			ShaderResourceView.Heap.handle,
-		});
+		list.SetDescriptorHeaps(1,
+        [
+            ShaderResourceView.Heap.handle,
+		]);
 
 		IsOpen = true;
 	}

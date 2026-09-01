@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace NFM.Common;
 
@@ -10,7 +10,7 @@ public static class ReflectionHelper
 	public const BindingFlags BindingFlagsAllNonStatic = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
 
 	public static IReadOnlyCollection<Assembly> LoadedAssemblies => loadedAssemblies;
-    private static List<Assembly> loadedAssemblies { get; } = new();
+    private static List<Assembly> loadedAssemblies { get; } = [];
 
 	static ReflectionHelper()
 	{

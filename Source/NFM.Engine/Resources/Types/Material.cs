@@ -4,7 +4,7 @@ public sealed class Material : GameResource
 {
 	public Shader Shader { get; }
 
-	public List<ShaderParameter> MaterialOverrides { get; } = new();
+	public List<ShaderParameter> MaterialOverrides { get; } = [];
 
 	public Material(Shader shader)
 	{

@@ -30,6 +30,8 @@
 
 .child-container {
     position: absolute;
+    /* Above the dock, whose panels are positioned and come later in the document. */
+    z-index: 100;
     display: none;
     min-width: 160px;
     background-color: var(--color-bg-menu);

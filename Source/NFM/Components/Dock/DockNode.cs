@@ -68,7 +68,7 @@ public sealed class DockSplit : DockNode
 
 public sealed class DockTabs : DockNode
 {
-    public List<DockTab> Tabs { get; } = new();
+    public List<DockTab> Tabs { get; } = [];
 
     public int ActiveIndex { get; set; }
 

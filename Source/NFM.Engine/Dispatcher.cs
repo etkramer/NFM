@@ -10,7 +10,7 @@ public static class Dispatcher
     public static Thread MainThread { get; private set; } = Thread.CurrentThread;
     public static event Action<double> OnTick = delegate { };
 
-    static Queue<Action> dispatcherQueue = new();
+    static readonly Queue<Action> dispatcherQueue = new();
 
     /// <summary>
     /// Schedules an action to be run on the main (dispatcher) thread.

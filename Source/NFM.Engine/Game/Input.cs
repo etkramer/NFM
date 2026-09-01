@@ -27,8 +27,8 @@ public static class Input
 		(IsDown(Keys.LMenu) || IsDown(Keys.RMenu) ? Keys.Alt : Keys.None);
 
 	// Store button states.
-	private static Dictionary<MouseButtons, ButtonState> mouseStates = new();
-	private static Dictionary<Keys, ButtonState> keyStates = new();
+	private static readonly Dictionary<MouseButtons, ButtonState> mouseStates = [];
+	private static readonly Dictionary<Keys, ButtonState> keyStates = [];
 
 	// Store pointer states.
 	private static bool wasMouseMoved = false;

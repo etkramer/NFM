@@ -7,14 +7,14 @@ public sealed partial class TreeView<TItem> where TItem : class
 	/// <summary>
 	/// Flat list of currently displayed nodes, not accounting for virtualization.
 	/// </summary>
-	private readonly List<TreeNode> displayNodes = new();
+	private readonly List<TreeNode> displayNodes = [];
 
 	/// <summary>
 	/// Item/node mappings. Includes non-visible/collapsed items that aren't in displayNodes.
 	/// </summary>
-	private readonly Dictionary<TItem, TreeNode> nodeItemMap = new();
+	private readonly Dictionary<TItem, TreeNode> nodeItemMap = [];
 
-	private readonly HashSet<TItem> reachable = new();
+	private readonly HashSet<TItem> reachable = [];
 
 	private IEnumerable<TItem>? lastRootItems;
 
@@ -196,7 +196,7 @@ public sealed partial class TreeView<TItem> where TItem : class
 		{
 			Item = item;
 			source = children;
-			Children = children.ToList();
+			Children = [.. children];
 			handler = (o, e) => onChildrenChanged.Invoke(this);
 
 			if (source is INotifyCollectionChanged notify)
@@ -205,7 +205,7 @@ public sealed partial class TreeView<TItem> where TItem : class
 			}
 		}
 
-		public void Refresh() => Children = source.ToList();
+		public void Refresh() => Children = [.. source];
 
 		public void Dispose()
 		{

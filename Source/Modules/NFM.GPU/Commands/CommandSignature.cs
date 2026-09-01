@@ -8,7 +8,7 @@ public sealed class CommandSignature : IDisposable
 {
 	public int Stride { get; private set; } = 0;
 
-	private List<IndirectArgumentDescription> arguments = new();
+	private readonly List<IndirectArgumentDescription> arguments = [];
 	internal ID3D12CommandSignature? Handle;
 
 	private PipelineState? program = null;
@@ -72,7 +72,7 @@ public sealed class CommandSignature : IDisposable
 		CommandSignatureDescription desc = new()
 		{
 			ByteStride = Stride,
-			IndirectArguments = arguments.ToArray(),
+			IndirectArguments = [.. arguments],
 		};
 
 		Guard.NotNull(D3DContext.Device).CreateCommandSignature(desc, program?.RootSignature, out Handle);
