@@ -62,11 +62,18 @@ public abstract class Component : ComponentBase, IDisposable, IHandleEvent
 		{
 			StateHasChanged();
 
-			return shouldAwaitTask
-				? task.ContinueWith(o => StateHasChanged())
-				: Task.CompletedTask;
+			return shouldAwaitTask ? RenderOnCompletion(task) : Task.CompletedTask;
 		}
 
 		return shouldAwaitTask ? task : Task.CompletedTask;
+	}
+
+	/// <summary>
+	/// Renders once an async handler finishes. Awaiting resumes on the dispatcher, which ContinueWith would not.
+	/// </summary>
+	private async Task RenderOnCompletion(Task task)
+	{
+		await task;
+		await InvokeAsync(StateHasChanged);
 	}
 }

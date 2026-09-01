@@ -16,32 +16,9 @@
     justify-content: flex-end;
     column-gap: 10px;
     padding: 0 12px;
-    position: relative;
 }
 
 .mode-picker {
+    flex: 0 0 150px;
     margin-right: auto;
-    margin-left: -6px;
-    align-self: stretch;
-}
-
-.mode-menu {
-    position: absolute;
-    left: 6px;
-    bottom: 100%;
-    z-index: 10;
-    flex-direction: column;
-    min-width: 140px;
-    background-color: var(--color-bg-menu);
-    box-shadow: 1px 1px 1px black;
-}
-
-.mode-menu > div {
-    padding: 6px 12px;
-}
-
-::deep .mode-button {
-    display: flex;
-    align-items: center;
-    padding: 0 6px;
 }

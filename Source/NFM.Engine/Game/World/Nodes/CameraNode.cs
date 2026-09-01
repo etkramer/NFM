@@ -12,6 +12,7 @@ public class CameraNode : Node
 	internal int HoveredInstance { get; set; } = -1;
 
 	// What the lighting pass should output for this camera.
+	[Inspect]
 	public DisplayMode DisplayMode { get; set; }
 
 	[Inspect]

@@ -1,0 +1,89 @@
+@namespace NFM.Components
+@inherits Component
+@inject IJSRuntime JS
+
+@* Focus holds the menu open - its entries aren't focusable, so clicking one keeps it here. *@
+<box class="container" tabindex="0" @onfocusout=@(() => isOpen = false)>
+    <box class="field" @ref=trigger @onclick=@Toggle>
+        @if (Icon is not null)
+        {
+            <box class="icon" style="color: @IconColor">@Icon</box>
+        }
+
+        <div class="value">@LabelFor(Value)</div>
+        <box class="chevron">arrow_drop_down</box>
+    </box>
+
+    @* Fixed, because the inspector scrolls its properties and would otherwise clip this. *@
+    @if (isOpen)
+    {
+        <box class="menu" style=@menuStyle>
+            @foreach (object option in Options)
+            {
+                <div class="btn-soft @(Equals(option, Value) ? "selected" : "")" @onclick=@(() => Select(option))>
+                    @LabelFor(option)
+                </div>
+            }
+        </box>
+    }
+</box>
+
+@code {
+    const int EntryHeight = 26;
+
+    [Parameter, EditorRequired]
+    public required System.Collections.IEnumerable Options { get; set; }
+
+    [Parameter, EditorRequired]
+    public required object? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public string IconColor { get; set; } = "#E6E62E";
+
+    ElementReference trigger;
+
+    bool isOpen;
+    string menuStyle = string.Empty;
+
+    public Dropdown()
+    {
+        ShouldRenderOnEvent = true;
+    }
+
+    static string LabelFor(object? value) => value?.ToString()?.PascalToDisplay() ?? string.Empty;
+
+    async Task Toggle()
+    {
+        if (isOpen)
+        {
+            isOpen = false;
+            return;
+        }
+
+        Bounds bounds = await JS.InvokeAsync<Bounds>("HTMLElement.getBounds", trigger);
+        double height = Options.Cast<object>().Count() * EntryHeight;
+
+        // Drop upwards when the list wouldn't fit below the field.
+        menuStyle = bounds.Y + bounds.H + height <= bounds.ViewportHeight
+            ? $"left: {bounds.X}px; top: {bounds.Y + bounds.H}px; min-width: {bounds.W}px"
+            : $"left: {bounds.X}px; bottom: {bounds.ViewportHeight - bounds.Y}px; min-width: {bounds.W}px";
+
+        isOpen = true;
+    }
+
+    async Task Select(object option)
+    {
+        isOpen = false;
+        await ValueChanged.InvokeAsync(option);
+    }
+
+    protected override int BuildHashCode() => HashCode.Combine(isOpen, Value, menuStyle);
+
+    private sealed record Bounds(double X, double Y, double W, double H, double ViewportHeight);
+}

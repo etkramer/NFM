@@ -9,21 +9,8 @@
     <div class="viewport" @ref=element />
 
     <box class="statusbar">
-        @* Focus holds the menu open - its entries aren't focusable, so clicking one keeps it here. *@
-        <box class="mode-picker" tabindex="0" @onfocusout=@(() => isModeOpen = false)>
-            <div class="mode-button btn-soft" @onclick=@(() => isModeOpen = !isModeOpen)>
-                <span>@GetLabel(CurrentMode)</span>
-                <FontIcon Glyph="arrow_drop_down" FontSize="16" />
-            </div>
-            @if (isModeOpen)
-            {
-                <box class="mode-menu">
-                    @foreach (DisplayMode mode in Modes)
-                    {
-                        <div class="btn-soft" @onclick=@(() => SetMode(mode))>@GetLabel(mode)</div>
-                    }
-                </box>
-            }
+        <box class="mode-picker">
+            <Dropdown Options=@Modes Value=@CurrentMode ValueChanged=@OnModeChanged />
         </box>
 
         <span>@memoryDisplay</span>
@@ -53,8 +40,6 @@
 
     static readonly DisplayMode[] Modes = Enum.GetValues<DisplayMode>();
 
-    bool isModeOpen;
-
     // The host is created asynchronously once the page reports our rect, so it can't be cached at construction.
     CameraNode? Camera => Viewport.All.FirstOrDefault(o => o.HostControl is ViewportHost host && host.Id == id)?.Camera;
 
@@ -65,25 +50,13 @@
         ShouldRenderOnEvent = true;
     }
 
-    void SetMode(DisplayMode mode)
+    void OnModeChanged(object? value)
     {
-        isModeOpen = false;
-
-        if (Camera is CameraNode camera)
+        if (Camera is CameraNode camera && value is DisplayMode mode)
         {
             camera.DisplayMode = mode;
         }
     }
-
-    static string GetLabel(DisplayMode mode) => mode switch
-    {
-        DisplayMode.Unlit => "Unlit",
-        DisplayMode.DebugNormals => "Debug Normals",
-        DisplayMode.DebugMetallic => "Debug Metallic",
-        DisplayMode.DebugSpecular => "Debug Specular",
-        DisplayMode.DebugRoughness => "Debug Roughness",
-        _ => mode.ToString(),
-    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -124,5 +97,5 @@
         }
     }
 
-    protected override int BuildHashCode() => HashCode.Combine(frameTimeDisplay, memoryDisplay, isModeOpen, CurrentMode);
+    protected override int BuildHashCode() => HashCode.Combine(frameTimeDisplay, memoryDisplay, CurrentMode);
 }

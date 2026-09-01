@@ -35,6 +35,11 @@ public static class Inspect
 			return typeof(StringEditor);
 		}
 
+		if (type.IsEnum)
+		{
+			return typeof(EnumEditor);
+		}
+
 		if (VectorTypes.Contains(type))
 		{
 			return typeof(VectorEditor);

@@ -1,0 +1,48 @@
+.container {
+    flex: 1;
+    position: relative;
+}
+
+.container:focus-visible {
+    outline: none;
+}
+
+.field {
+    align-items: center;
+    cursor: pointer;
+}
+
+.value {
+    min-height: 22px;
+    line-height: 22px;
+}
+
+.chevron {
+    flex: 0 0 16px;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 16px;
+    font-family: "Material Icons", "Segoe UI";
+    color: var(--color-fg-1);
+}
+
+.menu {
+    position: fixed;
+    z-index: 10;
+    flex-direction: column;
+    max-height: 240px;
+    overflow-y: auto;
+    background-color: var(--color-bg-menu);
+    box-shadow: 1px 1px 1px black;
+}
+
+.menu > div {
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.menu > div.selected {
+    color: var(--color-fg-3);
+    background-color: var(--color-accent-2);
+}

@@ -8,6 +8,11 @@ HTMLElement.setValue = (obj, val) => (obj.value = val);
 HTMLElement.getClientWidth = (obj) => obj.clientWidth;
 HTMLElement.getClientHeight = (obj) => obj.clientHeight;
 
+HTMLElement.getBounds = (obj) => {
+    const rect = obj.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, w: rect.width, h: rect.height, viewportHeight: window.innerHeight };
+};
+
 HTMLElement.getStyle = (obj, prop) => obj.style[prop];
 HTMLElement.setStyle = (obj, prop, value) => (obj.style[prop] = value);
 

@@ -1,0 +1,12 @@
+@namespace NFM.Components
+@inherits Component
+
+<Dropdown Icon="list" Options=@(Enum.GetValues(Target.Type)) Value=@Target.Value
+          ValueChanged=@(value => Target.Value = value) />
+
+@code {
+    [Parameter, EditorRequired]
+    public required InspectedProperty Target { get; set; }
+
+    protected override int BuildHashCode() => Target.Value?.GetHashCode() ?? 0;
+}
