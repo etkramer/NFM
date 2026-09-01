@@ -24,6 +24,19 @@ public static class NodeSerializer
 		}
 	};
 
+	private const int CurrentVersion = 1;
+
+	private class ProjectData
+	{
+		public int Version { get; set; } = CurrentVersion;
+		public List<NodeData> Nodes { get; set; } = [];
+
+		/// <summary>
+		/// The editor's view camera, restored onto the live one rather than spawned as a node.
+		/// </summary>
+		public NodeData? Camera { get; set; }
+	}
+
 	private class NodeData
 	{
 		public string Type { get; set; } = string.Empty;
@@ -75,6 +88,77 @@ public static class NodeSerializer
 		}
 
 		return nodes;
+	}
+
+	/// <summary>
+	/// Serializes a whole project - every scene root that isn't transient, plus the editor's view camera.
+	/// </summary>
+	public static string SerializeProject(Scene scene, Node? camera)
+	{
+		ProjectData data = new()
+		{
+			Nodes = [.. scene.RootNodes.Where(node => !node.IsTransient).Select(Pack)],
+			Camera = camera is null ? null : Pack(camera)
+		};
+
+		return JsonSerializer.Serialize(data, options);
+	}
+
+	/// <summary>
+	/// Rebuilds a project into the given scene, returning its saved view for <see cref="ApplyView"/>.
+	/// </summary>
+	public static async Task<string?> DeserializeProject(string json, Scene scene)
+	{
+		ProjectData? data;
+
+		try
+		{
+			data = JsonSerializer.Deserialize<ProjectData>(json, options);
+		}
+		catch (JsonException)
+		{
+			Log.Warn("Couldn't read project - the file isn't valid JSON");
+			return null;
+		}
+
+		if (data is null)
+		{
+			return null;
+		}
+
+		if (data.Version > CurrentVersion)
+		{
+			Log.Warn($"Project was saved by a newer version ({data.Version}), and may not load correctly");
+		}
+
+		foreach (NodeData item in data.Nodes)
+		{
+			await Unpack(item, scene, null);
+		}
+
+		return data.Camera is null ? null : JsonSerializer.Serialize(data.Camera, options);
+	}
+
+	/// <summary>
+	/// Restores a view from <see cref="DeserializeProject"/> onto a live camera.
+	/// </summary>
+	public static async Task ApplyView(string view, Node camera)
+	{
+		NodeData? data;
+
+		try
+		{
+			data = JsonSerializer.Deserialize<NodeData>(view, options);
+		}
+		catch (JsonException)
+		{
+			return;
+		}
+
+		if (data is not null)
+		{
+			await UnpackProperties(camera, camera.GetType(), data.Properties, data.Type);
+		}
 	}
 
 	private static NodeData Pack(Node node)

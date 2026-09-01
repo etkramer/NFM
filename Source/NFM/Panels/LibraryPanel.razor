@@ -59,7 +59,8 @@
             <div class="items">
                 <Virtualize Items=@VisibleAssets Context="asset">
                     <box class="entry @(asset == selected ? "selected" : "")" @key=asset
-                         @onpointerdown=@(() => selected = asset)>
+                         @onpointerdown=@(e => { selected = asset; DragDrop.Arm(asset, e); })
+                         @onpointermove=@(e => DragDrop.Update(e))>
                         <FontIcon Glyph=@GlyphOf(asset) Color=@ColorOf(asset) FontSize="16" />
                         <span class="entry-name">@asset.Name</span>
                     </box>

@@ -25,7 +25,7 @@ static class Program
 		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
 		Engine.Init();
-		Project.Reset();
+		_ = Project.LoadStartupAsync();
 
 		MainForm = new MainForm();
 

@@ -1,7 +1,8 @@
 @namespace NFM.Components
 @inherits Component
 
-<box class="field">
+<box class="field @(isDropTarget ? "drop-target" : "")" @onpointermove=@OnPointerMove
+     @onpointerup=@OnPointerUp @onpointerleave=@(() => isDropTarget = false)>
     <box class="icon" style="color: #E6E62E">filter_center_focus</box>
     <div class="value">@Display</div>
 </box>
@@ -10,6 +11,8 @@
     [Parameter, EditorRequired]
     public required InspectedProperty Target { get; set; }
 
+    bool isDropTarget;
+
     string Display => Target.Value switch
     {
         GameResource { Source: not null } resource => $"{resource.Source.Path.Split('/').Last()} ({resource.GetType().Name})",
@@ -17,5 +20,21 @@
         _ => string.Empty
     };
 
-    protected override int BuildHashCode() => Display.GetHashCode();
+    void OnPointerMove(PointerEventArgs args) => isDropTarget = CanAccept(DragDrop.Update(args));
+
+    void OnPointerUp()
+    {
+        if (CanAccept(DragDrop.Payload))
+        {
+            _ = AssignAsync((Asset)DragDrop.Payload!);
+        }
+
+        isDropTarget = false;
+    }
+
+    bool CanAccept(object? payload) => payload is Asset asset && Target.Type.IsAssignableFrom(asset.ResourceType);
+
+    async Task AssignAsync(Asset asset) => Target.Value = await Asset.LoadAsync(asset.Path, Target.Type);
+
+    protected override int BuildHashCode() => HashCode.Combine(Display, isDropTarget);
 }

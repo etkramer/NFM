@@ -1,11 +1,13 @@
 @namespace NFM.Components
-@implements IDisposable
+@inherits Component
 @using NFM.Hosting
 @typeparam TComponent where TComponent : IComponent
 @inject IJSRuntime JS
 @inject Form Form
 
-<box id="app-root-helper" style="width: 100%; height: 100%" @ref=boxElement>
+@* Last stop for a drag that ended over something with no interest in it. *@
+<box id="app-root-helper" style="width: 100%; height: 100%" @ref=boxElement
+     @onpointermove=@(e => DragDrop.Update(e)) @onpointerup=@DragDrop.Clear>
     <ComponentRenderer Type=@(typeof(TComponent)) />
 </box>
 
@@ -18,7 +20,7 @@
         objectReference = DotNetObjectReference.Create(this);
     }
 
-    public void Dispose()
+    protected override void OnDispose()
     {
         objectReference?.Dispose();
     }

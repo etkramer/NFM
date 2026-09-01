@@ -34,9 +34,10 @@ public class Viewport : IDisposable
 		Swapchain = swapchain;
 		HostControl = hostControl;
 
-		// Create work camera.
-		workCamera = new CameraNode(null);
+		// Create work camera, starting from the open project's view.
+		workCamera = new CameraNode(null) { IsTransient = true };
 		workCamera.Name = "Work Camera";
+		_ = Project.ApplyView(workCamera);
 
 		Gizmo = new TransformGizmo(this);
 
@@ -67,7 +68,7 @@ public class Viewport : IDisposable
 
 		workCamera.Dispose();
 
-		workCamera = new CameraNode(null);
+		workCamera = new CameraNode(null) { IsTransient = true };
 		workCamera.Name = "Work Camera";
 		workCamera.Position = position;
 		workCamera.Rotation = rotation;

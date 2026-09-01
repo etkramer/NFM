@@ -1,6 +1,7 @@
 @namespace NFM.Components
+@inherits Component
 
-<PageTitle>Editor</PageTitle>
+<PageTitle>@Project.Name - NFM</PageTitle>
 
 <box class="container">
     <MenuBar>
@@ -33,6 +34,8 @@
 
 @code {
     DockHost? dock;
+
+    protected override int BuildHashCode() => Project.Name.GetHashCode();
 
     void OnPressNew()
     {
@@ -73,7 +76,7 @@
 
             if (fileDialog.ShowDialog() is DialogResult.OK)
             {
-                Project.Load(fileDialog.FileName);
+                _ = Project.LoadAsync(fileDialog.FileName);
             }
         }
     }

@@ -19,18 +19,11 @@ public sealed partial class TreeView<TItem> where TItem : class
 	private IEnumerable<TItem>? lastRootItems;
 
 	/// <summary>
-	/// Distance the pointer must travel before a press turns into a drag rather than a click.
-	/// </summary>
-	private const double dragThreshold = 4;
-
-	/// <summary>
 	/// Item currently being dragged, if any.
 	/// </summary>
-	public TItem? DraggedItem { get; private set; }
+	public TItem? DraggedItem => DragDrop.Payload as TItem;
 
-	private TItem? pendingItem;
 	private TItem? dropTargetItem;
-	private (double X, double Y) pointerStart;
 
 	protected override Task OnParametersSetAsync()
 	{
@@ -121,42 +114,20 @@ public sealed partial class TreeView<TItem> where TItem : class
 		}
 	}
 
-	public bool GetIsDropTarget(TItem item) => dropTargetItem is not null && dropTargetItem == item;
+	public bool GetIsDropTarget(TItem item) => DraggedItem is not null && dropTargetItem == item;
 
 	public void OnPointerDownItem(TItem item, PointerEventArgs args)
 	{
-		EndDrag();
-
-		if (IsDraggable && args.Button == 0)
+		if (IsDraggable)
 		{
-			pendingItem = item;
-			pointerStart = (args.ClientX, args.ClientY);
+			DragDrop.Arm(item, args);
 		}
 	}
 
-	// The host pumps input by hand into a composition-hosted webview, which rules out HTML5 drag events.
 	public void OnPointerMoveItem(TItem? item, PointerEventArgs args)
 	{
-		if (args.Buttons == 0)
-		{
-			EndDrag();
-			return;
-		}
-
-		if (DraggedItem is null)
-		{
-			double deltaX = args.ClientX - pointerStart.X;
-			double deltaY = args.ClientY - pointerStart.Y;
-
-			if (pendingItem is null || (deltaX * deltaX) + (deltaY * deltaY) < dragThreshold * dragThreshold)
-			{
-				return;
-			}
-
-			DraggedItem = pendingItem;
-		}
-
-		dropTargetItem = CanDrop.Invoke(DraggedItem, item) ? item : null;
+		TItem? dragged = DragDrop.Update(args) as TItem;
+		dropTargetItem = dragged is not null && CanDrop.Invoke(dragged, item) ? item : null;
 	}
 
 	public void OnPointerUpItem(TItem item, PointerEventArgs args) => OnDropOnItem(item);
@@ -166,18 +137,12 @@ public sealed partial class TreeView<TItem> where TItem : class
 	/// </summary>
 	public void OnDropOnItem(TItem? target)
 	{
-		if (DraggedItem is not null && CanDrop.Invoke(DraggedItem, target))
+		if (DraggedItem is TItem dragged && CanDrop.Invoke(dragged, target))
 		{
-			OnDrop.Invoke(DraggedItem, target);
+			OnDrop.Invoke(dragged, target);
 		}
 
-		EndDrag();
-	}
-
-	private void EndDrag()
-	{
-		pendingItem = null;
-		DraggedItem = null;
+		DragDrop.Clear();
 		dropTargetItem = null;
 	}
 

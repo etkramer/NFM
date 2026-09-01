@@ -11,8 +11,6 @@ global using NFM.Threading;
 using System.Runtime.CompilerServices;
 using NFM.Graphics;
 using NFM.Plugins;
-using NFM.Resources;
-using NFM.World;
 
 [assembly: InternalsVisibleTo("NFM")]
 
@@ -28,25 +26,6 @@ public static class Engine
 		// Boot up renderer and load plugins.
 		Renderer.Init();
 		PluginSystem.Init();
-
-		Project.OnProjectCreated += async () =>
-		{
-            // Populate scene with nodes for testing...
-
-            var model = new ModelNode(null);
-            model.Name = "Heavy";
-			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
-            model.Scale = new Vector3(0.39f);
-			
-			var model2 = new ModelNode(null);
-            model2.Name = "Spaceship";
-			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
-			model2.Scale = new Vector3(0.001f);
-            model2.Position = new Vector3(1, -1.5f, 1);
-
-			// var model3 = new ModelNode(null);
-			// model3.Model = await Asset.LoadAsync<Model>("USER:/Objects/Sponza.glb");
-		};
 	}
 
 	internal static void Update()

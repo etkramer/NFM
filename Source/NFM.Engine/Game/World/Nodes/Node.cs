@@ -26,6 +26,12 @@ public class Node : ISelectable, IDisposable
 
 	public bool IsOwned => Owner is not null;
 
+	/// <summary>
+	/// Set for editor-owned nodes that live in the scene without being part of its content, and so
+	/// aren't saved alongside it.
+	/// </summary>
+	public bool IsTransient { get; init; }
+
 	public IEnumerable<Node> Children => children;
 	private readonly ObservableCollection<Node> children = [];
 
