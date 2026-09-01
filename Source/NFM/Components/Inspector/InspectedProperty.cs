@@ -3,8 +3,7 @@ using System.Reflection;
 namespace NFM.Components;
 
 /// <summary>
-/// One inspected property, shared across however many objects are selected. Replaces the reflection
-/// plumbing the inspector source generator used to emit into every editor.
+/// One inspected property, shared across however many objects are selected.
 /// </summary>
 public sealed class InspectedProperty(IReadOnlyList<object> subjects, PropertyInfo property)
 {

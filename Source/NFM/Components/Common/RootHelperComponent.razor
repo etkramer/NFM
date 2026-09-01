@@ -37,7 +37,7 @@
             // Tell the form it's ready to appear.
             componentForm.Show();
 
-            // Workaround incorrect keyboard navigation when webview is shown "late".
+            // Showing the window this late leaves focus on an arbitrary element.
             await JS.InvokeVoidAsync("blurActiveElement");
         }
 

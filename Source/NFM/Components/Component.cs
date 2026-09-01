@@ -69,7 +69,7 @@ public abstract class Component : ComponentBase, IDisposable, IHandleEvent
 	}
 
 	/// <summary>
-	/// Renders once an async handler finishes. Awaiting resumes on the dispatcher, which ContinueWith would not.
+	/// Renders once an async handler finishes. Awaiting resumes on the dispatcher.
 	/// </summary>
 	private async Task RenderOnCompletion(Task task)
 	{
