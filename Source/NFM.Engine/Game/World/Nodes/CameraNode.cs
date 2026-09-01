@@ -22,7 +22,7 @@ public class CameraNode : Node
 	public uint SensorSize { get; set; } = 36;
 
 	[Inspect]
-	public float Exposure { get; set; } = 1;
+	public float Exposure { get; set; } = 0.03f;
 
 	public float FOV => (2 * (float)Math.Atan(SensorSize / 2f / FocalLength)).ToDegrees();
 

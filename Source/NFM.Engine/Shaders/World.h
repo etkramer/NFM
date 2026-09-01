@@ -33,6 +33,16 @@ struct Mesh
 	uint IndexCount; // Number of indices in index buffer
 };
 
+// One per light in scene (unordered, sparse).
+struct Light
+{
+	uint Type; // LIGHT_ constant, or LIGHT_NONE for an empty slot
+	float3 Position;
+	float3 Color; // Linear RGB, scaled by intensity in candela
+	float Radius; // Source radius, in meters
+	float Range; // Distance past which the light is ignored
+};
+
 struct Vertex
 {
 	float3 Position;
@@ -48,3 +58,4 @@ StructuredBuffer<uint> Indices : register(t1, space1);
 StructuredBuffer<Mesh> Meshes : register(t3, space1);
 StructuredBuffer<Transform> Transforms : register(t4, space1);
 StructuredBuffer<Instance> Instances : register(t5, space1);
+StructuredBuffer<Light> Lights : register(t6, space1);

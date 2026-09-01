@@ -5,6 +5,7 @@ namespace NFM.Graphics;
 /// </summary>
 public enum DisplayMode
 {
+	Lit,
 	Unlit,
 	DebugNormals,
 	DebugMetallic,

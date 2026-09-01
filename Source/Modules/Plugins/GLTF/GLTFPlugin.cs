@@ -45,6 +45,7 @@ public class GLTFPlugin : Plugin
 		opaque.AddTextureParam("BaseColor", Texture2D.Purple);
 		opaque.AddTextureParam("Normal", Texture2D.Normal);
 		opaque.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+		opaque.AddTextureParam("Emissive", Texture2D.Black);
 
 		// Create Transparent shader
 		var transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl"))
@@ -54,6 +55,7 @@ public class GLTFPlugin : Plugin
 		transparent.AddTextureParam("BaseColor", Texture2D.Purple);
 		transparent.AddTextureParam("Normal", Texture2D.Normal);
 		transparent.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
+		transparent.AddTextureParam("Emissive", Texture2D.Black);
 
 		//...and submit both.
 		Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, new CachedResourceLoader<Shader>(opaque)));

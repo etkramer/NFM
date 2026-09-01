@@ -59,6 +59,7 @@ public class GLTFLoader : ResourceLoader<Model>
 			sourceMaterial.GetMaterialTexture(TextureType.Diffuse, 0, out var baseColor);
 			sourceMaterial.GetMaterialTexture(TextureType.Normals, 0, out var normal);
 			sourceMaterial.GetMaterialTexture(TextureType.Unknown, 0, out var orm);
+			sourceMaterial.GetMaterialTexture(TextureType.Emissive, 0, out var emissive);
 
 			// Create material from channels
 			Material material = new Material(shader);
@@ -76,6 +77,11 @@ public class GLTFLoader : ResourceLoader<Model>
 			{
 				int index = int.Parse(orm.FilePath.Split('*')[1]);
 				material.SetTexture("ORM", textures[index]);
+			}
+			if (!string.IsNullOrEmpty(emissive.FilePath))
+			{
+				int index = int.Parse(emissive.FilePath.Split('*')[1]);
+				material.SetTexture("Emissive", textures[index]);
 			}
 
 			materials[i] = material;

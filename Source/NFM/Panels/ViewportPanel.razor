@@ -50,7 +50,7 @@
 
     CameraNode? Camera => Target?.Camera;
 
-    DisplayMode CurrentMode => Camera?.DisplayMode ?? DisplayMode.Unlit;
+    DisplayMode CurrentMode => Camera?.DisplayMode ?? DisplayMode.Lit;
     GizmoMode CurrentGizmoMode => Target?.Gizmo.Mode ?? GizmoMode.Translate;
 
     public ViewportPanel()

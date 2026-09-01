@@ -31,7 +31,7 @@ class MaterialStep : ViewPass
 	public override void Setup(RenderGraphBuilder builder)
 	{
 		builder.Read(resources.VisBuffer, resources.DepthBuffer);
-		builder.Write(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2);
+		builder.Write(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2, resources.MatBuffer3);
 	}
 
 	public override void Init(RenderGraph graph)
@@ -102,6 +102,7 @@ class MaterialStep : ViewPass
 			list.SetPipelineUAV(0, 0, ctx.Get(resources.MatBuffer0));
 			list.SetPipelineUAV(1, 0, ctx.Get(resources.MatBuffer1));
 			list.SetPipelineUAV(2, 0, ctx.Get(resources.MatBuffer2));
+			list.SetPipelineUAV(3, 0, ctx.Get(resources.MatBuffer3));
 
 			// Dispatch over this shader's slice of the pixel list
 			list.SetPipelineConstants(0, 0, permutation.StackID);

@@ -35,7 +35,7 @@ public static class Engine
 
             var model = new ModelNode(null);
 			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
-            model.Scale = new Vector3(0.5f);
+            model.Scale = new Vector3(0.39f);
 			
 			var model2 = new ModelNode(null);
 			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");

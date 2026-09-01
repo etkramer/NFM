@@ -10,6 +10,7 @@
 	<ItemGroup>
 		<EmbeddedResource Include="Shaders\Common\SFTemplate.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\LightingCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\TonemapCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\PickCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseVS.hlsl" />
@@ -19,6 +20,7 @@
 		<EmbeddedResource Include="Shaders\Common\Gizmos\LineMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common.h" />
 		<EmbeddedResource Include="Shaders\World.h" />
+		<EmbeddedResource Include="Shaders\Lighting.h" />
 		<EmbeddedResource Include="Shaders\Standard\CullCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinCountCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinScanCS.hlsl" />

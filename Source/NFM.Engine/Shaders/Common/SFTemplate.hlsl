@@ -10,6 +10,7 @@ struct SurfaceModel
 	float Metallic;
 	float Roughness;
 	float Specular;
+	float3 Emissive;
 
 	// Non-opaque
 	float Opacity;
@@ -40,6 +41,7 @@ export SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 
 	model.Metallic = 0;
 	model.Roughness = 0.5;
 	model.Specular = 0.5;
+	model.Emissive = float3(0, 0, 0);
 	model.Opacity = 1;
 	
 	// Read material params from buffer.

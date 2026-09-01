@@ -1,13 +1,18 @@
-﻿namespace NFM.World;
+using NFM.Graphics;
+
+namespace NFM.World;
 
 [Icon("emoji_objects")]
-public class PointLightNode : Node
+public class PointLightNode : LightNode
 {
+	// Illuminance at which a light stops being worth evaluating, in lux.
+	private const float CutoffIlluminance = 0.01f;
+
 	/// <summary>
 	/// The light's intensity in lumens
 	/// </summary>
 	[Inspect]
-	public float Intensity { get; set; } = 100;
+	public float Intensity { get; set; } = 1000;
 
 	/// <summary>
 	/// The light's radius in meters
@@ -18,5 +23,22 @@ public class PointLightNode : Node
 	public PointLightNode(Scene? scene) : base(scene)
 	{
 		Name = "Point Light";
+
+		this.SubscribeFast(nameof(Intensity), nameof(Radius), MarkDirty);
+	}
+
+	protected override GPULight Pack()
+	{
+		// Lumens to candela, for a point emitting over the full sphere.
+		float candela = Intensity / (4 * MathF.PI);
+
+		return new GPULight()
+		{
+			Type = GPULight.Point,
+			Position = WorldTransform.ExtractTranslation(),
+			Color = Color * candela,
+			Radius = Radius,
+			Range = MathF.Sqrt(candela / CutoffIlluminance)
+		};
 	}
 }

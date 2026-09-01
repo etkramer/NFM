@@ -4,6 +4,7 @@
 RWTexture2D<float4> MatBuffer0 : register(u0);
 RWTexture2D<half4> MatBuffer1 : register(u1);
 RWTexture2D<float4> MatBuffer2 : register(u2);
+RWTexture2D<float4> MatBuffer3 : register(u3);
 
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
@@ -119,6 +120,7 @@ struct SurfaceModel
 	float Metallic;
 	float Roughness;
 	float Specular;
+	float3 Emissive;
 
 	// Non-opaque
 	float Opacity;
@@ -200,4 +202,5 @@ void main(uint threadID : SV_DispatchThreadID)
 	MatBuffer0[id] = float4(surface.Albedo, 1);
 	MatBuffer1[id] = float4(normalize(mul(surface.Normal, tangentToWorld)), 1);
 	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, 1);
+	MatBuffer3[id] = float4(surface.Emissive, 1);
 }

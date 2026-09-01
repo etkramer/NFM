@@ -13,21 +13,37 @@ class RenderScene : IDisposable
 	// This is a mostly arbitrary number chosen to be larger than most engines.
 	public const int MaxInstances = 2097152;
 
+	// Support up to 2^16 (65k) lights in a scene.
+	public const int MaxLights = 65536;
+
 	public TypedBuffer<GPUInstance> InstanceBuffer { get; } = new(MaxInstances) { Name = "Instance Buffer" };
 	public TypedBuffer<GPUTransform> TransformBuffer { get; } = new(MaxInstances) { Name = "Transform Buffer" };
+	public TypedBuffer<GPULight> LightBuffer { get; } = new(MaxLights) { Name = "Light Buffer" };
 
 	private readonly Dictionary<nint, ModelNode> instanceOwners = [];
 
 	private readonly HashSet<ModelNode> dirtyTransforms = [];
 	private readonly HashSet<ModelNode> dirtyInstances = [];
+	private readonly HashSet<LightNode> dirtyLights = [];
+
+	/// <summary>
+	/// Number of light slots a pass has to walk to cover every live light, including freed holes.
+	/// </summary>
+	public int LightCount => LightBuffer.NumAllocations > 0 ? (int)(LightBuffer.LastOffset + 1) : 0;
 
 	public void MarkTransformDirty(ModelNode node) => dirtyTransforms.Add(node);
 	public void MarkInstancesDirty(ModelNode node) => dirtyInstances.Add(node);
+	public void MarkLightDirty(LightNode node) => dirtyLights.Add(node);
 
 	public void Forget(ModelNode node)
 	{
 		dirtyTransforms.Remove(node);
 		dirtyInstances.Remove(node);
+	}
+
+	public void Forget(LightNode node)
+	{
+		dirtyLights.Remove(node);
 	}
 
 	/// <summary>
@@ -54,6 +70,16 @@ class RenderScene : IDisposable
 			}
 
 			dirtyTransforms.Clear();
+		}
+
+		if (dirtyLights.Count > 0)
+		{
+			foreach (var node in dirtyLights)
+			{
+				node.UploadLight(list);
+			}
+
+			dirtyLights.Clear();
 		}
 	}
 
@@ -87,6 +113,7 @@ class RenderScene : IDisposable
 	{
 		InstanceBuffer.Dispose();
 		TransformBuffer.Dispose();
+		LightBuffer.Dispose();
 	}
 }
 
@@ -102,4 +129,17 @@ public struct GPUInstance
 	public int MeshID;
 	public int MaterialID;
 	public int TransformID;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct GPULight
+{
+	public const uint None = 0;
+	public const uint Point = 1;
+
+	public uint Type;
+	public Vector3 Position;
+	public Vector3 Color; // Linear RGB, scaled by intensity in candela
+	public float Radius; // Source radius, in meters
+	public float Range; // Distance past which the light is ignored
 }
