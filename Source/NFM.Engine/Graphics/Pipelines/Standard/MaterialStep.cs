@@ -131,7 +131,7 @@ class MaterialStep : ViewPass
 		list.SetPipelineSRV(5, 1, scene.InstanceBuffer);
 		list.SetPipelineSRV(0, 2, RenderMaterial.MaterialBuffer);
 		list.SetPipelineUAV(0, 0, binCounts);
-		list.DispatchThreads(visBuffer.Width, 32, visBuffer.Height, 32);
+		list.DispatchThreads(visBuffer.Width, 8, visBuffer.Height, 8);
 
 		list.BarrierUAV(binCounts);
 
@@ -154,7 +154,7 @@ class MaterialStep : ViewPass
 		list.SetPipelineSRV(0, 2, RenderMaterial.MaterialBuffer);
 		list.SetPipelineUAV(0, 0, binCursors);
 		list.SetPipelineUAV(1, 0, binPixels);
-		list.DispatchThreads(visBuffer.Width, 32, visBuffer.Height, 32);
+		list.DispatchThreads(visBuffer.Width, 8, visBuffer.Height, 8);
 
 		list.BarrierUAV(binPixels);
 		list.EndEvent();

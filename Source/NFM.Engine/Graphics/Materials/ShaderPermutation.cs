@@ -85,7 +85,8 @@ abstract class ShaderPermutation : IDisposable
 			// Add HLSL code for loading parameters
 			setupSource += param.Value switch
 			{
-				Texture2D => $"input.{param.Name} = ResourceDescriptorHeap[MaterialParams.Load(materialID + {paramOffset})];\n",
+				// Bins group by shader stack, so one wave can span materials with different descriptors.
+				Texture2D => $"input.{param.Name} = ResourceDescriptorHeap[NonUniformResourceIndex(MaterialParams.Load(materialID + {paramOffset}))];\n",
 				bool => $"input.{param.Name} = (bool)MaterialParams.Load(materialID + {paramOffset});\n",
 				int or sbyte => $"input.{param.Name} = asint(MaterialParams.Load(materialID + {paramOffset}));\n",
 				uint or byte => $"input.{param.Name} = asuint(MaterialParams.Load(materialID + {paramOffset}));\n",

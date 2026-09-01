@@ -42,6 +42,6 @@ class LightingStep : ViewPass
 		list.SetPipelineSRV(3, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineConstants(0, 0, (int)ctx.Camera.DisplayMode);
 
-		list.DispatchThreads(colorTarget.Width, 32, colorTarget.Height, 32);
+		list.DispatchThreads(colorTarget.Width, 8, colorTarget.Height, 8);
 	}
 }

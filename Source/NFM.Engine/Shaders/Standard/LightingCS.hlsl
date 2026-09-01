@@ -16,7 +16,7 @@ int DisplayMode : register(b0);
 #define DISPLAY_SPECULAR 3
 #define DISPLAY_ROUGHNESS 4
 
-[numthreads(32, 32, 1)]
+[numthreads(8, 8, 1)]
 void main(uint2 id : SV_DispatchThreadID)
 {
 	// Grab the frame width/height

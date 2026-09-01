@@ -7,7 +7,7 @@ ByteAddressBuffer MaterialParams : register(t0, space2);
 
 RWStructuredBuffer<uint> BinCounts : register(u0);
 
-[numthreads(32, 32, 1)]
+[numthreads(8, 8, 1)]
 void main(uint2 id : SV_DispatchThreadID)
 {
 	int2 frameSize;
@@ -21,6 +21,20 @@ void main(uint2 id : SV_DispatchThreadID)
 	uint materialID = Instances[VisBuffer[id].x].MaterialID;
 	uint shaderID = MaterialParams.Load(materialID);
 
-	uint ignored;
-	InterlockedAdd(BinCounts[shaderID], 1, ignored);
+	// Each wave contributes a single atomic per distinct stack it covers.
+	while (true)
+	{
+		uint stack = WaveReadLaneFirst(shaderID);
+		if (stack == shaderID)
+		{
+			uint total = WaveActiveCountBits(true);
+			if (WaveIsFirstLane())
+			{
+				uint ignored;
+				InterlockedAdd(BinCounts[stack], total, ignored);
+			}
+
+			break;
+		}
+	}
 }

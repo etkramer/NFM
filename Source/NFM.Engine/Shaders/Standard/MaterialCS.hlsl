@@ -38,13 +38,17 @@ BarycentricDeriv CalcFullBary(float4 pt0, float4 pt1, float4 pt2, float2 pixelNd
 {
 	BarycentricDeriv ret = (BarycentricDeriv)0;
 
-	float3 invW = rcp(float3(pt0.w, pt1.w, pt2.w));
+	// Clamped away from zero - w reaches it on near-plane triangles.
+	float3 w = float3(pt0.w, pt1.w, pt2.w);
+	float3 invW = rcp(select(abs(w) < 1e-6f, 1e-6f, w));
 
 	float2 ndc0 = pt0.xy * invW.x;
 	float2 ndc1 = pt1.xy * invW.y;
 	float2 ndc2 = pt2.xy * invW.z;
 
-	float invDet = rcp(determinant(float2x2(ndc2 - ndc1, ndc0 - ndc1)));
+	// Clamped away from zero - degenerate triangles have no area in NDC.
+	float det = determinant(float2x2(ndc2 - ndc1, ndc0 - ndc1));
+	float invDet = rcp(select(abs(det) < 1e-12f, 1e-12f, det));
 	ret.m_ddx = float3(ndc1.y - ndc2.y, ndc2.y - ndc0.y, ndc0.y - ndc1.y) * invDet * invW;
 	ret.m_ddy = float3(ndc2.x - ndc1.x, ndc0.x - ndc2.x, ndc1.x - ndc0.x) * invDet * invW;
 	float ddxSum = dot(ret.m_ddx, float3(1, 1, 1));

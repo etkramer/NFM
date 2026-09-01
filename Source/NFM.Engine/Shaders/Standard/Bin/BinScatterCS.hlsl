@@ -9,7 +9,7 @@ StructuredBuffer<uint> BinOffsets : register(t2);
 RWStructuredBuffer<uint> BinCursors : register(u0);
 RWStructuredBuffer<uint> BinPixels : register(u1);
 
-[numthreads(32, 32, 1)]
+[numthreads(8, 8, 1)]
 void main(uint2 id : SV_DispatchThreadID)
 {
 	int2 frameSize;
@@ -23,8 +23,23 @@ void main(uint2 id : SV_DispatchThreadID)
 	uint materialID = Instances[VisBuffer[id].x].MaterialID;
 	uint shaderID = MaterialParams.Load(materialID);
 
-	uint slot;
-	InterlockedAdd(BinCursors[shaderID], 1, slot);
+	// Each wave claims one contiguous run of slots per distinct stack; lanes index it by prefix count.
+	while (true)
+	{
+		uint stack = WaveReadLaneFirst(shaderID);
+		if (stack == shaderID)
+		{
+			uint laneSlot = WavePrefixCountBits(true);
+			uint total = WaveActiveCountBits(true);
 
-	BinPixels[BinOffsets[shaderID] + slot] = (id.x & 0xFFFF) | (id.y << 16);
+			uint runStart = 0;
+			if (WaveIsFirstLane())
+			{
+				InterlockedAdd(BinCursors[stack], total, runStart);
+			}
+
+			BinPixels[BinOffsets[stack] + WaveReadLaneFirst(runStart) + laneSlot] = (id.x & 0xFFFF) | (id.y << 16);
+			break;
+		}
+	}
 }
