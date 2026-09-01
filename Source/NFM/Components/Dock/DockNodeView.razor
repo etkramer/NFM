@@ -1,0 +1,53 @@
+@namespace NFM.Components
+@using System.Globalization
+
+@* The dock frame only - splitters, tab strips and empty content slots. DockHost hosts the panels
+   themselves and aligns them to these slots. *@
+
+@if (Node is DockSplit split)
+{
+    <div class="dock-split @(split.Orientation is DockOrientation.Horizontal ? "horizontal" : "vertical")"
+         data-node=@split.Id
+         style="--ratio: @split.Ratio.ToString(CultureInfo.InvariantCulture)">
+        <div class="dock-first">
+            <DockNodeView Node=@split.First />
+        </div>
+
+        <div class="dock-handle"></div>
+
+        <div class="dock-second">
+            <DockNodeView Node=@split.Second />
+        </div>
+    </div>
+}
+else if (Node is DockTabs group)
+{
+    <div class="dock-group" data-node=@group.Id>
+        <div class="dock-tab-strip" data-node=@group.Id>
+            @foreach (DockTab tab in group.Tabs)
+            {
+                <div class="dock-tab @(group.Active == tab ? "active" : "")"
+                     data-tab=@tab.Id
+                     @key=tab
+                     @onpointerdown=@(() => Host.Activate(tab))>
+                    <span class="dock-tab-name">@tab.Name</span>
+
+                    <div class="dock-tab-close" @onclick=@(() => Host.Close(tab))>
+                        <FontIcon Glyph="close" FontSize="12" />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="dock-slot @(group.Active?.IsTransparent is true ? "transparent" : "")"
+             data-slot=@(group.Active?.Id ?? "")></div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required DockNode Node { get; set; }
+
+    [CascadingParameter]
+    public required DockHost Host { get; set; }
+}

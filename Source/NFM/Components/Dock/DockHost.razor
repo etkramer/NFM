@@ -1,0 +1,21 @@
+@namespace NFM.Components
+@inherits Component
+
+<div class="dock-root" @ref=rootElement>
+    <div class="dock-frame">
+        <CascadingValue Value="this" IsFixed="true">
+            <DockNodeView Node=@Layout.Root />
+        </CascadingValue>
+    </div>
+
+    @* A flat, stable stack, positioned over the slots by dock.js. A tab can move anywhere in the
+       tree without Blazor tearing its panel down. *@
+    @foreach (DockTab tab in Layout.Tabs)
+    {
+        <div class="dock-panel @(tab.IsTransparent ? "transparent" : "")" data-tab=@tab.Id @key=tab>
+            <ComponentRenderer Type=@tab.PanelType />
+        </div>
+    }
+
+    <div class="dock-overlay"></div>
+</div>

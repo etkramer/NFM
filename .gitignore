@@ -3,6 +3,7 @@
 /Source/.vs/
 /Runtime/Binaries/
 /Runtime/Plugins/
+/Runtime/Config/
 
 # Ignore *most* content
 /Runtime/Content/*

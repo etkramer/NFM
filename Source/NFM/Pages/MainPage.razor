@@ -18,15 +18,21 @@
             <MenuSeparator/>
             <MenuItem Label="Delete" OnPress=@OnPressDelete Hotkey=@(Keys.Delete) />
         </MenuItem>
+        <MenuItem Label="Window">
+            @foreach (var panel in PanelRegistry.All.OrderBy(o => o.Name))
+            {
+                <MenuItem Label=@panel.Name OnPress=@(() => Guard.NotNull(dock).Open(panel.Type)) />
+            }
+        </MenuItem>
     </MenuBar>
 
     <box class="dock-container">
-        <DockManager ConfigPath="Config/Layout.json" DefaultLayout=@(BuildDefaultDockLayout()) @ref=dock />
+        <DockHost ConfigPath="Config/Layout.json" DefaultLayout=@BuildDefaultDockLayout @ref=dock />
     </box>
 </box>
 
 @code {
-    DockManager? dock;
+    DockHost? dock;
 
     void OnPressNew()
     {
@@ -42,7 +48,6 @@
         }
 
         Project.Save(Project.Path);
-        Guard.NotNull(dock).SaveToDisk();
     }
 
     void OnPressSaveAs()
@@ -55,7 +60,6 @@
             if (fileDialog.ShowDialog() is DialogResult.OK)
             {
                 Project.Save(fileDialog.FileName);
-                Guard.NotNull(dock).SaveToDisk();
             }
         }
     }
@@ -109,23 +113,15 @@
         }
     }
 
-    DockManager.Layout BuildDefaultDockLayout() => new()
-    {
-        Tabs = [Guard.NotNull(typeof(ViewportPanel).FullName), Guard.NotNull(typeof(TimelinePanel).FullName)],
-        Right = new()
-        {
-            Tabs = [Guard.NotNull(typeof(InspectorPanel).FullName)],
-            Split = 0.13,
-            Top = new()
-            {
-                Tabs = [Guard.NotNull(typeof(OutlinerPanel).FullName)],
-                Split = 0.26
-            }
-        },
-        Bottom = new()
-        {
-            Tabs = [Guard.NotNull(typeof(LibraryPanel).FullName)],
-            Split = 0.26
-        }
-    };
+    static DockLayout BuildDefaultDockLayout() => new(
+        new DockSplit(DockOrientation.Horizontal,
+            new DockSplit(DockOrientation.Vertical,
+                new DockTabs(DockTab.Of<ViewportPanel>(), DockTab.Of<TimelinePanel>()),
+                new DockTabs(DockTab.Of<LibraryPanel>()),
+                ratio: 0.74),
+            new DockSplit(DockOrientation.Vertical,
+                new DockTabs(DockTab.Of<OutlinerPanel>()),
+                new DockTabs(DockTab.Of<InspectorPanel>()),
+                ratio: 0.26),
+            ratio: 0.87));
 }

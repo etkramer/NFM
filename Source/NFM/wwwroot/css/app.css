@@ -2,6 +2,7 @@
 @import "buttons.css";
 @import "inputs.css";
 @import "scrollbar.css";
+@import "dock.css";
 @import "../libs/material-design-icons/index.css";
 
 :root {
