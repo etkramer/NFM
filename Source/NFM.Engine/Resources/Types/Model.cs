@@ -19,6 +19,11 @@ public sealed class Model : GameResource
     public IReadOnlyCollection<MeshGroup> MeshGroups => meshGroups;
     private readonly List<MeshGroup> meshGroups = [];
 
+    /// <summary>
+    /// Skeleton this model's skinned meshes are posed by, if it has one.
+    /// </summary>
+    public Skeleton? Skeleton { get; private set; }
+
     protected override void PostLoad()
     {
         foreach (var mesh in Meshes)
@@ -46,6 +51,12 @@ public sealed class Model : GameResource
 		meshGroups.Add(meshGroup);
 	}
 
+	public void SetSkeleton(Skeleton skeleton)
+	{
+		Guard.Require(!IsFullyLoaded, "Cannot modify an already-loaded model");
+		Skeleton = skeleton;
+	}
+
 	public override void Dispose()
 	{
 		foreach (var mesh in Meshes)
@@ -55,6 +66,38 @@ public sealed class Model : GameResource
 
 		base.Dispose();
 	}
+}
+
+/// <summary>
+/// A model's bone hierarchy. Bones are ordered so a parent always precedes its children.
+/// </summary>
+public sealed class Skeleton
+{
+	public required Bone[] Bones { get; init; }
+
+	public int IndexOf(string name) => Array.FindIndex(Bones, bone => bone.Name == name);
+}
+
+public readonly struct Bone
+{
+	public required string Name { get; init; }
+
+	/// <summary>
+	/// Index of this bone's parent, or -1 if it's a root.
+	/// </summary>
+	public required int ParentIndex { get; init; }
+
+	/// <summary>
+	/// Rest transform, relative to the parent bone.
+	/// </summary>
+	public required Vector3 Position { get; init; }
+	public required Vector3 Rotation { get; init; }
+	public required Vector3 Scale { get; init; }
+
+	/// <summary>
+	/// Brings a vertex from model space into this bone's space, at the bind pose.
+	/// </summary>
+	public required Matrix4 InverseBind { get; init; }
 }
 
 public sealed class MeshGroup : IDisposable
@@ -93,6 +136,13 @@ public sealed class Mesh : IDisposable
     /// Material to be used by default (can be overriden in editor).
     /// </summary>
 	public required Material? Material { get; init; } = null;
+
+    /// <summary>
+    /// Bone influences, parallel to <see cref="Vertices"/>. Null on unskinned meshes.
+    /// </summary>
+	public VertexWeights[]? Weights { get; init; } = null;
+
+	public bool IsSkinned => Weights is not null;
 
     /// <summary>
     /// Mask of LOD levels at which this mesh should be visible.
@@ -180,4 +230,56 @@ public unsafe struct Vertex
 	public Vector4 Tangent;
 	public Vector2 UV0;
 	public Vector2 UV1;
+}
+
+/// <summary>
+/// Bone influences for a single vertex. Weights are unsigned-normalized and sum to one.
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct VertexWeights
+{
+	public const int MaxInfluences = 4;
+
+	public fixed ushort Indices[MaxInfluences];
+	public fixed ushort Weights[MaxInfluences];
+
+	/// <summary>
+	/// Keeps the heaviest influences, normalizes them, and packs the result.
+	/// </summary>
+	public static VertexWeights FromInfluences(List<(int Bone, float Weight)> influences)
+	{
+		influences.Sort((a, c) => c.Weight.CompareTo(a.Weight));
+
+		int count = Math.Min(influences.Count, MaxInfluences);
+		float total = 0;
+
+		for (int i = 0; i < count; i++)
+		{
+			total += influences[i].Weight;
+		}
+
+		VertexWeights result = new();
+		if (total <= 0)
+		{
+			return result;
+		}
+
+		// Distributed against a running total, so the packed weights always sum to exactly one.
+		ushort assigned = 0;
+		float accumulated = 0;
+
+		for (int i = 0; i < count; i++)
+		{
+			accumulated += influences[i].Weight / total;
+
+			ushort packed = (ushort)Math.Clamp(MathF.Round(accumulated * ushort.MaxValue), 0, ushort.MaxValue);
+
+			result.Indices[i] = (ushort)influences[i].Bone;
+			result.Weights[i] = (ushort)(packed - assigned);
+
+			assigned = packed;
+		}
+
+		return result;
+	}
 }

@@ -1,7 +1,7 @@
 @namespace NFM.Components
 @inherits Component
 
-<div style="padding: 4px 0">
+<div class=@(Node.IsOwned ? "name owned" : "name")>
     @Node.Name
 </div>
 
@@ -11,6 +11,6 @@
 
     protected override int BuildHashCode()
     {
-        return Node.Name.GetHashCode();
+        return HashCode.Combine(Node.Name, Node.IsOwned);
     }
 }

@@ -18,7 +18,17 @@ public partial class ModelNode : Node
 	internal Dictionary<Mesh, BufferAllocation<GPUInstance>> InstanceHandles { get; } = [];
 	internal Dictionary<Mesh, RenderMaterial> MaterialInstances { get; } = [];
 
+	/// <summary>
+	/// Deformed vertices for each of this node's skinned meshes, written by the skinning pass.
+	/// </summary>
+	internal Dictionary<Mesh, BufferAllocation<Vertex>> SkinHandles { get; } = [];
+
+	internal BufferAllocation<Matrix4>? BoneHandle;
+
 	private readonly Dictionary<Mesh, List<ShaderParameter>> materialOverrides = [];
+
+	private Skeleton? spawnedSkeleton;
+	private BoneNode[] bones = [];
 
 	private RenderScene RenderScene => Scene.RenderData;
 
@@ -29,6 +39,7 @@ public partial class ModelNode : Node
 		TransformHandle = RenderScene.TransformBuffer.Allocate(1);
 
 		// Track changes in model/visibility
+		this.SubscribeFast(nameof(Model), RebuildSkeleton);
 		this.SubscribeFast(nameof(Model), nameof(IsVisible), () => RenderScene.MarkInstancesDirty(this));
 		this.SubscribeFast(nameof(WorldTransform), () => RenderScene.MarkTransformDirty(this));
 
@@ -115,14 +126,96 @@ public partial class ModelNode : Node
 			InstanceHandles[mesh] = RenderScene.AllocateInstance(this);
 			MaterialInstances[mesh] = material;
 
+			// A skinned mesh draws from a deformed copy of its vertices, one per instance.
+			nint vertexOffset = mesh.RenderData.VertexHandle.Offset;
+			if (mesh.RenderData.WeightHandle is not null && BoneHandle is not null)
+			{
+				SkinHandles[mesh] = RenderMesh.VertexBuffer.Allocate(mesh.RenderData.VertexHandle.Size);
+				vertexOffset = SkinHandles[mesh].Offset;
+			}
+
 			// Upload instance to buffer
 			list.UploadBuffer(InstanceHandles[mesh], new GPUInstance()
 			{
 				MeshID = (int)mesh.RenderData.MeshHandle.Offset,
 				TransformID = (int)TransformHandle.Offset,
 				MaterialID = (int)material.MaterialHandle.Offset,
+				VertexOffset = (int)vertexOffset,
 			});
 		}
+
+		if (SkinHandles.Count > 0)
+		{
+			RenderScene.SkinnedNodes.Add(this);
+		}
+	}
+
+	/// <summary>
+	/// Replaces the owned bone tree with one matching the current model.
+	/// </summary>
+	private void RebuildSkeleton()
+	{
+		Model?.EnsureFullyLoaded();
+
+		if (Model?.Skeleton == spawnedSkeleton)
+		{
+			return;
+		}
+
+		DespawnOwned();
+
+		BoneHandle?.Dispose();
+		BoneHandle = null;
+
+		spawnedSkeleton = Model?.Skeleton;
+		bones = [];
+
+		if (spawnedSkeleton is not null)
+		{
+			bones = new BoneNode[spawnedSkeleton.Bones.Length];
+			BoneHandle = RenderScene.BoneBuffer.Allocate(bones.Length);
+
+			// Bones are ordered parents-first, so a parent is always spawned by the time it's needed.
+			for (int i = 0; i < bones.Length; i++)
+			{
+				Bone bone = spawnedSkeleton.Bones[i];
+
+				bones[i] = SpawnOwned(new BoneNode(Scene)
+				{
+					Name = bone.Name,
+					Index = i,
+					Position = bone.Position,
+					Rotation = bone.Rotation,
+					Scale = bone.Scale,
+				}, bone.Name, bone.ParentIndex < 0 ? this : bones[bone.ParentIndex]);
+
+				bones[i].SubscribeFast(nameof(WorldTransform), () => RenderScene.MarkBonesDirty(this));
+			}
+
+			RenderScene.MarkBonesDirty(this);
+		}
+	}
+
+	/// <summary>
+	/// Writes each bone's skinning matrix, which brings a bind-pose vertex to its posed position in
+	/// model space.
+	/// </summary>
+	internal void UploadBones(CommandList list)
+	{
+		if (BoneHandle is null || spawnedSkeleton is null)
+		{
+			return;
+		}
+
+		Matrix4 worldToObject = WorldTransform.Inverse();
+		Matrix4[] matrices = new Matrix4[bones.Length];
+
+		for (int i = 0; i < bones.Length; i++)
+		{
+			matrices[i] = spawnedSkeleton.Bones[i].InverseBind * bones[i].WorldTransform * worldToObject;
+		}
+
+		list.UploadBuffer(BoneHandle, matrices);
 	}
 
 	private void ReleaseInstances(CommandList list)
@@ -136,8 +229,16 @@ public partial class ModelNode : Node
 			MaterialInstances[mesh].Dispose();
 		}
 
+		foreach (var handle in SkinHandles.Values)
+		{
+			handle.Dispose();
+		}
+
 		InstanceHandles.Clear();
 		MaterialInstances.Clear();
+		SkinHandles.Clear();
+
+		RenderScene.SkinnedNodes.Remove(this);
 	}
 
 	public override void Dispose()
@@ -146,6 +247,7 @@ public partial class ModelNode : Node
 
 		ReleaseInstances(Renderer.DefaultCommandList);
 		TransformHandle.Dispose();
+		BoneHandle?.Dispose();
 
 		base.Dispose();
 	}

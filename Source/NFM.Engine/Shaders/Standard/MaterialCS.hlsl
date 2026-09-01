@@ -23,9 +23,9 @@ uint3 FetchTriangleIndices(Mesh mesh, uint triangleID)
 	return uint3(Indices[triangleID], Indices[triangleID + 1], Indices[triangleID + 2]);
 }
 
-Vertex FetchVertexData(Mesh mesh, uint index)
+Vertex FetchVertexData(Instance instance, uint index)
 {
-	return Vertices[mesh.VertexOffset + index];
+	return Vertices[instance.VertexOffset + index];
 }
 
 struct BarycentricDeriv
@@ -155,9 +155,9 @@ void main(uint threadID : SV_DispatchThreadID)
 
 	// Fetch vertex data for triangle
 	uint3 triangleIndices = FetchTriangleIndices(mesh, triangleID);
-	Vertex v0 = FetchVertexData(mesh, triangleIndices[0]);
-	Vertex v1 = FetchVertexData(mesh, triangleIndices[1]);
-	Vertex v2 = FetchVertexData(mesh, triangleIndices[2]);
+	Vertex v0 = FetchVertexData(instance, triangleIndices[0]);
+	Vertex v1 = FetchVertexData(instance, triangleIndices[1]);
+	Vertex v2 = FetchVertexData(instance, triangleIndices[2]);
 
 	// Transform vertices to clip space
 	float4x4 mvp = mul(ViewConstants.ViewToClip, mul(ViewConstants.WorldToView, transform.ObjectToWorld));

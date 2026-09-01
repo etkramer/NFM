@@ -40,7 +40,7 @@ void main(uint3 dispatchID : SV_DispatchThreadID)
 		command.IndexCountPerInstance = mesh.IndexCount;
 		command.InstanceCount = 1;
 		command.StartIndexLocation = mesh.IndexOffset;
-		command.BaseVertexLocation = mesh.VertexOffset;
+		command.BaseVertexLocation = 0;
 		command.StartInstanceLocation = 0;
 
 		// Store command and update count.

@@ -6,9 +6,8 @@ float4 main(uint vertexID : SV_VertexID) : SV_Position
 {
 	// Grab instance data.
 	Instance instance = Instances[InstanceID];
-	Mesh mesh = Meshes[instance.MeshID];
-	
-	Vertex vertex = Vertices[mesh.VertexOffset + vertexID];
+
+	Vertex vertex = Vertices[instance.VertexOffset + vertexID];
 	
 	// Grab the transform matrix.
 	Transform transform = Transforms[instance.TransformID];

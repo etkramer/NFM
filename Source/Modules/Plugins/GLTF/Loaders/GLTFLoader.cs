@@ -7,6 +7,7 @@ using NFM.Mathematics;
 using Asset = NFM.Resources.Asset;
 using Material = NFM.Resources.Material;
 using Mesh = NFM.Resources.Mesh;
+using Bone = NFM.Resources.Bone;
 using Assimp;
 using StbiSharp;
 using NFM.Common;
@@ -17,6 +18,9 @@ namespace GLTF.Loaders;
 
 public class GLTFLoader : ResourceLoader<Model>
 {
+	// GLTF is Y-up, NFM is Z-up.
+	private static readonly Matrix4 ZUp = Matrix4.CreateRotation(new(90, 0, 0));
+
 	public string Path;
 
 	public GLTFLoader(string path)
@@ -90,15 +94,23 @@ public class GLTFLoader : ResourceLoader<Model>
 		// Create model for NFM
 		Model model = new Model();
 
+		var skeleton = BuildSkeleton(sourceModel, out var boneIndices);
+		if (skeleton != null)
+		{
+			model.SetSkeleton(skeleton);
+		}
+
 		VisitMeshNodes(sourceModel.RootNode, Matrix4.Identity, (node) =>
 		{
-			// Get node transform as Z-up
-			var worldTransform = node.Item2 * Matrix4.CreateRotation(new(90, 0, 0));
-
 			for (int i = 0; i < node.Item1.MeshCount; i++)
 			{
 				var sourceMesh = sourceModel.Meshes[node.Item1.MeshIndices[i]];
 				Guard.Require(sourceMesh.HasNormals && sourceMesh.HasTangentBasis);
+
+				// Skinned geometry stays in mesh space - the bone chain carries it the rest of the way,
+				// Z-up correction included. Everything else gets its node transform baked in.
+				bool isSkinned = skeleton != null && sourceMesh.HasBones;
+				var worldTransform = isSkinned ? Matrix4.Identity : node.Item2 * ZUp;
 
 				// Reformat vertices
 				Vertex[] vertices = new Vertex[sourceMesh.Vertices.Count];
@@ -128,7 +140,8 @@ public class GLTFLoader : ResourceLoader<Model>
                 {
                     Vertices = vertices,
                     Indices = sourceMesh.GetUnsignedIndices(),
-                    Material = materials[sourceMesh.MaterialIndex]
+                    Material = materials[sourceMesh.MaterialIndex],
+                    Weights = isSkinned ? BuildWeights(sourceMesh, boneIndices, vertices.Length) : null
                 };
 
 				// Add to new mesh (body) group
@@ -138,6 +151,126 @@ public class GLTFLoader : ResourceLoader<Model>
 
 		return model;
 	}
+
+	/// <summary>
+	/// Builds a skeleton from every bone the model's meshes reference, or null if none do. Bones come
+	/// back in tree order, so a parent always precedes its children.
+	/// </summary>
+	private static Skeleton BuildSkeleton(AI.Scene sourceModel, out Dictionary<string, int> indices)
+	{
+		indices = [];
+		var boneIndices = indices;
+
+		// Offset matrices are per-mesh, but a bone shared between meshes carries the same one.
+		var offsets = new Dictionary<string, Matrix4>();
+		foreach (var sourceMesh in sourceModel.Meshes)
+		{
+			foreach (var bone in sourceMesh.Bones)
+			{
+				offsets[bone.Name] = ToMatrix(bone.OffsetMatrix);
+			}
+		}
+
+		if (offsets.Count == 0)
+		{
+			return null;
+		}
+
+		// Ancestors of a bone are kept too - they carry transforms the chain would otherwise lose.
+		var included = new HashSet<AI.Node>();
+		foreach (var name in offsets.Keys)
+		{
+			for (var node = sourceModel.RootNode.FindNode(name); node != null && node != sourceModel.RootNode; node = node.Parent)
+			{
+				included.Add(node);
+			}
+		}
+
+		var bones = new List<Bone>();
+		var names = new HashSet<string>();
+
+		void Visit(AI.Node node, Matrix4 parentWorld, int parentIndex)
+		{
+			var world = ToMatrix(node.Transform) * parentWorld;
+			var index = parentIndex;
+
+			if (included.Contains(node))
+			{
+				// A root bone folds in everything above it, Z-up correction included; the rest of the
+				// chain inherits that and keeps its own local transform.
+				var local = parentIndex < 0 ? world * ZUp : ToMatrix(node.Transform);
+				var euler = local.ExtractEulerAngles();
+
+				index = bones.Count;
+				boneIndices[node.Name] = index;
+
+				bones.Add(new Bone()
+				{
+					Name = UniqueName(node.Name, names),
+					ParentIndex = parentIndex,
+					Position = local.ExtractTranslation(),
+					Rotation = new Vector3(euler.X.ToDegrees(), euler.Y.ToDegrees(), euler.Z.ToDegrees()),
+					Scale = local.ExtractScale(),
+					InverseBind = offsets.GetValueOrDefault(node.Name, Matrix4.Identity)
+				});
+			}
+
+			foreach (var child in node.Children)
+			{
+				Visit(child, world, index);
+			}
+		}
+
+		Visit(sourceModel.RootNode, Matrix4.Identity, -1);
+
+		return new Skeleton() { Bones = bones.ToArray() };
+	}
+
+	/// <summary>
+	/// Collects each vertex's bone influences, resolved against the skeleton's indices.
+	/// </summary>
+	private static VertexWeights[] BuildWeights(AI.Mesh sourceMesh, Dictionary<string, int> boneIndices, int vertexCount)
+	{
+		var influences = new List<(int, float)>[vertexCount];
+
+		foreach (var bone in sourceMesh.Bones)
+		{
+			if (!boneIndices.TryGetValue(bone.Name, out int index))
+			{
+				continue;
+			}
+
+			foreach (var weight in bone.VertexWeights)
+			{
+				(influences[weight.VertexID] ??= []).Add((index, weight.Weight));
+			}
+		}
+
+		var weights = new VertexWeights[vertexCount];
+		for (int i = 0; i < vertexCount; i++)
+		{
+			weights[i] = VertexWeights.FromInfluences(influences[i] ?? []);
+		}
+
+		return weights;
+	}
+
+	// Bone names address nodes in the editor, so a duplicate or a separator would make one unreachable.
+	private static string UniqueName(string name, HashSet<string> taken)
+	{
+		name = string.IsNullOrEmpty(name) ? "Bone" : name.Replace('/', '_');
+		string unique = name;
+
+		for (int i = 1; !taken.Add(unique); i++)
+		{
+			unique = $"{name}.{i}";
+		}
+
+		return unique;
+	}
+
+	// Assimp stores column-vector matrices, which transpose into the row-vector form NFM uses.
+	private static unsafe Matrix4 ToMatrix(AI.Matrix4x4 matrix) => (*(Matrix4*)&matrix).Transpose();
 
 	// Directions carry no translation, so W stays zero.
 	private static Vector3 TransformDirection(AI.Vector3D direction, Matrix4 transform)

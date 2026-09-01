@@ -80,7 +80,7 @@
 
     void OnPressCopy()
     {
-        Node[] nodes = Selection.Selected.OfType<Node>().ToArray();
+        Node[] nodes = Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToArray();
 
         if (nodes.Length > 0)
         {
@@ -90,12 +90,16 @@
 
     void OnPressPaste()
     {
-        if (!Clipboard.ContainsText())
+        if (Clipboard.ContainsText())
         {
-            return;
+            _ = PasteAsync(Clipboard.GetText());
         }
+    }
 
-        List<Node> nodes = NodeSerializer.Deserialize(Clipboard.GetText(), null);
+    // Pasted nodes can reference assets, which have to finish loading before saved bone state resolves.
+    static async Task PasteAsync(string json)
+    {
+        List<Node> nodes = await NodeSerializer.Deserialize(json, null);
 
         if (nodes.Count > 0)
         {
@@ -106,8 +110,8 @@
 
     void OnPressDelete()
     {
-        // Delete all selected nodes
-        foreach (var node in Selection.Selected.OfType<Node>().ToArray())
+        // Delete all selected nodes. Owned ones only go away with their owner.
+        foreach (var node in Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToArray())
         {
             node.Dispose();
         }

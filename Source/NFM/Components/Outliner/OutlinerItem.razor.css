@@ -1,0 +1,7 @@
+.name {
+    padding: 4px 0;
+}
+
+.owned {
+    color: var(--color-fg-subtle);
+}

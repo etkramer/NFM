@@ -17,6 +17,7 @@ struct Instance
 	uint MeshID;
 	uint MaterialID;
 	uint TransformID;
+	uint VertexOffset; // Start of this instance's vertices, deformed or shared with the mesh
 };
 
 struct Transform
@@ -52,10 +53,29 @@ struct Vertex
 	float2 UV1;
 };
 
+// Bone influences for one vertex, four indices and four weights packed as ushorts.
+struct VertexWeights
+{
+	uint2 Indices;
+	uint2 Weights;
+};
+
+uint UnpackWeightIndex(VertexWeights weights, uint influence)
+{
+	return (weights.Indices[influence >> 1] >> ((influence & 1) * 16)) & 0xFFFF;
+}
+
+float UnpackWeight(VertexWeights weights, uint influence)
+{
+	return ((weights.Weights[influence >> 1] >> ((influence & 1) * 16)) & 0xFFFF) / 65535.0;
+}
+
 // Global geometry data.
 StructuredBuffer<Vertex> Vertices : register(t0, space1);
 StructuredBuffer<uint> Indices : register(t1, space1);
+StructuredBuffer<VertexWeights> Weights : register(t2, space1);
 StructuredBuffer<Mesh> Meshes : register(t3, space1);
 StructuredBuffer<Transform> Transforms : register(t4, space1);
 StructuredBuffer<Instance> Instances : register(t5, space1);
 StructuredBuffer<Light> Lights : register(t6, space1);
+StructuredBuffer<float4x4> Bones : register(t7, space1);

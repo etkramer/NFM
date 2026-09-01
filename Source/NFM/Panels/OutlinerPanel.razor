@@ -96,7 +96,7 @@
 
     bool CanDropNode(Node node, Node? target)
     {
-        if (node == target || node.Parent == target)
+        if (node.IsOwned || target?.IsOwned == true || node == target || node.Parent == target)
         {
             return false;
         }

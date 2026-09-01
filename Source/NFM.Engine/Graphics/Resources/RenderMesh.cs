@@ -9,10 +9,12 @@ class RenderMesh : IDisposable
 	internal static TypedBuffer<uint> IndexBuffer = new(20000000 * 3); // Support 20m tris
 	internal static TypedBuffer<Vertex> VertexBuffer = new(20000000); // Support 20m verts
 	internal static TypedBuffer<MeshData> MeshBuffer = new(20000000 + 1); // Support 20m meshes
+	internal static TypedBuffer<VertexWeights> WeightBuffer = new(4000000); // Support 4m skinned verts
 
 	static RenderMesh()
 	{
 		MeshBuffer.Name = "Mesh Buffer";
+		WeightBuffer.Name = "Weight Buffer";
 		MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
 	}
 
@@ -20,6 +22,7 @@ class RenderMesh : IDisposable
 	internal BufferAllocation<uint> IndexHandle;
 	internal BufferAllocation<Vertex> VertexHandle;
 	internal BufferAllocation<MeshData> MeshHandle;
+	internal BufferAllocation<VertexWeights>? WeightHandle;
 
 	public unsafe RenderMesh(Mesh source)
 	{
@@ -31,6 +34,12 @@ class RenderMesh : IDisposable
 		IndexHandle = IndexBuffer.Allocate(source.Indices.Length);
 		Renderer.DefaultCommandList.UploadBuffer(VertexHandle, source.Vertices);
 		Renderer.DefaultCommandList.UploadBuffer(IndexHandle, source.Indices);
+
+		if (source.Weights is not null)
+		{
+			WeightHandle = WeightBuffer.Allocate(source.Weights.Length);
+			Renderer.DefaultCommandList.UploadBuffer(WeightHandle, source.Weights);
+		}
 
 		// Upload mesh info to GPU.
 		MeshHandle = MeshBuffer.Allocate(1);
@@ -47,6 +56,7 @@ class RenderMesh : IDisposable
 		IndexHandle?.Dispose();
 		VertexHandle?.Dispose();
 		MeshHandle?.Dispose();
+		WeightHandle?.Dispose();
 	}
 }
 

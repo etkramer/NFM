@@ -16,14 +16,24 @@ class RenderScene : IDisposable
 	// Support up to 2^16 (65k) lights in a scene.
 	public const int MaxLights = 65536;
 
+	// Support up to 2^20 (~1M) posed bones in a scene.
+	public const int MaxBones = 1048576;
+
 	public TypedBuffer<GPUInstance> InstanceBuffer { get; } = new(MaxInstances) { Name = "Instance Buffer" };
 	public TypedBuffer<GPUTransform> TransformBuffer { get; } = new(MaxInstances) { Name = "Transform Buffer" };
 	public TypedBuffer<GPULight> LightBuffer { get; } = new(MaxLights) { Name = "Light Buffer" };
+	public TypedBuffer<Matrix4> BoneBuffer { get; } = new(MaxBones) { Name = "Bone Buffer" };
+
+	/// <summary>
+	/// Every node with geometry to deform this frame, walked by the skinning pass.
+	/// </summary>
+	public HashSet<ModelNode> SkinnedNodes { get; } = [];
 
 	private readonly Dictionary<nint, ModelNode> instanceOwners = [];
 
 	private readonly HashSet<ModelNode> dirtyTransforms = [];
 	private readonly HashSet<ModelNode> dirtyInstances = [];
+	private readonly HashSet<ModelNode> dirtyBones = [];
 	private readonly HashSet<LightNode> dirtyLights = [];
 
 	/// <summary>
@@ -33,12 +43,15 @@ class RenderScene : IDisposable
 
 	public void MarkTransformDirty(ModelNode node) => dirtyTransforms.Add(node);
 	public void MarkInstancesDirty(ModelNode node) => dirtyInstances.Add(node);
+	public void MarkBonesDirty(ModelNode node) => dirtyBones.Add(node);
 	public void MarkLightDirty(LightNode node) => dirtyLights.Add(node);
 
 	public void Forget(ModelNode node)
 	{
 		dirtyTransforms.Remove(node);
 		dirtyInstances.Remove(node);
+		dirtyBones.Remove(node);
+		SkinnedNodes.Remove(node);
 	}
 
 	public void Forget(LightNode node)
@@ -70,6 +83,16 @@ class RenderScene : IDisposable
 			}
 
 			dirtyTransforms.Clear();
+		}
+
+		if (dirtyBones.Count > 0)
+		{
+			foreach (var node in dirtyBones)
+			{
+				node.UploadBones(list);
+			}
+
+			dirtyBones.Clear();
 		}
 
 		if (dirtyLights.Count > 0)
@@ -114,6 +137,7 @@ class RenderScene : IDisposable
 		InstanceBuffer.Dispose();
 		TransformBuffer.Dispose();
 		LightBuffer.Dispose();
+		BoneBuffer.Dispose();
 	}
 }
 
@@ -129,6 +153,7 @@ public struct GPUInstance
 	public int MeshID;
 	public int MaterialID;
 	public int TransformID;
+	public int VertexOffset; // Start of this instance's vertices, deformed or shared with the mesh
 }
 
 [StructLayout(LayoutKind.Sequential)]

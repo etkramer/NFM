@@ -34,13 +34,18 @@ public static class Engine
             // Populate scene with nodes for testing...
 
             var model = new ModelNode(null);
+            model.Name = "Heavy";
 			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
             model.Scale = new Vector3(0.39f);
 			
 			var model2 = new ModelNode(null);
+            model2.Name = "Spaceship";
 			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
 			model2.Scale = new Vector3(0.001f);
             model2.Position = new Vector3(1, -1.5f, 1);
+
+			// var model3 = new ModelNode(null);
+			// model3.Model = await Asset.LoadAsync<Model>("USER:/Objects/Sponza.glb");
 		};
 	}
 

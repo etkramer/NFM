@@ -29,6 +29,11 @@ public static class NodeSerializer
 		public string Type { get; set; } = string.Empty;
 		public Dictionary<string, JsonElement> Properties { get; set; } = [];
 		public List<NodeData> Children { get; set; } = [];
+
+		/// <summary>
+		/// Properties of each node this one owns, keyed by owner path.
+		/// </summary>
+		public Dictionary<string, Dictionary<string, JsonElement>> OwnedProperties { get; set; } = [];
 	}
 
 	/// <summary>
@@ -47,7 +52,7 @@ public static class NodeSerializer
 	/// Rebuilds the node trees described by the given JSON, returning their roots. Returns an empty
 	/// list if the JSON doesn't describe nodes at all.
 	/// </summary>
-	public static List<Node> Deserialize(string json, Scene? scene)
+	public static async Task<List<Node>> Deserialize(string json, Scene? scene)
 	{
 		List<NodeData>? data;
 
@@ -63,7 +68,7 @@ public static class NodeSerializer
 		List<Node> nodes = [];
 		foreach (NodeData item in data ?? [])
 		{
-			if (Unpack(item, scene, null) is Node node)
+			if (await Unpack(item, scene, null) is Node node)
 			{
 				nodes.Add(node);
 			}
@@ -75,24 +80,14 @@ public static class NodeSerializer
 	private static NodeData Pack(Node node)
 	{
 		NodeData data = new() { Type = Guard.NotNull(node.GetType().FullName) };
+		PackProperties(node, data.Properties);
 
-		foreach (PropertyInfo property in GetSavedProperties(node.GetType()))
+		foreach (Node owned in node.OwnedNodes)
 		{
-			object? value = property.GetValue(node);
-
-			try
-			{
-				data.Properties[property.Name] = value is GameResource resource
-					? JsonSerializer.SerializeToElement(resource.Source?.Path, options)
-					: JsonSerializer.SerializeToElement(value, property.PropertyType, options);
-			}
-			catch (Exception e) when (e is JsonException or NotSupportedException)
-			{
-				Log.Warn($"Couldn't serialize {data.Type}.{property.Name} ({property.PropertyType.Name})");
-			}
+			data.OwnedProperties[Guard.NotNull(owned.OwnerPath)] = PackProperties(owned, []);
 		}
 
-		foreach (Node child in node.Children)
+		foreach (Node child in node.Children.Where(child => child.Owner is null))
 		{
 			data.Children.Add(Pack(child));
 		}
@@ -100,7 +95,30 @@ public static class NodeSerializer
 		return data;
 	}
 
-	private static Node? Unpack(NodeData data, Scene? scene, Node? parent)
+	private static Dictionary<string, JsonElement> PackProperties(Node node, Dictionary<string, JsonElement> into)
+	{
+		string type = Guard.NotNull(node.GetType().FullName);
+
+		foreach (PropertyInfo property in GetSavedProperties(node.GetType()))
+		{
+			object? value = property.GetValue(node);
+
+			try
+			{
+				into[property.Name] = value is GameResource resource
+					? JsonSerializer.SerializeToElement(resource.Source?.Path, options)
+					: JsonSerializer.SerializeToElement(value, property.PropertyType, options);
+			}
+			catch (Exception e) when (e is JsonException or NotSupportedException)
+			{
+				Log.Warn($"Couldn't serialize {type}.{property.Name} ({property.PropertyType.Name})");
+			}
+		}
+
+		return into;
+	}
+
+	private static async Task<Node?> Unpack(NodeData data, Scene? scene, Node? parent)
 	{
 		if (ResolveType(data.Type) is not Type type)
 		{
@@ -114,9 +132,35 @@ public static class NodeSerializer
 			node.Parent = parent;
 		}
 
+		// Resources have to land before owned state is applied - they're what spawns the nodes it
+		// addresses by path.
+		await UnpackProperties(node, type, data.Properties, data.Type);
+
+		foreach ((string path, var properties) in data.OwnedProperties)
+		{
+			if (node.FindOwned(path) is Node owned)
+			{
+				await UnpackProperties(owned, owned.GetType(), properties, data.Type);
+			}
+			else
+			{
+				Log.Warn($"Dropping saved state for '{path}', which {data.Type} no longer owns");
+			}
+		}
+
+		foreach (NodeData child in data.Children)
+		{
+			await Unpack(child, scene, node);
+		}
+
+		return node;
+	}
+
+	private static async Task UnpackProperties(Node node, Type type, Dictionary<string, JsonElement> properties, string typeName)
+	{
 		foreach (PropertyInfo property in GetSavedProperties(type))
 		{
-			if (!property.CanWrite || !data.Properties.TryGetValue(property.Name, out JsonElement element))
+			if (!property.CanWrite || !properties.TryGetValue(property.Name, out JsonElement element))
 			{
 				continue;
 			}
@@ -126,7 +170,7 @@ public static class NodeSerializer
 			{
 				if (element.ValueKind is JsonValueKind.String)
 				{
-					_ = AssignResourceAsync(node, property, Guard.NotNull(element.GetString()));
+					await AssignResourceAsync(node, property, Guard.NotNull(element.GetString()));
 				}
 
 				continue;
@@ -138,16 +182,9 @@ public static class NodeSerializer
 			}
 			catch (Exception e) when (e is JsonException or NotSupportedException)
 			{
-				Log.Warn($"Couldn't deserialize {data.Type}.{property.Name} ({property.PropertyType.Name})");
+				Log.Warn($"Couldn't deserialize {typeName}.{property.Name} ({property.PropertyType.Name})");
 			}
 		}
-
-		foreach (NodeData child in data.Children)
-		{
-			Unpack(child, scene, node);
-		}
-
-		return node;
 	}
 
 	private static async Task AssignResourceAsync(Node node, PropertyInfo property, string path)
