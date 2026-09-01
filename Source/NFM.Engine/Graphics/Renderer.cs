@@ -29,6 +29,7 @@ static class Renderer
 		DefaultCommandList.Open();
 
 		AddPass(new SkinningStep());
+		AddPass(new BVHStep());
 	}
 
 	public static void RenderFrame()

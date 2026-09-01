@@ -12,6 +12,8 @@ public partial class RawBuffer : Resource, IDisposable
 	public int Stride;
 	public int SizeAlignment = 1;
 
+	public ulong GPUAddress => D3DResource.GPUVirtualAddress;
+
 	public bool HasCounter { get; private set; }
 	public nint CounterOffset { get; private set; } = 0;
 	public bool IsRaw { get; private set; }
@@ -22,7 +24,7 @@ public partial class RawBuffer : Resource, IDisposable
 	private UnorderedAccessView? uav;
 	private ConstantBufferView? cbv;
 
-	public ShaderResourceView GetSRV()
+	public virtual ShaderResourceView GetSRV()
 	{
 		if (srv is null)
 		{
@@ -59,7 +61,7 @@ public partial class RawBuffer : Resource, IDisposable
 		set => D3DResource.Name = value;
 	}
 
-	public RawBuffer(nint sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false)
+	public RawBuffer(nint sizeBytes, int stride, int sizeAlignment = 1, bool hasCounter = false, bool isRaw = false, ResourceStates initialState = ResourceStates.Common)
 	{
 		Capacity = (int)(sizeBytes / stride);
 		SizeAlignment = sizeAlignment;
@@ -94,9 +96,9 @@ public partial class RawBuffer : Resource, IDisposable
 		};
 
 		// Create buffer.
-		Guard.NotNull(D3DContext.Device).CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, ResourceStates.Common, out var resource);
+		Guard.NotNull(D3DContext.Device).CreateCommittedResource(HeapProperties.DefaultHeapProperties, HeapFlags.None, bufferDescription, initialState, out var resource);
 		D3DResource = Guard.NotNull(resource);
-		State = ResourceStates.Common;
+		State = initialState;
 
 		// Set debug name.
 		Name = GetType().Name;

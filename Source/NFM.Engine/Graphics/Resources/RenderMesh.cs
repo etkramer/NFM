@@ -18,11 +18,21 @@ class RenderMesh : IDisposable
 		MeshBuffer.Allocate(1, true); // First element is reserved to represent an invalid index.
 	}
 
+	/// <summary>
+	/// Meshes whose acceleration structure hasn't been built yet, drained by the BVH pass.
+	/// </summary>
+	internal static HashSet<RenderMesh> PendingBuilds { get; } = [];
+
 	// Geometry allocations
 	internal BufferAllocation<uint> IndexHandle;
 	internal BufferAllocation<Vertex> VertexHandle;
 	internal BufferAllocation<MeshData> MeshHandle;
 	internal BufferAllocation<VertexWeights>? WeightHandle;
+
+	/// <summary>
+	/// Traced against by every instance of this mesh that isn't deformed.
+	/// </summary>
+	internal BottomLevelAS BLAS;
 
 	public unsafe RenderMesh(Mesh source)
 	{
@@ -41,6 +51,9 @@ class RenderMesh : IDisposable
 			Renderer.DefaultCommandList.UploadBuffer(WeightHandle, source.Weights);
 		}
 
+		BLAS = new BottomLevelAS(VertexBuffer, VertexHandle.Offset, VertexHandle.Size, IndexBuffer, IndexHandle.Offset, IndexHandle.Size);
+		PendingBuilds.Add(this);
+
 		// Upload mesh info to GPU.
 		MeshHandle = MeshBuffer.Allocate(1);
 		Renderer.DefaultCommandList.UploadBuffer(MeshHandle, new MeshData()
@@ -53,10 +66,41 @@ class RenderMesh : IDisposable
 
 	public void Dispose()
 	{
+		PendingBuilds.Remove(this);
+
 		IndexHandle?.Dispose();
 		VertexHandle?.Dispose();
 		MeshHandle?.Dispose();
 		WeightHandle?.Dispose();
+		BLAS.Dispose();
+	}
+}
+
+/// <summary>
+/// One instance's deformed copy of a skinned mesh, and the structure traced against it. Deformed
+/// geometry can't share the mesh's structure, so each instance carries its own.
+/// </summary>
+class RenderSkin : IDisposable
+{
+	public required BufferAllocation<Vertex> Vertices { get; init; }
+	public required BottomLevelAS BLAS { get; init; }
+
+	public static RenderSkin Create(RenderMesh source)
+	{
+		var vertices = RenderMesh.VertexBuffer.Allocate(source.VertexHandle.Size);
+
+		return new RenderSkin()
+		{
+			Vertices = vertices,
+			BLAS = new BottomLevelAS(RenderMesh.VertexBuffer, vertices.Offset, vertices.Size,
+				RenderMesh.IndexBuffer, source.IndexHandle.Offset, source.IndexHandle.Size, allowUpdate: true),
+		};
+	}
+
+	public void Dispose()
+	{
+		Vertices.Dispose();
+		BLAS.Dispose();
 	}
 }
 

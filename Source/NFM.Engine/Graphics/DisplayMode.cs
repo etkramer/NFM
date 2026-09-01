@@ -11,4 +11,5 @@ public enum DisplayMode
 	DebugMetallic,
 	DebugSpecular,
 	DebugRoughness,
+	DebugShadows,
 }

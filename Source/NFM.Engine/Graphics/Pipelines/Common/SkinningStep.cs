@@ -34,14 +34,14 @@ class SkinningStep : ScenePass
 		{
 			int boneOffset = (int)Guard.NotNull(node.BoneHandle).Offset;
 
-			foreach (var (mesh, skinHandle) in node.SkinHandles)
+			foreach (var (mesh, skin) in node.SkinHandles)
 			{
 				var source = Guard.NotNull(mesh.RenderData);
 				int vertexCount = (int)source.VertexHandle.Size;
 
 				list.SetPipelineConstants(0, 0,
 					(int)source.VertexHandle.Offset,
-					(int)skinHandle.Offset,
+					(int)skin.Vertices.Offset,
 					(int)Guard.NotNull(source.WeightHandle).Offset,
 					boneOffset,
 					vertexCount);

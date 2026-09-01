@@ -18,6 +18,8 @@ class StandardResources
 	public required TextureHandle MatBuffer1 { get; init; } // RGB: Normal
 	public required TextureHandle MatBuffer2 { get; init; } // R: Metallic, G: Specular, B: Roughness
 	public required TextureHandle MatBuffer3 { get; init; } // RGB: Emissive radiance
+
+	public required TextureHandle ShadowMask { get; init; } // Bit per light, set where the light is unoccluded
 }
 
 class StandardRenderPipeline : RenderPipeline
@@ -38,11 +40,14 @@ class StandardRenderPipeline : RenderPipeline
 			MatBuffer1 = Graph.CreateTexture("Material Buffer 1", new(Size, Format.R16G16B16A16_Float)),
 			MatBuffer2 = Graph.CreateTexture("Material Buffer 2", new(Size, Format.R8G8B8A8_UNorm)),
 			MatBuffer3 = Graph.CreateTexture("Material Buffer 3", new(Size, Format.R11G11B10_Float)),
+
+			ShadowMask = Graph.CreateTexture("Shadow Mask", new(Size, Format.R32_UInt)),
 		};
 
 		Graph.AddPass(new PrepassStep(resources));
 		Graph.AddPass(new PickingStep(resources));
 		Graph.AddPass(new MaterialStep(resources));
+		Graph.AddPass(new ShadowStep(resources));
 		Graph.AddPass(new LightingStep(resources));
 		Graph.AddPass(new TonemapStep(resources));
 	}

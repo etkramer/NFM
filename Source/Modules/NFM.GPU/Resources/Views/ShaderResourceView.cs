@@ -30,6 +30,24 @@ public class ShaderResourceView : IDisposable
 		Guard.NotNull(D3DContext.Device).CreateShaderResourceView(resource, desc, Handle);
 	}
 
+	public ShaderResourceView(ulong accelerationStructureAddress)
+	{
+		Handle = Heap.Allocate();
+
+		ShaderResourceViewDescription desc = new()
+		{
+			Format = Format.Unknown,
+			ViewDimension = ShaderResourceViewDimension.RaytracingAccelerationStructure,
+			Shader4ComponentMapping = ShaderComponentMapping.Default,
+			RaytracingAccelerationStructure = new()
+			{
+				Location = accelerationStructureAddress,
+			}
+		};
+
+		Guard.NotNull(D3DContext.Device).CreateShaderResourceView(null, desc, Handle);
+	}
+
 	public ShaderResourceView(Texture target, int mipLevel = -1)
 	{
 		Handle = Heap.Allocate();

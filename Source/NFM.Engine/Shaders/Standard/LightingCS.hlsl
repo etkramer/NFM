@@ -8,6 +8,7 @@ Texture2D<half4> MatBuffer1 : register(t1);
 Texture2D<float4> MatBuffer2 : register(t2);
 Texture2D<float4> MatBuffer3 : register(t3);
 Texture2D<float> DepthBuffer : register(t4);
+Texture2D<uint> ShadowMask : register(t5);
 
 cbuffer Constants : register(b0)
 {
@@ -21,14 +22,14 @@ cbuffer Constants : register(b0)
 #define DISPLAY_METALLIC 3
 #define DISPLAY_SPECULAR 4
 #define DISPLAY_ROUGHNESS 5
+#define DISPLAY_SHADOWS 6
 
-float3 ReconstructWorldPosition(uint2 id, int2 frameSize, float depth)
+// Lights past the mask's capacity go unshadowed.
+#define MAX_SHADOWED_LIGHTS 32
+
+bool IsLightVisible(uint shadowMask, int index)
 {
-	float2 ndc = ((float2(id) + 0.5) / float2(frameSize)) * 2 - 1;
-	ndc.y *= -1;
-
-	float4 viewPos = mul(ViewConstants.ClipToView, float4(ndc, depth, 1));
-	return mul(ViewConstants.ViewToWorld, float4(viewPos.xyz / viewPos.w, 1)).xyz;
+	return index >= MAX_SHADOWED_LIGHTS || (shadowMask & (1u << index)) != 0;
 }
 
 [numthreads(8, 8, 1)]
@@ -57,6 +58,8 @@ void main(uint2 id : SV_DispatchThreadID)
 	float3 normal = MatBuffer1[id].rgb;
 	float3 msr = MatBuffer2[id].rgb;
 
+	uint shadowMask = ShadowMask[id];
+
 	float3 color = albedo;
 	switch (DisplayMode)
 	{
@@ -64,6 +67,7 @@ void main(uint2 id : SV_DispatchThreadID)
 		case DISPLAY_METALLIC: color = msr.r; break;
 		case DISPLAY_SPECULAR: color = msr.g; break;
 		case DISPLAY_ROUGHNESS: color = msr.b; break;
+		case DISPLAY_SHADOWS: color = countbits(shadowMask) / max(float(min(LightCount, MAX_SHADOWED_LIGHTS)), 1); break;
 		case DISPLAY_LIT:
 		{
 			Surface surface;
@@ -79,7 +83,10 @@ void main(uint2 id : SV_DispatchThreadID)
 			color = MatBuffer3[id].rgb;
 			for (int i = 0; i < LightCount; i++)
 			{
-				color += EvalLight(surface, V, Lights[i]);
+				if (IsLightVisible(shadowMask, i))
+				{
+					color += EvalLight(surface, V, Lights[i]);
+				}
 			}
 
 			break;

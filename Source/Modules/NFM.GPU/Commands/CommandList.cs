@@ -74,6 +74,14 @@ public class CommandList : IDisposable
 		Dispatch(groupsX, groupsY, groupsZ);
 	}
 
+	/// <summary>
+	/// Orders every preceding unordered write against everything that follows it.
+	/// </summary>
+	public void BarrierUAV()
+	{
+		list.ResourceBarrier(new ResourceBarrier(new ResourceUnorderedAccessViewBarrier(null)));
+	}
+
 	public void BarrierUAV(params RawBuffer[] buffers)
 	{
 		Span<ResourceBarrier> barriers = stackalloc ResourceBarrier[buffers.Length];
@@ -478,6 +486,12 @@ public class CommandList : IDisposable
 			return;
 		}
 
+		// Acceleration structures are pinned to their own state for life.
+		if (resource.State == ResourceStates.RaytracingAccelerationStructure)
+		{
+			return;
+		}
+
 		// Common and Present are both zero, so they need an exact match rather than a subset test.
 		bool satisfied = state == ResourceStates.Common
 			? resource.State == ResourceStates.Common
@@ -488,6 +502,11 @@ public class CommandList : IDisposable
 			list.ResourceBarrierTransition(resource, resource.State, state);
 			resource.State = state;
 		}
+	}
+
+	public void BuildAccelerationStructure(in BuildRaytracingAccelerationStructureDescription desc)
+	{
+		list.BuildRaytracingAccelerationStructure(desc);
 	}
 
 	public void BeginEvent(string name)

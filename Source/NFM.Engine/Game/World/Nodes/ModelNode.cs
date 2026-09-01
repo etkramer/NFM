@@ -21,7 +21,7 @@ public partial class ModelNode : Node
 	/// <summary>
 	/// Deformed vertices for each of this node's skinned meshes, written by the skinning pass.
 	/// </summary>
-	internal Dictionary<Mesh, BufferAllocation<Vertex>> SkinHandles { get; } = [];
+	internal Dictionary<Mesh, RenderSkin> SkinHandles { get; } = [];
 
 	internal BufferAllocation<Matrix4>? BoneHandle;
 
@@ -128,10 +128,15 @@ public partial class ModelNode : Node
 
 			// A skinned mesh draws from a deformed copy of its vertices, one per instance.
 			nint vertexOffset = mesh.RenderData.VertexHandle.Offset;
+			ulong blasAddress = mesh.RenderData.BLAS.GPUAddress;
+
 			if (mesh.RenderData.WeightHandle is not null && BoneHandle is not null)
 			{
-				SkinHandles[mesh] = RenderMesh.VertexBuffer.Allocate(mesh.RenderData.VertexHandle.Size);
-				vertexOffset = SkinHandles[mesh].Offset;
+				var skin = RenderSkin.Create(mesh.RenderData);
+
+				SkinHandles[mesh] = skin;
+				vertexOffset = skin.Vertices.Offset;
+				blasAddress = skin.BLAS.GPUAddress;
 			}
 
 			// Upload instance to buffer
@@ -141,6 +146,7 @@ public partial class ModelNode : Node
 				TransformID = (int)TransformHandle.Offset,
 				MaterialID = (int)material.MaterialHandle.Offset,
 				VertexOffset = (int)vertexOffset,
+				BLASAddress = blasAddress,
 			});
 		}
 
@@ -229,9 +235,9 @@ public partial class ModelNode : Node
 			MaterialInstances[mesh].Dispose();
 		}
 
-		foreach (var handle in SkinHandles.Values)
+		foreach (var skin in SkinHandles.Values)
 		{
-			handle.Dispose();
+			skin.Dispose();
 		}
 
 		InstanceHandles.Clear();

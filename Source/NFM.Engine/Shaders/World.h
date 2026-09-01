@@ -1,4 +1,6 @@
-﻿// Shared view constants
+﻿#pragma once
+
+// Shared view constants
 struct _ViewConstants
 {
 	float4x4 WorldToView;
@@ -18,6 +20,7 @@ struct Instance
 	uint MaterialID;
 	uint TransformID;
 	uint VertexOffset; // Start of this instance's vertices, deformed or shared with the mesh
+	uint2 BLASAddress; // Structure to trace against, deformed or shared with the mesh
 };
 
 struct Transform
@@ -79,3 +82,13 @@ StructuredBuffer<Transform> Transforms : register(t4, space1);
 StructuredBuffer<Instance> Instances : register(t5, space1);
 StructuredBuffer<Light> Lights : register(t6, space1);
 StructuredBuffer<float4x4> Bones : register(t7, space1);
+
+// Recovers the world position a pixel was shaded at, from reversed-Z depth.
+float3 ReconstructWorldPosition(uint2 id, int2 frameSize, float depth)
+{
+	float2 ndc = ((float2(id) + 0.5) / float2(frameSize)) * 2 - 1;
+	ndc.y *= -1;
+
+	float4 viewPos = mul(ViewConstants.ClipToView, float4(ndc, depth, 1));
+	return mul(ViewConstants.ViewToWorld, float4(viewPos.xyz / viewPos.w, 1)).xyz;
+}

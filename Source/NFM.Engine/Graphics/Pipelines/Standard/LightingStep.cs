@@ -15,7 +15,7 @@ class LightingStep : ViewPass
 
 	public override void Setup(RenderGraphBuilder builder)
 	{
-		builder.Read(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2, resources.MatBuffer3, resources.DepthBuffer);
+		builder.Read(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2, resources.MatBuffer3, resources.DepthBuffer, resources.ShadowMask);
 		builder.Write(resources.SceneColor);
 	}
 
@@ -42,6 +42,7 @@ class LightingStep : ViewPass
 		list.SetPipelineSRV(2, 0, ctx.Get(resources.MatBuffer2));
 		list.SetPipelineSRV(3, 0, ctx.Get(resources.MatBuffer3));
 		list.SetPipelineSRV(4, 0, ctx.Get(resources.DepthBuffer));
+		list.SetPipelineSRV(5, 0, ctx.Get(resources.ShadowMask));
 		list.SetPipelineSRV(6, 1, scene.LightBuffer);
 		list.SetPipelineCBV(0, 1, ctx.ViewCB);
 

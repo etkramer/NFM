@@ -25,6 +25,11 @@ class RenderScene : IDisposable
 	public TypedBuffer<Matrix4> BoneBuffer { get; } = new(MaxBones) { Name = "Bone Buffer" };
 
 	/// <summary>
+	/// Everything traceable in the scene, rebuilt each frame by the BVH pass.
+	/// </summary>
+	public TopLevelAS TLAS { get; } = new();
+
+	/// <summary>
 	/// Every node with geometry to deform this frame, walked by the skinning pass.
 	/// </summary>
 	public HashSet<ModelNode> SkinnedNodes { get; } = [];
@@ -40,6 +45,11 @@ class RenderScene : IDisposable
 	/// Number of light slots a pass has to walk to cover every live light, including freed holes.
 	/// </summary>
 	public int LightCount => LightBuffer.NumAllocations > 0 ? (int)(LightBuffer.LastOffset + 1) : 0;
+
+	/// <summary>
+	/// Number of instance slots a pass has to walk to cover every live instance, including freed holes.
+	/// </summary>
+	public int InstanceCount => InstanceBuffer.NumAllocations > 0 ? (int)(InstanceBuffer.LastOffset + 1) : 0;
 
 	public void MarkTransformDirty(ModelNode node) => dirtyTransforms.Add(node);
 	public void MarkInstancesDirty(ModelNode node) => dirtyInstances.Add(node);
@@ -138,6 +148,7 @@ class RenderScene : IDisposable
 		TransformBuffer.Dispose();
 		LightBuffer.Dispose();
 		BoneBuffer.Dispose();
+		TLAS.Dispose();
 	}
 }
 
@@ -154,6 +165,7 @@ public struct GPUInstance
 	public int MaterialID;
 	public int TransformID;
 	public int VertexOffset; // Start of this instance's vertices, deformed or shared with the mesh
+	public ulong BLASAddress; // Structure to trace against, deformed or shared with the mesh
 }
 
 [StructLayout(LayoutKind.Sequential)]
