@@ -107,6 +107,12 @@ public static class Input
 	/// </summary>
 	public static void UpdateKey(Keys key, bool down)
 	{
+		// None is what an unrecognised key parses to, and matches any shortcut that was never assigned one.
+		if (key == Keys.None)
+		{
+			return;
+		}
+
 		bool wasDown = IsDown(key);
 		keyStates[key] = down ? ButtonState.Down : ButtonState.Up;
 

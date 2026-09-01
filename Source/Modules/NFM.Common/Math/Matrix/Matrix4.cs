@@ -589,6 +589,29 @@ namespace NFM.Mathematics
 		}
 
 		/// <summary>
+		/// Returns the euler angles, in radians, that <see cref="CreateRotation"/> would rebuild this
+		/// instance's rotation from. Scale is removed first, so a full transform can be passed directly.
+		/// </summary>
+		[Pure]
+		public Vector3 ExtractEulerAngles()
+		{
+			Vector3 row0 = Row0.Xyz.Normalized();
+			Vector3 row1 = Row1.Xyz.Normalized();
+			Vector3 row2 = Row2.Xyz.Normalized();
+
+			float sinY = Math.Clamp(-row0.Z, -1f, 1f);
+			float cosY = MathF.Sqrt(1f - (sinY * sinY));
+
+			// Near a pole X and Z describe the same rotation, so pin Z and fold everything into X.
+			if (cosY < 1e-4f)
+			{
+				return new Vector3(MathF.Atan2(row1.X / sinY, row1.Y), MathF.Asin(sinY), 0);
+			}
+
+			return new Vector3(MathF.Atan2(row1.Z, row2.Z), MathF.Asin(sinY), MathF.Atan2(row0.Y, row0.X));
+		}
+
+		/// <summary>
 		/// Returns the rotation component of this instance. Quite slow.
 		/// </summary>
 		/// <param name="rowNormalize">

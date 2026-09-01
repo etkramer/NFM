@@ -9,6 +9,10 @@
     <div class="viewport" @ref=element />
 
     <box class="statusbar">
+        <box class="gizmo-picker">
+            <Dropdown Options=@GizmoModes Value=@CurrentGizmoMode ValueChanged=@OnGizmoModeChanged />
+        </box>
+
         <box class="mode-picker">
             <Dropdown Options=@Modes Value=@CurrentMode ValueChanged=@OnModeChanged />
         </box>
@@ -39,11 +43,15 @@
     int frameTimeCount;
 
     static readonly DisplayMode[] Modes = Enum.GetValues<DisplayMode>();
+    static readonly GizmoMode[] GizmoModes = Enum.GetValues<GizmoMode>();
 
     // The host is created asynchronously once the page reports our rect, so it can't be cached at construction.
-    CameraNode? Camera => Viewport.All.FirstOrDefault(o => o.HostControl is ViewportHost host && host.Id == id)?.Camera;
+    Viewport? Target => Viewport.All.FirstOrDefault(o => o.HostControl is ViewportHost host && host.Id == id);
+
+    CameraNode? Camera => Target?.Camera;
 
     DisplayMode CurrentMode => Camera?.DisplayMode ?? DisplayMode.Unlit;
+    GizmoMode CurrentGizmoMode => Target?.Gizmo.Mode ?? GizmoMode.Translate;
 
     public ViewportPanel()
     {
@@ -55,6 +63,14 @@
         if (Camera is CameraNode camera && value is DisplayMode mode)
         {
             camera.DisplayMode = mode;
+        }
+    }
+
+    void OnGizmoModeChanged(object? value)
+    {
+        if (Target is Viewport target && value is GizmoMode mode)
+        {
+            target.Gizmo.Mode = mode;
         }
     }
 
@@ -97,5 +113,5 @@
         }
     }
 
-    protected override int BuildHashCode() => HashCode.Combine(frameTimeDisplay, memoryDisplay, CurrentMode);
+    protected override int BuildHashCode() => HashCode.Combine(frameTimeDisplay, memoryDisplay, CurrentMode, CurrentGizmoMode);
 }

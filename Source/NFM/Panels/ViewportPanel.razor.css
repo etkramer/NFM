@@ -19,6 +19,10 @@
 }
 
 .mode-picker {
-    flex: 0 0 150px;
+    flex: 0 0 140px;
     margin-right: auto;
+}
+
+.gizmo-picker {
+    flex: 0 0 100px;
 }

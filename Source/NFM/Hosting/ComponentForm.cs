@@ -346,6 +346,8 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 			_ => CoreWebView2MouseEventKind.LeftButtonUp,
 		}, e);
 
+		captured?.OnRelease(e.Button == System.Windows.Forms.MouseButtons.Left);
+
 		if (Control.MouseButtons == System.Windows.Forms.MouseButtons.None)
 		{
 			Capture = false;

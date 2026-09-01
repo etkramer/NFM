@@ -178,6 +178,6 @@ public partial class ModelNode : Node
         modelBounds.Min = (new Vector4(modelBounds.Min, 1) * WorldTransform).Xyz;
         modelBounds.Max = (new Vector4(modelBounds.Max, 1) * WorldTransform).Xyz;
 
-		context.DrawBox(modelBounds, Color.White, Color.Invisible);
+		context.DrawBox(modelBounds, Color.White);
 	}
 }

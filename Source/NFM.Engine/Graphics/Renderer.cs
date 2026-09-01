@@ -96,16 +96,20 @@ static class Renderer
 		rp.Render(texture, camera);
 
 		// Setup gizmos context
-		var context = new Gizmos(rp.List, camera, rp.ViewMatrix, rp.ProjectionMatrix, rp.ViewCB);
+		var view = new GizmoView(rp.ViewMatrix, rp.ProjectionMatrix, camera.WorldTransform.ExtractTranslation(), rp.Size, camera.FOV);
+		var context = new Gizmos(rp.List, camera, view, rp.ViewCB);
 		rp.List.SetRenderTarget(texture);
 
 		// Draw gizmos for any subscribers
 		context.FireGizmosEvent();
 
 		// Draw axis lines
-		context.DrawLine(new Vector3(0), new Vector3(1, 0, 0), Color.FromHex(0xfa3652));
-		context.DrawLine(new Vector3(0), new Vector3(0, 1, 0), Color.FromHex(0x6fa21c));
-		context.DrawLine(new Vector3(0), new Vector3(0, 0, 1), Color.FromHex(0x317cd1));
+		for (int i = 0; i < 3; i++)
+		{
+			context.DrawLine(Vector3.Zero, Gizmos.AxisDirections[i] * 0.2f, Gizmos.AxisColors[i]);
+		}
+
+		context.Flush();
 
 		// Close/execute the command list
 		beforeExecute?.Invoke(rp.List);

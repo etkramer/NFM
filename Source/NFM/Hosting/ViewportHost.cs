@@ -59,9 +59,23 @@ sealed class ViewportHost : IDisposable
 		// Alt+Shift+LMB belongs to the camera pan gesture.
 		bool isPanning = Input.IsDown(Keys.LMenu) && Input.IsDown(Keys.LShiftKey);
 
-		if (isLeft && !isPanning)
+		if (!isLeft || isPanning)
+		{
+			return;
+		}
+
+		// A grabbed handle swallows the click, so dragging a gizmo never changes the selection.
+		if (!viewport.Gizmo.TryBeginDrag())
 		{
 			Select(viewport.HoveredNode, Input.IsDown(Keys.LControlKey));
+		}
+	}
+
+	public void OnRelease(bool isLeft)
+	{
+		if (isLeft)
+		{
+			viewport.Gizmo.EndDrag();
 		}
 	}
 

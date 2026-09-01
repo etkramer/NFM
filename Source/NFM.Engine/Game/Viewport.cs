@@ -22,6 +22,11 @@ public class Viewport : IDisposable
 	public Scene Scene => workCamera.Scene;
 
 	/// <summary>
+	/// Moves and rotates the selection in this viewport.
+	/// </summary>
+	public TransformGizmo Gizmo { get; }
+
+	/// <summary>
 	/// Constructs a viewport from a given UI host
 	/// </summary>
 	public Viewport(Swapchain swapchain, object hostControl)
@@ -33,10 +38,22 @@ public class Viewport : IDisposable
 		workCamera = new CameraNode(null);
 		workCamera.Name = "Work Camera";
 
+		Gizmo = new TransformGizmo(this);
+
 		Dispatcher.OnTick += OnTick;
 		Project.OnProjectCreated += OnProjectCreated;
+		Gizmos.OnDrawGizmos += OnDrawGizmos;
 
 		All.Add(this);
+	}
+
+	private void OnDrawGizmos(object? sender, Gizmos context)
+	{
+		// The event is global, but the gizmo only belongs to the viewport driving it.
+		if (context.Camera == Camera)
+		{
+			Gizmo.Draw(context);
+		}
 	}
 
 	/// <summary>
@@ -74,6 +91,8 @@ public class Viewport : IDisposable
 		// Hand this frame's cursor to the renderer, and pick up the result of the last one.
 		Camera.PickCoords = CursorPosition;
 		HoveredNode = Camera.HoveredInstance < 0 ? null : Scene.RenderData.GetInstanceOwner(Camera.HoveredInstance);
+
+		Gizmo.Update();
 
 		const float lookSens = 0.15f;
 		const float dampingCoefficient = 15;
@@ -146,6 +165,7 @@ public class Viewport : IDisposable
 	{
 		Dispatcher.OnTick -= OnTick;
 		Project.OnProjectCreated -= OnProjectCreated;
+		Gizmos.OnDrawGizmos -= OnDrawGizmos;
 		All.Remove(this);
 
 		workCamera.Dispose();
