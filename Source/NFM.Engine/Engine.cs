@@ -22,6 +22,9 @@ public static class Engine
 {
 	internal static void Init()
 	{
+		// Route anything awaited during startup through the dispatcher, not the thread pool.
+		Dispatcher.Install();
+
 		// Boot up renderer and load plugins.
 		Renderer.Init();
 		PluginSystem.Init();
@@ -33,13 +36,14 @@ public static class Engine
             var model = new ModelNode(null);
 			model.Model = await Asset.LoadAsync<Model>("USER:/Objects/Heavy.glb");
             model.Scale = new Vector3(0.5f);
-
-            await Task.Delay(1000);
 			
 			var model2 = new ModelNode(null);
 			model2.Model = await Asset.LoadAsync<Model>("USER:/Objects/Spaceship.glb");
 			model2.Scale = new Vector3(0.001f);
             model2.Position = new Vector3(1, -1.5f, 1);
+
+			var model3 = new ModelNode(null);
+			model3.Model = await Asset.LoadAsync<Model>("USER:/Objects/UnitySponza.glb");
 		};
 	}
 
