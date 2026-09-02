@@ -24,6 +24,9 @@
 		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\PickCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Prepass\BaseVS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Forward\Forward.h" />
+		<EmbeddedResource Include="Shaders\Standard\Forward\ForwardVS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Forward\TransparentPS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GeomMS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\Gizmos.h" />
 		<EmbeddedResource Include="Shaders\Common\Gizmos\GizmosPS.hlsl" />
@@ -33,6 +36,9 @@
 		<EmbeddedResource Include="Shaders\Lighting.h" />
 		<EmbeddedResource Include="Shaders\Raytracing.h" />
 		<EmbeddedResource Include="Shaders\Clustering.h" />
+		<EmbeddedResource Include="Shaders\Shading.h" />
+		<EmbeddedResource Include="Shaders\SurfaceModel.h" />
+		<EmbeddedResource Include="Shaders\Standard\Culling.h" />
 		<EmbeddedResource Include="Shaders\Standard\CullCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinCountCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinScanCS.hlsl" />

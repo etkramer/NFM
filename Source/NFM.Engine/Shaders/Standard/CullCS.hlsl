@@ -1,18 +1,10 @@
-﻿#include "Shaders/World.h"
-
-struct IndirectCommand
-{
-	uint InstanceID;
-	
-	uint IndexCountPerInstance;
-	uint InstanceCount;
-	uint StartIndexLocation;
-	uint BaseVertexLocation;
-	uint StartInstanceLocation;
-};
+#include "Shaders/Standard/Culling.h"
 
 ByteAddressBuffer MaterialParams : register(t0);
 AppendStructuredBuffer<IndirectCommand> Commands : register(u0);
+
+// Which blend modes this pass draws, as InstanceBucketBit flags.
+uint BucketMask : register(b0);
 
 [numthreads(1, 1, 1)]
 void main(uint3 dispatchID : SV_DispatchThreadID)
@@ -27,23 +19,18 @@ void main(uint3 dispatchID : SV_DispatchThreadID)
 		return;
 	}
 
+	// Drawn by whichever pass claims this blend mode.
+	if ((InstanceBucketBit(instance) & BucketMask) == 0)
+	{
+		return;
+	}
+
 	Mesh mesh = Meshes[instance.MeshID];
 
 	// Check visibility.
-	bool visible = true;
-	if (visible)
+	if (IsInstanceVisible(instance, mesh))
 	{
-		// Build command.
-		IndirectCommand command;
-		command.InstanceID = instanceID;
-		
-		command.IndexCountPerInstance = mesh.IndexCount;
-		command.InstanceCount = 1;
-		command.StartIndexLocation = mesh.IndexOffset;
-		command.BaseVertexLocation = 0;
-		command.StartInstanceLocation = 0;
-
 		// Store command and update count.
-		Commands.Append(command);
+		Commands.Append(BuildDrawCommand(instanceID, mesh));
 	}
 }

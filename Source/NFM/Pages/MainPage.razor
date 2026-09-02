@@ -61,30 +61,30 @@
 
     void OnPressSaveAs()
     {
-        using (var fileDialog = new SaveFileDialog())
-        {
-            fileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-            fileDialog.RestoreDirectory = true;
-
-            if (fileDialog.ShowDialog() is DialogResult.OK)
-            {
-                Project.Save(fileDialog.FileName);
-            }
-        }
+        ShowFileDialog(new SaveFileDialog(), path => Project.Save(path));
     }
 
     void OnPressOpen()
     {
-        using (var fileDialog = new OpenFileDialog())
-        {
-            fileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-            fileDialog.RestoreDirectory = true;
+        ShowFileDialog(new OpenFileDialog(), path => _ = Project.LoadAsync(path));
+    }
 
-            if (fileDialog.ShowDialog() is DialogResult.OK)
+    // Hosts the dialog's nested message loop on the dispatcher thread.
+    static void ShowFileDialog(FileDialog fileDialog, Action<string> onAccept)
+    {
+        _ = Dispatcher.InvokeAsync(() =>
+        {
+            using (fileDialog)
             {
-                _ = Project.LoadAsync(fileDialog.FileName);
+                fileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                fileDialog.RestoreDirectory = true;
+
+                if (fileDialog.ShowDialog() is DialogResult.OK)
+                {
+                    onAccept(fileDialog.FileName);
+                }
             }
-        }
+        });
     }
 
     void OnPressCopy()

@@ -61,6 +61,11 @@ public class CommandList : IDisposable
 		DispatchMesh(groupsX, groupsY, groupsZ);
 	}
 
+	public void DrawIndexed(int indexCount, int startIndex = 0, int baseVertex = 0)
+	{
+		list.DrawIndexedInstanced(indexCount, 1, startIndex, baseVertex, 0);
+	}
+
 	public void Dispatch(int threadGroupCountX, int threadGroupCountY = 1, int threadGroupCountZ = 1)
 	{
 	    list.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);

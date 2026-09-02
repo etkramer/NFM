@@ -19,6 +19,12 @@ struct _ViewConstants
 };
 ConstantBuffer<_ViewConstants> ViewConstants : register(b0, space1);
 
+#define INSTANCE_BLEND_MASK 0x3
+#define INSTANCE_BLEND_OPAQUE 0
+#define INSTANCE_BLEND_MASKED 1
+#define INSTANCE_BLEND_OVER 2
+#define INSTANCE_BLEND_ADDITIVE 3
+
 // One per object in scene (unordered, compact).
 struct Instance
 {
@@ -26,8 +32,16 @@ struct Instance
 	uint MaterialID;
 	uint TransformID;
 	uint VertexOffset; // Start of this instance's vertices, deformed or shared with the mesh
+	uint Flags; // INSTANCE_ bits, blend mode in the low two
+	uint Pad;
 	uint2 BLASAddress; // Structure to trace against, deformed or shared with the mesh
 };
+
+// The instance's blend mode as a single bit, for testing against a bucket mask.
+uint InstanceBucketBit(Instance instance)
+{
+	return 1u << (instance.Flags & INSTANCE_BLEND_MASK);
+}
 
 struct Transform
 {

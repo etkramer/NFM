@@ -6,7 +6,7 @@ void SFMain(inout SurfaceModel surface, in SFInput input)
 
 	surface.Albedo = LinearToSRGB(baseTex.rgb) * input.Color.rgb;
 	surface.Normal = bumpTex.rgb * 2 - 1;
-	surface.Emissive = surface.Albedo * input.SelfIllumTint.rgb;
+	surface.Emissive = surface.Albedo * input.SelfIllumTint.rgb * 33;
 
 	// $phong masks are dark intensity maps that $phongboost compensates for, so rescale to a gate.
 	float rawMask = input.PhongMaskSource == 1 ? baseTex.a : bumpTex.a;

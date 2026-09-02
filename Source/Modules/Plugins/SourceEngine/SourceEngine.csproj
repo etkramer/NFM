@@ -10,11 +10,13 @@
 	<ItemGroup>
 	  <None Remove="Shaders\VertexLitGeneric.hlsl" />
 	  <None Remove="Shaders\VertexLitGenericTransparent.hlsl" />
+	  <None Remove="Shaders\UnlitGeneric.hlsl" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Include="Shaders\VertexLitGeneric.hlsl" />
 	  <EmbeddedResource Include="Shaders\VertexLitGenericTransparent.hlsl" />
+	  <EmbeddedResource Include="Shaders\UnlitGeneric.hlsl" />
 	</ItemGroup>
 
 	<ItemGroup>

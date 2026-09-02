@@ -1,16 +1,11 @@
 #include "Shaders/Common.h"
-#include "Shaders/Lighting.h"
 #include "Shaders/Raytracing.h"
-#include "Shaders/Clustering.h"
+#include "Shaders/Shading.h"
 
 RWTexture2D<uint> ShadowMask : register(u0);
 
 Texture2D<half4> MatBuffer1 : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
-
-StructuredBuffer<uint> ClusterCounts : register(t9, space1);
-StructuredBuffer<uint> ClusterOffsets : register(t10, space1);
-StructuredBuffer<uint> ClusterLights : register(t11, space1);
 
 [numthreads(8, 8, 1)]
 void main(uint2 id : SV_DispatchThreadID)

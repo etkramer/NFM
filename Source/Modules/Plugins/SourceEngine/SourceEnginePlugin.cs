@@ -125,29 +125,64 @@ public class SourceEnginePlugin : Plugin
 		return string.IsNullOrEmpty(id) ? "SOURCE" : id.ToUpperInvariant();
 	}
 
+	/// <summary>Asset path of one registered shader variant.</summary>
+	public static string ShaderPath(string family, BlendMode blendMode, FaceMode faceMode)
+	{
+		string suffix = faceMode == FaceMode.TwoSided ? "TwoSided" : "";
+		return $"Shaders/{family}{blendMode}{suffix}.hlsl";
+	}
+
 	private void LoadShaders(MountPoint mount)
 	{
-		Submit("Shaders/VertexLitGeneric.hlsl", BlendMode.Opaque);
-		Submit("Shaders/VertexLitGenericTransparent.hlsl", BlendMode.Transparent);
+		Register("VertexLitGeneric", "Shaders/VertexLitGeneric.hlsl", "Shaders/VertexLitGenericTransparent.hlsl", AddVertexLitParams);
+		Register("UnlitGeneric", "Shaders/UnlitGeneric.hlsl", "Shaders/UnlitGeneric.hlsl", AddUnlitParams);
 
-		void Submit(string path, BlendMode blendMode)
+		// Only the blended variants come in both face modes; the visbuffer rasterizes opaque
+		// geometry with one cull mode for the whole scene.
+		void Register(string family, string opaqueSource, string blendedSource, Action<Shader> addParams)
 		{
-			Shader shader = new(Embed.GetString(path))
+			Submit(family, opaqueSource, BlendMode.Opaque, FaceMode.FrontOnly, addParams);
+
+			foreach (BlendMode blendMode in new[] { BlendMode.Transparent, BlendMode.Additive })
 			{
-				BlendMode = blendMode
+				foreach (FaceMode faceMode in new[] { FaceMode.FrontOnly, FaceMode.TwoSided })
+				{
+					Submit(family, blendedSource, blendMode, faceMode, addParams);
+				}
+			}
+		}
+
+		void Submit(string family, string source, BlendMode blendMode, FaceMode faceMode, Action<Shader> addParams)
+		{
+			Shader shader = new(Embed.GetString(source))
+			{
+				BlendMode = blendMode,
+				FaceMode = faceMode
 			};
 
-			shader.AddTextureParam("BaseTexture", Texture2D.White);
-			shader.AddTextureParam("BumpMap", Texture2D.Normal);
-			shader.AddTextureParam("ExponentTexture", Texture2D.Black);
+			addParams(shader);
 
-			shader.AddColorParam("Color", Color.White);
-			shader.AddColorParam("SelfIllumTint", Color.Black);
-			shader.AddFloatParam("PhongExponent", 0);
-			shader.AddFloatParam("PhongBoost", 0);
-			shader.AddIntParam("PhongMaskSource", 0);
-
+			string path = ShaderPath(family, blendMode, faceMode);
 			Asset.Submit(new Asset<Shader>(path, mount, new CachedResourceLoader<Shader>(shader)));
 		}
+	}
+
+	private static void AddVertexLitParams(Shader shader)
+	{
+		shader.AddTextureParam("BaseTexture", Texture2D.White);
+		shader.AddTextureParam("BumpMap", Texture2D.Normal);
+		shader.AddTextureParam("ExponentTexture", Texture2D.Black);
+
+		shader.AddColorParam("Color", Color.White);
+		shader.AddColorParam("SelfIllumTint", Color.Black);
+		shader.AddFloatParam("PhongExponent", 0);
+		shader.AddFloatParam("PhongBoost", 0);
+		shader.AddIntParam("PhongMaskSource", 0);
+	}
+
+	private static void AddUnlitParams(Shader shader)
+	{
+		shader.AddTextureParam("BaseTexture", Texture2D.White);
+		shader.AddColorParam("Color", Color.White);
 	}
 }

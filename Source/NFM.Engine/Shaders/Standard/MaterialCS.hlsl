@@ -1,5 +1,6 @@
 ﻿#include "Shaders/Common.h"
 #include "Shaders/World.h"
+#include "Shaders/SurfaceModel.h"
 
 RWTexture2D<float4> MatBuffer0 : register(u0);
 RWTexture2D<half4> MatBuffer1 : register(u1);
@@ -110,22 +111,6 @@ float3 InterpolateWithDeriv(BarycentricDeriv deriv, float v0, float v1, float v2
 	return ret;
 }
 
-struct SurfaceModel
-{
-	// Geoemtry (tangent space)
-	float3 Normal;
-
-	// PBR
-	float3 Albedo;
-	float Metallic;
-	float Roughness;
-	float Specular;
-	float3 Emissive;
-
-	// Non-opaque
-	float Opacity;
-};
-
 SurfaceModel EvalSurface(uint materialID, float2 uv0, float2 ddx, float2 ddy);
 
 [numthreads(64, 1, 1)]
@@ -204,6 +189,6 @@ void main(uint threadID : SV_DispatchThreadID)
 	// Write to g-buffer
 	MatBuffer0[id] = float4(surface.Albedo, 1);
 	MatBuffer1[id] = float4(normalize(mul(surface.Normal, tangentToWorld)), 1);
-	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, 1);
+	MatBuffer2[id] = float4(surface.Metallic, surface.Specular, surface.Roughness, surface.ShadingModel / 255.0);
 	MatBuffer3[id] = float4(surface.Emissive, 1);
 }

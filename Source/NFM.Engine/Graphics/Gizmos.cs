@@ -60,14 +60,14 @@ public class Gizmos
 			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl"), ShaderStage.Pixel))
 			.AsRootConstant(0, 2)
 			.SetDepthMode(DepthMode.None, false, false)
-			.SetEnableBlend(true)
+			.SetBlendMode(BlendPreset.Premultiplied)
 			.Compile().Result;
 
 		geometryPSO = new PipelineState()
 			.SetMeshShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GeomMS.hlsl"), ShaderStage.Mesh))
 			.SetPixelShader(new ShaderModule(Embed.GetString("Shaders/Common/Gizmos/GizmosPS.hlsl"), ShaderStage.Pixel))
 			.SetDepthMode(DepthMode.None, false, false)
-			.SetEnableBlend(true)
+			.SetBlendMode(BlendPreset.Premultiplied)
 			.Compile().Result;
 	}
 

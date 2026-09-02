@@ -27,6 +27,7 @@ class PrepassStep : ViewPass
 		// Compile indirect compute program.
 		cullPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/CullCS.hlsl"), ShaderStage.Compute))
+			.AsRootConstant(0, 1)
 			.Compile().Result;
 
 		// Compile depth prepass program.
@@ -88,6 +89,7 @@ class PrepassStep : ViewPass
 
 		// Switch to indirect culling PSO
 		list.SetPipelineState(cullPSO!);
+		list.SetPipelineConstants(0, 0, (int)CullBuckets.Visbuffer);
 		list.SetPipelineSRV(3, 1, RenderMesh.MeshBuffer);
 		list.SetPipelineSRV(5, 1, scene.InstanceBuffer);
 		list.SetPipelineUAV(0, 0, commandBuffer!);

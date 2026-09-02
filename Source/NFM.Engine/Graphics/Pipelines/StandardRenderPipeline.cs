@@ -54,6 +54,7 @@ class StandardRenderPipeline : RenderPipeline
 		Graph.AddPass(new ClusterStep(resources));
 		Graph.AddPass(new ShadowStep(resources));
 		Graph.AddPass(new LightingStep(resources));
+		Graph.AddPass(new TransparentStep(resources));
 		Graph.AddPass(new TonemapStep(resources));
 	}
 

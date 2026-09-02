@@ -25,11 +25,32 @@ public class VmtLoader : ResourceLoader<Material>
 	{
 		VmtFile vmt = VmtFile.Read(fileSystem, Path);
 
-		bool isTransparent = vmt.GetBool("$translucent") || vmt.GetBool("$additive");
-		string shaderPath = isTransparent ? "Shaders/VertexLitGenericTransparent.hlsl" : "Shaders/VertexLitGeneric.hlsl";
+		// TODO: $alphatest wants a masked mode, which the visbuffer can't discard for yet.
+		BlendMode blendMode = vmt.GetBool("$additive") ? BlendMode.Additive
+			: vmt.GetBool("$translucent") ? BlendMode.Transparent
+			: BlendMode.Opaque;
+
+		bool isTransparent = blendMode != BlendMode.Opaque;
+
+		// $nocull only reaches blended geometry; opaque uses one scene-wide cull mode.
+		FaceMode faceMode = vmt.GetBool("$nocull") && isTransparent ? FaceMode.TwoSided : FaceMode.FrontOnly;
+
+		bool isUnlit = vmt.Shader is "UnlitGeneric" or "UnlitTwoTexture" or "Sprite";
+		string shaderPath = SourceEnginePlugin.ShaderPath(isUnlit ? "UnlitGeneric" : "VertexLitGeneric", blendMode, faceMode);
 
 		Task<Shader> shader = Asset.LoadAsync<Shader>($"{SourceEnginePlugin.ShaderMount}:/{shaderPath}");
 		Task<Texture2D> baseTask = LoadTexture(vmt.GetString("$basetexture"));
+
+		if (isUnlit)
+		{
+			Material unlit = new(await shader);
+
+			unlit.SetTexture("BaseTexture", await baseTask);
+			unlit.SetColor("Color", vmt.GetColor("$color2", vmt.GetColor("$color", Color.White)));
+
+			return unlit;
+		}
+
 		Task<Texture2D> bumpTask = LoadTexture(vmt.GetString("$bumpmap"));
 		Task<Texture2D> exponentTask = LoadTexture(vmt.GetString("$phongexponenttexture"));
 

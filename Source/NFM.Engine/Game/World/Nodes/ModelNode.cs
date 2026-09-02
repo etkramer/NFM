@@ -126,6 +126,8 @@ public partial class ModelNode : Node
 			InstanceHandles[mesh] = RenderScene.AllocateInstance(this);
 			MaterialInstances[mesh] = material;
 
+			RenderScene.SetTransparent(InstanceHandles[mesh], this, mesh, material);
+
 			// A skinned mesh draws from a deformed copy of its vertices, one per instance.
 			nint vertexOffset = mesh.RenderData.VertexHandle.Offset;
 			ulong blasAddress = mesh.RenderData.BLAS.GPUAddress;
@@ -146,6 +148,7 @@ public partial class ModelNode : Node
 				TransformID = (int)TransformHandle.Offset,
 				MaterialID = (int)material.MaterialHandle.Offset,
 				VertexOffset = (int)vertexOffset,
+				Flags = material.InstanceFlags,
 				BLASAddress = blasAddress,
 			});
 		}

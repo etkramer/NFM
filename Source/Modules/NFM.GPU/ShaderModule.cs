@@ -131,7 +131,6 @@ public class ShaderModule : IDisposable
 				return reader.ReadToEnd();
 			}
 
-			Log.Error($"Failed to resolve include \"{path}\"");
 			return null;
 		};
 

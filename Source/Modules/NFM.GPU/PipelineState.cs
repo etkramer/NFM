@@ -30,6 +30,14 @@ public enum DepthMode
 	Always = ComparisonFunction.Always
 }
 
+public enum BlendPreset
+{
+	Opaque,
+	AlphaOver,
+	Additive,
+	Premultiplied
+}
+
 public enum TopologyType
 {
 	Triangle = PrimitiveTopologyType.Triangle,
@@ -71,7 +79,7 @@ public sealed class PipelineState : IDisposable
 	private Format[] rtFormats = [D3DContext.RTFormat];
 	private int rtSamples = 1;
 	private TopologyType topologyType = TopologyType.Triangle;
-	private bool isBlendEnabled = false;
+	private BlendPreset blendPreset = BlendPreset.Opaque;
 
 	public void Dispose()
 	{
@@ -127,10 +135,59 @@ public sealed class PipelineState : IDisposable
 		return this;
 	}
 
-	public PipelineState SetEnableBlend(bool value)
+	public PipelineState SetBlendMode(BlendPreset preset)
 	{
-		isBlendEnabled = value;
+		blendPreset = preset;
 		return this;
+	}
+
+	// Blending applies to RT0 only; MRT passes are opaque.
+	private BlendDescription BuildBlend()
+	{
+		BlendDescription blend = BlendDescription.Opaque;
+		blend.IndependentBlendEnable = true;
+
+		for (int i = 0; i < D3D12.SimultaneousRenderTargetCount; i++)
+		{
+			blend.RenderTarget[i].BlendEnable = false;
+		}
+
+		if (blendPreset == BlendPreset.Opaque)
+		{
+			return blend;
+		}
+
+		ref RenderTargetBlendDescription rt = ref blend.RenderTarget[0];
+		rt.BlendEnable = true;
+		rt.BlendOp = BlendOperation.Add;
+		rt.BlendOpAlpha = BlendOperation.Add;
+		rt.RenderTargetWriteMask = ColorWriteEnable.All;
+
+		switch (blendPreset)
+		{
+			case BlendPreset.AlphaOver:
+				rt.SrcBlend = Blend.SourceAlpha;
+				rt.DestBlend = Blend.InverseSourceAlpha;
+				rt.SrcBlendAlpha = Blend.One;
+				rt.DestBlendAlpha = Blend.InverseSourceAlpha;
+				break;
+
+			case BlendPreset.Additive:
+				rt.SrcBlend = Blend.SourceAlpha;
+				rt.DestBlend = Blend.One;
+				rt.SrcBlendAlpha = Blend.Zero;
+				rt.DestBlendAlpha = Blend.One;
+				break;
+
+			case BlendPreset.Premultiplied:
+				rt.SrcBlend = Blend.One;
+				rt.DestBlend = Blend.InverseSourceAlpha;
+				rt.SrcBlendAlpha = Blend.One;
+				rt.DestBlendAlpha = Blend.InverseSourceAlpha;
+				break;
+		}
+
+		return blend;
 	}
 
 	public PipelineState SetComputeShader(ShaderModule module)
@@ -290,11 +347,7 @@ public sealed class PipelineState : IDisposable
 			{
                 Guard.NotNull(compiledPixel);
 
-				BlendDescription disabledBlend = BlendDescription.Opaque;
-				for (int i = 0; i < D3D12.SimultaneousRenderTargetCount; i++)
-				{
-					disabledBlend.RenderTarget[i].BlendEnable = false;
-				}
+				BlendDescription blendDescription = BuildBlend();
 
 				if (compiledVertex is null)
 				{
@@ -317,7 +370,7 @@ public sealed class PipelineState : IDisposable
 							FillMode = FillMode.Solid,
 							AntialiasedLineEnable = topologyType == TopologyType.Line,
 						},
-						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
+						BlendDescription = blendDescription
 					}, out PSO);
 				}
 				else
@@ -341,7 +394,7 @@ public sealed class PipelineState : IDisposable
 							FillMode = FillMode.Solid,
 							AntialiasedLineEnable = topologyType == TopologyType.Line,
 						},
-						BlendDescription = isBlendEnabled ? BlendDescription.AlphaBlend : disabledBlend
+						BlendDescription = blendDescription
 					}, out PSO);
 				}
 			}

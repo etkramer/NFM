@@ -9,6 +9,9 @@ struct RTInstance
 	uint2 BLASAddress;
 };
 
+// D3D12_RAYTRACING_INSTANCE_FLAG_FORCE_NON_OPAQUE
+#define RT_INSTANCE_FORCE_NON_OPAQUE 0x4
+
 RWStructuredBuffer<RTInstance> RTInstances : register(u0);
 
 cbuffer Constants : register(b0)
@@ -38,6 +41,10 @@ void main(uint id : SV_DispatchThreadID)
 
 		result.InstanceIDAndMask = id | (0xFF << 24);
 		result.BLASAddress = instance.BLASAddress;
+
+		// Blended geometry stays non-opaque, letting rays that cull non-opaque hits pass through.
+		bool blended = (instance.Flags & INSTANCE_BLEND_MASK) >= INSTANCE_BLEND_OVER;
+		result.ContributionAndFlags = blended ? (RT_INSTANCE_FORCE_NON_OPAQUE << 24) : 0;
 	}
 
 	RTInstances[id] = result;

@@ -27,24 +27,34 @@ public static class D3DContext
 	private static ID3D12Fence? frameFence;
 	private static ID3D12Fence? flushFence;
 	private static AutoResetEvent? frameFenceEvent;
+	private static int debugCallbackCookie;
 
+	/// <summary>The first debug layer error, rethrown on the main thread by <see cref="WaitFrame"/>.</summary>
+	private static string? pendingDebugError;
+
+	[UnmanagedCallersOnly]
 	private static unsafe void DebugCallback(MessageCategory category, MessageSeverity severity, MessageId id, void* description, void* context)
 	{
-		string message = Guard.NotNull(Marshal.PtrToStringAnsi((IntPtr)description));
+		// Runs on a native frame, which nothing may escape into.
+		try
+		{
+			string message = Marshal.PtrToStringAnsi((IntPtr)description) ?? "Got unexpected null";
 
-		if (severity == MessageSeverity.Corruption || severity == MessageSeverity.Error)
-		{
-			Log.Error(message);
-			throw new Exception(message);
+			if (severity == MessageSeverity.Corruption || severity == MessageSeverity.Error)
+			{
+				Log.Error(message);
+				Interlocked.CompareExchange(ref pendingDebugError, message, null);
+			}
+			else if (severity == MessageSeverity.Warning)
+			{
+				Log.Warn(message);
+			}
+			else
+			{
+				Log.Info(message);
+			}
 		}
-		else if (severity == MessageSeverity.Warning)
-		{
-			Log.Warn(message);
-		}
-		else
-		{
-			Log.Info(message);
-		}
+		catch { }
 	}
 
 	public static void Init(int renderLatency = 2)
@@ -83,9 +93,8 @@ public static class D3DContext
 				unsafe
 				{
 					// Setup debug callbacks.
-					int cookie = 0;
-					delegate*<MessageCategory, MessageSeverity, MessageId, void*, void*, void> callback = &DebugCallback;
-					infoQueue.RegisterMessageCallback(new(callback), MessageCallbackFlags.None, IntPtr.Zero, ref cookie);
+					delegate* unmanaged<MessageCategory, MessageSeverity, MessageId, void*, void*, void> callback = &DebugCallback;
+					infoQueue.RegisterMessageCallback(new(callback), MessageCallbackFlags.None, IntPtr.Zero, ref debugCallbackCookie);
 				}
 			}
 		}
@@ -143,6 +152,11 @@ public static class D3DContext
         Guard.NotNull(frameFence);
         Guard.NotNull(frameFenceEvent);
 
+
+		if (Interlocked.Exchange(ref pendingDebugError, null) is string debugError)
+		{
+			throw new Exception(debugError);
+		}
 
 		GraphicsQueue.Signal(frameFence, Metrics.FrameCount);
 		ulong frameCountGPU = frameFence.CompletedValue;

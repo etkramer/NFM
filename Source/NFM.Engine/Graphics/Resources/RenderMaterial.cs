@@ -60,6 +60,19 @@ class RenderMaterial : IDisposable
 	public IEnumerable<ShaderPermutation> Permutations => permutations;
 	private readonly List<ShaderPermutation> permutations = [];
 
+	public T? GetPermutation<T>() where T : ShaderPermutation
+	{
+		foreach (var permutation in permutations)
+		{
+			if (permutation is T match)
+			{
+				return match;
+			}
+		}
+
+		return null;
+	}
+
 	#endregion
 
 	[Inspect] public Material Source => key.Source;
@@ -68,6 +81,18 @@ class RenderMaterial : IDisposable
 	public ObservableCollection<Shader> Shaders { get; } = [];
 
 	public BufferAllocation<byte> MaterialHandle { get; private set; }
+
+	// A stack composites as its loosest member.
+	public BlendMode BlendMode => Shaders.Max(o => o.BlendMode);
+	public FaceMode FaceMode => Shaders.Max(o => o.FaceMode);
+
+	public InstanceFlags InstanceFlags => BlendMode switch
+	{
+		BlendMode.Masked => InstanceFlags.BlendMasked,
+		BlendMode.Transparent => InstanceFlags.BlendOver,
+		BlendMode.Additive => InstanceFlags.BlendAdditive,
+		_ => InstanceFlags.BlendOpaque,
+	};
 
 	public int StackID { get; private set; }
 	private static int lastID = 0;

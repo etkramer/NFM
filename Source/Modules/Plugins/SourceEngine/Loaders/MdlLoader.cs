@@ -317,7 +317,8 @@ public class MdlLoader : ResourceLoader<Model>
 
 	private static async Task<Material> MakePlaceholder()
 	{
-		Shader shader = await Asset.LoadAsync<Shader>($"{SourceEnginePlugin.ShaderMount}:/Shaders/VertexLitGeneric.hlsl");
+		string shaderPath = SourceEnginePlugin.ShaderPath("VertexLitGeneric", BlendMode.Opaque, FaceMode.FrontOnly);
+		Shader shader = await Asset.LoadAsync<Shader>($"{SourceEnginePlugin.ShaderMount}:/{shaderPath}");
 
 		Material material = new(shader);
 		material.SetTexture("BaseTexture", Texture2D.Purple);

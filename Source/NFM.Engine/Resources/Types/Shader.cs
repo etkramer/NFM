@@ -1,10 +1,18 @@
 ﻿namespace NFM.Resources;
 
+// Ordered least to most transparent.
 public enum BlendMode
 {
 	Opaque,
 	Masked,
 	Transparent,
+	Additive,
+}
+
+public enum FaceMode
+{
+	FrontOnly,
+	TwoSided,
 }
 
 public struct ShaderParameter
@@ -21,6 +29,7 @@ public sealed class Shader : GameResource
 
 	public List<ShaderParameter> Parameters { get; } = [];
 	public required BlendMode BlendMode { get; init; } = BlendMode.Opaque;
+	public FaceMode FaceMode { get; init; } = FaceMode.FrontOnly;
 
 	public Shader(string source)
 	{
