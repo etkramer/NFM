@@ -15,6 +15,7 @@ namespace NFM;
 
 static class Program
 {
+	public static List<Form> OpenForms { get; } = [];
 	public static MainForm MainForm { get; private set; } = null!;
 
 	[STAThread]
@@ -31,8 +32,13 @@ static class Program
 
 		// The window stays hidden until the page has rendered, so bring it up by hand.
 		_ = MainForm.Handle;
+		MainForm.Show();
 
-		Application.Run(MainForm);
+		while (OpenForms.Count > 0)
+		{
+			Application.DoEvents();
+			MainForm.Frame();
+		}
 
 		Engine.Cleanup();
 	}

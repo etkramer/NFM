@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using NFM.Components;
-using Windows.Win32;
-using Windows.Win32.Foundation;
 
 namespace NFM.Hosting;
 
@@ -18,24 +16,12 @@ sealed class MainForm : ComponentForm<MainPage>
 
 	private readonly Stopwatch clock = Stopwatch.StartNew();
 	private TimeSpan lastTick;
-	private bool isInFrame;
-
-	protected override void OnShown(EventArgs e)
-	{
-		base.OnShown(e);
-		RequestFrame();
-	}
 
 	/// <summary>
-	/// Queues the next frame. WM_PAINT is only generated once the message queue is otherwise empty,
-	/// so input and webview work always take precedence over the game loop.
+	/// Advances the engine by a frame. Driven by the loop in <see cref="Program"/>, which pumps the
+	/// message queue dry first - input and webview work always take precedence over the game loop.
 	/// </summary>
-	private unsafe void RequestFrame()
-	{
-		PInvoke.InvalidateRect((HWND)Handle, (RECT*)null, false);
-	}
-
-	private void Frame()
+	internal void Frame()
 	{
 		Engine.Update();
 
@@ -44,33 +30,5 @@ sealed class MainForm : ComponentForm<MainPage>
 			lastTick = clock.Elapsed;
 			Component.Tick();
 		}
-	}
-
-	protected override void WndProc(ref Message m)
-	{
-		if (m.Msg == PInvoke.WM_PAINT)
-		{
-			// Guard against reentrancy, in case a frame pumps messages itself (dialogs, blocking waits).
-			if (!isInFrame)
-			{
-				isInFrame = true;
-
-				try
-				{
-					Frame();
-				}
-				finally
-				{
-					isInFrame = false;
-				}
-			}
-
-			base.WndProc(ref m);
-			RequestFrame();
-
-			return;
-		}
-
-		base.WndProc(ref m);
 	}
 }

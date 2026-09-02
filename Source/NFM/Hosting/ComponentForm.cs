@@ -54,6 +54,8 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 
 	public ComponentForm()
 	{
+		Program.OpenForms.Add(this);
+
 		Text = "NFM";
 		Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
 		BackColor = ColorTranslator.FromHtml("#1a1a1a");
@@ -190,8 +192,8 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 		controller.MoveFocus(CoreWebView2MoveFocusReason.Programmatic);
 	}
 
-	// The first request to show comes from Application.Run, before there's anything to look at.
-	// RootHelperComponent calls Show() again once the page has rendered.
+	// The first request to show comes before there's anything to look at. RootHelperComponent calls
+	// Show() again once the page has rendered.
 	private bool hasSuppressedSetVisible;
 
 	protected override void SetVisibleCore(bool value)
@@ -422,6 +424,8 @@ class ComponentForm<TComponent> : Form, IComponentForm where TComponent : ICompo
 
 	protected override void OnFormClosed(FormClosedEventArgs e)
 	{
+		Program.OpenForms.Remove(this);
+
 		foreach (ViewportHost host in viewports.Values)
 		{
 			host.Dispose();
