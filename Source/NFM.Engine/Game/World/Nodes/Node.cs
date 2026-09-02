@@ -33,10 +33,10 @@ public class Node : ISelectable, IDisposable
 	public bool IsTransient { get; init; }
 
 	/// <summary>
-	/// Set while this node is held out of the scene by the undo stack, waiting to be put back or
-	/// destroyed. Detached nodes keep their state but render nothing.
+	/// Set while this node is held out of the scene by the undo stack. Detached nodes keep their
+	/// state but render nothing.
 	/// </summary>
-	public bool IsDetached { get; private set; }
+	[Notify] public bool IsDetached { get; private set; }
 
 	public IEnumerable<Node> Children => children;
 	private readonly ObservableCollection<Node> children = [];
@@ -95,22 +95,14 @@ public class Node : ISelectable, IDisposable
 	internal int SiblingIndex => parent is null ? Scene.IndexOfRootNode(this) : parent.children.IndexOf(this);
 
 	/// <summary>
-	/// Takes this node's subtree out of the scene without destroying it, so the undo stack can hold
-	/// onto it. The node keeps everything but its place in the tree.
+	/// Takes this node's subtree out of the scene without destroying it.
 	/// </summary>
 	internal void Detach()
 	{
 		Guard.Require(!IsDetached, "Node is already detached.");
 		Guard.Require(!IsOwned, "Owned nodes are detached along with their owner.");
 
-		if (parent is null)
-		{
-			Scene.RemoveRootNode(this);
-		}
-		else
-		{
-			parent.children.Remove(this);
-		}
+		Unplace();
 
 		parent = null;
 		SetDetached(true);
@@ -134,6 +126,12 @@ public class Node : ISelectable, IDisposable
 	{
 		Guard.Require(!IsOwned, "Owned nodes cannot be reparented.");
 
+		Unplace();
+		Place(newParent, index);
+	}
+
+	private void Unplace()
+	{
 		if (parent is null)
 		{
 			Scene.RemoveRootNode(this);
@@ -142,8 +140,6 @@ public class Node : ISelectable, IDisposable
 		{
 			parent.children.Remove(this);
 		}
-
-		Place(newParent, index);
 	}
 
 	private void Place(Node? newParent, int index)
@@ -171,18 +167,11 @@ public class Node : ISelectable, IDisposable
 			Selection.Deselect(this);
 		}
 
-		OnDetachedChanged();
-
 		foreach (Node child in children)
 		{
 			child.SetDetached(value);
 		}
 	}
-
-	/// <summary>
-	/// Called as this node enters or leaves the scene, for subclasses holding render state.
-	/// </summary>
-	protected virtual void OnDetachedChanged() {}
 
 	public Node(Scene? scene)
 	{

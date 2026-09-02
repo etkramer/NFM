@@ -7,11 +7,10 @@
 #define LIGHT_NONE 0
 #define LIGHT_POINT 1
 
-// Nothing is binned past the cluster grid's far distance, so no light reaches further.
+// Matches the cluster grid's far distance.
 #define LIGHT_MAX_RANGE 512
 
-// Distance squared at which a light stops contributing more than the display can resolve. Derived
-// from the view's own exposure, so ranges track it without anything to author.
+// Distance squared at which a light stops contributing more than the display can resolve.
 float LightRangeSq(Light light)
 {
 	float peak = max(light.Color.r, max(light.Color.g, light.Color.b));
@@ -96,7 +95,7 @@ float3 EvalLight(Surface surface, float3 V, Light light)
 	// Clamped inside the source radius, where inverse-square would blow up.
 	float attenuation = rcp(max(distSq, light.Radius * light.Radius));
 
-	// Eased to nothing by the range, so the cutoff never shows up as an edge.
+	// Eased to nothing by the range.
 	float ratio = distSq / rangeSq;
 	float window = saturate(1 - ratio * ratio);
 

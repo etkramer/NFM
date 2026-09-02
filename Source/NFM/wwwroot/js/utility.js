@@ -36,7 +36,6 @@ function registerViewport(element, id) {
     const entry = { element, rect: null };
     viewports.set(id, entry);
 
-    // Moves rather than enters - the pointer is often already inside by the time a viewport registers.
     element.addEventListener("pointermove", () => postHover(id));
     element.addEventListener("pointerleave", () => postHover(null));
 

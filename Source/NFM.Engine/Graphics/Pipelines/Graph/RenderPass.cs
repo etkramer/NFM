@@ -42,4 +42,5 @@ readonly struct ViewPassContext
 	public RenderScene RenderScene => Camera.Scene.RenderData;
 
 	public Texture Get(TextureHandle handle) => Graph.Get(handle);
+	public RawBuffer Get(BufferHandle handle) => Graph.Get(handle);
 }

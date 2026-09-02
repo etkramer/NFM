@@ -30,9 +30,12 @@ class RenderScene : IDisposable
 	public TopLevelAS TLAS { get; } = new();
 
 	/// <summary>
-	/// Every node with geometry to deform this frame, walked by the skinning pass.
+	/// Nodes whose geometry has to be deformed this frame, and the structures over it refit. Drained
+	/// by the BVH pass, once the skinning pass has run over the same set.
 	/// </summary>
-	public HashSet<ModelNode> SkinnedNodes { get; } = [];
+	public HashSet<ModelNode> DeformedNodes { get; } = [];
+
+	private bool structuresDirty = true;
 
 	private readonly Dictionary<nint, ModelNode> instanceOwners = [];
 
@@ -51,17 +54,60 @@ class RenderScene : IDisposable
 	/// </summary>
 	public int InstanceCount => InstanceBuffer.NumAllocations > 0 ? (int)(InstanceBuffer.LastOffset + 1) : 0;
 
-	public void MarkTransformDirty(ModelNode node) => dirtyTransforms.Add(node);
-	public void MarkInstancesDirty(ModelNode node) => dirtyInstances.Add(node);
-	public void MarkBonesDirty(ModelNode node) => dirtyBones.Add(node);
+	public void MarkTransformDirty(ModelNode node)
+	{
+		dirtyTransforms.Add(node);
+		MarkStructuresDirty();
+	}
+
+	public void MarkInstancesDirty(ModelNode node)
+	{
+		dirtyInstances.Add(node);
+		MarkStructuresDirty();
+	}
+
+	public void MarkBonesDirty(ModelNode node)
+	{
+		dirtyBones.Add(node);
+		MarkDeformed(node);
+	}
+
 	public void MarkLightDirty(LightNode node) => dirtyLights.Add(node);
+
+	/// <summary>
+	/// Queues a node's skinned geometry for another pass of deformation.
+	/// </summary>
+	public void MarkDeformed(ModelNode node)
+	{
+		DeformedNodes.Add(node);
+		MarkStructuresDirty();
+	}
+
+	/// <summary>
+	/// Flags the scene's structures as no longer matching its instances.
+	/// </summary>
+	public void MarkStructuresDirty() => structuresDirty = true;
+
+	/// <summary>
+	/// Reports whether the structures need rebuilding, clearing the flag so anything marked after
+	/// this point carries over to the next frame.
+	/// </summary>
+	public bool TakeStructuresDirty()
+	{
+		bool result = structuresDirty;
+		structuresDirty = false;
+
+		return result;
+	}
 
 	public void Forget(ModelNode node)
 	{
 		dirtyTransforms.Remove(node);
 		dirtyInstances.Remove(node);
 		dirtyBones.Remove(node);
-		SkinnedNodes.Remove(node);
+		DeformedNodes.Remove(node);
+
+		MarkStructuresDirty();
 	}
 
 	public void Forget(LightNode node)

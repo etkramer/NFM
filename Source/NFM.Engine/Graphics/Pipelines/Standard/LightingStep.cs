@@ -7,17 +7,16 @@ class LightingStep : ViewPass
 	private static PipelineState? lightingPSO;
 
 	private readonly StandardResources resources;
-	private readonly ClusterStep clusterStep;
 
-	public LightingStep(StandardResources resources, ClusterStep clusterStep)
+	public LightingStep(StandardResources resources)
 	{
 		this.resources = resources;
-		this.clusterStep = clusterStep;
 	}
 
 	public override void Setup(RenderGraphBuilder builder)
 	{
 		builder.Read(resources.MatBuffer0, resources.MatBuffer1, resources.MatBuffer2, resources.MatBuffer3, resources.DepthBuffer, resources.ShadowMask);
+		builder.Read(resources.Clusters.Counts, resources.Clusters.Offsets, resources.Clusters.Lights);
 		builder.Write(resources.SceneColor);
 	}
 
@@ -46,9 +45,9 @@ class LightingStep : ViewPass
 		list.SetPipelineSRV(4, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineSRV(5, 0, ctx.Get(resources.ShadowMask));
 		list.SetPipelineSRV(6, 1, scene.LightBuffer);
-		list.SetPipelineSRV(9, 1, clusterStep.Counts);
-		list.SetPipelineSRV(10, 1, clusterStep.Offsets);
-		list.SetPipelineSRV(11, 1, clusterStep.Lights);
+		list.SetPipelineSRV(9, 1, ctx.Get(resources.Clusters.Counts));
+		list.SetPipelineSRV(10, 1, ctx.Get(resources.Clusters.Offsets));
+		list.SetPipelineSRV(11, 1, ctx.Get(resources.Clusters.Lights));
 		list.SetPipelineCBV(0, 1, ctx.ViewCB);
 
 		list.SetPipelineConstants(0, 0, (int)ctx.Camera.DisplayMode);

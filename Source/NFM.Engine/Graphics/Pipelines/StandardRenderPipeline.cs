@@ -4,10 +4,12 @@ using Vortice.DXGI;
 namespace NFM.Graphics;
 
 /// <summary>
-/// Handles to every texture in the standard pipeline, handed to each of its passes.
+/// Handles to every resource in the standard pipeline, handed to each of its passes.
 /// </summary>
 class StandardResources
 {
+	public required ClusterBuffers Clusters { get; init; }
+
 	public required TextureHandle SceneColor { get; init; } // Linear HDR radiance, pre-tonemap
 	public required TextureHandle ColorTarget { get; init; } // Display-encoded output
 
@@ -42,16 +44,16 @@ class StandardRenderPipeline : RenderPipeline
 			MatBuffer3 = Graph.CreateTexture("Material Buffer 3", new(Size, Format.R11G11B10_Float)),
 
 			ShadowMask = Graph.CreateTexture("Shadow Mask", new(Size, Format.R32_UInt)),
-		};
 
-		var clusterStep = new ClusterStep(resources);
+			Clusters = ClusterStep.Declare(Graph, Size),
+		};
 
 		Graph.AddPass(new PrepassStep(resources));
 		Graph.AddPass(new PickingStep(resources));
 		Graph.AddPass(new MaterialStep(resources));
-		Graph.AddPass(clusterStep);
-		Graph.AddPass(new ShadowStep(resources, clusterStep));
-		Graph.AddPass(new LightingStep(resources, clusterStep));
+		Graph.AddPass(new ClusterStep(resources));
+		Graph.AddPass(new ShadowStep(resources));
+		Graph.AddPass(new LightingStep(resources));
 		Graph.AddPass(new TonemapStep(resources));
 	}
 

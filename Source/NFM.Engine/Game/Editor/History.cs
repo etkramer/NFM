@@ -5,14 +5,7 @@ namespace NFM;
 
 /// <summary>
 /// The editor's undo stack. A change is recorded by snapshotting whatever it's about to touch and
-/// diffing that once it's done, so a call site only has to declare what it works on:
-/// <code>
-/// using (History.Begin("Move"))
-/// {
-///     History.Track(node);
-///     node.Position = destination;
-/// }
-/// </code>
+/// diffing that once the transaction closes.
 /// </summary>
 public static class History
 {
@@ -33,8 +26,8 @@ public static class History
 	private static int depth;
 
 	/// <summary>
-	/// Opens a transaction, which becomes one entry on the stack once disposed. Transactions opened
-	/// inside another join it, so a change built out of smaller ones still undoes in a single step.
+	/// Opens a transaction, which becomes one entry on the stack once disposed. Nested transactions
+	/// join the outermost one.
 	/// </summary>
 	public static Transaction Begin(string name)
 	{
@@ -47,12 +40,11 @@ public static class History
 	}
 
 	/// <summary>
-	/// Snapshots a subject's inspectable properties, along with its place in the scene tree. Anything
-	/// that differs by the end of the transaction becomes part of the entry.
+	/// Snapshots a subject's inspectable properties, along with its place in the scene tree.
 	/// </summary>
 	public static void Track(object subject)
 	{
-		if (open is not Entry entry || entry.Tracked.Any(snapshot => ReferenceEquals(snapshot.Subject, subject)))
+		if (open is not Entry entry || entry.Tracked.ContainsKey(subject))
 		{
 			return;
 		}
@@ -66,7 +58,7 @@ public static class History
 		}
 
 		Node? node = subject as Node;
-		entry.Tracked.Add(new Snapshot(subject, properties, values, node?.Parent, node?.SiblingIndex ?? 0));
+		entry.Tracked.Add(subject, new Snapshot(subject, properties, values, node?.Parent, node?.SiblingIndex ?? 0));
 	}
 
 	/// <summary>
@@ -81,8 +73,7 @@ public static class History
 	}
 
 	/// <summary>
-	/// Removes a node from the scene, holding it here so undo can put it back. Takes the place of
-	/// disposing it - the node is only destroyed for real once this entry falls off the stack.
+	/// Removes a node from the scene, holding it here until the entry falls off the stack.
 	/// </summary>
 	public static void RecordDespawn(Node node)
 	{
@@ -153,7 +144,6 @@ public static class History
 			return;
 		}
 
-		// Nothing to commit if the transaction was abandoned partway through.
 		if (open is not Entry entry)
 		{
 			return;
@@ -161,12 +151,14 @@ public static class History
 
 		open = null;
 
-		foreach (Snapshot snapshot in entry.Tracked)
+		foreach (Snapshot snapshot in entry.Tracked.Values)
 		{
 			Diff(snapshot, entry.Edits);
 		}
 
-		// A transaction that changed nothing leaves the stack alone, redo included.
+		// Snapshots hold every inspected value, assets included; only the edits outlive the commit.
+		entry.Tracked.Clear();
+
 		if (entry.Edits.Count == 0)
 		{
 			return;
@@ -189,7 +181,7 @@ public static class History
 			}
 		}
 
-		// A node that left the scene entirely is covered by the edit that removed it.
+		// A node that left the scene is covered by the edit that removed it.
 		if (snapshot.Subject is Node node && !node.IsDetached &&
 			(node.Parent != snapshot.Parent || node.SiblingIndex != snapshot.Index))
 		{
@@ -242,7 +234,7 @@ public static class History
 	{
 		public string Name { get; } = name;
 
-		public List<Snapshot> Tracked { get; } = [];
+		public Dictionary<object, Snapshot> Tracked { get; } = new(ReferenceEqualityComparer.Instance);
 		public List<IEdit> Edits { get; } = [];
 
 		public ISelectable[] SelectionBefore { get; } = selectionBefore;
@@ -263,7 +255,7 @@ public static class History
 		void Redo();
 
 		/// <summary>
-		/// Releases anything this edit was keeping alive on the stack's behalf.
+		/// Releases anything this edit was keeping alive.
 		/// </summary>
 		void Discard() {}
 	}
@@ -281,8 +273,7 @@ public static class History
 	}
 
 	/// <summary>
-	/// A node entering or leaving the scene. Whichever side of it is out of the scene is held by this
-	/// edit, and destroyed along with it.
+	/// A node entering or leaving the scene, held by this edit while it's out of the scene.
 	/// </summary>
 	private sealed class LifetimeEdit(Node node, Node? parent, int index, bool spawned) : IEdit
 	{

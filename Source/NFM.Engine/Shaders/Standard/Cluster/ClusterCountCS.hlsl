@@ -8,8 +8,7 @@ cbuffer Constants : register(b0)
 	int GroupsPerLight;
 }
 
-// A grid of groups per light slot, striding over the clusters that light reaches. Spreading each
-// light over many groups is what keeps a handful of large lights from serializing onto a few cores.
+// A grid of groups per light slot, striding over the clusters that light reaches.
 [numthreads(64, 1, 1)]
 void main(uint3 groupID : SV_GroupID, uint threadID : SV_GroupIndex)
 {

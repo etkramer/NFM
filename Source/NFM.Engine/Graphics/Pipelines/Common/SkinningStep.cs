@@ -18,7 +18,7 @@ class SkinningStep : ScenePass
 	public override void Run(in ScenePassContext ctx)
 	{
 		var scene = ctx.RenderScene;
-		if (scene.SkinnedNodes.Count == 0)
+		if (scene.DeformedNodes.Count == 0)
 		{
 			return;
 		}
@@ -30,7 +30,7 @@ class SkinningStep : ScenePass
 		list.SetPipelineSRV(7, 1, scene.BoneBuffer);
 		list.SetPipelineUAV(0, 0, RenderMesh.VertexBuffer);
 
-		foreach (var node in scene.SkinnedNodes)
+		foreach (var node in scene.DeformedNodes)
 		{
 			int boneOffset = (int)Guard.NotNull(node.BoneHandle).Offset;
 

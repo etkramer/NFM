@@ -4,12 +4,10 @@ using Vortice.Direct3D12;
 namespace NFM.Graphics;
 
 /// <summary>
-/// Keeps the scene traceable: builds structures for newly loaded geometry, refits whatever the
-/// skinning pass deformed, and rebuilds the top-level structure over every live instance.
+/// Builds and refits the scene's acceleration structures.
 /// </summary>
 class BVHStep : ScenePass
 {
-	// Holds a frame's worth of builds. Overflowing costs a barrier, not correctness.
 	private const int ScratchSize = 64 * 1024 * 1024;
 
 	private static PipelineState? instancePSO;
@@ -29,25 +27,35 @@ class BVHStep : ScenePass
 		var list = ctx.List;
 		var scene = ctx.RenderScene;
 
-		scratch.Reset(list);
+		bool hasBuilds = RenderMesh.PendingBuilds.Count > 0 || scene.DeformedNodes.Count > 0;
 
-		// Builds source their triangles straight out of the shared geometry buffers.
-		list.RequestState(RenderMesh.VertexBuffer, ResourceStates.NonPixelShaderResource);
-		list.RequestState(RenderMesh.IndexBuffer, ResourceStates.NonPixelShaderResource);
-
-		foreach (var mesh in RenderMesh.PendingBuilds)
+		if (!scene.TakeStructuresDirty() && !hasBuilds)
 		{
-			mesh.BLAS.Build(list, scratch.Allocate(list, mesh.BLAS.ScratchSize));
+			return;
 		}
 
-		RenderMesh.PendingBuilds.Clear();
+		scratch.Reset(list);
 
-		foreach (var node in scene.SkinnedNodes)
+		if (hasBuilds)
 		{
-			foreach (var skin in node.SkinHandles.Values)
+			list.RequestState(RenderMesh.VertexBuffer, ResourceStates.NonPixelShaderResource);
+			list.RequestState(RenderMesh.IndexBuffer, ResourceStates.NonPixelShaderResource);
+
+			foreach (var mesh in RenderMesh.PendingBuilds)
 			{
-				skin.BLAS.Build(list, scratch.Allocate(list, skin.BLAS.ScratchSize));
+				mesh.BLAS.Build(list, scratch.Allocate(list, mesh.BLAS.ScratchSize));
 			}
+
+			foreach (var node in scene.DeformedNodes)
+			{
+				foreach (var skin in node.SkinHandles.Values)
+				{
+					skin.BLAS.Build(list, scratch.Allocate(list, skin.BLAS.ScratchSize));
+				}
+			}
+
+			RenderMesh.PendingBuilds.Clear();
+			scene.DeformedNodes.Clear();
 		}
 
 		int instanceCount = scene.InstanceCount;
@@ -64,7 +72,6 @@ class BVHStep : ScenePass
 			list.DispatchThreads(instanceCount, 64);
 		}
 
-		// Nothing can reference a bottom-level structure until its build has landed.
 		list.BarrierUAV();
 		scene.TLAS.Build(list, instanceCount, scratch.Allocate(list, scene.TLAS.ScratchSize));
 		list.BarrierUAV();
@@ -73,5 +80,7 @@ class BVHStep : ScenePass
 	public override void Dispose()
 	{
 		scratch.Dispose();
+
+		base.Dispose();
 	}
 }

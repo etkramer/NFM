@@ -40,7 +40,7 @@ public partial class ModelNode : Node
 
 		// Track changes in model/visibility
 		this.SubscribeFast(nameof(Model), RebuildSkeleton);
-		this.SubscribeFast(nameof(Model), nameof(IsVisible), () => RenderScene.MarkInstancesDirty(this));
+		this.SubscribeFast(nameof(Model), nameof(IsVisible), nameof(IsDetached), () => RenderScene.MarkInstancesDirty(this));
 		this.SubscribeFast(nameof(WorldTransform), () => RenderScene.MarkTransformDirty(this));
 
 		RenderScene.MarkInstancesDirty(this);
@@ -152,7 +152,7 @@ public partial class ModelNode : Node
 
 		if (SkinHandles.Count > 0)
 		{
-			RenderScene.SkinnedNodes.Add(this);
+			RenderScene.MarkDeformed(this);
 		}
 	}
 
@@ -244,10 +244,8 @@ public partial class ModelNode : Node
 		MaterialInstances.Clear();
 		SkinHandles.Clear();
 
-		RenderScene.SkinnedNodes.Remove(this);
+		RenderScene.DeformedNodes.Remove(this);
 	}
-
-	protected override void OnDetachedChanged() => RenderScene.MarkInstancesDirty(this);
 
 	public override void Dispose()
 	{

@@ -31,14 +31,14 @@ void main(uint2 id : SV_DispatchThreadID)
 		float3 position = ReconstructWorldPosition(id, frameSize, depth);
 		float3 normal = normalize(MatBuffer1[id].rgb);
 
-		// Lift the origin off the surface by more the coarser this pixel is in world units.
+		// Lifted off the surface, scaled by this pixel's world-space size.
 		float3 origin = position + normal * (0.001 + 0.0005 * distance(ViewConstants.EyePosition, position));
 
 		uint cluster = ClusterFromPixel(id, position);
 		uint offset = ClusterOffsets[cluster];
 		uint count = min(ClusterLightCount(offset, ClusterCounts[cluster]), MAX_SHADOWED_LIGHTS);
 
-		// Bit i tracks the cluster's i'th light, so lighting resolves the same walk from one fetch.
+		// Bit i tracks the cluster's i'th light.
 		for (uint i = 0; i < count; i++)
 		{
 			Light light = Lights[ClusterLights[offset + i]];
@@ -51,7 +51,7 @@ void main(uint2 id : SV_DispatchThreadID)
 				continue;
 			}
 
-			// Stop short of the source, so geometry enclosing the light doesn't occlude it.
+			// Stops short of the source itself.
 			if (TraceVisibility(origin, delta / dist, max(dist - light.Radius, 0)))
 			{
 				mask |= 1u << i;

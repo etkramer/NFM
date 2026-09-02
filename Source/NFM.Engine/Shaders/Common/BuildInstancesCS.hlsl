@@ -27,7 +27,7 @@ void main(uint id : SV_DispatchThreadID)
 	Instance instance = Instances[id];
 	RTInstance result = (RTInstance)0;
 
-	// A zeroed mask leaves freed slots inactive, so the sparse instance buffer needs no compaction.
+	// Freed slots keep a zeroed mask, leaving them inactive.
 	if (instance.BLASAddress.x != 0 || instance.BLASAddress.y != 0)
 	{
 		float4x4 objectToWorld = Transforms[instance.TransformID].ObjectToWorld;

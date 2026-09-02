@@ -3,25 +3,23 @@ using NFM.GPU;
 namespace NFM.Graphics;
 
 /// <summary>
-/// Traces one shadow ray per light per pixel, packing the results into a visibility bitmask for the
-/// lighting pass to resolve.
+/// Traces one shadow ray per light per pixel, into a per-pixel visibility bitmask.
 /// </summary>
 class ShadowStep : ViewPass
 {
 	private static PipelineState? shadowPSO;
 
 	private readonly StandardResources resources;
-	private readonly ClusterStep clusterStep;
 
-	public ShadowStep(StandardResources resources, ClusterStep clusterStep)
+	public ShadowStep(StandardResources resources)
 	{
 		this.resources = resources;
-		this.clusterStep = clusterStep;
 	}
 
 	public override void Setup(RenderGraphBuilder builder)
 	{
 		builder.Read(resources.MatBuffer1, resources.DepthBuffer);
+		builder.Read(resources.Clusters.Counts, resources.Clusters.Offsets, resources.Clusters.Lights);
 		builder.Write(resources.ShadowMask);
 	}
 
@@ -45,9 +43,9 @@ class ShadowStep : ViewPass
 		list.SetPipelineSRV(1, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineSRV(6, 1, scene.LightBuffer);
 		list.SetPipelineSRV(8, 1, scene.TLAS.Structure);
-		list.SetPipelineSRV(9, 1, clusterStep.Counts);
-		list.SetPipelineSRV(10, 1, clusterStep.Offsets);
-		list.SetPipelineSRV(11, 1, clusterStep.Lights);
+		list.SetPipelineSRV(9, 1, ctx.Get(resources.Clusters.Counts));
+		list.SetPipelineSRV(10, 1, ctx.Get(resources.Clusters.Offsets));
+		list.SetPipelineSRV(11, 1, ctx.Get(resources.Clusters.Lights));
 		list.SetPipelineCBV(0, 1, ctx.ViewCB);
 
 		list.DispatchThreads(shadowMask.Width, 8, shadowMask.Height, 8);

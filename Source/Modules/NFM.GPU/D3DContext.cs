@@ -16,7 +16,6 @@ public static class D3DContext
 	public static event Action OnFrameStart = delegate {};
 
 	internal static bool SupportsTearing = false;
-	internal static bool SupportsRaytracing = false;
 
 	internal static Format RTFormat = Format.R8G8B8A8_UNorm;
 	internal static Format DSFormat = Format.D32_Float;
@@ -94,9 +93,7 @@ public static class D3DContext
 		// Check feature support.
 		{
 			SupportsTearing = DXGIFactory.PresentAllowTearing;
-			SupportsRaytracing = Device.Options5.RaytracingTier >= RaytracingTier.Tier1_1;
-
-			if (!SupportsRaytracing)
+			if (Device.Options5.RaytracingTier < RaytracingTier.Tier1_1)
 			{
 				throw new NotSupportedException("GPU does not support inline ray tracing (DXR 1.1).");
 			}

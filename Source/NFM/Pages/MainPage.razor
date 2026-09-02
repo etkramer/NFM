@@ -127,8 +127,8 @@
 
     void OnPressDelete()
     {
-        // Delete all selected nodes. Owned ones only go away with their owner, as do nested ones.
-        Node[] nodes = Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToArray();
+        // Delete all selected nodes, minus owned and nested ones.
+        HashSet<Node> nodes = Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToHashSet();
         Node[] roots = nodes.Where(o => !HasAncestorIn(o, nodes)).ToArray();
 
         if (roots.Length == 0)
@@ -145,7 +145,7 @@
         }
     }
 
-    static bool HasAncestorIn(Node node, Node[] nodes)
+    static bool HasAncestorIn(Node node, HashSet<Node> nodes)
     {
         for (Node? ancestor = node.Parent; ancestor is not null; ancestor = ancestor.Parent)
         {

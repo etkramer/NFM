@@ -73,7 +73,7 @@ public class TransformGizmo
 	private readonly record struct Target(Node Node, Matrix4 World, Matrix4 ParentInverse);
 	private readonly List<Target> targets = [];
 
-	// Held open for the length of a drag, so the whole thing undoes in one step.
+	// Held open for the length of a drag.
 	private Transaction? edit;
 
 	public TransformGizmo(Viewport viewport)

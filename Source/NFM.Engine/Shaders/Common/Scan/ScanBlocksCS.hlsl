@@ -7,8 +7,7 @@ cbuffer Constants : register(b0)
 	int Count;
 }
 
-// Exclusive scan over the block totals, in one group. Each thread reduces a contiguous chunk
-// first, so any number of blocks fits however large the scanned buffer gets.
+// Exclusive scan over the block totals, in one group, each thread reducing a contiguous chunk.
 [numthreads(SCAN_GROUP_SIZE, 1, 1)]
 void main(uint threadID : SV_GroupIndex)
 {

@@ -3,27 +3,28 @@ using NFM.GPU;
 namespace NFM.Graphics;
 
 /// <summary>
-/// Bins lights into a froxel grid, so shading and shadow tracing only ever visit the lights that
-/// can reach a pixel. Each light scatters into the clusters its bounds cover and a prefix sum packs
-/// the results into one contiguous run per cluster, leaving nothing capped but the pool as a whole.
+/// The froxel grid <see cref="ClusterStep"/> fills in, walked by every pass that shades.
+/// </summary>
+record ClusterBuffers(BufferHandle Counts, BufferHandle Offsets, BufferHandle Lights);
+
+/// <summary>
+/// Bins lights into a froxel grid, one contiguous run of light indices per cluster.
 /// </summary>
 class ClusterStep : ViewPass
 {
 	public const int TileSize = 16;
 	public const int SliceCount = 32;
 
-	// The range slices are distributed over. Unrelated to the view's own near plane, which is far
-	// too close to spend slices on, and to its far plane, which is at infinity.
+	// The range slices are distributed over, independent of the view's own near/far planes.
 	public const float NearDepth = 0.1f;
 	public const float FarDepth = 512;
 
-	// Shared by every cluster; a scene dense enough to exhaust it drops its last few assignments.
+	// Light index pool, shared by every cluster.
 	private const int LightPool = 4 * 1024 * 1024;
 
 	private const int ScanGroupSize = 256;
-	private const int LightGroupSize = 64;
+	private const int ClearGroupSize = 64;
 
-	// Roughly how many groups it takes to fill a modern GPU, and the ceiling one light may claim.
 	private const int TargetGroups = 4096;
 	private const int MaxGroupsPerLight = 1024;
 
@@ -34,11 +35,8 @@ class ClusterStep : ViewPass
 	private static PipelineState? scanAddPSO;
 	private static PipelineState? scatterPSO;
 
-	private RawBuffer? counts;
-	private RawBuffer? offsets;
 	private RawBuffer? cursors;
 	private RawBuffer? blockSums;
-	private RawBuffer? lights;
 
 	private int clusterCount;
 	private int blockCount;
@@ -50,13 +48,36 @@ class ClusterStep : ViewPass
 		this.resources = resources;
 	}
 
-	public RawBuffer Counts => Guard.NotNull(counts);
-	public RawBuffer Offsets => Guard.NotNull(offsets);
-	public RawBuffer Lights => Guard.NotNull(lights);
+	private RawBuffer Cursors => Guard.NotNull(cursors);
+	private RawBuffer BlockSums => Guard.NotNull(blockSums);
 
 	public static Vector3i DimensionsFor(Vector2i size)
 	{
 		return new(MathHelper.IntCeiling(size.X / (float)TileSize), MathHelper.IntCeiling(size.Y / (float)TileSize), SliceCount);
+	}
+
+	public static int CountFor(Vector2i size)
+	{
+		Vector3i dims = DimensionsFor(size);
+		return dims.X * dims.Y * dims.Z;
+	}
+
+	/// <summary>
+	/// Declares the buffers this pass fills in, sized for a view of a given resolution.
+	/// </summary>
+	public static ClusterBuffers Declare(RenderGraph graph, Vector2i size)
+	{
+		nint clusterBytes = (nint)CountFor(size) * sizeof(uint);
+
+		return new ClusterBuffers(
+			graph.CreateBuffer("Cluster Counts", new(clusterBytes, sizeof(uint))),
+			graph.CreateBuffer("Cluster Offsets", new(clusterBytes, sizeof(uint))),
+			graph.CreateBuffer("Cluster Lights", new((nint)LightPool * sizeof(uint), sizeof(uint))));
+	}
+
+	public override void Setup(RenderGraphBuilder builder)
+	{
+		builder.Write(resources.Clusters.Counts, resources.Clusters.Offsets, resources.Clusters.Lights);
 	}
 
 	public override void Init(RenderGraph graph)
@@ -91,16 +112,11 @@ class ClusterStep : ViewPass
 			.AsRootConstant(0, 1)
 			.Compile().Result;
 
-		Vector3i dims = DimensionsFor(graph.Get(resources.DepthBuffer).Size);
-
-		clusterCount = dims.X * dims.Y * dims.Z;
+		clusterCount = CountFor(graph.Get(resources.DepthBuffer).Size);
 		blockCount = MathHelper.IntCeiling(clusterCount / (float)ScanGroupSize);
 
-		counts = new RawBuffer((nint)clusterCount * sizeof(uint), sizeof(uint)) { Name = "Cluster Counts" };
-		offsets = new RawBuffer((nint)clusterCount * sizeof(uint), sizeof(uint)) { Name = "Cluster Offsets" };
 		cursors = new RawBuffer((nint)clusterCount * sizeof(uint), sizeof(uint)) { Name = "Cluster Cursors" };
 		blockSums = new RawBuffer((nint)blockCount * sizeof(uint), sizeof(uint)) { Name = "Cluster Block Sums" };
-		lights = new RawBuffer((nint)LightPool * sizeof(uint), sizeof(uint)) { Name = "Cluster Lights" };
 	}
 
 	public override void Run(in ViewPassContext ctx)
@@ -111,64 +127,67 @@ class ClusterStep : ViewPass
 		Vector2i size = ctx.Get(resources.DepthBuffer).Size;
 		int lightCount = scene.LightCount;
 
+		RawBuffer counts = ctx.Get(resources.Clusters.Counts);
+		RawBuffer offsets = ctx.Get(resources.Clusters.Offsets);
+		RawBuffer lights = ctx.Get(resources.Clusters.Lights);
+
 		list.SetPipelineState(Guard.NotNull(clearPSO));
-		list.SetPipelineUAV(0, 0, Counts);
-		list.SetPipelineUAV(1, 0, Guard.NotNull(cursors));
+		list.SetPipelineUAV(0, 0, counts);
+		list.SetPipelineUAV(1, 0, Cursors);
 		list.SetPipelineConstants(0, 0, clusterCount);
-		list.DispatchThreads(clusterCount, LightGroupSize);
+		list.DispatchThreads(clusterCount, ClearGroupSize);
 
-		list.BarrierUAV(Counts, Guard.NotNull(cursors));
+		list.BarrierUAV(counts, Cursors);
 
-		// Few large lights would otherwise leave most of the GPU idle, so each one is spread over
-		// however many groups it takes to keep the dispatch wide.
+		// Spread each light over enough groups to keep the dispatch wide.
 		int groupsPerLight = Math.Clamp(TargetGroups / Math.Max(lightCount, 1), 1, MaxGroupsPerLight);
 
 		if (lightCount > 0)
 		{
 			list.SetPipelineState(Guard.NotNull(countPSO));
-			list.SetPipelineUAV(0, 0, Counts);
+			list.SetPipelineUAV(0, 0, counts);
 			list.SetPipelineSRV(6, 1, scene.LightBuffer);
 			list.SetPipelineCBV(0, 1, ctx.ViewCB);
 			list.SetPipelineConstants(0, 0, size.X, size.Y, groupsPerLight);
 			list.Dispatch(groupsPerLight, lightCount);
 
-			list.BarrierUAV(Counts);
+			list.BarrierUAV(counts);
 		}
 
-		Scan(list);
+		Scan(list, counts, offsets);
 
 		if (lightCount > 0)
 		{
 			list.SetPipelineState(Guard.NotNull(scatterPSO));
-			list.SetPipelineSRV(0, 0, Offsets);
-			list.SetPipelineUAV(0, 0, Guard.NotNull(cursors));
-			list.SetPipelineUAV(1, 0, Lights);
+			list.SetPipelineSRV(0, 0, offsets);
+			list.SetPipelineUAV(0, 0, Cursors);
+			list.SetPipelineUAV(1, 0, lights);
 			list.SetPipelineSRV(6, 1, scene.LightBuffer);
 			list.SetPipelineCBV(0, 1, ctx.ViewCB);
 			list.SetPipelineConstants(0, 0, size.X, size.Y, groupsPerLight);
 			list.Dispatch(groupsPerLight, lightCount);
 
-			list.BarrierUAV(Lights);
+			list.BarrierUAV(lights);
 		}
 	}
 
 	/// <summary>
 	/// Turns per-cluster counts into each cluster's start in the shared pool.
 	/// </summary>
-	private void Scan(CommandList list)
+	private void Scan(CommandList list, RawBuffer counts, RawBuffer offsets)
 	{
-		var sums = Guard.NotNull(blockSums);
+		var sums = BlockSums;
 
 		list.BeginEvent("Scan clusters");
 
 		list.SetPipelineState(Guard.NotNull(scanPSO));
-		list.SetPipelineSRV(0, 0, Counts);
-		list.SetPipelineUAV(0, 0, Offsets);
+		list.SetPipelineSRV(0, 0, counts);
+		list.SetPipelineUAV(0, 0, offsets);
 		list.SetPipelineUAV(1, 0, sums);
 		list.SetPipelineConstants(0, 0, clusterCount);
 		list.DispatchThreads(clusterCount, ScanGroupSize);
 
-		list.BarrierUAV(Offsets, sums);
+		list.BarrierUAV(offsets, sums);
 
 		list.SetPipelineState(Guard.NotNull(scanBlocksPSO));
 		list.SetPipelineUAV(0, 0, sums);
@@ -179,21 +198,18 @@ class ClusterStep : ViewPass
 
 		list.SetPipelineState(Guard.NotNull(scanAddPSO));
 		list.SetPipelineSRV(0, 0, sums);
-		list.SetPipelineUAV(0, 0, Offsets);
+		list.SetPipelineUAV(0, 0, offsets);
 		list.SetPipelineConstants(0, 0, clusterCount);
 		list.DispatchThreads(clusterCount, ScanGroupSize);
 
-		list.BarrierUAV(Offsets);
+		list.BarrierUAV(offsets);
 		list.EndEvent();
 	}
 
 	public override void Dispose()
 	{
-		counts?.Dispose();
-		offsets?.Dispose();
 		cursors?.Dispose();
 		blockSums?.Dispose();
-		lights?.Dispose();
 
 		base.Dispose();
 	}

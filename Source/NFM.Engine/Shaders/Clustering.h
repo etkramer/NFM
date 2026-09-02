@@ -6,10 +6,10 @@
 #define CLUSTER_TILE_SIZE 16
 #define CLUSTER_SLICES 32
 
-// Shared by every cluster; a scene dense enough to exhaust it drops its last few assignments.
+// Light index pool, shared by every cluster.
 #define CLUSTER_LIGHT_POOL (4 * 1024 * 1024)
 
-// Lights past this many in a cluster go unshadowed, being beyond what one mask can hold.
+// Width of a cluster's shadow mask; lights past this go unshadowed.
 #define MAX_SHADOWED_LIGHTS 32
 
 // Slices are spaced exponentially over distance from the eye, so each tracks a constant projected size.
@@ -31,7 +31,7 @@ uint ClusterFromPixel(uint2 pixel, float3 position)
 	return ClusterIndex(uint3(pixel / CLUSTER_TILE_SIZE, slice));
 }
 
-// Assignments past the pool's end were never written, so they're dropped rather than read back.
+// Assignments past the pool's end, which were never written.
 uint ClusterLightCount(uint offset, uint count)
 {
 	return offset < CLUSTER_LIGHT_POOL ? min(count, CLUSTER_LIGHT_POOL - offset) : 0;
@@ -56,7 +56,7 @@ bool LightClusterBounds(Light light, int2 frameSize, out uint3 lo, out uint3 hi)
 	float2 uvMin = 0;
 	float2 uvMax = 1;
 
-	// A sphere reaching the eye projects to nothing usable, so it just claims the whole screen.
+	// A sphere reaching the eye claims the whole screen.
 	if (depth > range)
 	{
 		float2 boundsMin = 1e30;

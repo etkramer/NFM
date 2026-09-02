@@ -4,8 +4,7 @@ using Vortice.DXGI;
 namespace NFM.GPU;
 
 /// <summary>
-/// A ray tracing acceleration structure. Created in - and never leaving - its own resource state,
-/// so it's exempt from the usual transition tracking.
+/// A ray tracing acceleration structure, pinned to its own resource state for life.
 /// </summary>
 public class AccelerationStructure : RawBuffer
 {
@@ -16,7 +15,7 @@ public class AccelerationStructure : RawBuffer
 		Name = nameof(AccelerationStructure);
 	}
 
-	// An acceleration structure is addressed directly, so its view ignores the underlying resource.
+	// Addressed directly, so the view ignores the underlying resource.
 	public override ShaderResourceView GetSRV() => asView ??= new ShaderResourceView(GPUAddress);
 
 	public override void Dispose()
@@ -27,8 +26,7 @@ public class AccelerationStructure : RawBuffer
 }
 
 /// <summary>
-/// An acceleration structure over one range of a shared vertex/index buffer. Geometry that deforms
-/// is built once and refit from then on.
+/// An acceleration structure over one range of a shared vertex/index buffer.
 /// </summary>
 public class BottomLevelAS : IDisposable
 {
@@ -130,7 +128,6 @@ public class TopLevelAS : IDisposable
 			return;
 		}
 
-		// Grow generously, so a scene that adds instances steadily doesn't reallocate every frame.
 		capacity = MathHelper.Max(instanceCount * 2, 128);
 
 		var info = Guard.NotNull(D3DContext.Device).GetRaytracingAccelerationStructurePrebuildInfo(new()
@@ -176,19 +173,17 @@ public class TopLevelAS : IDisposable
 }
 
 /// <summary>
-/// Bump allocator over a single scratch buffer. Every build in a frame gets a disjoint range, so
-/// builds overlap freely; running out wraps back to the start behind a barrier.
+/// Bump allocator over a single scratch buffer, wrapping behind a barrier when it runs out.
 /// </summary>
 public class ScratchAllocator : IDisposable
 {
-	private const ulong Alignment = D3D12.RaytracingAccelerationStructureByteAlignment;
+	private const int Alignment = (int)D3D12.RaytracingAccelerationStructureByteAlignment;
 
 	private readonly RawBuffer buffer;
 	private ulong offset = 0;
 
 	public ScratchAllocator(nint sizeBytes)
 	{
-		// Left in the common state, which buffers promote out of on first use.
 		buffer = new RawBuffer(sizeBytes, 1) { Name = "AS Scratch" };
 	}
 
@@ -200,7 +195,7 @@ public class ScratchAllocator : IDisposable
 
 	public ulong Allocate(CommandList list, ulong size)
 	{
-		size = (size + Alignment - 1) & ~(Alignment - 1);
+		size = MathHelper.Align(size, Alignment);
 		Guard.Require(size <= (ulong)buffer.SizeBytes, "Acceleration structure needs more scratch than the whole buffer holds.");
 
 		if (offset + size > (ulong)buffer.SizeBytes)

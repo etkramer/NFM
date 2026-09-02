@@ -4,6 +4,7 @@ using Vortice.DXGI;
 namespace NFM.Graphics;
 
 readonly record struct TextureDesc(Vector2i Size, Format Format, Format DSFormat = default, Format SRFormat = default);
+readonly record struct BufferDesc(nint SizeBytes, int Stride);
 
 readonly struct TextureHandle
 {
@@ -11,15 +12,21 @@ readonly struct TextureHandle
 	internal TextureHandle(int index) => Index = index;
 }
 
+readonly struct BufferHandle
+{
+	internal int Index { get; }
+	internal BufferHandle(int index) => Index = index;
+}
+
 /// <summary>
-/// Owns a render pipeline's textures and the passes that read and write them. Passes declare their
+/// Owns a render pipeline's resources and the passes that read and write them. Passes declare their
 /// usage up front, so the graph can check every read is produced by an earlier pass before the first frame.
 /// </summary>
 class RenderGraph : IDisposable
 {
 	private readonly List<string> names = [];
-	private readonly List<TextureDesc> descs = [];
-	private Texture[] textures = [];
+	private readonly List<Func<Resource>> factories = [];
+	private Resource[] resources = [];
 
 	private readonly List<ViewPass> passes = [];
 	private readonly List<(HashSet<int> Reads, HashSet<int> Writes)> usage = [];
@@ -30,12 +37,25 @@ class RenderGraph : IDisposable
 
 	public TextureHandle CreateTexture(string name, TextureDesc desc)
 	{
-		Guard.Require(!isBuilt, "Cannot declare textures once the graph is built.");
+		return new TextureHandle(Declare(name, () => new Texture(desc.Size.X, desc.Size.Y, 1, desc.Format, dsFormat: desc.DSFormat, srFormat: desc.SRFormat)
+		{
+			Name = name
+		}));
+	}
+
+	public BufferHandle CreateBuffer(string name, BufferDesc desc)
+	{
+		return new BufferHandle(Declare(name, () => new RawBuffer(desc.SizeBytes, desc.Stride) { Name = name }));
+	}
+
+	private int Declare(string name, Func<Resource> factory)
+	{
+		Guard.Require(!isBuilt, "Cannot declare resources once the graph is built.");
 
 		names.Add(name);
-		descs.Add(desc);
+		factories.Add(factory);
 
-		return new TextureHandle(descs.Count - 1);
+		return factories.Count - 1;
 	}
 
 	public void AddPass(ViewPass pass)
@@ -44,28 +64,26 @@ class RenderGraph : IDisposable
 		passes.Add(pass);
 	}
 
-	public Texture Get(TextureHandle handle) => textures[handle.Index];
+	public Texture Get(TextureHandle handle) => (Texture)resources[handle.Index];
+	public RawBuffer Get(BufferHandle handle) => (RawBuffer)resources[handle.Index];
 
 	public string GetName(TextureHandle handle) => names[handle.Index];
 
 	/// <summary>
-	/// Realizes every declared texture, sets up each pass, and validates the resulting graph.
+	/// Realizes every declared resource, sets up each pass, and validates the resulting graph.
 	/// </summary>
 	public void Build()
 	{
 		Guard.Require(!isBuilt, "Graph is already built.");
 		isBuilt = true;
 
-		textures = new Texture[descs.Count];
-		for (int i = 0; i < descs.Count; i++)
+		resources = new Resource[factories.Count];
+		for (int i = 0; i < factories.Count; i++)
 		{
-			var desc = descs[i];
-
-			textures[i] = new Texture(desc.Size.X, desc.Size.Y, 1, desc.Format, dsFormat: desc.DSFormat, srFormat: desc.SRFormat)
-			{
-				Name = names[i]
-			};
+			resources[i] = factories[i]();
 		}
+
+		factories.Clear();
 
 		foreach (var pass in passes)
 		{
@@ -121,9 +139,9 @@ class RenderGraph : IDisposable
 			pass.Dispose();
 		}
 
-		foreach (var texture in textures)
+		foreach (var resource in resources)
 		{
-			texture.Dispose();
+			(resource as IDisposable)?.Dispose();
 		}
 	}
 }
@@ -134,5 +152,8 @@ class RenderGraphBuilder
 	internal HashSet<int> Writes { get; } = [];
 
 	public void Read(params TextureHandle[] handles) => handles.ForEach(o => Reads.Add(o.Index));
+	public void Read(params BufferHandle[] handles) => handles.ForEach(o => Reads.Add(o.Index));
+
 	public void Write(params TextureHandle[] handles) => handles.ForEach(o => Writes.Add(o.Index));
+	public void Write(params BufferHandle[] handles) => handles.ForEach(o => Writes.Add(o.Index));
 }
