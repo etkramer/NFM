@@ -1,5 +1,6 @@
 #include "Shaders/Common.h"
 #include "Shaders/Lighting.h"
+#include "Shaders/Clustering.h"
 
 RWTexture2D<float4> RT : register(u0);
 
@@ -10,10 +11,13 @@ Texture2D<float4> MatBuffer3 : register(t3);
 Texture2D<float> DepthBuffer : register(t4);
 Texture2D<uint> ShadowMask : register(t5);
 
+StructuredBuffer<uint> ClusterCounts : register(t9, space1);
+StructuredBuffer<uint> ClusterOffsets : register(t10, space1);
+StructuredBuffer<uint> ClusterLights : register(t11, space1);
+
 cbuffer Constants : register(b0)
 {
 	int DisplayMode;
-	int LightCount;
 }
 
 #define DISPLAY_LIT 0
@@ -23,11 +27,9 @@ cbuffer Constants : register(b0)
 #define DISPLAY_SPECULAR 4
 #define DISPLAY_ROUGHNESS 5
 #define DISPLAY_SHADOWS 6
+#define DISPLAY_CLUSTERS 7
 
-// Lights past the mask's capacity go unshadowed.
-#define MAX_SHADOWED_LIGHTS 32
-
-bool IsLightVisible(uint shadowMask, int index)
+bool IsLightVisible(uint shadowMask, uint index)
 {
 	return index >= MAX_SHADOWED_LIGHTS || (shadowMask & (1u << index)) != 0;
 }
@@ -58,7 +60,12 @@ void main(uint2 id : SV_DispatchThreadID)
 	float3 normal = MatBuffer1[id].rgb;
 	float3 msr = MatBuffer2[id].rgb;
 
+	float3 position = ReconstructWorldPosition(id, frameSize, depth);
+
 	uint shadowMask = ShadowMask[id];
+	uint cluster = ClusterFromPixel(id, position);
+	uint offset = ClusterOffsets[cluster];
+	uint count = ClusterLightCount(offset, ClusterCounts[cluster]);
 
 	float3 color = albedo;
 	switch (DisplayMode)
@@ -67,11 +74,12 @@ void main(uint2 id : SV_DispatchThreadID)
 		case DISPLAY_METALLIC: color = msr.r; break;
 		case DISPLAY_SPECULAR: color = msr.g; break;
 		case DISPLAY_ROUGHNESS: color = msr.b; break;
-		case DISPLAY_SHADOWS: color = countbits(shadowMask) / max(float(min(LightCount, MAX_SHADOWED_LIGHTS)), 1); break;
+		case DISPLAY_CLUSTERS: color = count == 0 ? 0 : ColorFromIndex(count); break;
+		case DISPLAY_SHADOWS: color = countbits(shadowMask) / max(float(min(count, MAX_SHADOWED_LIGHTS)), 1); break;
 		case DISPLAY_LIT:
 		{
 			Surface surface;
-			surface.Position = ReconstructWorldPosition(id, frameSize, depth);
+			surface.Position = position;
 			surface.Normal = normalize(normal);
 			surface.Albedo = albedo;
 			surface.Metallic = msr.r;
@@ -81,11 +89,11 @@ void main(uint2 id : SV_DispatchThreadID)
 			float3 V = normalize(ViewConstants.EyePosition - surface.Position);
 
 			color = MatBuffer3[id].rgb;
-			for (int i = 0; i < LightCount; i++)
+			for (uint i = 0; i < count; i++)
 			{
 				if (IsLightVisible(shadowMask, i))
 				{
-					color += EvalLight(surface, V, Lights[i]);
+					color += EvalLight(surface, V, Lights[ClusterLights[offset + i]]);
 				}
 			}
 

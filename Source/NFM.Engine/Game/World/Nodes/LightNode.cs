@@ -16,6 +16,17 @@ public abstract class LightNode : Node
 	[Inspect]
 	public Vector3 Color { get; set; } = Vector3.One;
 
+	// Display steps a light may still be contributing where it's cut off, and the illuminance one
+	// step costs a mid-grey surface at unit exposure.
+	private const float VisibleSteps = 8;
+	private const float StepIlluminance = MathF.PI / (0.5f * 255 * 12.92f);
+
+	/// <summary>
+	/// Reciprocal of the illuminance a light stops being worth evaluating at, for a given exposure.
+	/// Ranges are derived from this in the shader, so brightening a view tightens them on its own.
+	/// </summary>
+	public static float InvCutoffFor(float exposure) => MathF.Max(exposure, 1e-6f) / (VisibleSteps * StepIlluminance);
+
 	internal BufferAllocation<GPULight> LightHandle;
 
 	private RenderScene RenderScene => Scene.RenderData;

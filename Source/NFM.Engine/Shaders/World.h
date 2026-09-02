@@ -10,6 +10,12 @@ struct _ViewConstants
 	float4x4 ClipToView;
 
 	float3 EyePosition;
+
+	float ClusterScale;
+	uint3 ClusterDims;
+	float ClusterBias;
+
+	float InvLightCutoff; // Reciprocal of the illuminance a light stops being worth evaluating at
 };
 ConstantBuffer<_ViewConstants> ViewConstants : register(b0, space1);
 
@@ -44,7 +50,6 @@ struct Light
 	float3 Position;
 	float3 Color; // Linear RGB, scaled by intensity in candela
 	float Radius; // Source radius, in meters
-	float Range; // Distance past which the light is ignored
 };
 
 struct Vertex

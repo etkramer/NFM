@@ -12,4 +12,5 @@ public enum DisplayMode
 	DebugSpecular,
 	DebugRoughness,
 	DebugShadows,
+	DebugClusters,
 }

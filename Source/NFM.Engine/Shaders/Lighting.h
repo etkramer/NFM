@@ -1,9 +1,22 @@
+#pragma once
+
 #include "World.h"
 
 #define PI 3.14159265359
 
 #define LIGHT_NONE 0
 #define LIGHT_POINT 1
+
+// Nothing is binned past the cluster grid's far distance, so no light reaches further.
+#define LIGHT_MAX_RANGE 512
+
+// Distance squared at which a light stops contributing more than the display can resolve. Derived
+// from the view's own exposure, so ranges track it without anything to author.
+float LightRangeSq(Light light)
+{
+	float peak = max(light.Color.r, max(light.Color.g, light.Color.b));
+	return min(peak * ViewConstants.InvLightCutoff, LIGHT_MAX_RANGE * LIGHT_MAX_RANGE);
+}
 
 // A shaded point, as unpacked from the g-buffer or hit by a ray.
 struct Surface
@@ -70,8 +83,9 @@ float3 EvalLight(Surface surface, float3 V, Light light)
 
 	float3 delta = light.Position - surface.Position;
 	float distSq = dot(delta, delta);
+	float rangeSq = LightRangeSq(light);
 
-	if (distSq > light.Range * light.Range)
+	if (distSq > rangeSq)
 	{
 		return 0;
 	}
@@ -82,5 +96,9 @@ float3 EvalLight(Surface surface, float3 V, Light light)
 	// Clamped inside the source radius, where inverse-square would blow up.
 	float attenuation = rcp(max(distSq, light.Radius * light.Radius));
 
-	return EvalBRDF(surface, V, L) * light.Color * attenuation * ndotl;
+	// Eased to nothing by the range, so the cutoff never shows up as an edge.
+	float ratio = distSq / rangeSq;
+	float window = saturate(1 - ratio * ratio);
+
+	return EvalBRDF(surface, V, L) * light.Color * attenuation * window * window * ndotl;
 }

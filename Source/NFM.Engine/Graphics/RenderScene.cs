@@ -178,5 +178,4 @@ public struct GPULight
 	public Vector3 Position;
 	public Vector3 Color; // Linear RGB, scaled by intensity in candela
 	public float Radius; // Source radius, in meters
-	public float Range; // Distance past which the light is ignored
 }

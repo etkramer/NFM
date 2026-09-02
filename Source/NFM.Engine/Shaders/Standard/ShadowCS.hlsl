@@ -1,19 +1,16 @@
 #include "Shaders/Common.h"
 #include "Shaders/Lighting.h"
 #include "Shaders/Raytracing.h"
-
-// Bit i is light i's visibility, so lighting resolves every light from one fetch.
-#define MAX_SHADOWED_LIGHTS 32
+#include "Shaders/Clustering.h"
 
 RWTexture2D<uint> ShadowMask : register(u0);
 
 Texture2D<half4> MatBuffer1 : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
-cbuffer Constants : register(b0)
-{
-	int LightCount;
-}
+StructuredBuffer<uint> ClusterCounts : register(t9, space1);
+StructuredBuffer<uint> ClusterOffsets : register(t10, space1);
+StructuredBuffer<uint> ClusterLights : register(t11, space1);
 
 [numthreads(8, 8, 1)]
 void main(uint2 id : SV_DispatchThreadID)
@@ -37,15 +34,19 @@ void main(uint2 id : SV_DispatchThreadID)
 		// Lift the origin off the surface by more the coarser this pixel is in world units.
 		float3 origin = position + normal * (0.001 + 0.0005 * distance(ViewConstants.EyePosition, position));
 
-		int count = min(LightCount, MAX_SHADOWED_LIGHTS);
-		for (int i = 0; i < count; i++)
+		uint cluster = ClusterFromPixel(id, position);
+		uint offset = ClusterOffsets[cluster];
+		uint count = min(ClusterLightCount(offset, ClusterCounts[cluster]), MAX_SHADOWED_LIGHTS);
+
+		// Bit i tracks the cluster's i'th light, so lighting resolves the same walk from one fetch.
+		for (uint i = 0; i < count; i++)
 		{
-			Light light = Lights[i];
+			Light light = Lights[ClusterLights[offset + i]];
 
 			float3 delta = light.Position - origin;
 			float dist = length(delta);
 
-			if (light.Type == LIGHT_NONE || dist > light.Range || dot(normal, delta) <= 0)
+			if (light.Type == LIGHT_NONE || dist * dist > LightRangeSq(light) || dot(normal, delta) <= 0)
 			{
 				continue;
 			}

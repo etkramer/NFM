@@ -8,18 +8,15 @@ namespace NFM.Graphics;
 /// </summary>
 class ShadowStep : ViewPass
 {
-	/// <summary>
-	/// Lights past this many go unshadowed, being beyond what one mask can hold.
-	/// </summary>
-	public const int MaxShadowedLights = 32;
-
 	private static PipelineState? shadowPSO;
 
 	private readonly StandardResources resources;
+	private readonly ClusterStep clusterStep;
 
-	public ShadowStep(StandardResources resources)
+	public ShadowStep(StandardResources resources, ClusterStep clusterStep)
 	{
 		this.resources = resources;
+		this.clusterStep = clusterStep;
 	}
 
 	public override void Setup(RenderGraphBuilder builder)
@@ -32,7 +29,6 @@ class ShadowStep : ViewPass
 	{
 		shadowPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/ShadowCS.hlsl"), ShaderStage.Compute))
-			.AsRootConstant(0, 1)
 			.Compile().Result;
 	}
 
@@ -49,9 +45,10 @@ class ShadowStep : ViewPass
 		list.SetPipelineSRV(1, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineSRV(6, 1, scene.LightBuffer);
 		list.SetPipelineSRV(8, 1, scene.TLAS.Structure);
+		list.SetPipelineSRV(9, 1, clusterStep.Counts);
+		list.SetPipelineSRV(10, 1, clusterStep.Offsets);
+		list.SetPipelineSRV(11, 1, clusterStep.Lights);
 		list.SetPipelineCBV(0, 1, ctx.ViewCB);
-
-		list.SetPipelineConstants(0, 0, scene.LightCount);
 
 		list.DispatchThreads(shadowMask.Width, 8, shadowMask.Height, 8);
 	}

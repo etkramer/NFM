@@ -5,9 +5,6 @@ namespace NFM.World;
 [Icon("emoji_objects")]
 public class PointLightNode : LightNode
 {
-	// Illuminance at which a light stops being worth evaluating, in lux.
-	private const float CutoffIlluminance = 0.01f;
-
 	/// <summary>
 	/// The light's intensity in lumens
 	/// </summary>
@@ -38,7 +35,6 @@ public class PointLightNode : LightNode
 			Position = WorldTransform.ExtractTranslation(),
 			Color = Color * candela,
 			Radius = Radius,
-			Range = MathF.Sqrt(candela / CutoffIlluminance)
 		};
 	}
 }

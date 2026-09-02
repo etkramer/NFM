@@ -13,6 +13,12 @@ public struct ViewConstants
 	public Matrix4 ClipToView;
 
 	public Vector3 EyePosition;
+	public float ClusterScale; // Slice distribution, as log2(depth) * scale + bias
+
+	public Vector3i ClusterDims;
+	public float ClusterBias;
+
+	public float InvLightCutoff; // Reciprocal of the illuminance a light stops being worth evaluating at
 }
 
 /// <summary>
@@ -85,6 +91,8 @@ abstract class RenderPipeline : IDisposable
 		// Apply Z-up projection.
 		ProjectionMatrix = Matrix4.CreateRotation(new(-90, 180, 0)) * ProjectionMatrix;
 
+		float logRange = MathF.Log2(ClusterStep.FarDepth / ClusterStep.NearDepth);
+
 		// Upload to constant buffer.
 		list.UploadBuffer(ViewCB, new ViewConstants()
 		{
@@ -93,6 +101,12 @@ abstract class RenderPipeline : IDisposable
 			ViewToClip = ProjectionMatrix,
 			ClipToView = ProjectionMatrix.Inverse(),
 			EyePosition = camera.WorldTransform.ExtractTranslation(),
+
+			ClusterDims = ClusterStep.DimensionsFor(Size),
+			ClusterScale = ClusterStep.SliceCount / logRange,
+			ClusterBias = -ClusterStep.SliceCount * MathF.Log2(ClusterStep.NearDepth) / logRange,
+
+			InvLightCutoff = LightNode.InvCutoffFor(camera.Exposure),
 		});
 	}
 

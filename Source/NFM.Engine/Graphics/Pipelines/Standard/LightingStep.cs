@@ -7,10 +7,12 @@ class LightingStep : ViewPass
 	private static PipelineState? lightingPSO;
 
 	private readonly StandardResources resources;
+	private readonly ClusterStep clusterStep;
 
-	public LightingStep(StandardResources resources)
+	public LightingStep(StandardResources resources, ClusterStep clusterStep)
 	{
 		this.resources = resources;
+		this.clusterStep = clusterStep;
 	}
 
 	public override void Setup(RenderGraphBuilder builder)
@@ -24,7 +26,7 @@ class LightingStep : ViewPass
 		// Compile indirect compute program.
 		lightingPSO ??= new PipelineState()
 			.SetComputeShader(new ShaderModule(Embed.GetString("Shaders/Standard/LightingCS.hlsl"), ShaderStage.Compute))
-			.AsRootConstant(0, 2)
+			.AsRootConstant(0, 1)
 			.Compile().Result;
 	}
 
@@ -44,9 +46,12 @@ class LightingStep : ViewPass
 		list.SetPipelineSRV(4, 0, ctx.Get(resources.DepthBuffer));
 		list.SetPipelineSRV(5, 0, ctx.Get(resources.ShadowMask));
 		list.SetPipelineSRV(6, 1, scene.LightBuffer);
+		list.SetPipelineSRV(9, 1, clusterStep.Counts);
+		list.SetPipelineSRV(10, 1, clusterStep.Offsets);
+		list.SetPipelineSRV(11, 1, clusterStep.Lights);
 		list.SetPipelineCBV(0, 1, ctx.ViewCB);
 
-		list.SetPipelineConstants(0, 0, (int)ctx.Camera.DisplayMode, scene.LightCount);
+		list.SetPipelineConstants(0, 0, (int)ctx.Camera.DisplayMode);
 
 		list.DispatchThreads(sceneColor.Width, 8, sceneColor.Height, 8);
 	}

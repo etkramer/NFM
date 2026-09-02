@@ -44,11 +44,14 @@ class StandardRenderPipeline : RenderPipeline
 			ShadowMask = Graph.CreateTexture("Shadow Mask", new(Size, Format.R32_UInt)),
 		};
 
+		var clusterStep = new ClusterStep(resources);
+
 		Graph.AddPass(new PrepassStep(resources));
 		Graph.AddPass(new PickingStep(resources));
 		Graph.AddPass(new MaterialStep(resources));
-		Graph.AddPass(new ShadowStep(resources));
-		Graph.AddPass(new LightingStep(resources));
+		Graph.AddPass(clusterStep);
+		Graph.AddPass(new ShadowStep(resources, clusterStep));
+		Graph.AddPass(new LightingStep(resources, clusterStep));
 		Graph.AddPass(new TonemapStep(resources));
 	}
 

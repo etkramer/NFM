@@ -12,6 +12,13 @@
 		<EmbeddedResource Include="Shaders\Common\SkinCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Common\BuildInstancesCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\ShadowCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Cluster\ClusterClearCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Cluster\ClusterCountCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Standard\Cluster\ClusterScatterCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Scan\Scan.h" />
+		<EmbeddedResource Include="Shaders\Common\Scan\ScanCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Scan\ScanBlocksCS.hlsl" />
+		<EmbeddedResource Include="Shaders\Common\Scan\ScanAddCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\LightingCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\TonemapCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\MaterialCS.hlsl" />
@@ -25,6 +32,7 @@
 		<EmbeddedResource Include="Shaders\World.h" />
 		<EmbeddedResource Include="Shaders\Lighting.h" />
 		<EmbeddedResource Include="Shaders\Raytracing.h" />
+		<EmbeddedResource Include="Shaders\Clustering.h" />
 		<EmbeddedResource Include="Shaders\Standard\CullCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinCountCS.hlsl" />
 		<EmbeddedResource Include="Shaders\Standard\Bin\BinScanCS.hlsl" />
