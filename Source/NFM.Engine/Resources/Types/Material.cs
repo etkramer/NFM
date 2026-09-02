@@ -21,6 +21,15 @@ public sealed class Material : GameResource
 		});
 	}
 
+	public void SetFloat(string param, float value)
+	{
+		MaterialOverrides.Add(new ShaderParameter()
+		{
+			Name = param,
+			Value = value
+		});
+	}
+
 	public void SetTexture(string param, Texture2D value)
 	{
 		if (value is null)

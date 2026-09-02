@@ -42,23 +42,29 @@ public class GLTFPlugin : Plugin
         {
             BlendMode = BlendMode.Opaque
         };
-		opaque.AddTextureParam("BaseColor", Texture2D.Purple);
-		opaque.AddTextureParam("Normal", Texture2D.Normal);
-		opaque.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
-		opaque.AddTextureParam("Emissive", Texture2D.Black);
+		AddMaterialParams(opaque);
 
 		// Create Transparent shader
 		var transparent = new Shader(Embed.GetString("Shaders/Transparent.hlsl"))
         {
             BlendMode = BlendMode.Transparent
         };
-		transparent.AddTextureParam("BaseColor", Texture2D.Purple);
-		transparent.AddTextureParam("Normal", Texture2D.Normal);
-		transparent.AddTextureParam("ORM", Texture2D.FromColor(new Color(1, 0.5f, 0)));
-		transparent.AddTextureParam("Emissive", Texture2D.Black);
+		AddMaterialParams(transparent);
 
 		//...and submit both.
 		Asset.Submit(new Asset<Shader>("Shaders/Opaque.hlsl", mount, new CachedResourceLoader<Shader>(opaque)));
 		Asset.Submit(new Asset<Shader>("Shaders/Transparent.hlsl", mount, new CachedResourceLoader<Shader>(transparent)));
+	}
+	static void AddMaterialParams(Shader shader)
+	{
+		shader.AddTextureParam("BaseColor", Texture2D.White);
+		shader.AddTextureParam("Normal", Texture2D.Normal);
+		shader.AddTextureParam("ORM", Texture2D.White);
+		shader.AddTextureParam("Emissive", Texture2D.White);
+
+		shader.AddColorParam("BaseColorFactor", Color.White);
+		shader.AddColorParam("EmissiveFactor", Color.Black);
+		shader.AddFloatParam("RoughnessFactor", 1);
+		shader.AddFloatParam("MetallicFactor", 1);
 	}
 }

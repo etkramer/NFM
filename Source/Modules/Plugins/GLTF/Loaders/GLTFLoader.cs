@@ -88,6 +88,11 @@ public class GLTFLoader : ResourceLoader<Model>
 				material.SetTexture("Emissive", textures[index]);
 			}
 
+			material.SetColor("BaseColorFactor", sourceMaterial.HasColorDiffuse ? ToColor(sourceMaterial.ColorDiffuse) : Color.White);
+			material.SetColor("EmissiveFactor", sourceMaterial.HasColorEmissive ? ToColor(sourceMaterial.ColorEmissive) : Color.Black);
+			material.SetFloat("RoughnessFactor", GetFactor(sourceMaterial, "roughnessFactor"));
+			material.SetFloat("MetallicFactor", GetFactor(sourceMaterial, "metallicFactor"));
+
 			materials[i] = material;
 		}
 
@@ -268,6 +273,17 @@ public class GLTFLoader : ResourceLoader<Model>
 
 		return unique;
 	}
+
+	// Assimp moved the PBR factors out of the GLTF-specific namespace, so both keys are worth a look.
+	private static float GetFactor(AI.Material material, string name, float fallback = 1)
+	{
+		var property = material.GetNonTextureProperty($"$mat.gltf.pbrMetallicRoughness.{name}")
+			?? material.GetNonTextureProperty($"$mat.{name}");
+
+		return property == null ? fallback : property.GetFloatValue();
+	}
+
+	private static Color ToColor(AI.Color4D color) => new Color(color.R, color.G, color.B, color.A);
 
 	// Assimp stores column-vector matrices, which transpose into the row-vector form NFM uses.
 	private static unsafe Matrix4 ToMatrix(AI.Matrix4x4 matrix) => (*(Matrix4*)&matrix).Transpose();
