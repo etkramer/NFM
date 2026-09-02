@@ -87,10 +87,10 @@ public static class AssetTree
 		return folder;
 	}
 
-	// Mounts are registered from loader threads, so this indexes rather than enumerating.
+	// Scanned newest-first, so the last mount to claim an ID is the one that names it.
 	static string? FindMountName(string id)
 	{
-		List<MountPoint> mounts = MountPoint.All;
+		IReadOnlyList<MountPoint> mounts = MountPoint.All;
 
 		for (int i = mounts.Count - 1; i >= 0; i--)
 		{

@@ -2,7 +2,13 @@
 
 public sealed class MountPoint
 {
-	public static List<MountPoint> All = [];
+	/// <summary>
+	/// Every mount registered so far.
+	/// </summary>
+	public static IReadOnlyList<MountPoint> All => all;
+
+	private static MountPoint[] all = [];
+	private static readonly object allLock = new();
 
 	public readonly string Name;
 	public readonly string ID;
@@ -14,7 +20,11 @@ public sealed class MountPoint
 
 		Name = name;
 		ID = id;
-		All.Add(this);
+
+		lock (allLock)
+		{
+			all = [.. all, this];
+		}
 	}
 
 	public static MountPoint Create(string name, string id)
