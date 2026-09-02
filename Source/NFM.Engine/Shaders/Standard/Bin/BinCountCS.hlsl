@@ -1,5 +1,7 @@
 #include "Shaders/World.h"
 
+#define NO_STACK 0xFFFFFFFF
+
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
@@ -19,22 +21,27 @@ void main(uint2 id : SV_DispatchThreadID)
 	}
 
 	uint materialID = Instances[VisBuffer[id].x].MaterialID;
-	uint shaderID = MaterialParams.Load(materialID);
+	uint pending = MaterialParams.Load(materialID);
 
-	// Each wave contributes a single atomic per distinct stack it covers.
+	// Each wave contributes a single atomic per distinct stack it covers, lanes retiring by mask.
+	[loop]
 	while (true)
 	{
-		uint stack = WaveReadLaneFirst(shaderID);
-		if (stack == shaderID)
+		uint stack = WaveActiveMin(pending);
+		if (stack == NO_STACK)
 		{
-			uint total = WaveActiveCountBits(true);
-			if (WaveIsFirstLane())
-			{
-				uint ignored;
-				InterlockedAdd(BinCounts[stack], total, ignored);
-			}
-
 			break;
 		}
+
+		bool mine = pending == stack;
+		uint total = WaveActiveCountBits(mine);
+
+		if (WaveIsFirstLane())
+		{
+			uint ignored;
+			InterlockedAdd(BinCounts[stack], total, ignored);
+		}
+
+		pending = mine ? NO_STACK : pending;
 	}
 }

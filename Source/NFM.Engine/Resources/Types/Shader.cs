@@ -47,6 +47,16 @@ public sealed class Shader : GameResource
 		});
 	}
 
+	public void AddIntParam(string paramName, int defaultValue = default)
+	{
+		Parameters.Add(new ShaderParameter()
+		{
+			Name = paramName,
+			Value = defaultValue,
+			Type = typeof(int)
+		});
+	}
+
 	public void AddTextureParam(string paramName, Texture2D? defaultValue = default)
 	{
 		Parameters.Add(new ShaderParameter()

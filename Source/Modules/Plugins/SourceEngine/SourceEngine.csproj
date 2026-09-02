@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<OutputPath>$(RuntimeDir)Plugins\$(MSBuildProjectName)\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Shaders\VertexLitGeneric.hlsl" />
+	  <None Remove="Shaders\VertexLitGenericTransparent.hlsl" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Shaders\VertexLitGeneric.hlsl" />
+	  <EmbeddedResource Include="Shaders\VertexLitGenericTransparent.hlsl" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Sledge.Formats.Texture" Version="1.1.0" />
+		<PackageReference Include="ValveKeyValue" Version="0.20.0.417" />
+	</ItemGroup>
+
+	<Import Project="$(RuntimeDir)Binaries\Plugin.targets" />
+
+</Project>

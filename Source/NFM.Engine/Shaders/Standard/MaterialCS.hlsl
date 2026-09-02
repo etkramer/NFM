@@ -165,8 +165,8 @@ void main(uint threadID : SV_DispatchThreadID)
 	float4 pt1 = mul(mvp, float4(v1.Position, 1));
 	float4 pt2 = mul(mvp, float4(v2.Position, 1));
 
-	// Calculate pixel location in NDC
-	float2 pixelNDC = (float2(id) / float2(frameSize)) * 2.f - 1.f;
+	// Calculate pixel location in NDC, sampled at the pixel center
+	float2 pixelNDC = ((float2(id) + 0.5) / float2(frameSize)) * 2.f - 1.f;
 	pixelNDC.y *= -1;
 
 	// Calculate barycentric derivs
@@ -184,17 +184,20 @@ void main(uint threadID : SV_DispatchThreadID)
 	// Interp vertex data
 	float3 normal = normalize(BarycentricLerp(norm0, norm1, norm2, deriv.m_lambda));
 	float3 tangent = BarycentricLerp(tan0, tan1, tan2, deriv.m_lambda);
-	float2 uv0 = BarycentricLerp(v0.UV0, v1.UV0, v2.UV0, deriv.m_lambda);
+
+	// Interp U and V separately - each carries its value plus screen-space derivs.
+	float3 u = InterpolateWithDeriv(deriv, v0.UV0.x, v1.UV0.x, v2.UV0.x);
+	float3 v = InterpolateWithDeriv(deriv, v0.UV0.y, v1.UV0.y, v2.UV0.y);
+
+	float2 uv0 = float2(u.x, v.x);
+	float2 ddx = float2(u.y, v.y);
+	float2 ddy = float2(u.z, v.z);
 
 	// Build an orthonormal tangent frame, handedness from the vertex data
 	tangent = normalize(tangent - normal * dot(normal, tangent));
 	float3 bitangent = cross(normal, tangent) * v0.Tangent.w;
 	float3x3 tangentToWorld = float3x3(tangent, bitangent, normal);
-	
-	// Calculate UV derivs
-	float2 ddx = InterpolateWithDeriv(deriv, v0.UV0.x, v1.UV0.x, v2.UV0.x).yz;
-	float2 ddy = InterpolateWithDeriv(deriv, v0.UV0.y, v1.UV0.y, v2.UV0.y).yz;
-	
+
 	// Evaluate surface
 	SurfaceModel surface = EvalSurface(instance.MaterialID, uv0, ddx, ddy);
 	

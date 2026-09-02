@@ -1,5 +1,7 @@
 #include "Shaders/World.h"
 
+#define NO_STACK 0xFFFFFFFF
+
 Texture2D<uint2> VisBuffer : register(t0);
 Texture2D<float> DepthBuffer : register(t1);
 
@@ -21,25 +23,35 @@ void main(uint2 id : SV_DispatchThreadID)
 	}
 
 	uint materialID = Instances[VisBuffer[id].x].MaterialID;
-	uint shaderID = MaterialParams.Load(materialID);
+	uint pending = MaterialParams.Load(materialID);
+	uint packed = (id.x & 0xFFFF) | (id.y << 16);
 
 	// Each wave claims one contiguous run of slots per distinct stack; lanes index it by prefix count.
+	[loop]
 	while (true)
 	{
-		uint stack = WaveReadLaneFirst(shaderID);
-		if (stack == shaderID)
+		uint stack = WaveActiveMin(pending);
+		if (stack == NO_STACK)
 		{
-			uint laneSlot = WavePrefixCountBits(true);
-			uint total = WaveActiveCountBits(true);
-
-			uint runStart = 0;
-			if (WaveIsFirstLane())
-			{
-				InterlockedAdd(BinCursors[stack], total, runStart);
-			}
-
-			BinPixels[BinOffsets[stack] + WaveReadLaneFirst(runStart) + laneSlot] = (id.x & 0xFFFF) | (id.y << 16);
 			break;
+		}
+
+		bool mine = pending == stack;
+		uint total = WaveActiveCountBits(mine);
+		uint laneSlot = WavePrefixCountBits(mine);
+
+		uint runStart = 0;
+		if (WaveIsFirstLane())
+		{
+			InterlockedAdd(BinCursors[stack], total, runStart);
+		}
+
+		runStart = WaveReadLaneFirst(runStart);
+
+		if (mine)
+		{
+			BinPixels[BinOffsets[stack] + runStart + laneSlot] = packed;
+			pending = NO_STACK;
 		}
 	}
 }

@@ -30,8 +30,6 @@ public class ShaderModule : IDisposable
 	public ShaderStage Stage { get; }
 	public IDxcBlob Bytecode { get; }
 
-	readonly IDxcLinker linker = Dxc.CreateDxcLinker();
-
 	public ShaderModule(string source) : this(source, ShaderStage.Library, GetIncludes(Assembly.GetCallingAssembly())) {}
 
 	public ShaderModule(string source, ShaderStage stage, string entry = "main") : this(source, entry, (DxcShaderStage)stage, GetIncludes(Assembly.GetCallingAssembly())) {}
@@ -61,12 +59,13 @@ public class ShaderModule : IDisposable
 
 	public void Dispose()
 	{
-		linker.Dispose();
 		Bytecode.Dispose();
 	}
 
 	public ShaderModule Link(string entryName, ShaderStage stage, params ShaderModule[] others)
 	{
+		using IDxcLinker linker = Dxc.CreateDxcLinker();
+
 		var libNames = new string[others.Length + 1];
 		linker.RegisterLibrary("this", Bytecode);
 		libNames[0] = "this";
