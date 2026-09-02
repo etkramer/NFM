@@ -27,11 +27,24 @@ public partial class Scene : IDisposable
 	}
 
 	/// <summary>
+	/// Adds a Node as a scene root at a given position among the others. Should NEVER be called manually.
+	/// </summary>
+	internal void InsertRootNode(Node node, int index)
+	{
+		rootNodes.Insert(Math.Clamp(index, 0, rootNodes.Count), node);
+	}
+
+	/// <summary>
 	/// Removes a Node as a scene root. Should NEVER be called manually.
 	/// </summary>
 	internal bool RemoveRootNode(Node node)
 	{
 		return rootNodes.Remove(node);
+	}
+
+	internal int IndexOfRootNode(Node node)
+	{
+		return rootNodes.IndexOf(node);
 	}
 
 	public void Dispose()

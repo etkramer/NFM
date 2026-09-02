@@ -25,6 +25,9 @@ public static class Project
 		Path = null;
 		view = null;
 
+		// Anything the stack was holding belongs to the scene on its way out.
+		History.Clear();
+
 		Scene.Main.Dispose();
 		Scene.Main = new Scene();
 

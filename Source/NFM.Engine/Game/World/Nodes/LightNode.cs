@@ -53,8 +53,10 @@ public abstract class LightNode : Node
 
 	internal void UploadLight(CommandList list)
 	{
-		list.UploadBuffer(LightHandle, Pack());
+		list.UploadBuffer(LightHandle, IsDetached ? default : Pack());
 	}
+
+	protected override void OnDetachedChanged() => MarkDirty();
 
 	public override void Dispose()
 	{

@@ -93,7 +93,7 @@ public partial class ModelNode : Node
 		// two isn't dropped to zero references and immediately rebuilt.
 		Dictionary<Mesh, RenderMaterial> newMaterials = [];
 
-		if (IsVisible && Model is not null)
+		if (IsVisible && !IsDetached && Model is not null)
 		{
 			foreach (var group in Model.MeshGroups)
 			{
@@ -246,6 +246,8 @@ public partial class ModelNode : Node
 
 		RenderScene.SkinnedNodes.Remove(this);
 	}
+
+	protected override void OnDetachedChanged() => RenderScene.MarkInstancesDirty(this);
 
 	public override void Dispose()
 	{

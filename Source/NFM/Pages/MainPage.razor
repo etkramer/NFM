@@ -14,6 +14,9 @@
             <MenuItem Label="Quit" OnPress=@Application.Exit/>
         </MenuItem>
         <MenuItem Label="Edit">
+            <MenuItem Label=@UndoLabel OnPress=@History.Undo Hotkey=@(Keys.Control | Keys.Z) IsEnabled=@(History.UndoName is not null) />
+            <MenuItem Label=@RedoLabel OnPress=@History.Redo Hotkey=@(Keys.Control | Keys.Y) IsEnabled=@(History.RedoName is not null) />
+            <MenuSeparator/>
             <MenuItem Label="Copy" OnPress=@OnPressCopy Hotkey=@(Keys.Control | Keys.C) />
             <MenuItem Label="Paste" OnPress=@OnPressPaste Hotkey=@(Keys.Control | Keys.V) />
             <MenuSeparator/>
@@ -35,7 +38,10 @@
 @code {
     DockHost? dock;
 
-    protected override int BuildHashCode() => Project.Name.GetHashCode();
+    string UndoLabel => History.UndoName is string name ? $"Undo {name}" : "Undo";
+    string RedoLabel => History.RedoName is string name ? $"Redo {name}" : "Redo";
+
+    protected override int BuildHashCode() => HashCode.Combine(Project.Name, History.Version);
 
     void OnPressNew()
     {
@@ -106,18 +112,50 @@
 
         if (nodes.Count > 0)
         {
-            Selection.DeselectAll();
-            Selection.Select(nodes);
+            using (History.Begin(nodes.Count > 1 ? $"Paste {nodes.Count} Nodes" : $"Paste {nodes[0].Name}"))
+            {
+                foreach (Node node in nodes)
+                {
+                    History.RecordSpawn(node);
+                }
+
+                Selection.DeselectAll();
+                Selection.Select(nodes);
+            }
         }
     }
 
     void OnPressDelete()
     {
-        // Delete all selected nodes. Owned ones only go away with their owner.
-        foreach (var node in Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToArray())
+        // Delete all selected nodes. Owned ones only go away with their owner, as do nested ones.
+        Node[] nodes = Selection.Selected.OfType<Node>().Where(o => !o.IsOwned).ToArray();
+        Node[] roots = nodes.Where(o => !HasAncestorIn(o, nodes)).ToArray();
+
+        if (roots.Length == 0)
         {
-            node.Dispose();
+            return;
         }
+
+        using (History.Begin(roots.Length > 1 ? $"Delete {roots.Length} Nodes" : $"Delete {roots[0].Name}"))
+        {
+            foreach (Node node in roots)
+            {
+                History.RecordDespawn(node);
+            }
+        }
+    }
+
+    static bool HasAncestorIn(Node node, Node[] nodes)
+    {
+        for (Node? ancestor = node.Parent; ancestor is not null; ancestor = ancestor.Parent)
+        {
+            if (nodes.Contains(ancestor))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     static DockLayout BuildDefaultDockLayout() => new(

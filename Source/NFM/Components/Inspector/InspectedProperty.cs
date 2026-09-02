@@ -34,9 +34,13 @@ public sealed class InspectedProperty(IReadOnlyList<object> subjects, PropertyIn
 		}
 		set
 		{
-			foreach (object subject in Subjects)
+			using (History.Begin($"Change {DisplayName}"))
 			{
-				Property.SetValue(subject, value);
+				foreach (object subject in Subjects)
+				{
+					History.Track(subject);
+					Property.SetValue(subject, value);
+				}
 			}
 		}
 	}

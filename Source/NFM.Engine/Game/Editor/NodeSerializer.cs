@@ -339,7 +339,7 @@ public static class NodeSerializer
 
 	private static readonly ConcurrentDictionary<Type, PropertyInfo[]> savedProperties = [];
 
-	private static PropertyInfo[] GetSavedProperties(Type type) => savedProperties.GetOrAdd(type, key => [.. key
+	internal static PropertyInfo[] GetSavedProperties(Type type) => savedProperties.GetOrAdd(type, key => [.. key
 		.GetProperties(ReflectionHelper.BindingFlagsAllNonStatic)
 		.Where(property => property.HasAttribute<InspectAttribute>() && property.CanRead)]);
 

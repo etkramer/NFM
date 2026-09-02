@@ -73,6 +73,9 @@ public class TransformGizmo
 	private readonly record struct Target(Node Node, Matrix4 World, Matrix4 ParentInverse);
 	private readonly List<Target> targets = [];
 
+	// Held open for the length of a drag, so the whole thing undoes in one step.
+	private Transaction? edit;
+
 	public TransformGizmo(Viewport viewport)
 	{
 		this.viewport = viewport;
@@ -371,6 +374,13 @@ public class TransformGizmo
 			return false;
 		}
 
+		edit = History.Begin(Mode == GizmoMode.Translate ? "Move" : "Rotate");
+
+		foreach (Target target in targets)
+		{
+			History.Track(target.Node);
+		}
+
 		Dragging = handle;
 		return true;
 	}
@@ -405,6 +415,9 @@ public class TransformGizmo
 
 	public void EndDrag()
 	{
+		edit?.Dispose();
+		edit = null;
+
 		Dragging = GizmoHandle.None;
 		targets.Clear();
 	}

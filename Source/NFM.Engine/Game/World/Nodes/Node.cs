@@ -32,6 +32,12 @@ public class Node : ISelectable, IDisposable
 	/// </summary>
 	public bool IsTransient { get; init; }
 
+	/// <summary>
+	/// Set while this node is held out of the scene by the undo stack, waiting to be put back or
+	/// destroyed. Detached nodes keep their state but render nothing.
+	/// </summary>
+	public bool IsDetached { get; private set; }
+
 	public IEnumerable<Node> Children => children;
 	private readonly ObservableCollection<Node> children = [];
 
@@ -82,6 +88,101 @@ public class Node : ISelectable, IDisposable
 			UpdateTransform();
 		}
 	}
+
+	/// <summary>
+	/// Where this node sits among its siblings, which is what the outliner shows.
+	/// </summary>
+	internal int SiblingIndex => parent is null ? Scene.IndexOfRootNode(this) : parent.children.IndexOf(this);
+
+	/// <summary>
+	/// Takes this node's subtree out of the scene without destroying it, so the undo stack can hold
+	/// onto it. The node keeps everything but its place in the tree.
+	/// </summary>
+	internal void Detach()
+	{
+		Guard.Require(!IsDetached, "Node is already detached.");
+		Guard.Require(!IsOwned, "Owned nodes are detached along with their owner.");
+
+		if (parent is null)
+		{
+			Scene.RemoveRootNode(this);
+		}
+		else
+		{
+			parent.children.Remove(this);
+		}
+
+		parent = null;
+		SetDetached(true);
+	}
+
+	/// <summary>
+	/// Puts a detached subtree back where it came from.
+	/// </summary>
+	internal void Attach(Node? newParent, int index)
+	{
+		Guard.Require(IsDetached, "Node is already attached.");
+
+		SetDetached(false);
+		Place(newParent, index);
+	}
+
+	/// <summary>
+	/// Reparents this node to a given spot among its new siblings, staying in the scene throughout.
+	/// </summary>
+	internal void MoveTo(Node? newParent, int index)
+	{
+		Guard.Require(!IsOwned, "Owned nodes cannot be reparented.");
+
+		if (parent is null)
+		{
+			Scene.RemoveRootNode(this);
+		}
+		else
+		{
+			parent.children.Remove(this);
+		}
+
+		Place(newParent, index);
+	}
+
+	private void Place(Node? newParent, int index)
+	{
+		parent = newParent;
+
+		if (parent is null)
+		{
+			Scene.InsertRootNode(this, index);
+		}
+		else
+		{
+			parent.children.Insert(Math.Clamp(index, 0, parent.children.Count), this);
+		}
+
+		UpdateTransform();
+	}
+
+	private void SetDetached(bool value)
+	{
+		IsDetached = value;
+
+		if (value)
+		{
+			Selection.Deselect(this);
+		}
+
+		OnDetachedChanged();
+
+		foreach (Node child in children)
+		{
+			child.SetDetached(value);
+		}
+	}
+
+	/// <summary>
+	/// Called as this node enters or leaves the scene, for subclasses holding render state.
+	/// </summary>
+	protected virtual void OnDetachedChanged() {}
 
 	public Node(Scene? scene)
 	{

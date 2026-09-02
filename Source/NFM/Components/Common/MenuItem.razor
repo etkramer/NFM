@@ -3,7 +3,7 @@
 @implements IDisposable
 @inject IJSRuntime JS
 
-<div class="container @(IsExpanded ? "expanded" : "")" tabindex="0" @onpointerenter=OnPointerEnter @onclick=OnClick @ref=containerElement>
+<div class="container @(IsExpanded ? "expanded" : "") @(IsEnabled ? "" : "disabled")" tabindex="0" @onpointerenter=OnPointerEnter @onclick=OnClick @ref=containerElement>
     <box class="item">
         <p class="label-text">
             @Label
@@ -32,6 +32,12 @@
     [Parameter]
     public Action? OnPress { get; set; }
 
+    /// <summary>
+    /// Greys the item out and stops it responding, hotkey included.
+    /// </summary>
+    [Parameter]
+    public bool IsEnabled { get; set; } = true;
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
@@ -52,7 +58,7 @@
             await JS.InvokeVoidAsync("HTMLElement.blur", containerElement);
         }
 
-        if (OnPress is not null)
+        if (OnPress is not null && IsEnabled)
         {
             await JS.InvokeVoidAsync("setBodyCursor", "wait");
             OnPress.Invoke();

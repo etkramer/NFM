@@ -9,6 +9,15 @@
     background-color: var(--color-bg-menu);
 }
 
+.container.disabled,
+.container.disabled:hover {
+    color: var(--color-fg-subtle);
+}
+
+.container.disabled .item:hover {
+    background-color: transparent;
+}
+
 .item {
     height: 100%;
     padding: 0 8px;

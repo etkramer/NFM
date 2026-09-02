@@ -36,7 +36,8 @@ function registerViewport(element, id) {
     const entry = { element, rect: null };
     viewports.set(id, entry);
 
-    element.addEventListener("pointerenter", () => postHover(id));
+    // Moves rather than enters - the pointer is often already inside by the time a viewport registers.
+    element.addEventListener("pointermove", () => postHover(id));
     element.addEventListener("pointerleave", () => postHover(null));
 
     if (viewports.size === 1) {
@@ -46,11 +47,22 @@ function registerViewport(element, id) {
 
 function unregisterViewport(id) {
     if (viewports.delete(id)) {
+        if (hoveredViewport === id) {
+            hoveredViewport = null;
+        }
+
         chrome.webview.postMessage({ kind: "viewportRemoved", id });
     }
 }
 
+let hoveredViewport = null;
+
 function postHover(id) {
+    if (id === hoveredViewport) {
+        return;
+    }
+
+    hoveredViewport = id;
     chrome.webview.postMessage({ kind: "viewportHover", id });
 }
 

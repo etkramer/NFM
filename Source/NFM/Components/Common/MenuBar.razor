@@ -30,7 +30,7 @@
 
     void OnKeyPressed(Keys keys)
     {
-        MenuItem[] matches = items.Where(o => o.Hotkey == keys && o.OnPress is not null).ToArray();
+        MenuItem[] matches = items.Where(o => o.Hotkey == keys && o.OnPress is not null && o.IsEnabled).ToArray();
 
         if (matches.Length > 0)
         {

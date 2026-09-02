@@ -87,6 +87,7 @@
     {
         HashCode hash = new();
         hash.Add(filter);
+        hash.Add(History.Version);
 
         foreach (ISelectable item in Selected)
         {

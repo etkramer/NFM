@@ -73,8 +73,14 @@
     void Add(Node node)
     {
         isAddOpen = false;
-        Selection.DeselectAll();
-        Selection.Select(node);
+
+        using (History.Begin($"Add {node.Name}"))
+        {
+            History.RecordSpawn(node);
+
+            Selection.DeselectAll();
+            Selection.Select(node);
+        }
     }
 
     void OnClickNode(Node node, MouseEventArgs args)
@@ -114,11 +120,15 @@
 
     void OnDropNode(Node node, Node? target)
     {
-        foreach (Node dragged in GetDraggedNodes(node))
+        using (History.Begin("Reparent"))
         {
-            if (CanDropNode(dragged, target))
+            foreach (Node dragged in GetDraggedNodes(node))
             {
-                dragged.Parent = target;
+                if (CanDropNode(dragged, target))
+                {
+                    History.Track(dragged);
+                    dragged.Parent = target;
+                }
             }
         }
     }
